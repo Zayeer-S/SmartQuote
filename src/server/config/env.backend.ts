@@ -35,13 +35,13 @@ const envSchema = z.object({
   REDIS_PASSWORD: z.string().optional(),
 
   SMTP_HOST: z.string().optional(),
-  SMPT_PORT: z.string().transform(Number).optional(),
-  SMPT_SECURE: z
+  SMTP_PORT: z.string().transform(Number).optional(),
+  SMTP_SECURE: z
     .string()
     .transform((val) => val === 'true')
     .optional(),
-  SMPT_USER: z.string().optional(),
-  SMPT_PASSWORD: z.string().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
 });
 
 /** Validated env vars */
