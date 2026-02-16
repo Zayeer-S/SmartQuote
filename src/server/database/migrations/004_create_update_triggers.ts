@@ -46,7 +46,7 @@ const TABLES = [
 
   'role_permissions',
   'user_notification_preferences',
-  'quote_detail_revisons',
+  'quote_detail_revisions',
   'ticket_comments',
   'ticket_attachments',
   'organization_members',
