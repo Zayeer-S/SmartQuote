@@ -4,7 +4,7 @@ import type { AuthService } from '../services/auth/auth.service';
 import type { RBACService } from '../services/rbac/rbac.service';
 import { createAuthMiddleware } from '../middleware/auth.middleware';
 import { requirePermission } from '../middleware/rbac.middleware';
-import { PERMISSIONS } from '../../shared/constants';
+import { ADMIN_ENDPOINTS, PERMISSIONS } from '../../shared/constants';
 
 export function createAdminRoutes(
   adminController: AdminController,
@@ -15,14 +15,14 @@ export function createAdminRoutes(
   const authenticate = createAuthMiddleware(authService);
 
   router.post(
-    '/users',
+    ADMIN_ENDPOINTS.USERS,
     authenticate,
     requirePermission(rbacService, PERMISSIONS.USERS_CREATE),
     adminController.createUser
   );
 
   router.get(
-    '/users',
+    ADMIN_ENDPOINTS.USERS,
     authenticate,
     requirePermission(rbacService, PERMISSIONS.USERS_READ),
     adminController.listUsers
