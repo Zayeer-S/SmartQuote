@@ -17,6 +17,9 @@ smartquote/
 │   │   ├── config/                                 # Environment and config values only; no runtime logic
 │   │   │   ├── index.ts
 │   │   │   ├── env.frontend.ts
+│   │   ├── constants/
+│   │   │   ├── index.ts
+│   │   │   ├── client.routes.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules.
 │   │   │   ├── useLogin.ts
@@ -119,8 +122,8 @@ smartquote/
 │   └── shared/
 │       ├── constants/                              # Define all seed lookup table data here so frontend/backend stay in sync
 │       │   ├── index.ts
-│       │   ├── lookup-values.ts
-│       │   └── routes.ts                           #
+│       │   ├── endpoints.ts
+│       │   └── lookup-values.ts
 │       └── contracts/                              # Define all DTO types here so frontend/backend share to prevent drift
 │           ├── auth-contracts.ts
 │           └── user-contracts.ts
