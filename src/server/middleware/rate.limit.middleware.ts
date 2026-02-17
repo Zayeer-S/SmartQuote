@@ -1,43 +1,63 @@
-import rateLimit from 'express-rate-limit';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import rateLimit, { type Store } from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
 import { createClient } from 'redis';
 import { backEnv } from '../config/env.backend.js';
-import { authRateLimitConfig } from '../config/auth-config.js';
+import { authRateLimitConfig } from '../config/auth-config';
 
-/**
- * Rate Limit Middleware
- * Uses Redis for distributed rate limiting across multiple server instances
- */
-const redisClient = createClient({
-  socket: {
-    host: backEnv.REDIS_HOST,
-    port: backEnv.REDIS_PORT,
-  },
-  password: backEnv.REDIS_PASSWORD,
-});
+const redisEnvPresent =
+  backEnv.REDIS_HOST !== undefined &&
+  backEnv.REDIS_PORT !== undefined &&
+  backEnv.REDIS_PASSWORD !== undefined;
 
-redisClient.on('error', (err) => {
-  console.error('Redis Client Error for rate limiting:', err);
-});
+let redisClient: ReturnType<typeof createClient> | null = null;
 
-void (async () => {
-  try {
-    await redisClient.connect();
-    console.log('Redis client connected for rate limiting');
-  } catch (err) {
-    console.error('Failed to connect to Redis for rate limiting:', err);
-  }
-})();
+if (redisEnvPresent) {
+  redisClient = createClient({
+    socket: {
+      host: backEnv.REDIS_HOST,
+      port: backEnv.REDIS_PORT,
+    },
+    password: backEnv.REDIS_PASSWORD,
+  });
+
+  redisClient.on('error', (err) => {
+    console.error('Redis Client Error for rate limiting:', err);
+  });
+
+  void (async () => {
+    try {
+      await redisClient.connect();
+      console.log('Redis client connected for rate limiting');
+    } catch (err) {
+      console.error('Failed to connect to Redis for rate limiting:', err);
+    }
+  })();
+
+  process.on('SIGTERM', () => void redisClient!.quit());
+  process.on('SIGINT', () => void redisClient!.quit());
+} else {
+  console.warn(
+    '[rate-limit] REDIS_HOST / REDIS_PORT / REDIS_PASSWORD are not set. ' +
+      'Falling back to in-process MemoryStore. ' +
+      'Rate limits will NOT be shared across multiple server instances.'
+  );
+}
+
+function makeStore(prefix: string): Store | undefined {
+  if (!redisClient) return undefined;
+
+  return new RedisStore({
+    sendCommand: (...args: string[]) => redisClient!.sendCommand(args),
+    prefix,
+  });
+}
 
 /**
  * Login Rate Limiter
- * Prevents brute force attacks on login endpoint
  */
 export const loginRateLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args: string[]) => redisClient.sendCommand(args),
-    prefix: 'rate_limit:login:',
-  }),
+  store: makeStore('rate_limit:login:'),
   windowMs: authRateLimitConfig.login.windowMs,
   max: authRateLimitConfig.login.maxAttempts,
   message: {
@@ -52,12 +72,9 @@ export const loginRateLimiter = rateLimit({
 });
 
 export const apiRateLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args: string[]) => redisClient.sendCommand(args),
-    prefix: 'rate_limit:login:',
-  }),
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  store: makeStore('rate_limit:api:'),
+  windowMs: authRateLimitConfig.api.windowMs,
+  max: authRateLimitConfig.api.maxAttempts,
   message: {
     success: false,
     data: null,

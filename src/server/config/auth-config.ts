@@ -17,6 +17,10 @@ export const authRateLimitConfig: AuthRateLimitConfig = {
     windowMs: backEnv.LOGIN_RATE_LIMIT_WINDOW_MINUTES * 60 * 1000,
     maxAttempts: backEnv.MAX_LOGIN_ATTEMPTS,
   },
+  api: {
+    windowMs: 15 * 60 * 1000,
+    maxAttempts: 100,
+  },
 };
 
 export const authConfig: AuthConfig = {

@@ -3,6 +3,16 @@ import z from 'zod';
 
 dotenv.config({ path: '.env.local' });
 
+const optionalStr = z
+  .string()
+  .optional()
+  .transform((val) => (val === '' ? undefined : val));
+
+const optionalNum = z
+  .string()
+  .optional()
+  .transform((val) => (val === '' || val === undefined ? undefined : Number(val)));
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']),
 
@@ -25,23 +35,23 @@ const envSchema = z.object({
 
   CORS_ORIGIN: z.string(),
 
-  AWS_REGION: z.string().optional(),
-  AWS_ACCESS_KEY_ID: z.string().optional(),
-  AWS_SECRET_ACCESS_KEY: z.string().optional(),
-  AWS_S3_BUCKET: z.string().optional(),
+  AWS_REGION: optionalStr,
+  AWS_ACCESS_KEY_ID: optionalStr,
+  AWS_SECRET_ACCESS_KEY: optionalStr,
+  AWS_S3_BUCKET: optionalStr,
 
-  REDIS_HOST: z.string().optional(),
-  REDIS_PORT: z.string().transform(Number).optional(),
-  REDIS_PASSWORD: z.string().optional(),
+  REDIS_HOST: optionalStr,
+  REDIS_PORT: optionalNum,
+  REDIS_PASSWORD: optionalStr,
 
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.string().transform(Number).optional(),
+  SMTP_HOST: optionalStr,
+  SMTP_PORT: optionalNum,
   SMTP_SECURE: z
     .string()
-    .transform((val) => val === 'true')
-    .optional(),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASSWORD: z.string().optional(),
+    .optional()
+    .transform((val) => (val === '' || val === undefined ? undefined : val === 'true')),
+  SMTP_USER: optionalStr,
+  SMTP_PASSWORD: optionalStr,
 });
 
 /** Validated env vars */

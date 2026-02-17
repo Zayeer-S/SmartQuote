@@ -5,6 +5,10 @@ export interface AuthRateLimitConfig {
     /** Maximum login attempts per window */
     maxAttempts: number;
   };
+  api: {
+    windowMs: number;
+    maxAttempts: number;
+  }
 }
 
 export interface AuthConfig {
