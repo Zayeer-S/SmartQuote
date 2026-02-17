@@ -6,7 +6,7 @@ import type { AuthService } from '../services/auth/auth.service';
 import { validateOrThrow } from '../validators/validation-utils';
 import { changePasswordSchema, loginSchema } from '../validators/auth.validator';
 import type { ChangePasswordRequest, LoginRequest } from '../../shared/contracts/auth-contracts';
-import { success, error } from '../../lib/http/respond';
+import { success, error } from '../lib/respond';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware';
 import type { UserId } from '../database/types/ids';
 

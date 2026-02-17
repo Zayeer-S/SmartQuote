@@ -7,7 +7,7 @@ import type { AuthService } from '../services/auth/auth.service';
 import { validateOrThrow } from '../validators/validation-utils';
 import { createUserSchema, listUsersQuerySchema } from '../validators/user.validator';
 import type { CreateUserRequest } from '../../shared/contracts/user-contracts';
-import { error, success } from '../../lib/http/respond';
+import { error, success } from '../lib/respond';
 
 export class AdminController {
   private authService: AuthService;

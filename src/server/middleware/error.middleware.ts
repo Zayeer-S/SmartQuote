@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { ZodError } from 'zod';
 import { AuthError, PasswordValidationError } from '../services/auth/auth.errors';
 import { formatValidationError } from '../validators/validation-utils';
-import { error } from '../../lib/http/respond';
+import { error } from '../lib/respond';
 
 /**
  * Global Error Handling Middleware

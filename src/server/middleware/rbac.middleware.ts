@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { RBACService } from '../services/rbac/rbac.service';
 import type { RoleId, UserId } from '../database/types/ids';
-import { error } from '../../lib/http/respond';
+import { error } from '../lib/respond';
 import { isAuthenticatedRequest } from './auth.middleware';
 import type { PermissionName } from '../../shared/constants';
 
