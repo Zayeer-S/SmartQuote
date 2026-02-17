@@ -3,15 +3,20 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/login/LoginPage';
 import CustomerPage from './pages/customer/CustomerPage';
+import { CLIENT_ROUTES } from '../shared/constants';
 
-createRoot(document.getElementById('root') as HTMLElement).render(
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path='/login' element={<LoginPage />} />
-        <Route path='/customer' element={<CustomerPage />} />
+        <Route path="/">
+          <Route index element={<LoginPage />} />
+          <Route path={CLIENT_ROUTES.LOGIN} element={<LoginPage />} />
+          <Route path={CLIENT_ROUTES.CUSTOMER} element={<CustomerPage />} />
+          <Route path={CLIENT_ROUTES.ADMIN} /> {/** This will redirect to admin dashboard */}
+        </Route>
       </Routes>
     </BrowserRouter>
   </StrictMode>
 );
-
