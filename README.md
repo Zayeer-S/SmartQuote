@@ -2,7 +2,11 @@
 
 ## Getting Started
 
-Run these commands in order:
+# Install Node and PgAdmin4
+- https://nodejs.org/en/download
+- https://www.pgadmin.org/download/
+
+# Run these commands in order:
 
 ```bash
 npm install
