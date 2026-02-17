@@ -18,7 +18,8 @@
   box-sizing: border-box;
 }
 
-.customerPage {
+/* Layout */
+.adminPage {
   min-height: 100vh;
   display: flex;
   background: var(--bg);
@@ -35,24 +36,34 @@
     'Segoe UI Emoji';
 }
 
-/* ============ Sidebar ============ */
-.sidebar {
+/* Sidebar */
+.adminSidebar {
   width: 280px;
   background: linear-gradient(180deg, var(--sidebar), var(--sidebar2));
   color: var(--sidebarText);
   padding: 22px 18px;
 
-  /* ✅ key changes */
   position: fixed;
   top: 0;
   left: 0;
   height: 100vh;
-  overflow: hidden; /* prevents sidebar from becoming scrollable */
-  z-index: 1000;
+  overflow: hidden;
 
   display: flex;
   flex-direction: column;
   gap: 18px;
+  z-index: 1000;
+}
+
+/* Collapse */
+.adminPage.adminCollapsed .adminSidebar {
+  width: 90px;
+}
+
+.brandRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .brand {
@@ -72,7 +83,16 @@
   color: rgba(203, 213, 225, 0.75);
 }
 
-/* ✅ optional included: menu scrolls only if the menu itself ever becomes too tall */
+.collapseBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
 .menu {
   display: flex;
   flex-direction: column;
@@ -135,6 +155,10 @@
   font-weight: 600;
 }
 
+.adminPage.adminCollapsed .menuItem {
+  justify-content: center;
+}
+
 .sidebarFooter {
   margin-top: auto;
   padding-top: 18px;
@@ -142,6 +166,10 @@
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.adminPage.adminCollapsed .sidebarFooter {
+  justify-content: center;
 }
 
 .userAvatar {
@@ -174,15 +202,18 @@
   white-space: nowrap;
 }
 
-/* ============ Main ============ */
-.main {
+/* Main */
+.adminMain {
   flex: 1;
   padding: 28px 34px;
 
-  /* ✅ key changes */
-  margin-left: 280px; /* must match .sidebar width */
+  margin-left: 280px;
   min-height: 100vh;
-  overflow-y: auto; /* only main content scrolls */
+  overflow-y: auto;
+}
+
+.adminPage.adminCollapsed .adminMain {
+  margin-left: 90px;
 }
 
 .topBar {
@@ -205,7 +236,7 @@
   font-size: 16px;
 }
 
-/* ============ Stats ============ */
+/* Stats – same sizing as customer */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -220,7 +251,6 @@
   padding: 18px 18px 16px;
   box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
   min-height: 112px;
-  position: relative;
 }
 
 .statIcon {
@@ -229,7 +259,6 @@
   border-radius: 12px;
   display: grid;
   place-items: center;
-  font-size: 20px;
   margin-bottom: 10px;
   border: 1px solid rgba(15, 23, 42, 0.08);
 }
@@ -238,20 +267,23 @@
   color: #2563eb;
   background: rgba(37, 99, 235, 0.08);
 }
-
-.statIcon.amber {
-  color: #b45309;
-  background: rgba(245, 158, 11, 0.1);
+.statIcon.red {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
 }
-
+.statIcon.orange {
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.08);
+}
 .statIcon.green {
   color: #16a34a;
-  background: rgba(34, 197, 94, 0.1);
+  background: rgba(34, 197, 94, 0.08);
 }
 
-.statIcon.orange {
-  color: #ea580c;
-  background: rgba(234, 88, 12, 0.1);
+.statSvg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
 }
 
 .statValue {
@@ -266,7 +298,7 @@
   font-weight: 600;
 }
 
-/* ============ Actions Row ============ */
+/* Search row – match customer sizing */
 .actionsRow {
   margin-top: 22px;
   display: flex;
@@ -299,187 +331,70 @@
   background: transparent;
 }
 
-.primaryBtn {
-  height: 48px;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: #0b1222;
-  color: #ffffff;
-  font-weight: 700;
-  padding: 0 18px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: var(--shadow);
-  transition:
-    transform 160ms ease,
-    opacity 160ms ease;
-}
-
-.primaryBtn:hover {
-  opacity: 0.96;
-}
-
-.primaryBtn:active {
-  transform: translateY(1px);
-}
-
-.btnPlus {
-  width: 22px;
-  height: 22px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* ============ Ticket Cards ============ */
-.ticketsCol {
-  margin-top: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.ticketCard {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
-}
-
-.ticketTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.tagRow {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.tag {
-  font-size: 12px;
-  font-weight: 800;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(100, 116, 139, 0.1);
-  color: #334155;
-  text-transform: lowercase;
-}
-
-.tag.critical {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.25);
-  color: #b91c1c;
-}
-
-.ghostBtn {
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: #0b1222;
-  color: #ffffff;
-  font-weight: 800;
-  cursor: pointer;
-  transition:
-    transform 160ms ease,
-    opacity 160ms ease;
-}
-
-.ghostBtn:hover {
-  opacity: 0.96;
-}
-
-.ghostBtn:active {
-  transform: translateY(1px);
-}
-
-.ticketTitle {
-  margin: 0;
-  font-size: 22px;
-  letter-spacing: -0.2px;
-}
-
-.ticketDesc {
-  margin: 10px 0 14px;
-  color: #334155;
-  line-height: 1.5;
-}
-
-.ticketMetaBox {
-  background: rgba(100, 116, 139, 0.06);
-  border: 1px solid rgba(100, 116, 139, 0.16);
-  border-radius: 14px;
-  padding: 14px;
-}
-
-.metaItem {
-  display: inline-block;
-  min-width: 220px;
-  margin-right: 18px;
-}
-
-.metaLabel {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.metaValue {
-  font-size: 18px;
-  font-weight: 900;
-  margin-top: 2px;
-}
-
-.metaLine {
-  margin-top: 10px;
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-  color: #334155;
-}
-
-.ticketBottom {
+/* Filters row */
+.filtersRow {
   margin-top: 14px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
 }
 
-.ticketBottomLeft {
-  color: #334155;
+.filterGlyph {
+  color: var(--muted);
+  font-weight: 800;
+  opacity: 0.85;
+}
+
+.selectWrap select {
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: rgba(15, 23, 42, 0.03);
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+}
+
+/* Table shell area – match customer empty area sizing */
+.tableShell {
+  margin-top: 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 360px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
 }
 
-.muted {
+.emptyState {
   color: var(--muted);
   font-weight: 700;
 }
 
-.dot {
-  opacity: 0.5;
+/* Help button */
+.helpFab {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  display: grid;
+  place-items: center;
 }
 
-.emptyState {
-  padding: 18px;
-  border-radius: var(--radius);
-  border: 1px dashed rgba(100, 116, 139, 0.35);
-  color: var(--muted);
-  background: rgba(255, 255, 255, 0.7);
-}
-
-/* ============ Responsive ============ */
+/* Responsive */
 @media (max-width: 1180px) {
   .statsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -487,19 +402,18 @@
 }
 
 @media (max-width: 860px) {
-  .customerPage {
+  .adminPage {
     flex-direction: column;
   }
 
-  /* ✅ on mobile, sidebar becomes normal flow (not fixed) */
-  .sidebar {
+  .adminSidebar {
     position: relative;
     width: 100%;
     height: auto;
+    overflow: visible;
     flex-direction: row;
     align-items: center;
     gap: 12px;
-    overflow: visible;
   }
 
   .menu {
@@ -514,7 +428,7 @@
     display: none;
   }
 
-  .main {
+  .adminMain {
     margin-left: 0;
     padding: 20px;
     overflow: visible;
@@ -526,110 +440,43 @@
   }
 }
 
-/* Collapse behavior */
-.customerPage.sidebarCollapsed .sidebar {
-  width: 90px;
-}
-
-/* ✅ main offset changes with collapse */
-.customerPage.sidebarCollapsed .main {
-  margin-left: 90px;
-}
-
-.brandRow {
+.profileClickable {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.collapseBtn {
-  background: rgba(255, 255, 255, 0.08);
-  border: none;
-  color: white;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.customerPage.sidebarCollapsed .menuItem {
-  justify-content: center;
-}
-
-.customerPage.sidebarCollapsed .sidebarFooter {
-  justify-content: center;
-}
-
-/* ===== Admin-style empty panel under search bar ===== */
-.tableShell {
-  margin-top: 18px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  min-height: 360px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
-}
-
-/* Dashed "No tickets found." pill like admin */
-.emptyPill {
-  padding: 14px 22px;
-  border-radius: 14px;
-  border: 2px dashed rgba(100, 116, 139, 0.35);
-  background: rgba(255, 255, 255, 0.7);
-  color: var(--muted);
-  font-weight: 800;
-}
-
-/* ===== Profile Dropdown ===== */
-
-.profileTrigger {
-  width: 100%;
-  background: transparent;
-  border: none;
-  display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
   cursor: pointer;
-  padding: 6px 4px;
+  position: relative;
 }
 
 .profileDropdown {
   position: absolute;
-  bottom: 80px;
+  bottom: 70px;
   left: 20px;
-  width: 220px;
   background: #ffffff;
-  border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: var(--shadow);
+  padding: 8px;
+  width: 200px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  padding: 6px;
-  z-index: 2000;
+  gap: 6px;
+  z-index: 100;
 }
 
-.dropdownItem {
+.profileDropdown button {
+  background: none;
   border: none;
-  background: transparent;
-  padding: 10px 12px;
-  text-align: left;
+  padding: 10px;
   border-radius: 8px;
-  font-weight: 600;
+  text-align: left;
   cursor: pointer;
-  transition: background 150ms ease;
+  font-weight: 600;
 }
 
-.dropdownItem:hover {
-  background: rgba(15, 23, 42, 0.06);
+.profileDropdown button:hover {
+  background: #f1f5f9;
 }
 
-.dropdownItem.logout {
+.logoutBtn {
   color: #dc2626;
-}
-
-.dropdownItem.logout:hover {
-  background: rgba(220, 38, 38, 0.08);
 }

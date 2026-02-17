@@ -1,156 +1,176 @@
-import React, { useEffect, useState } from "react";
-import "./CustomerPage.css";
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/no-confusing-void-expression */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './CustomerPage.css';
 
-type DashboardStats = {
-  totalTickets: number;
-  activeTickets: number;
-  totalQuoted: number;
-  pendingQuotes: number;
+type MenuKey = 'Dashboard' | 'My Tickets' | 'Quotes' | 'History' | 'Profile';
+
+type StatCard = {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
 };
-
-type CustomerIdentity = {
-  name: string;
-  email: string;
-};
-
-const formatGBP = (value: number) =>
-  new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(
-    value
-  );
 
 const CustomerPage: React.FC = () => {
-  const [activeMenu, setActiveMenu] = useState<
-    "Dashboard" | "My Tickets" | "Quotes" | "History" | "Profile"
-  >("Dashboard");
+  const navigate = useNavigate();
 
-  // Placeholder user until DB/auth is wired
-  const [customer, setCustomer] = useState<CustomerIdentity>({
-    name: "Guest",
-    email: "guest@giacom",
-  });
+  const [activeMenu, setActiveMenu] = useState<MenuKey>('Dashboard');
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const [stats, setStats] = useState<DashboardStats>({
-    totalTickets: 0,
-    activeTickets: 0,
-    totalQuoted: 0,
-    pendingQuotes: 0,
-  });
+  const [query, setQuery] = useState('');
 
-  const [search, setSearch] = useState("");
+  // Profile dropdown
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement | null>(null);
 
-  // Stats: placeholder fetch — stays 0 until your API/DB is connected.
+  // Placeholder user (replace with auth/session later)
+  const customer = useMemo(() => ({ name: 'Guest', email: 'guest@giacom' }), []);
+
+  // Placeholder stats (until DB is connected)
+  const stats: StatCard[] = useMemo(
+    () => [
+      { label: 'Total Tickets', value: '0', icon: '🎫' },
+      { label: 'Active Tickets', value: '0', icon: '🕒' },
+      { label: 'Total Quoted', value: '£0.00', icon: '🧾' },
+      { label: 'Pending Quotes', value: '0', icon: '📄' },
+    ],
+    []
+  );
+
+  // No DB yet => no tickets
+  const tickets: any[] = [];
+
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadStats() {
-      try {
-        const res = await fetch("/api/customer/dashboard/stats");
-        if (!res.ok) throw new Error("Stats endpoint not ready");
-        const data = (await res.json()) as Partial<DashboardStats>;
-
-        if (!cancelled) {
-          setStats({
-            totalTickets: Number(data.totalTickets ?? 0),
-            activeTickets: Number(data.activeTickets ?? 0),
-            totalQuoted: Number(data.totalQuoted ?? 0),
-            pendingQuotes: Number(data.pendingQuotes ?? 0),
-          });
-        }
-      } catch {
-        if (!cancelled) {
-          setStats({
-            totalTickets: 0,
-            activeTickets: 0,
-            totalQuoted: 0,
-            pendingQuotes: 0,
-          });
-        }
+    function handleClickOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
       }
     }
-
-    loadStats();
-    return () => {
-      cancelled = true;
-    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Customer identity: placeholder fetch — stays Guest until DB/auth is connected.
-  useEffect(() => {
-    let cancelled = false;
+  const handleLogout = () => {
+    // Optional: clear auth data if you store it
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setProfileOpen(false);
+    navigate('/login');
+  };
 
-    async function loadCustomer() {
-      try {
-        /**
-         * Later you can wire this to your auth/session endpoint, e.g.
-         * GET /api/customer/me  -> { name, email }
-         */
-        const res = await fetch("/api/customer/me");
-        if (!res.ok) throw new Error("Customer endpoint not ready");
-        const data = (await res.json()) as Partial<CustomerIdentity>;
-
-        if (!cancelled) {
-          setCustomer({
-            name: String(data.name ?? "Guest"),
-            email: String(data.email ?? "guest@giacom"),
-          });
-        }
-      } catch {
-        if (!cancelled) {
-          setCustomer({ name: "Guest", email: "guest@giacom" });
-        }
-      }
-    }
-
-    loadCustomer();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const handleNewTicket = () => {
-    // Replace with navigation/modal logic later (e.g. react-router navigate("/tickets/new"))
-    alert("New Ticket clicked (wire this to your ticket creation flow).");
+  const handleViewUserInfo = () => {
+    setProfileOpen(false);
+    // Change route if you have one:
+    // navigate("/customer/profile");
+    alert('User information page coming soon.');
   };
 
   return (
-    <div className="customerPage">
+    <div className={`customerPage ${isCollapsed ? 'sidebarCollapsed' : ''}`}>
       {/* Sidebar */}
       <aside className="sidebar">
-        <div className="brand">
-          <div className="brandTitle">GIACOM</div>
-          <div className="brandSub">Customer Portal</div>
+        <div className="brandRow">
+          <div className="brand">
+            <div className="brandTitle">{isCollapsed ? 'G' : 'GIACOM'}</div>
+            {!isCollapsed && <div className="brandSub">Customer Portal</div>}
+          </div>
+
+          <button
+            className="collapseBtn"
+            onClick={() => setIsCollapsed((v) => !v)}
+            type="button"
+            aria-label="Toggle sidebar"
+            title="Toggle sidebar"
+          >
+            {isCollapsed ? '➡️' : '⬅️'}
+          </button>
         </div>
 
         <nav className="menu">
-          {(
-            ["Dashboard", "My Tickets", "Quotes", "History", "Profile"] as const
-          ).map((item) => (
-            <button
-              key={item}
-              className={`menuItem ${activeMenu === item ? "active" : ""}`}
-              onClick={() => setActiveMenu(item)}
-              type="button"
-            >
-              <span className="menuIcon" aria-hidden="true">
-                {item === "Dashboard" && "🏠"}
-                {item === "My Tickets" && "🎫"}
-                {item === "Quotes" && "£"}
-                {item === "History" && "🧾"}
-                {item === "Profile" && "👤"}
-              </span>
-              <span className="menuLabel">{item}</span>
-            </button>
-          ))}
+          <button
+            className={`menuItem ${activeMenu === 'Dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('Dashboard')}
+            title={isCollapsed ? 'Dashboard' : undefined}
+            type="button"
+          >
+            <span className="menuIcon">🏠</span>
+            {!isCollapsed && <span className="menuLabel">Dashboard</span>}
+          </button>
+
+          <button
+            className={`menuItem ${activeMenu === 'My Tickets' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('My Tickets')}
+            title={isCollapsed ? 'My Tickets' : undefined}
+            type="button"
+          >
+            <span className="menuIcon">🎫</span>
+            {!isCollapsed && <span className="menuLabel">My Tickets</span>}
+          </button>
+
+          <button
+            className={`menuItem ${activeMenu === 'Quotes' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('Quotes')}
+            title={isCollapsed ? 'Quotes' : undefined}
+            type="button"
+          >
+            <span className="menuIcon">£</span>
+            {!isCollapsed && <span className="menuLabel">Quotes</span>}
+          </button>
+
+          <button
+            className={`menuItem ${activeMenu === 'History' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('History')}
+            title={isCollapsed ? 'History' : undefined}
+            type="button"
+          >
+            <span className="menuIcon">🧾</span>
+            {!isCollapsed && <span className="menuLabel">History</span>}
+          </button>
+
+          <button
+            className={`menuItem ${activeMenu === 'Profile' ? 'active' : ''}`}
+            onClick={() => setActiveMenu('Profile')}
+            title={isCollapsed ? 'Profile' : undefined}
+            type="button"
+          >
+            <span className="menuIcon">👤</span>
+            {!isCollapsed && <span className="menuLabel">Profile</span>}
+          </button>
         </nav>
 
-        <div className="sidebarFooter">
-          <div className="userAvatar" aria-hidden="true">
-            👤
-          </div>
-          <div className="userMeta">
-            <div className="userName">{customer.name}</div>
-            <div className="userEmail">{customer.email}</div>
-          </div>
+        {/* Sidebar Footer with dropdown */}
+        <div className="sidebarFooter" ref={profileRef}>
+          <button
+            className="profileTrigger"
+            type="button"
+            onClick={() => setProfileOpen((v) => !v)}
+            aria-label="Open profile menu"
+          >
+            <div className="userAvatar">👤</div>
+
+            {!isCollapsed && (
+              <div className="userMeta">
+                <div className="userName">{customer.name}</div>
+                <div className="userEmail">{customer.email}</div>
+              </div>
+            )}
+          </button>
+
+          {profileOpen && (
+            <div className="profileDropdown" role="menu">
+              <button className="dropdownItem" type="button" onClick={handleViewUserInfo}>
+                View User Information
+              </button>
+
+              <button className="dropdownItem logout" type="button" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </aside>
 
@@ -159,45 +179,21 @@ const CustomerPage: React.FC = () => {
         <header className="topBar">
           <div>
             <h1 className="pageTitle">Dashboard</h1>
-            <p className="pageSubtitle">
-              Manage your support tickets and view quotes
-            </p>
+            <p className="pageSubtitle">Manage your support tickets and view quotes</p>
           </div>
         </header>
 
-        {/* Stat cards */}
+        {/* Stats */}
         <section className="statsGrid">
-          <div className="statCard">
-            <div className="statIcon blue" aria-hidden="true">
-              🎫
+          {stats.map((s) => (
+            <div key={s.label} className="statCard">
+              {/* If your CSS expects .statIcon.blue/amber/green/orange,
+                  you can switch to those styles. This keeps it simple. */}
+              <div className="statIcon">{s.icon}</div>
+              <div className="statValue">{s.value}</div>
+              <div className="statLabel">{s.label}</div>
             </div>
-            <div className="statValue">{stats.totalTickets}</div>
-            <div className="statLabel">Total Tickets</div>
-          </div>
-
-          <div className="statCard">
-            <div className="statIcon amber" aria-hidden="true">
-              🕒
-            </div>
-            <div className="statValue">{stats.activeTickets}</div>
-            <div className="statLabel">Active Tickets</div>
-          </div>
-
-          <div className="statCard">
-            <div className="statIcon green" aria-hidden="true">
-              💷
-            </div>
-            <div className="statValue">{formatGBP(stats.totalQuoted)}</div>
-            <div className="statLabel">Total Quoted</div>
-          </div>
-
-          <div className="statCard">
-            <div className="statIcon orange" aria-hidden="true">
-              🧾
-            </div>
-            <div className="statValue">{stats.pendingQuotes}</div>
-            <div className="statLabel">Pending Quotes</div>
-          </div>
+          ))}
         </section>
 
         {/* Search + New Ticket */}
@@ -208,21 +204,27 @@ const CustomerPage: React.FC = () => {
             </span>
             <input
               className="searchInput"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               placeholder="Search tickets..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search tickets"
             />
           </div>
 
-          <button className="primaryBtn" onClick={handleNewTicket} type="button">
-            <span className="btnPlus" aria-hidden="true">
-              +
-            </span>
+          <button className="primaryBtn" type="button" onClick={() => navigate('/customer/create')}>
+            <span className="btnPlus">＋</span>
             New Ticket
           </button>
         </section>
 
-        {/* No tickets shown until DB is wired (removed as requested) */}
+        {/* Empty panel like Admin (until DB wired) */}
+        <section className="tableShell">
+          {tickets.length === 0 ? (
+            <div className="emptyPill">No tickets found.</div>
+          ) : (
+            <div style={{ width: '100%' }}>{/* Later: render tickets list here */}</div>
+          )}
+        </section>
       </main>
     </div>
   );
