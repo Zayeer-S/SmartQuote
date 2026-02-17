@@ -3,7 +3,8 @@ import type { LoginRequest } from '../../shared/contracts/auth-contracts';
 import { useState } from 'react';
 import { authAPI } from '../lib/api/auth.api';
 import { tokenStorage } from '../lib/storage/tokenStorage';
-import { AUTH_ROLES, CLIENT_ROUTES } from '../../shared/constants';
+import { AUTH_ROLES } from '../../shared/constants';
+import { CLIENT_ROUTES } from '../constants/client.routes';
 
 interface UseLoginReturn {
   login: (credentials: LoginRequest, rememberMe: boolean) => Promise<void>;
