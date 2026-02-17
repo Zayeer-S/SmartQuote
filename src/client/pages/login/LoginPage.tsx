@@ -1,20 +1,27 @@
-import React, { useState } from "react";
-import "./LoginPage.css";
+/* eslint-disable @typescript-eslint/no-misused-promises */
+import React, { useState } from 'react';
+import { useLogin } from '../../hooks/useLogin';
+import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const { login, isLoading, error } = useLogin();
+
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("Login Attempt:", {
-      email,
-      password,
-      rememberMe,
-    });
+    try {
+      await login({ email, password }, rememberMe);
+      // Navigation happens inside the hook
+    } catch {
+      // Error is already set in the hook's state
+      // Could add additional error handling here if needed but unlikely
+    }
   };
 
   return (
@@ -31,8 +38,11 @@ const LoginPage: React.FC = () => {
               type="email"
               placeholder="E.g. johndoe@email.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -40,11 +50,14 @@ const LoginPage: React.FC = () => {
             <label>Password</label>
             <div className="password-wrapper">
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
                 required
+                disabled={isLoading}
               />
 
               {/* Only show eye icon when password field has text */}
@@ -52,8 +65,11 @@ const LoginPage: React.FC = () => {
                 <button
                   type="button"
                   className="toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => {
+                    setShowPassword(!showPassword);
+                  }}
                   aria-label="Toggle password visibility"
+                  disabled={isLoading}
                 >
                   {showPassword ? (
                     /* Eye Off Icon */
@@ -92,12 +108,21 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
 
+          {error && (
+            <div className="error-message" role="alert">
+              {error}
+            </div>
+          )}
+
           <div className="options-row">
             <label className="remember-me">
               <input
                 type="checkbox"
                 checked={rememberMe}
-                onChange={() => setRememberMe(!rememberMe)}
+                onChange={() => {
+                  setRememberMe(!rememberMe);
+                }}
+                disabled={isLoading}
               />
               Remember Me
             </label>
@@ -107,13 +132,13 @@ const LoginPage: React.FC = () => {
             </a>
           </div>
 
-          <button type="submit" className="login-btn">
-            Login
+          <button type="submit" className="login-btn" disabled={isLoading}>
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
         <p className="signup-text">
-          Not registered yet?{" "}
+          Not registered yet?{' '}
           <a href="/register" className="signup-link">
             Create an account
           </a>
