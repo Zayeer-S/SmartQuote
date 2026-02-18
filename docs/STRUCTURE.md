@@ -30,6 +30,26 @@ smartquote/
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules.
 │   │   │   ├── useLogin.ts
+│   │   │   ├── quotes/
+│   │   │   │   ├── useApproveQuote.ts
+│   │   │   │   ├── useCreateManualQuote.ts
+│   │   │   │   ├── useGenerateQuote.ts
+│   │   │   │   ├── useGetQuote.ts
+│   │   │   │   ├── useGetRevisionHistory.ts
+│   │   │   │   ├── useListQuote.ts
+│   │   │   │   ├── useRejectQuote.ts
+│   │   │   │   ├── useSubmitForApproval.ts
+│   │   │   │   └── useUpdateForQuote.ts
+│   │   │   ├── tickets/
+│   │   │   │   ├── useAddComment.ts
+│   │   │   │   ├── useAssignTicket.ts
+│   │   │   │   ├── useCreateTicket.ts
+│   │   │   │   ├── useDeleteTicket.ts
+│   │   │   │   ├── useGetTicket.ts
+│   │   │   │   ├── useListComments.ts
+│   │   │   │   ├── useListTicket.ts
+│   │   │   │   ├── useResolveTicket.ts
+│   │   │   │   └── useUpdateTicket.ts
 │   │   │   └── auth/
 │   │   │       ├── useAuth.ts
 │   │   │       ├── useQuotePermissions.ts
@@ -39,7 +59,9 @@ smartquote/
 │   │   │   ├── api/                                # Only place that knows endpoints in client
 │   │   │   │   ├── admin.api.ts
 │   │   │   │   ├── auth.api.ts
-│   │   │   │   └── http-client.ts
+│   │   │   │   ├── http-client.ts
+│   │   │   │   ├── quote.api.ts
+│   │   │   │   └── ticket.api.ts
 │   │   │   ├── storage/                            # Browser persistence tokens
 │   │   │   │   ├── keys.ts
 │   │   │   │   └── tokenStorage.ts
@@ -66,14 +88,19 @@ smartquote/
 │   │   │   ├── index.ts
 │   │   │   ├── auth-config.ts
 │   │   │   ├── database-config.ts
+│   │   │   ├── email-config.ts
 │   │   │   ├── env.backend.ts
 │   │   │   └── redis-config.ts
 │   │   ├── containers/                             # Construct controllers by injecting dependencies; no business behaviour
 │   │   │   ├── admin.container.ts
-│   │   │   └── auth.container.ts
+│   │   │   ├── auth.container.ts
+│   │   │   ├── quote.container.ts
+│   │   │   └── ticket.container.ts
 │   │   ├── controllers/
 │   │   │   ├── admin.controller.ts
-│   │   │   └── auth.controller.ts
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── quote.controller.ts
+│   │   │   └── ticket.controller.ts
 │   │   ├── daos/                                   # Database persistence/access only - no validation, permissions, or workflow rules
 │   │   │   ├── index.ts
 │   │   │   ├── dao.factory.ts
@@ -86,8 +113,16 @@ smartquote/
 │   │   │   │   └── types.ts
 │   │   │   └── children/
 │   │   │       ├── permissions.dao.ts
+│   │   │       ├── quote.approvals.dao.ts
+│   │   │       ├── quote.calculation.rules.dao.ts
+│   │   │       ├── quote.detail.revisions.dao.ts
+│   │   │       ├── quotes.dao.ts
+│   │   │       ├── rate.profiles.dao.ts
 │   │   │       ├── roles.dao.ts
 │   │   │       ├── sessions.dao.ts
+│   │   │       ├── ticket.attachments.dao.ts
+│   │   │       ├── ticket.comments.dao.ts
+│   │   │       ├── tickets.dao.ts
 │   │   │       └── users.dao.ts
 │   │   ├── database/                               # Connection, migrations, and schema definitions only.
 │   │   │   ├── connection.ts
@@ -117,7 +152,8 @@ smartquote/
 │   │   │   └── rbac.middleware.ts
 │   │   ├── routes/                                 # Map URLs to controllers only - no logic allowed.
 │   │   │   ├── admin.routes.ts
-│   │   │   └── auth.routes.ts
+│   │   │   ├── auth.routes.ts
+│   │   │   └── ticket.routes.ts
 │   │   ├── services/                               # All business rules/workflows here; nothing else enforces domain behaviour. No HTTP here.
 │   │   │   ├── auth/
 │   │   │   │   ├── auth.config.types.ts
@@ -126,10 +162,24 @@ smartquote/
 │   │   │   │   ├── index.ts
 │   │   │   │   ├── password.service.ts
 │   │   │   │   └── session.service.ts
-│   │   │   └── rbac/
-│   │   │       └── rbac.service.ts
+│   │   │   ├── email/
+│   │   │   ├── notification/
+│   │   │   ├── quote/
+│   │   │   │   ├── comment.engine.service.ts
+│   │   │   │   ├── comment.errors.ts
+│   │   │   │   └── comment.service.ts
+│   │   │   ├── rbac/
+│   │   │   │   └── rbac.service.ts
+│   │   │   ├── ticket/
+│   │   │   │   ├── comment.service.ts
+│   │   │   │   ├── ticket.errors.ts
+│   │   │   │   ├── ticket.service.ts
+│   │   │   │   └── ticket.types.ts
+│   │   │   └── user/
 │   │   └── validators/                             # Input shape validation only; must not access database or services.
 │   │       ├── auth.validator.ts
+│   │       ├── quote.validator.ts
+│   │       ├── ticket.validator.ts
 │   │       ├── user.validator.ts
 │   │       └── validation-utils.ts
 │   │
@@ -140,6 +190,8 @@ smartquote/
 │       │   └── lookup-values.ts
 │       └── contracts/                              # Define all DTO types here so frontend/backend share to prevent drift
 │           ├── auth-contracts.ts
+│           ├── quote-contracts.ts
+│           ├── ticket-contracts.ts
 │           └── user-contracts.ts
 │
 ├── tests/
