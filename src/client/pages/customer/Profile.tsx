@@ -1,8 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Profile.css";
-
-type ViewMode = "customer" | "admin";
 
 type StatRow = {
   label: string;
@@ -177,7 +175,6 @@ const Icons = {
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const [view, setView] = useState<ViewMode>("customer");
 
   // Placeholder data (swap with API later)
   const user = useMemo(
@@ -229,26 +226,51 @@ const Profile: React.FC = () => {
     <div className="profilePage">
       {/* Slim left sidebar */}
       <aside className="pSidebar" aria-label="Sidebar navigation">
-        <button className="pSidebarExpand" type="button" aria-label="Expand sidebar" title="Expand">
+        <button
+          className="pSidebarExpand"
+          type="button"
+          aria-label="Expand sidebar"
+          title="Expand"
+        >
           <span className="pSidebarExpandIcon" aria-hidden="true">
             ›
           </span>
         </button>
 
         <nav className="pNav" aria-label="Primary">
-          <button className="pNavBtn" type="button" onClick={() => navigate("/customer")}>
+          <button
+            className="pNavBtn"
+            type="button"
+            onClick={() => navigate("/customer")}
+          >
             <span className="pNavIcon">{Icons.Home}</span>
           </button>
-          <button className="pNavBtn" type="button" onClick={() => navigate("/customer/tickets")}>
+          <button
+            className="pNavBtn"
+            type="button"
+            onClick={() => navigate("/customer/tickets")}
+          >
             <span className="pNavIcon">{Icons.Ticket}</span>
           </button>
-          <button className="pNavBtn" type="button" onClick={() => navigate("/customer/quotes")}>
+          <button
+            className="pNavBtn"
+            type="button"
+            onClick={() => navigate("/customer/quotes")}
+          >
             <span className="pNavIcon">{Icons.Pound}</span>
           </button>
-          <button className="pNavBtn" type="button" onClick={() => navigate("/customer/history")}>
+          <button
+            className="pNavBtn"
+            type="button"
+            onClick={() => navigate("/customer/history")}
+          >
             <span className="pNavIcon">{Icons.Doc}</span>
           </button>
-          <button className="pNavBtn active" type="button" onClick={() => navigate("/customer/profile")}>
+          <button
+            className="pNavBtn active"
+            type="button"
+            onClick={() => navigate("/customer/profile")}
+          >
             <span className="pNavIcon">{Icons.User}</span>
           </button>
         </nav>
@@ -265,34 +287,17 @@ const Profile: React.FC = () => {
         <header className="pTop">
           <div>
             <h1 className="pTitle">Profile</h1>
-            <p className="pSub">Manage your account information and preferences</p>
+            <p className="pSub">
+              Manage your account information and preferences
+            </p>
           </div>
 
           <div className="pTopRight">
-            <div className="viewToggle" role="tablist" aria-label="View mode">
-              <button
-                className={`viewTab ${view === "customer" ? "active" : ""}`}
-                type="button"
-                onClick={() => setView("customer")}
-                role="tab"
-                aria-selected={view === "customer"}
-              >
-                <span className="viewTabIcon">{Icons.User}</span>
-                Customer View
-              </button>
-              <button
-                className={`viewTab ${view === "admin" ? "active" : ""}`}
-                type="button"
-                onClick={() => setView("admin")}
-                role="tab"
-                aria-selected={view === "admin"}
-              >
-                <span className="viewTabIcon">{Icons.User}</span>
-                Admin View
-              </button>
-            </div>
-
-            <button className="editBtn" type="button" onClick={() => alert("Edit Profile (placeholder)")}>
+            <button
+              className="editBtn"
+              type="button"
+              onClick={() => alert("Edit Profile (placeholder)")}
+            >
               ✎&nbsp; Edit Profile
             </button>
           </div>
@@ -396,7 +401,9 @@ const Profile: React.FC = () => {
                   <span className="cardIcon">{Icons.Building}</span>
                   <span className="cardTitle">Organization Information</span>
                 </div>
-                <div className="cardSubtitle">Company details and contact information</div>
+                <div className="cardSubtitle">
+                  Company details and contact information
+                </div>
               </div>
 
               <div className="formGrid">
