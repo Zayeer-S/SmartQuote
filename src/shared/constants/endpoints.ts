@@ -1,4 +1,5 @@
 export const AUTH_ENDPOINTS = {
+  BASE: '/auth',
   LOGIN: '/login',
   LOGOUT: '/logout',
   ME: '/me',
@@ -6,10 +7,12 @@ export const AUTH_ENDPOINTS = {
 };
 
 export const ADMIN_ENDPOINTS = {
+  BASE: '/admin',
   USERS: '/users',
 };
 
 export const TICKET_ENDPOINTS = {
+  BASE: '/tickets',
   LIST: '/',
   CREATE: '/',
   GET: (ticketId = ':ticketId') => `/${ticketId}`,
