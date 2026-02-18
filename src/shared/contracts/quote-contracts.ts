@@ -1,5 +1,3 @@
-// ─── Quote Requests ───────────────────────────────────────────────────────────
-
 export interface CreateManualQuoteRequest {
   estimatedHoursMinimum: number;
   estimatedHoursMaximum: number;
@@ -27,8 +25,6 @@ export interface ApproveQuoteRequest {
 export interface RejectQuoteRequest {
   comment: string;
 }
-
-// ─── Quote Responses ──────────────────────────────────────────────────────────
 
 export interface QuoteResponse {
   id: string;
@@ -61,8 +57,6 @@ export interface ListQuotesResponse {
   quotes: QuoteResponse[];
 }
 
-// ─── Approval Responses ───────────────────────────────────────────────────────
-
 export interface QuoteApprovalResponse {
   id: number;
   approvedByUserId: string;
@@ -73,8 +67,6 @@ export interface QuoteApprovalResponse {
   createdAt: string;
   updatedAt: string;
 }
-
-// ─── Revision Responses ───────────────────────────────────────────────────────
 
 export interface QuoteRevisionResponse {
   id: number;
