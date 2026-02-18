@@ -1,8 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { PERMISSIONS } from '../../../shared/constants';
 import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types';
 import type { TicketsDAO } from '../../daos/children/tickets.dao';
 import type { UsersDAO } from '../../daos/children/users.dao';
-import type { TicketId, UserId } from '../../database/types/ids';
+import type {
+  BusinessImpactId,
+  TicketId,
+  TicketSeverityId,
+  TicketStatusId,
+  TicketTypeId,
+  UserId,
+} from '../../database/types/ids';
 import type { Ticket, TicketWithDetails } from '../../database/types/tables';
 import type { RBACService } from '../rbac/rbac.service';
 import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from './ticket.errors';
@@ -52,9 +60,9 @@ export class TicketService {
         ...data,
         creator_user_id: actorId,
         organization_id: actor.organization_id,
-        ticket_type_id: data.ticket_type_id,
-        ticket_severity_id: data.ticket_severity_id,
-        business_impact_id: data.business_impact_id,
+        ticket_type_id: data.ticket_type_id as TicketTypeId,
+        ticket_severity_id: data.ticket_severity_id as TicketSeverityId,
+        business_impact_id: data.business_impact_id as BusinessImpactId,
         // Status OPEN (id=1). Priority P3 (id=3). Both are seeded lookup values —
         // the quote engine will update priority after generating a quote.
         // Using literal seed IDs here is intentional: these are fixed bootstrap values.
@@ -116,7 +124,7 @@ export class TicketService {
     if (canReadAll) {
       const criteria: Partial<Ticket> = {};
       if (filters.organizationId) criteria.organization_id = filters.organizationId;
-      if (filters.statusId) criteria.ticket_status_id = filters.statusId;
+      if (filters.statusId) criteria.ticket_status_id = filters.statusId as TicketStatusId;
       if (filters.assigneeId) criteria.assigned_to_user_id = filters.assigneeId;
       return this.ticketsDAO.getMany(criteria, options);
     }
@@ -125,7 +133,7 @@ export class TicketService {
     if (!actor?.organization_id) return [];
 
     const criteria: Partial<Ticket> = { organization_id: actor.organization_id };
-    if (filters.statusId) criteria.ticket_status_id = filters.statusId;
+    if (filters.statusId) criteria.ticket_status_id = filters.statusId as TicketStatusId;
 
     return this.ticketsDAO.getMany(criteria, options);
   }
