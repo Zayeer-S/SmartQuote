@@ -1,7 +1,10 @@
 smartquote/
 ├── .github/
 │   ├── actions/
+│   │   └── actions/
+│   │       └── setup/
 │   └── workflows/
+│       └── push.yml
 │
 ├── .husky/
 │   └── pre-commit/                                 # Lint-staged
@@ -20,15 +23,26 @@ smartquote/
 │   │   ├── constants/
 │   │   │   ├── index.ts
 │   │   │   ├── client.routes.ts
+│   │   ├── context/
+│   │   │   └── auth/
+│   │   │       ├── auth.context.types.ts
+│   │   │       └── AuthContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules.
 │   │   │   ├── useLogin.ts
+│   │   │   └── auth/
+│   │   │       ├── useAuth.ts
+│   │   │       ├── useQuotePermissions.ts
+│   │   │       ├── useTicketPermissions.ts
+│   │   │       └── useUserPermissions.ts
 │   │   ├── lib/
 │   │   │   ├── api/                                # Only place that knows endpoints in client
 │   │   │   │   ├── admin.api.ts
 │   │   │   │   ├── auth.api.ts
 │   │   │   │   └── http-client.ts
 │   │   │   ├── storage/                            # Browser persistence tokens
+│   │   │   │   ├── keys.ts
+│   │   │   │   └── tokenStorage.ts
 │   │   │   └── utils/                              # Generic helpers only; if it knows about e.g. tickets, it doesn't belong here
 │   │   ├── pages/                                  # Route level composition (no logic, only assemble features)
 │   │   │   ├── admin/
