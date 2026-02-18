@@ -16,4 +16,8 @@ export const tokenStorage = {
     localStorage.removeItem(key);
     sessionStorage.removeItem(key);
   },
+
+  exists(): boolean {
+    return tokenStorage.get() !== null;
+  },
 };

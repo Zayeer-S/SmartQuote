@@ -1,6 +1,7 @@
 import type {
   ChangePasswordRequest,
   ChangePasswordResponse,
+  GetCurrentUserPermissionsResponse,
   GetCurrentUserResponse,
   LoginRequest,
   LoginResponse,
@@ -47,6 +48,12 @@ export const authAPI = {
       '/auth/change-password',
       passwords
     );
+    return extractData(response);
+  },
+
+  async getPermissions(): Promise<GetCurrentUserPermissionsResponse> {
+    const response =
+      await httpClient.post<ApiResponse<GetCurrentUserPermissionsResponse>>('/auth/permissions');
     return extractData(response);
   },
 };
