@@ -40,17 +40,17 @@ export interface TableIdMap {
   // Link Tables (Integer IDs)
   [LINK_TABLES.SESSIONS]: IntegerId<'Session'>;
   [LINK_TABLES.QUOTE_DETAIL_REVISIONS]: IntegerId<'QuoteDetailRevision'>;
+  [LINK_TABLES.TICKET_COMMENTS]: IntegerId<'TicketComment'>;
   [LINK_TABLES.TICKET_ATTACHMENTS]: IntegerId<'TicketAttachment'>;
   [LINK_TABLES.ORGANIZATION_MEMBERS]: IntegerId<'OrganizationMember'>;
   [LINK_TABLES.SLA_POLICIES]: IntegerId<'SLAPolicy'>;
   [LINK_TABLES.RESOURCE_UTILIZATIONS]: IntegerId<'ResourceUtilization'>;
-  [LINK_TABLES.QUOTE_EFFORT_LEVEL_RANGES]: IntegerId<'QuoteEfforLevelRanges'>;
+  [LINK_TABLES.QUOTE_EFFORT_LEVEL_RANGES]: IntegerId<'QuoteEffortLevelRanges'>;
   [LINK_TABLES.NOTIFICATION_TOKENS]: IntegerId<'NotificationToken'>;
 
   // Link Tables (Composite Keys - no single ID, but we define for completeness)
   [LINK_TABLES.ROLE_PERMISSIONS]: never;
   [LINK_TABLES.USER_NOTIFICATION_PREFERENCES]: never;
-  [LINK_TABLES.TICKET_COMMENTS]: never;
 }
 
 export type RoleId = TableIdMap[typeof LOOKUP_TABLES.ROLES];
@@ -86,5 +86,5 @@ export type TicketAttachmentId = TableIdMap[typeof LINK_TABLES.TICKET_ATTACHMENT
 export type OrganizationMemberId = TableIdMap[typeof LINK_TABLES.ORGANIZATION_MEMBERS];
 export type SlaPolicyId = TableIdMap[typeof LINK_TABLES.SLA_POLICIES];
 export type ResourceUtilizationId = TableIdMap[typeof LINK_TABLES.RESOURCE_UTILIZATIONS];
-export type QuoteEfforLevelRangesId = TableIdMap[typeof LINK_TABLES.QUOTE_EFFORT_LEVEL_RANGES];
+export type QuoteEffortLevelRangesId = TableIdMap[typeof LINK_TABLES.QUOTE_EFFORT_LEVEL_RANGES];
 export type NotificationTokenId = TableIdMap[typeof LINK_TABLES.NOTIFICATION_TOKENS];

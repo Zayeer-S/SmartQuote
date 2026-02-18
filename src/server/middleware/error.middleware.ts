@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { AuthError, PasswordValidationError } from '../services/auth/auth.errors';
 import { formatValidationError } from '../validators/validation-utils';
 import { error } from '../lib/respond';
+import { ForbiddenError, TicketError } from '../services/ticket/ticket.errors';
 
 /**
  * Global Error Handling Middleware
@@ -10,7 +11,6 @@ import { error } from '../lib/respond';
  * Must be registered last in middleware chain
  */
 export function errorHandler(err: Error, req: Request, res: Response): void {
-  // Log error for debugging
   console.error('Error:', {
     name: err.name,
     message: err.message,
@@ -19,7 +19,6 @@ export function errorHandler(err: Error, req: Request, res: Response): void {
     method: req.method,
   });
 
-  // Handle known error types
   if (err instanceof AuthError) {
     error(res, err.statusCode, err.message);
     return;
@@ -30,19 +29,23 @@ export function errorHandler(err: Error, req: Request, res: Response): void {
     return;
   }
 
+  if (err instanceof TicketError) {
+    error(res, err.statusCode, err.message);
+    return;
+  }
+
+  if (err instanceof ForbiddenError) {
+    error(res, err.statusCode, err.message);
+    return;
+  }
+
   if (err instanceof ZodError) {
     error(res, 400, formatValidationError(err));
     return;
   }
 
-  // Handle specific error names
   if (err.name === 'UnauthorizedError') {
     error(res, 401, 'Invalid or expired token');
-    return;
-  }
-
-  if (err.name === 'ForbiddenError') {
-    error(res, 403, 'Access denied');
     return;
   }
 

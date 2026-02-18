@@ -10,6 +10,8 @@ import { createAdminRoutes } from '../routes/admin.routes';
 import { authConfig } from '../config/auth-config';
 import type { SessionService } from '../services/auth/session.service';
 import { errorHandler, notFoundHandler } from '../middleware/error.middleware';
+import { TicketContainer } from '../containers/ticket.container';
+import { createTicketRoutes } from '../routes/ticket.routes';
 
 export async function bootstrapApplication(): Promise<Express> {
   console.log('Bootstrapping application...');
@@ -37,6 +39,7 @@ export async function bootstrapApplication(): Promise<Express> {
   console.log('Initializing containers...');
   const authContainer = new AuthContainer(db);
   const adminContainer = new AdminContainer(db, authContainer.authService);
+  const ticketContainer = new TicketContainer(db, adminContainer.rbacService);
 
   console.log('Registering routes...');
   app.use('/api/auth', createAuthRoutes(authContainer.authController, authContainer.authService));
@@ -44,6 +47,14 @@ export async function bootstrapApplication(): Promise<Express> {
     '/api/admin',
     createAdminRoutes(
       adminContainer.adminController,
+      authContainer.authService,
+      adminContainer.rbacService
+    )
+  );
+  app.use(
+    '/api/tickets',
+    createTicketRoutes(
+      ticketContainer.ticketController,
       authContainer.authService,
       adminContainer.rbacService
     )
