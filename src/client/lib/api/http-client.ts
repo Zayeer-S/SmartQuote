@@ -1,8 +1,7 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
-import { frontEnv } from '../../config/env.frontend';
 
 export const httpClient: AxiosInstance = axios.create({
-  baseURL: frontEnv.VITE_APP_URL + '/api',
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 10000,
 });
