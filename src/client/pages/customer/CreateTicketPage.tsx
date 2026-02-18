@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CustomerSidebar, { type MenuKey } from '../../components/layout/CustomerSidebar';
+import CustomerSidebar from './CustomerSidebar';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useCreateTicket } from '../../hooks/tickets/useCreateTicket';
 import './CreateTicketPage.css';
@@ -17,6 +17,8 @@ import { CLIENT_ROUTES } from '../../constants/client.routes';
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+type MenuKey = 'Dashboard' | 'My Tickets' | 'Quotes' | 'History' | 'Profile';
 
 interface LookupOption {
   id: number;
@@ -89,7 +91,13 @@ const CreateTicketPage: React.FC = () => {
   const { execute: createTicket } = useCreateTicket();
 
   const [activeMenu, setActiveMenu] = useState<MenuKey>('My Tickets');
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   const [form, setForm] = useState<TicketFormState>(INITIAL_FORM);
+
+  const toggleSidebar = useCallback(() => {
+    setIsCollapsed((v) => !v);
+  }, []);
 
   const setField = <K extends keyof TicketFormState>(key: K, value: TicketFormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -141,14 +149,12 @@ const CreateTicketPage: React.FC = () => {
   };
 
   return (
-    <div className="customerPage">
+    <div className={`customerPage ${isCollapsed ? 'sidebarCollapsed' : ''}`}>
       <CustomerSidebar
         activeMenu={activeMenu}
-        onMenuChange={setActiveMenu}
-        brandTitle="GIACOM"
-        brandSub="Customer Portal"
-        userName={user?.firstName ?? 'Guest'}
-        userEmail={user?.email ?? 'guest@giacom'}
+        setActiveMenu={setActiveMenu}
+        isCollapsed={isCollapsed}
+        toggleSidebar={toggleSidebar}
       />
 
       <main className="main">
@@ -181,9 +187,7 @@ const CreateTicketPage: React.FC = () => {
               <select
                 className="control"
                 value={form.ticket_type_id}
-                onChange={(e) => {
-                  setField('ticket_type_id', Number(e.target.value));
-                }}
+                onChange={(e) => setField('ticket_type_id', Number(e.target.value))}
               >
                 {TICKET_TYPE_OPTIONS.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -202,9 +206,7 @@ const CreateTicketPage: React.FC = () => {
                 className="control"
                 placeholder="Brief summary of the issue or request"
                 value={form.title}
-                onChange={(e) => {
-                  setField('title', e.target.value);
-                }}
+                onChange={(e) => setField('title', e.target.value)}
                 required
               />
             </div>
@@ -218,9 +220,7 @@ const CreateTicketPage: React.FC = () => {
                 className="control textarea"
                 placeholder="Provide a detailed explanation of the issue or request."
                 value={form.description}
-                onChange={(e) => {
-                  setField('description', e.target.value);
-                }}
+                onChange={(e) => setField('description', e.target.value)}
                 required
               />
               <div className="helpRow">
@@ -237,9 +237,7 @@ const CreateTicketPage: React.FC = () => {
                 <select
                   className="control"
                   value={form.ticket_severity_id}
-                  onChange={(e) => {
-                    setField('ticket_severity_id', Number(e.target.value));
-                  }}
+                  onChange={(e) => setField('ticket_severity_id', Number(e.target.value))}
                 >
                   {SEVERITY_OPTIONS.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -256,9 +254,7 @@ const CreateTicketPage: React.FC = () => {
                 <select
                   className="control"
                   value={form.business_impact_id}
-                  onChange={(e) => {
-                    setField('business_impact_id', Number(e.target.value));
-                  }}
+                  onChange={(e) => setField('business_impact_id', Number(e.target.value))}
                 >
                   {BUSINESS_IMPACT_OPTIONS.map((b) => (
                     <option key={b.id} value={b.id}>
@@ -277,9 +273,7 @@ const CreateTicketPage: React.FC = () => {
               <select
                 className="control"
                 value={form.ticket_priority_id}
-                onChange={(e) => {
-                  setField('ticket_priority_id', Number(e.target.value));
-                }}
+                onChange={(e) => setField('ticket_priority_id', Number(e.target.value))}
               >
                 {PRIORITY_OPTIONS.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -299,9 +293,7 @@ const CreateTicketPage: React.FC = () => {
                   type="date"
                   className="control"
                   value={form.deadline_date}
-                  onChange={(e) => {
-                    setField('deadline_date', e.target.value);
-                  }}
+                  onChange={(e) => setField('deadline_date', e.target.value)}
                   required
                 />
               </div>
@@ -315,9 +307,7 @@ const CreateTicketPage: React.FC = () => {
                   min={1}
                   className="control"
                   value={form.users_impacted}
-                  onChange={(e) => {
-                    setField('users_impacted', Number(e.target.value));
-                  }}
+                  onChange={(e) => setField('users_impacted', Number(e.target.value))}
                   required
                 />
               </div>

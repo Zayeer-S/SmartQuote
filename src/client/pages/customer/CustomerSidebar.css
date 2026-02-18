@@ -1,0 +1,265 @@
+/* =========================
+   Sidebar
+   ========================= */
+.sidebar {
+  width: var(--sidebarW);
+  background: linear-gradient(180deg, var(--sidebar), var(--sidebar2));
+  color: var(--sidebarText);
+  padding: 22px 18px;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  /* allow floating collapse button */
+  overflow: visible;
+}
+
+.brand {
+  padding: 6px 10px 12px;
+}
+
+.brandTitle {
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: -0.2px;
+  color: #ffffff;
+}
+
+.brandSub {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(203, 213, 225, 0.72);
+}
+
+.brandRow {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Menu (scroll only if it ever grows too tall) */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.menu::-webkit-scrollbar {
+  width: 6px;
+}
+.menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.menuItem {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: rgba(203, 213, 225, 0.9);
+  padding: 14px;
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.menuItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.menuItem:active {
+  transform: translateY(1px);
+}
+
+.menuItem.active {
+  background: var(--sidebarActive);
+  color: #ffffff;
+}
+
+.menuIcon {
+  width: 26px;
+  display: grid;
+  place-items: center;
+  opacity: 0.95;
+}
+
+.menuIcon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.menuLabel {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Footer + profile dropdown */
+.sidebarFooter {
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  position: relative; /* needed for dropdown */
+}
+
+.profileTrigger {
+  width: 100%;
+  background: transparent;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  cursor: pointer;
+  color: inherit;
+  padding: 6px 4px;
+  text-align: left;
+}
+
+.userAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.userAvatar svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.userMeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userName {
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.userEmail {
+  font-size: 12px;
+  color: rgba(203, 213, 225, 0.75);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileDropdown {
+  position: absolute;
+  left: 0;
+  bottom: 74px;
+  width: 240px;
+
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  z-index: 2000;
+}
+
+.dropdownItem {
+  border: none;
+  background: transparent;
+  padding: 12px;
+  text-align: left;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms ease;
+  color: var(--text);
+}
+
+.dropdownItem:hover {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.dropdownItem.logout {
+  color: #dc2626;
+}
+
+.dropdownItem.logout:hover {
+  background: rgba(220, 38, 38, 0.08);
+}
+
+/* Collapse button (floating circle) */
+.collapseBtn {
+  position: absolute;
+  top: 10px;
+  right: -22px;
+
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+
+  background: #ffffff;
+  border: 4px solid rgba(203, 213, 225, 0.9);
+  color: #0b1222;
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.18);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+
+  font-size: 0; /* hide emoji text */
+}
+
+.collapseBtn::before {
+  content: "‹";
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.collapseBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.22);
+}
+
+.collapseBtn:active {
+  transform: translateY(0);
+}
