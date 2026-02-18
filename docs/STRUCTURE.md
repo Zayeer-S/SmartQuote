@@ -30,6 +30,16 @@ smartquote/
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules.
 │   │   │   ├── useLogin.ts
+│   │   │   ├── tickets/
+│   │   │   │   ├── useAddComment.ts
+│   │   │   │   ├── useAssignTicket.ts
+│   │   │   │   ├── useCreateTicket.ts
+│   │   │   │   ├── useDeleteTicket.ts
+│   │   │   │   ├── useGetTicket.ts
+│   │   │   │   ├── useListComments.ts
+│   │   │   │   ├── useListTicket.ts
+│   │   │   │   ├── useResolveTicket.ts
+│   │   │   │   ├── useUpdateTicket.ts
 │   │   │   └── auth/
 │   │   │       ├── useAuth.ts
 │   │   │       ├── useQuotePermissions.ts
