@@ -31,7 +31,7 @@ export function useLogin(): UseLoginReturn {
 
       const destination =
         response.user.role.name === AUTH_ROLES.CUSTOMER
-          ? CLIENT_ROUTES.CUSTOMER
+          ? CLIENT_ROUTES.CUSTOMER.ROOT
           : CLIENT_ROUTES.ADMIN;
 
       await navigate(destination, { replace: true });

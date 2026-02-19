@@ -2,10 +2,10 @@ export const CLIENT_ROUTES = {
   LOGIN: '/login',
   CANT_ACCESS_ACCOUNT: '/cannot',
   ADMIN: '/admin',
-  CUSTOMER: '/customer',
-  CUSTOMER_PROFILE: '/customer/profile',
-  CUSTOMER_CREATE: '/customer/create',
-  CUSTOMER_TICKETS: '/customer/tickets',
-  CUSTOMER_QUOTES: '/customer/quotes',
-  CUSTOMER_HISTORY: '/customer/history',
+  CUSTOMER: {
+    ROOT: '/customer',
+    TICKETS: '/customer/tickets',
+    TICKET: (id = ':ticketId') => `/customer/tickets/${id}`,
+    NEW_TICKET: '/customer/tickets/new',
+  },
 } as const;
