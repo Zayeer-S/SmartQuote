@@ -41,7 +41,9 @@ const CustomerPage: React.FC = () => {
 
   useEffect(() => {
     void fetchTickets();
-  }, [fetchTickets]);
+    // Cascading render if you add dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tickets = useMemo<TicketResponse[]>(() => data?.tickets ?? [], [data]);
 
