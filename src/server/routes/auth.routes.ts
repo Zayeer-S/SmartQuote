@@ -15,6 +15,8 @@ export function createAuthRoutes(authController: AuthController, authService: Au
 
   router.get(AUTH_ENDPOINTS.ME, authenticate, authController.getCurrentUser);
 
+  router.get(AUTH_ENDPOINTS.PERMISSIONS, authenticate, authController.getPermissions);
+
   router.post(AUTH_ENDPOINTS.CHANGE_PASSWORD, authenticate, authController.changePassword);
 
   return router;
