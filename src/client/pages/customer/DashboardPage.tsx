@@ -5,7 +5,7 @@ import { useAuth } from '../../hooks/contexts/useAuth';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
 import StatsOverview from '../../features/dashboard/StatsOverview';
 import TicketStatusChart from '../../features/dashboard/TicketStatusChart';
-import TicketCard from '../../features/tickets/TicketCard';
+import TicketCard from '../../features/tickets/CustomerTicketCard';
 
 const RECENT_TICKET_COUNT = 5;
 
