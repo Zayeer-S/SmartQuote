@@ -64,6 +64,48 @@ export class TicketsDAO extends DeletableDAO<Ticket, TicketId> {
     ticketId: TicketId,
     options?: QueryOptions
   ): Promise<TicketWithDetails | null> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const result = await this.buildDetailsQuery(options)
+      .where(`${MAIN_TABLES.TICKETS}.id`, ticketId)
+      .first();
+
+    return result ? (result as TicketWithDetails) : null;
+  }
+
+  /**
+   * Find multiple tickets with all lookup fields joined in.
+   * Accepts the same criteria shape as getMany.
+   *
+   * @param criteria Partial ticket fields to filter by
+   * @param options Query and pagination options
+   * @returns Array of tickets with resolved lookup names
+   */
+  async findManyWithDetails(
+    criteria: Partial<Ticket>,
+    options?: GetManyOptions
+  ): Promise<TicketWithDetails[]> {
+    let query = this.buildDetailsQuery(options).where(criteria as Record<string, unknown>);
+
+    if (options?.limit !== undefined && options.limit > 0) query = query.limit(options.limit);
+    if (options?.offset !== undefined && options.offset > 0) query = query.offset(options.offset);
+
+    if (options?.orderBy) {
+      options.orderBy.forEach(({ column, order = 'asc' }) => {
+        query = query.orderBy(column, order);
+      });
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const results = await query;
+    return results as TicketWithDetails[];
+  }
+
+  /**
+   * Shared query builder for detail joins.
+   * Single source of the join logic — both findWithDetails and
+   * findManyWithDetails build on this so they can never drift apart.
+   */
+  private buildDetailsQuery(options?: QueryOptions): Knex.QueryBuilder {
     const t = MAIN_TABLES.TICKETS;
     const org = LOOKUP_TABLES.ORGANIZATIONS;
     const types = LOOKUP_TABLES.TICKET_TYPES;
@@ -72,9 +114,7 @@ export class TicketsDAO extends DeletableDAO<Ticket, TicketId> {
     const statuses = LOOKUP_TABLES.TICKET_STATUSES;
     const priorities = LOOKUP_TABLES.TICKET_PRIORITIES;
 
-    let query = this.getQuery(options);
-
-    query = query
+    let query = this.getQuery(options)
       .select(
         `${t}.*`,
         `${types}.name as ticket_type_name`,
@@ -89,13 +129,10 @@ export class TicketsDAO extends DeletableDAO<Ticket, TicketId> {
       .leftJoin(impacts, `${t}.business_impact_id`, `${impacts}.id`)
       .leftJoin(statuses, `${t}.ticket_status_id`, `${statuses}.id`)
       .leftJoin(priorities, `${t}.ticket_priority_id`, `${priorities}.id`)
-      .leftJoin(org, `${t}.organization_id`, `${org}.id`)
-      .where(`${t}.id`, ticketId);
+      .leftJoin(org, `${t}.organization_id`, `${org}.id`);
 
     query = this.applyFilters(query, options);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const result = await query.first();
-    return result ? (result as TicketWithDetails) : null;
+    return query;
   }
 }

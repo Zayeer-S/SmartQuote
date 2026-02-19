@@ -182,6 +182,65 @@ export const SMARTQUOTE_CONFIG_KEYS = {
 export type SmartQuoteConfigKey =
   (typeof SMARTQUOTE_CONFIG_KEYS)[keyof typeof SMARTQUOTE_CONFIG_KEYS];
 
+export const LOOKUP_IDS = {
+  TICKET_TYPE: {
+    SUPPORT: 1,
+    INCIDENT: 2,
+    ENHANCEMENT: 3,
+  },
+  TICKET_SEVERITY: {
+    LOW: 1,
+    MEDIUM: 2,
+    HIGH: 3,
+    CRITICAL: 4,
+  },
+  BUSINESS_IMPACT: {
+    MINOR: 1,
+    MODERATE: 2,
+    MAJOR: 3,
+    CRITICAL: 4,
+  },
+  TICKET_STATUS: {
+    OPEN: 1,
+    ASSIGNED: 2,
+    IN_PROGRESS: 3,
+    RESOLVED: 4,
+    CLOSED: 5,
+    CANCELLED: 6,
+  },
+  TICKET_PRIORITY: {
+    P1: 1,
+    P2: 2,
+    P3: 3,
+    P4: 4,
+  },
+  COMMENT_TYPE: {
+    INTERNAL: 1,
+    EXTERNAL: 2,
+    SYSTEM: 3,
+  },
+  QUOTE_EFFORT_LEVEL: {
+    LOW: 1,
+    MEDIUM: 2,
+    HIGH: 3,
+  },
+  QUOTE_CREATOR: {
+    MANUAL: 1,
+    AUTOMATED: 2,
+  },
+  QUOTE_APPROVAL_STATUS: {
+    PENDING: 1,
+    APPROVED: 2,
+    REJECTED: 3,
+    REVISED: 4,
+  },
+  QUOTE_CONFIDENCE_LEVEL: {
+    LOW: 1,
+    MEDIUM: 2,
+    HIGH: 3,
+  },
+} as const;
+
 export const ALL_ROLES = Object.values(AUTH_ROLES);
 export const ALL_PERMISSIONS = Object.values(PERMISSIONS);
 export const ALL_NOTIFICATION_TYPES = Object.values(NOTIFICATION_TYPES);

@@ -1,21 +1,25 @@
 import type { Knex } from 'knex';
 import { AuthController } from '../controllers/auth.controller';
+import { PermissionsDAO } from '../daos/children/permissions.dao';
 import { RolesDAO } from '../daos/children/roles.dao';
 import { SessionsDAO } from '../daos/children/sessions.dao';
 import { UsersDAO } from '../daos/children/users.dao';
 import { AuthService } from '../services/auth/auth.service';
 import { PasswordService } from '../services/auth/password.service';
 import { SessionService } from '../services/auth/session.service';
+import { RBACService } from '../services/rbac/rbac.service';
 import { authConfig, passwordConfig } from '../config/auth-config';
 
 export class AuthContainer {
   public readonly usersDAO: UsersDAO;
   public readonly sessionsDAO: SessionsDAO;
   public readonly rolesDAO: RolesDAO;
+  public readonly permissionsDAO: PermissionsDAO;
 
   public readonly passwordService: PasswordService;
   public readonly sessionService: SessionService;
   public readonly authService: AuthService;
+  public readonly rbacService: RBACService;
 
   public readonly authController: AuthController;
 
@@ -23,11 +27,13 @@ export class AuthContainer {
     this.usersDAO = new UsersDAO(db);
     this.sessionsDAO = new SessionsDAO(db);
     this.rolesDAO = new RolesDAO(db);
+    this.permissionsDAO = new PermissionsDAO(db);
 
     this.passwordService = new PasswordService(passwordConfig);
     this.sessionService = new SessionService(authConfig, this.sessionsDAO);
     this.authService = new AuthService(this.usersDAO, this.sessionService, this.passwordService);
+    this.rbacService = new RBACService(this.usersDAO, this.permissionsDAO);
 
-    this.authController = new AuthController(this.authService);
+    this.authController = new AuthController(this.authService, this.rbacService);
   }
 }

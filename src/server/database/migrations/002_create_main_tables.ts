@@ -15,9 +15,9 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('role_id').notNullable();
     table.uuid('organization_id').nullable();
 
-    table.timestamp('deleted_at').nullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('deleted_at', { useTz: true }).nullable();
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('role_id').references('id').inTable('roles').onDelete('RESTRICT');
     table.foreign('organization_id').references('id').inTable('organizations').onDelete('RESTRICT');
@@ -48,12 +48,12 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('ticket_status_id').notNullable();
     table.integer('ticket_priority_id').notNullable();
 
-    table.timestamp('deadline').notNullable();
+    table.timestamp('deadline', { useTz: true }).notNullable();
     table.integer('users_impacted').notNullable();
 
-    table.timestamp('deleted_at').nullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('deleted_at', { useTz: true }).nullable();
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('creator_user_id').references('id').inTable('users').onDelete('RESTRICT');
     table.foreign('resolved_by_user_id').references('id').inTable('users').onDelete('RESTRICT');
@@ -105,9 +105,9 @@ export async function up(knex: Knex): Promise<void> {
     table.string('user_role').notNullable();
     table.integer('approval_status_id').notNullable();
     table.string('comment').nullable();
-    table.timestamp('approved_at').nullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('approved_at', { useTz: true }).nullable();
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('approved_by_user_id').references('id').inTable('users').onDelete('RESTRICT');
     table
@@ -140,9 +140,9 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('quote_effort_level_id').notNullable();
     table.integer('quote_creator_id').notNullable();
 
-    table.timestamp('deleted_at').nullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('deleted_at', { useTz: true }).nullable();
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('ticket_id').references('id').inTable('tickets').onDelete('RESTRICT');
     table
@@ -198,10 +198,10 @@ export async function up(knex: Knex): Promise<void> {
     table.decimal('multiplier').notNullable().defaultTo(1);
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('effective_from').notNullable();
-    table.timestamp('effective_to').notNullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('effective_from', { useTz: true }).notNullable();
+    table.timestamp('effective_to', { useTz: true }).notNullable();
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('ticket_type_id').references('id').inTable('ticket_types').onDelete('RESTRICT');
     table
@@ -237,8 +237,8 @@ export async function up(knex: Knex): Promise<void> {
 
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table
       .foreign('ticket_severity_id')
@@ -276,8 +276,8 @@ export async function up(knex: Knex): Promise<void> {
     table.uuid('organization_id').nullable();
     table.jsonb('data').notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('organization_id').references('id').inTable('organizations').onDelete('RESTRICT');
     table.foreign('schema_id').references('id').inTable('analytics_schemas').onDelete('RESTRICT');

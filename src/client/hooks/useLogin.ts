@@ -3,6 +3,7 @@ import type { LoginRequest } from '../../shared/contracts/auth-contracts';
 import { useState } from 'react';
 import { authAPI } from '../lib/api/auth.api';
 import { tokenStorage } from '../lib/storage/tokenStorage';
+import { useAuth } from './auth/useAuth';
 import { AUTH_ROLES } from '../../shared/constants';
 import { CLIENT_ROUTES } from '../constants/client.routes';
 
@@ -14,6 +15,7 @@ interface UseLoginReturn {
 
 export function useLogin(): UseLoginReturn {
   const navigate = useNavigate();
+  const { refetch } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +26,9 @@ export function useLogin(): UseLoginReturn {
     try {
       const response = await authAPI.login(credentials);
       tokenStorage.save(response.token, rememberMe);
+
+      await refetch();
+
       const destination =
         response.user.role.name === AUTH_ROLES.CUSTOMER
           ? CLIENT_ROUTES.CUSTOMER

@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import type { Request, Response } from 'express';
 import type { AuthService } from '../services/auth/auth.service';
+import type { RBACService } from '../services/rbac/rbac.service';
 import { validateOrThrow } from '../validators/validation-utils';
 import { changePasswordSchema, loginSchema } from '../validators/auth.validator';
 import type { ChangePasswordRequest, LoginRequest } from '../../shared/contracts/auth-contracts';
@@ -12,9 +13,11 @@ import type { UserId } from '../database/types/ids';
 
 export class AuthController {
   private authService: AuthService;
+  private rbacService: RBACService;
 
-  constructor(authService: AuthService) {
+  constructor(authService: AuthService, rbacService: RBACService) {
     this.authService = authService;
+    this.rbacService = rbacService;
   }
 
   login = async (req: Request, res: Response): Promise<void> => {
@@ -77,6 +80,20 @@ export class AuthController {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('Get current user error:', err);
+      error(res, 500, 'Internal server error');
+    }
+  };
+
+  getPermissions = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+
+      const permissions = await this.rbacService.getUserPermissions(authReq.user.id as UserId);
+
+      success(res, { permissions }, 200);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error('Get permissions error:', err);
       error(res, 500, 'Internal server error');
     }
   };
