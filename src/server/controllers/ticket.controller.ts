@@ -39,8 +39,6 @@ export class TicketController {
     this.commentService = commentService;
   }
 
-  // ─── Tickets ───────────────────────────────────────────────────────────────
-
   createTicket = async (req: Request, res: Response): Promise<void> => {
     try {
       const actor = (req as AuthenticatedRequest).user;
@@ -95,7 +93,7 @@ export class TicketController {
         { limit: query.limit, offset: query.offset }
       );
 
-      const response: ListTicketsResponse = { tickets: tickets.map(mapTicket) };
+      const response: ListTicketsResponse = { tickets: tickets.map(mapTicketDetail) };
       success(res, response, 200);
     } catch (err: unknown) {
       handleError(res, err);
@@ -173,8 +171,6 @@ export class TicketController {
     }
   };
 
-  // ─── Comments ──────────────────────────────────────────────────────────────
-
   addComment = async (req: Request, res: Response): Promise<void> => {
     try {
       const actor = (req as AuthenticatedRequest).user;
@@ -209,8 +205,6 @@ export class TicketController {
     }
   };
 }
-
-// ─── Response Mappers ─────────────────────────────────────────────────────────
 
 function mapTicket(ticket: Ticket): TicketResponse {
   return {
@@ -256,8 +250,6 @@ function mapComment(comment: TicketComment): CommentResponse {
     updatedAt: comment.updated_at.toISOString(),
   };
 }
-
-// ─── Shared Error Handler ─────────────────────────────────────────────────────
 
 function handleError(res: Response, err: unknown): void {
   if (!(err instanceof Error)) {

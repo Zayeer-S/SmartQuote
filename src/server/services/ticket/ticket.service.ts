@@ -114,7 +114,7 @@ export class TicketService {
     filters: ListTicketsFilters,
     actorId: UserId,
     options?: GetManyOptions
-  ): Promise<Ticket[]> {
+  ): Promise<TicketWithDetails[]> {
     const canReadAll = await this.rbacService.hasPermission(
       actorId,
       PERMISSIONS.TICKETS_READ_ALL,
@@ -126,7 +126,7 @@ export class TicketService {
       if (filters.organizationId) criteria.organization_id = filters.organizationId;
       if (filters.statusId) criteria.ticket_status_id = filters.statusId as TicketStatusId;
       if (filters.assigneeId) criteria.assigned_to_user_id = filters.assigneeId;
-      return this.ticketsDAO.getMany(criteria, options);
+      return this.ticketsDAO.findManyWithDetails(criteria, options);
     }
 
     const actor = await this.usersDAO.getById(actorId, options);
@@ -135,7 +135,7 @@ export class TicketService {
     const criteria: Partial<Ticket> = { organization_id: actor.organization_id };
     if (filters.statusId) criteria.ticket_status_id = filters.statusId as TicketStatusId;
 
-    return this.ticketsDAO.getMany(criteria, options);
+    return this.ticketsDAO.findManyWithDetails(criteria, options);
   }
 
   /**

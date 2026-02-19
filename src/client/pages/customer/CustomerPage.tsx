@@ -3,14 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import CustomerLayout from './CustomerLayout';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
 import { useListTickets } from '../../hooks/tickets/useListTicket';
-import type { TicketResponse } from '../../../shared/contracts/ticket-contracts';
+import type { TicketDetailResponse } from '../../../shared/contracts/ticket-contracts';
 import { LOOKUP_IDS } from '../../../shared/constants';
 import { TicketIcon, ClockIcon, DollarIcon } from '../../components/icons/CustomerIcons';
 import './CustomerPage.css';
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
 
 const ACTIVE_STATUS_IDS = new Set<number>([
   LOOKUP_IDS.TICKET_STATUS.OPEN,
@@ -18,21 +14,13 @@ const ACTIVE_STATUS_IDS = new Set<number>([
   LOOKUP_IDS.TICKET_STATUS.IN_PROGRESS,
 ]);
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function filterTickets(tickets: TicketResponse[], query: string): TicketResponse[] {
+function filterTickets(tickets: TicketDetailResponse[], query: string): TicketDetailResponse[] {
   const q = query.trim().toLowerCase();
   if (!q) return tickets;
   return tickets.filter(
     (t) => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
   );
 }
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 
 const CustomerPage: React.FC = () => {
   const navigate = useNavigate();
@@ -45,7 +33,7 @@ const CustomerPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const tickets = useMemo<TicketResponse[]>(() => data?.tickets ?? [], [data]);
+  const tickets = useMemo<TicketDetailResponse[]>(() => data?.tickets ?? [], [data]);
 
   const filteredTickets = useMemo(() => filterTickets(tickets, query), [tickets, query]);
 
@@ -169,9 +157,9 @@ const CustomerPage: React.FC = () => {
               {filteredTickets.map((ticket) => (
                 <tr key={ticket.id} data-testid={`ticket-row-${ticket.id}`}>
                   <td>{ticket.title}</td>
-                  <td>{ticket.ticketTypeId}</td>
-                  <td>{ticket.ticketPriorityId}</td>
-                  <td>{ticket.ticketStatusId}</td>
+                  <td>{ticket.ticketTypeName}</td>
+                  <td>{ticket.ticketPriorityName}</td>
+                  <td>{ticket.ticketStatusName}</td>
                   <td>{new Date(ticket.deadline).toLocaleDateString('en-GB')}</td>
                   <td>{ticket.usersImpacted}</td>
                 </tr>
