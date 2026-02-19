@@ -10,6 +10,7 @@ import type {
   PermissionId,
   QuoteApprovalId,
   QuoteApprovalStatusId,
+  QuoteCalculationRuleId,
   QuoteConfidenceId,
   QuoteCreatorId,
   QuoteDetailRevisionId,
@@ -210,7 +211,7 @@ export interface RateProfile extends BaseAuditRows, ActivatableRow {
 }
 
 export interface QuoteCalculationRule extends BaseAuditRows, ActivatableRow {
-  id: number;
+  id: QuoteCalculationRuleId;
   name: string;
   ticket_severity_id: TicketSeverityId;
   business_impact_id: BusinessImpactId;

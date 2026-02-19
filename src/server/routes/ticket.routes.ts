@@ -5,10 +5,12 @@ import type { RBACService } from '../services/rbac/rbac.service';
 import { createAuthMiddleware } from '../middleware/auth.middleware';
 import { requirePermission } from '../middleware/rbac.middleware';
 import { PERMISSIONS } from '../../shared/constants/lookup-values';
-import { TICKET_ENDPOINTS } from '../../shared/constants';
+import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../shared/constants';
+import type { QuoteController } from '../controllers/quote.controller';
 
 export function createTicketRoutes(
   ticketController: TicketController,
+  quoteController: QuoteController,
   authService: AuthService,
   rbacService: RBACService
 ): Router {
@@ -79,6 +81,69 @@ export function createTicketRoutes(
     authenticate,
     can(PERMISSIONS.TICKETS_READ_OWN, PERMISSIONS.TICKETS_READ_ALL),
     ticketController.addComment
+  );
+
+  router.get(
+    QUOTE_ENDPOINTS.LIST(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_READ_OWN, PERMISSIONS.QUOTES_READ_ALL),
+    quoteController.listQuotes
+  );
+
+  router.post(
+    QUOTE_ENDPOINTS.GENERATE(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_CREATE),
+    quoteController.generateQuote
+  );
+
+  router.post(
+    QUOTE_ENDPOINTS.CREATE_MANUAL(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_CREATE),
+    quoteController.createManualQuote
+  );
+
+  router.get(
+    QUOTE_ENDPOINTS.GET(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_READ_OWN, PERMISSIONS.QUOTES_READ_ALL),
+    quoteController.getQuote
+  );
+
+  router.patch(
+    QUOTE_ENDPOINTS.UPDATE(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_UPDATE),
+    quoteController.updateQuote
+  );
+
+  router.post(
+    QUOTE_ENDPOINTS.SUBMIT(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_CREATE),
+    quoteController.submitForApproval
+  );
+
+  router.post(
+    QUOTE_ENDPOINTS.APPROVE(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_APPROVE),
+    quoteController.approveQuote
+  );
+
+  router.post(
+    QUOTE_ENDPOINTS.REJECT(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_REJECT),
+    quoteController.rejectQuote
+  );
+
+  router.get(
+    QUOTE_ENDPOINTS.REVISIONS(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_READ_OWN, PERMISSIONS.QUOTES_READ_ALL),
+    quoteController.getRevisionHistory
   );
 
   return router;
