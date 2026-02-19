@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
 import { useLogin } from '../../hooks/useLogin';
-import { EyeIcon, EyeOffIcon } from './Icons';
+import { EyeIcon, EyeOffIcon } from '../../components/icons/LoginIcons';
 import './LoginPage.css';
 
 const LoginPage: React.FC = () => {

@@ -17,6 +17,13 @@ smartquote/
 │   ├── client/
 │   │   ├── main.tsx
 │   │   ├── components/                             # Pure reusable UI elements; must not know about APIs, auths, or domain concepts
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   ├── icons/
+│   │   │   │   ├── CustomerIcons.tsx
+│   │   │   │   ├── LoginIcons.tsx
+│   │   │   │   ├── SidebarIcons.tsx
+│   │   │   ├── layout/
+│   │   │   │   ├── CustomerSidebar.tsx
 │   │   ├── config/                                 # Environment and config values only; no runtime logic
 │   │   │   ├── index.ts
 │   │   │   ├── env.frontend.ts
@@ -27,12 +34,24 @@ smartquote/
 │   │   │   ├── auth/
 │   │   │   │   ├── auth.context.types.ts
 │   │   │   │   └── AuthContext.ts
+│   │   │   ├── sidebar/
+│   │   │   │   ├── sidebar.context.types.ts
+│   │   │   │   └── SidebarContext.ts
 │   │   │   └── theme/
 │   │   │       ├── theme.context.types.ts
 │   │   │       └── ThemeContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
+│   │   │   ├── customerDashboard/
+│   │   │   │   ├── customerDashboard.constants.ts
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules.
 │   │   │   ├── useLogin.ts
+│   │   │   ├── useSidebar.ts                       # Context hook
+│   │   │   ├── useTheme.ts                         # Context hook
+│   │   │   ├── auth/
+│   │   │   │   ├── useAuth.ts                      # Context hook
+│   │   │   │   ├── useQuotePermissions.ts
+│   │   │   │   ├── useTicketPermissions.ts
+│   │   │   │   └── useUserPermissions.ts
 │   │   │   ├── quotes/
 │   │   │   │   ├── useApproveQuote.ts
 │   │   │   │   ├── useCreateManualQuote.ts
@@ -43,21 +62,16 @@ smartquote/
 │   │   │   │   ├── useRejectQuote.ts
 │   │   │   │   ├── useSubmitForApproval.ts
 │   │   │   │   └── useUpdateForQuote.ts
-│   │   │   ├── tickets/
-│   │   │   │   ├── useAddComment.ts
-│   │   │   │   ├── useAssignTicket.ts
-│   │   │   │   ├── useCreateTicket.ts
-│   │   │   │   ├── useDeleteTicket.ts
-│   │   │   │   ├── useGetTicket.ts
-│   │   │   │   ├── useListComments.ts
-│   │   │   │   ├── useListTicket.ts
-│   │   │   │   ├── useResolveTicket.ts
-│   │   │   │   └── useUpdateTicket.ts
-│   │   │   └── auth/
-│   │   │       ├── useAuth.ts
-│   │   │       ├── useQuotePermissions.ts
-│   │   │       ├── useTicketPermissions.ts
-│   │   │       └── useUserPermissions.ts
+│   │   │   └── tickets/
+│   │   │       ├── useAddComment.ts
+│   │   │       ├── useAssignTicket.ts
+│   │   │       ├── useCreateTicket.ts
+│   │   │       ├── useDeleteTicket.ts
+│   │   │       ├── useGetTicket.ts
+│   │   │       ├── useListComments.ts
+│   │   │       ├── useListTicket.ts
+│   │   │       ├── useResolveTicket.ts
+│   │   │       └── useUpdateTicket.ts
 │   │   ├── lib/
 │   │   │   ├── api/                                # Only place that knows endpoints in client
 │   │   │   │   ├── admin.api.ts
@@ -74,8 +88,13 @@ smartquote/
 │   │   │   │   ├── AdminDashboard.css
 │   │   │   │   └── AdminDashboard.tsx
 │   │   │   ├── customer/
-│   │   │   │   ├── CustomerDashboard.css
-│   │   │   │   └── CustomerDashboard.tsx
+│   │   │   │   ├── CreateTicketPage.css
+│   │   │   │   ├── CreateTicketPage.tsx
+│   │   │   │   ├── CustomerLayout.tsx
+│   │   │   │   ├── CustomerPage.css
+│   │   │   │   ├── CustomerPage.tsx
+│   │   │   │   ├── CustomerSidebar.css
+│   │   │   │   └── CustomerSidebar.tsx
 │   │   │   └── login/
 │   │   │       ├── Icons.tsx
 │   │   │       ├── LoginPage.css

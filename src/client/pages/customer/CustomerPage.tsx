@@ -41,7 +41,7 @@ const CustomerPage: React.FC = () => {
 
   useEffect(() => {
     void fetchTickets();
-  }, []);
+  }, [fetchTickets]);
 
   const tickets = useMemo<TicketResponse[]>(() => data?.tickets ?? [], [data]);
 
