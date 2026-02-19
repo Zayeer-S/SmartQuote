@@ -4,8 +4,8 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTableIfNotExists('role_permissions', (table) => {
     table.integer('role_id').notNullable();
     table.integer('permission_id').notNullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.primary(['role_id', 'permission_id']);
 
@@ -18,8 +18,8 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTableIfNotExists('user_notification_preferences', (table) => {
     table.uuid('user_id').notNullable();
     table.integer('notification_type_id').notNullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.primary(['user_id', 'notification_type_id']);
 
@@ -41,8 +41,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('old_value').notNullable();
     table.string('new_value').notNullable();
     table.string('reason').notNullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('quote_id').references('id').inTable('quotes').onDelete('RESTRICT');
     table.foreign('changed_by_user_id').references('id').inTable('users').onDelete('RESTRICT');
@@ -58,8 +58,8 @@ export async function up(knex: Knex): Promise<void> {
     table.uuid('user_id').notNullable();
     table.string('comment_text').notNullable();
     table.integer('comment_type_id').notNullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('ticket_id').references('id').inTable('tickets').onDelete('RESTRICT');
     table.foreign('user_id').references('id').inTable('users').onDelete('RESTRICT');
@@ -78,8 +78,8 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('storage_type_id').notNullable();
     table.integer('size_bytes').notNullable();
     table.string('mime_type', 128).notNullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('uploaded_by_user_id').references('id').inTable('users').onDelete('RESTRICT');
     table.foreign('ticket_id').references('id').inTable('tickets').onDelete('RESTRICT');
@@ -100,8 +100,8 @@ export async function up(knex: Knex): Promise<void> {
     table.uuid('organization_id').notNullable();
     table.uuid('user_id').notNullable();
     table.integer('role_id').notNullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('organization_id').references('id').inTable('organizations').onDelete('RESTRICT');
     table.foreign('user_id').references('id').inTable('users').onDelete('RESTRICT');
@@ -117,10 +117,10 @@ export async function up(knex: Knex): Promise<void> {
     table.uuid('user_id').nullable();
     table.uuid('organization_id').nullable();
     table.jsonb('contract').notNullable();
-    table.timestamp('effective_from').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('effective_to').notNullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('effective_from', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('effective_to', { useTz: true }).notNullable();
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.foreign('organization_id').references('id').inTable('organizations').onDelete('RESTRICT');
     table.foreign('user_id').references('id').inTable('users').onDelete('RESTRICT');
@@ -142,10 +142,10 @@ export async function up(knex: Knex): Promise<void> {
     table.increments('id').primary();
     table.uuid('user_id').notNullable();
     table.string('session_token', 255).notNullable();
-    table.timestamp('last_activity').notNullable();
-    table.timestamp('expires_at').notNullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('last_activity', { useTz: true }).notNullable();
+    table.timestamp('expires_at', { useTz: true }).notNullable();
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['session_token']);
     table.index(['user_id', 'expires_at']);
@@ -166,8 +166,8 @@ export async function up(knex: Knex): Promise<void> {
     table.integer('role_id').notNullable().references('id').inTable('roles').onDelete('RESTRICT');
     table.decimal('percent', 5, 2).notNullable().comment('store as 0..100 (e.g., 45.00)');
     table.boolean('is_active').notNullable().defaultTo(true);
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.unique(['ticket_type_id', 'role_id']);
     table.index(['ticket_type_id']);
@@ -184,8 +184,8 @@ export async function up(knex: Knex): Promise<void> {
     table.decimal('hours_minimum').notNullable();
     table.decimal('hours_maximum').notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['quote_effort_level_id']);
 
@@ -206,10 +206,10 @@ export async function up(knex: Knex): Promise<void> {
       .inTable('notification_token_types')
       .onDelete('RESTRICT');
     table.string('token', 64).notNullable().unique();
-    table.timestamp('expires_at').notNullable();
-    table.timestamp('last_activity').nullable();
-    table.timestamp('updated_at');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('expires_at', { useTz: true }).notNullable();
+    table.timestamp('last_activity', { useTz: true }).nullable();
+    table.timestamp('updated_at', { useTz: true });
+    table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
 
     table.index('token', 'idx_notification_tokens_token');
     table.index('user_id', 'idx_notification_tokens_user_id');
