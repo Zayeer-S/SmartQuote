@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useSidebar } from '../../hooks/useSidebar';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
+
 import {
   HomeIcon,
   TicketIcon,
@@ -10,6 +12,7 @@ import {
   DocIcon,
   UserIcon,
 } from '../../components/icons/CustomerIcons';
+
 import './CustomerSidebar.css';
 
 type MenuKey = 'Dashboard' | 'My Tickets' | 'Quotes' | 'History' | 'Profile';
@@ -42,7 +45,7 @@ const Icon = {
   ),
 } as const;
 
-const CustomerSidebar: React.FC = () => {
+const CustomerSidebar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user, logout } = useAuth();
@@ -64,13 +67,13 @@ const CustomerSidebar: React.FC = () => {
     try {
       await logout();
     } finally {
-      navigate('/login');
+      navigate(CLIENT_ROUTES.LOGIN);
     }
   }, [logout, navigate]);
 
   const handleViewUserInfo = useCallback(() => {
     setProfileOpen(false);
-    void navigate(CLIENT_ROUTES.CUSTOMER_PROFILE);
+    navigate(CLIENT_ROUTES.CUSTOMER_PROFILE);
   }, [navigate]);
 
   const onToggle = useCallback(() => {
@@ -86,9 +89,7 @@ const CustomerSidebar: React.FC = () => {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
@@ -114,7 +115,7 @@ const CustomerSidebar: React.FC = () => {
       <nav className="menu" aria-label="Customer navigation">
         <button
           className={`menuItem ${activeMenu === 'Dashboard' ? 'active' : ''}`}
-          onClick={() => void navigate(CLIENT_ROUTES.CUSTOMER)}
+          onClick={() => navigate(CLIENT_ROUTES.CUSTOMER)}
           type="button"
           aria-current={activeMenu === 'Dashboard' ? 'page' : undefined}
           data-testid="nav-dashboard"
@@ -127,7 +128,7 @@ const CustomerSidebar: React.FC = () => {
 
         <button
           className={`menuItem ${activeMenu === 'My Tickets' ? 'active' : ''}`}
-          onClick={() => void navigate(CLIENT_ROUTES.CUSTOMER_TICKETS)}
+          onClick={() => navigate(CLIENT_ROUTES.CUSTOMER_TICKETS)}
           type="button"
           aria-current={activeMenu === 'My Tickets' ? 'page' : undefined}
           data-testid="nav-my-tickets"
@@ -140,7 +141,7 @@ const CustomerSidebar: React.FC = () => {
 
         <button
           className={`menuItem ${activeMenu === 'Quotes' ? 'active' : ''}`}
-          onClick={() => void navigate(CLIENT_ROUTES.CUSTOMER_QUOTES)}
+          onClick={() => navigate(CLIENT_ROUTES.CUSTOMER_QUOTES)}
           type="button"
           aria-current={activeMenu === 'Quotes' ? 'page' : undefined}
           data-testid="nav-quotes"
@@ -153,7 +154,7 @@ const CustomerSidebar: React.FC = () => {
 
         <button
           className={`menuItem ${activeMenu === 'History' ? 'active' : ''}`}
-          onClick={() => void navigate(CLIENT_ROUTES.CUSTOMER_HISTORY)}
+          onClick={() => navigate(CLIENT_ROUTES.CUSTOMER_HISTORY)}
           type="button"
           aria-current={activeMenu === 'History' ? 'page' : undefined}
           data-testid="nav-history"
@@ -166,7 +167,7 @@ const CustomerSidebar: React.FC = () => {
 
         <button
           className={`menuItem ${activeMenu === 'Profile' ? 'active' : ''}`}
-          onClick={() => void navigate(CLIENT_ROUTES.CUSTOMER_PROFILE)}
+          onClick={() => navigate(CLIENT_ROUTES.CUSTOMER_PROFILE)}
           type="button"
           aria-current={activeMenu === 'Profile' ? 'page' : undefined}
           data-testid="nav-profile"
@@ -214,7 +215,7 @@ const CustomerSidebar: React.FC = () => {
               className="dropdownItem logout"
               type="button"
               role="menuitem"
-              onClick={() => void handleLogout()}
+              onClick={handleLogout}
               data-testid="profile-logout"
             >
               Logout

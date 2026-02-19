@@ -1,5 +1,3 @@
-// This exists due to handleSubmit, if you add void there it will break the login
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import React, { useState } from 'react';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
 import { useLogin } from '../../hooks/useLogin';

@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomerLayout from './CustomerLayout';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
-import { useListTickets } from '../../hooks/tickets/useListTicket';
+import { useListTickets } from '../../hooks/tickets/useListTicket'; // ✅ FIX: correct path/file
 import type { TicketDetailResponse } from '../../../shared/contracts/ticket-contracts';
 import { LOOKUP_IDS } from '../../../shared/constants';
 import { TicketIcon, ClockIcon, DollarIcon } from '../../components/icons/CustomerIcons';
@@ -17,9 +17,18 @@ const ACTIVE_STATUS_IDS = new Set<number>([
 function filterTickets(tickets: TicketDetailResponse[], query: string): TicketDetailResponse[] {
   const q = query.trim().toLowerCase();
   if (!q) return tickets;
-  return tickets.filter(
-    (t) => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
-  );
+  return tickets.filter((t) => {
+    const title = (t.title ?? '').toLowerCase();
+    const desc = (t.description ?? '').toLowerCase();
+    return title.includes(q) || desc.includes(q);
+  });
+}
+
+function formatDateGB(value: unknown): string {
+  if (!value) return '—';
+  const d = new Date(String(value));
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('en-GB');
 }
 
 const CustomerPage: React.FC = () => {
@@ -29,17 +38,23 @@ const CustomerPage: React.FC = () => {
 
   useEffect(() => {
     void fetchTickets();
-    // Cascading render if you add dependency
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const tickets = useMemo<TicketDetailResponse[]>(() => data?.tickets ?? [], [data]);
-
   const filteredTickets = useMemo(() => filterTickets(tickets, query), [tickets, query]);
 
   const activeCount = useMemo(
     () => tickets.filter((t) => ACTIVE_STATUS_IDS.has(t.ticketStatusId)).length,
     [tickets]
+  );
+
+  // ✅ FIX: accept string ids too
+  const onRowClick = useCallback(
+    (ticketId: string | number) => {
+      void navigate(`${CLIENT_ROUTES.CUSTOMER_TICKETS}/${ticketId}`);
+    },
+    [navigate]
   );
 
   return (
@@ -100,9 +115,7 @@ const CustomerPage: React.FC = () => {
             id="ticket-search"
             className="searchInput"
             value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-            }}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search tickets..."
             aria-label="Search tickets"
             data-testid="ticket-search-input"
@@ -131,7 +144,7 @@ const CustomerPage: React.FC = () => {
 
         {error && !loading && (
           <div className="emptyState" role="alert" data-testid="tickets-error">
-            Failed to load tickets: {error}
+            Failed to load tickets: {String(error)}
           </div>
         )}
 
@@ -155,13 +168,22 @@ const CustomerPage: React.FC = () => {
             </thead>
             <tbody>
               {filteredTickets.map((ticket) => (
-                <tr key={ticket.id} data-testid={`ticket-row-${ticket.id}`}>
+                <tr
+                  key={ticket.id}
+                  data-testid={`ticket-row-${ticket.id}`}
+                  onClick={() => onRowClick(ticket.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') onRowClick(ticket.id);
+                  }}
+                >
                   <td>{ticket.title}</td>
                   <td>{ticket.ticketTypeName}</td>
                   <td>{ticket.ticketPriorityName}</td>
                   <td>{ticket.ticketStatusName}</td>
-                  <td>{new Date(ticket.deadline).toLocaleDateString('en-GB')}</td>
-                  <td>{ticket.usersImpacted}</td>
+                  <td>{formatDateGB(ticket.deadline)}</td>
+                  <td>{ticket.usersImpacted ?? '—'}</td>
                 </tr>
               ))}
             </tbody>
