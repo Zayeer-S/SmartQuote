@@ -1,0 +1,361 @@
+/* Uses your existing CSS vars from CustomerPage.css (:root) */
+
+.profileTopBar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.profileTitle {
+  margin: 0;
+  font-size: 38px;
+  letter-spacing: -0.6px;
+}
+
+.profileSubtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.editBtn {
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #0b1222;
+  color: #fff;
+  font-weight: 800;
+  padding: 0 16px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.editBtn:hover {
+  opacity: 0.96;
+}
+
+.editBtn:active {
+  transform: translateY(1px);
+}
+
+.profileLoading {
+  margin-top: 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.profileGrid {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 22px;
+  margin-top: 18px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
+}
+
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Left: profile card */
+.profileCard {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.avatarWrap {
+  margin-top: 6px;
+}
+
+.avatarCircle {
+  width: 132px;
+  height: 132px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.14);
+  color: rgba(100, 116, 139, 0.9);
+  display: grid;
+  place-items: center;
+}
+
+.avatarCircle svg {
+  width: 54px;
+  height: 54px;
+  display: block;
+}
+
+.nameRow {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.profileName {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  color: var(--text);
+}
+
+.rolePill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(15, 23, 42, 0.05);
+  color: #0f172a;
+}
+
+.contactList {
+  width: 100%;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.contactIcon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: rgba(51, 65, 85, 0.9);
+}
+
+.contactIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Left: stats card */
+.statsCard {
+  padding: 18px;
+}
+
+.cardHeaderTitle {
+  font-weight: 900;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.statsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 2px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.statsRow:first-child {
+  border-top: 0;
+}
+
+.statsLabel {
+  color: #334155;
+  font-weight: 700;
+}
+
+.statsValue {
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.statsValue.blue {
+  color: #2563eb;
+}
+.statsValue.green {
+  color: #16a34a;
+}
+.statsValue.orange {
+  color: #ea580c;
+}
+
+/* Right: form cards */
+.formCardWide {
+  padding: 18px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.sectionTitle {
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.sectionSub {
+  margin-top: 4px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.sectionTitleRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.sectionIcon {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.sectionIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.formGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.field {
+  margin-top: 14px;
+}
+
+.label {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.control {
+  width: 100%;
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #f7f8fb;
+  padding: 0 14px;
+  font-size: 14px;
+  outline: none;
+  color: #0f172a;
+}
+
+.textarea {
+  height: 120px;
+  padding: 12px 14px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.hintText {
+  margin-top: 8px;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Account status */
+.statusPill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 13px;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  background: rgba(34, 197, 94, 0.12);
+  color: #166534;
+  white-space: nowrap;
+  height: fit-content;
+}
+
+.statusPill.inactive {
+  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.12);
+  color: #991b1b;
+}
+
+.infoRows {
+  margin-top: 6px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 2px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.infoLabel {
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.infoValue {
+  color: #334155;
+  font-weight: 800;
+}
+
+.infoValue.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Responsive */
+@media (max-width: 1180px) {
+  .profileGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .formGrid2 {
+    grid-template-columns: 1fr;
+  }
+}

@@ -11,6 +11,15 @@ export type Props = {
   toggleSidebar: () => void;
 };
 
+type MeResponse = {
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+};
+
+const ME_URL = '/api/me'; // <-- change if your backend uses a different route
+
 const Icon = {
   Home: (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -80,6 +89,12 @@ const Icon = {
   ),
 } as const;
 
+function buildDisplayName(me: MeResponse | null): string {
+  if (!me) return 'Guest';
+  const fullName = [me.firstName, me.lastName].filter(Boolean).join(' ').trim();
+  return me.name ?? (fullName || 'Guest');
+}
+
 const CustomerSidebar: React.FC<Props> = ({
   activeMenu,
   setActiveMenu,
@@ -91,9 +106,14 @@ const CustomerSidebar: React.FC<Props> = ({
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
+  const [me, setMe] = useState<MeResponse | null>(null);
+
   const customer = useMemo(
-    () => ({ name: 'Guest', email: 'guest@smartquote.com' }),
-    []
+    () => ({
+      name: buildDisplayName(me),
+      email: me?.email ?? 'guest@smartquote.com',
+    }),
+    [me]
   );
 
   const handleLogout = useCallback(() => {
@@ -102,6 +122,48 @@ const CustomerSidebar: React.FC<Props> = ({
     setProfileOpen(false);
     navigate('/login');
   }, [navigate]);
+
+  // ✅ Fetch current user from backend (database via API)
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return; // not logged in
+
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        const res = await fetch(ME_URL, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+          signal: controller.signal,
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          // token invalid/expired
+          handleLogout();
+          return;
+        }
+
+        if (!res.ok) {
+          // don’t crash UI, just keep Guest
+          console.error(`Failed to load user: ${res.status} ${res.statusText}`);
+          return;
+        }
+
+        const data = (await res.json()) as MeResponse;
+        setMe(data);
+      } catch (err) {
+        // AbortError is normal on unmount
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        console.error('Failed to load user:', err);
+      }
+    })();
+
+    return () => controller.abort();
+  }, [handleLogout]);
 
   const handleViewUserInfo = useCallback(() => {
     setProfileOpen(false);
@@ -132,12 +194,7 @@ const CustomerSidebar: React.FC<Props> = ({
           {!isCollapsed && <div className="brandSub">Customer Portal</div>}
         </div>
 
-        <button
-          className="collapseBtn"
-          type="button"
-          onClick={onToggle}
-          aria-label="Toggle sidebar"
-        />
+        <button className="collapseBtn" type="button" onClick={onToggle} aria-label="Toggle sidebar" />
       </div>
 
       <nav className="menu">
@@ -203,11 +260,7 @@ const CustomerSidebar: React.FC<Props> = ({
       </nav>
 
       <div className="sidebarFooter" ref={profileRef}>
-        <button
-          className="profileTrigger"
-          type="button"
-          onClick={() => setProfileOpen((v) => !v)}
-        >
+        <button className="profileTrigger" type="button" onClick={() => setProfileOpen((v) => !v)}>
           <div className="userAvatar">{Icon.User}</div>
           {!isCollapsed && (
             <div className="userMeta">
