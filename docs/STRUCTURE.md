@@ -24,9 +24,12 @@ smartquote/
 │   │   │   ├── index.ts
 │   │   │   ├── client.routes.ts
 │   │   ├── context/
-│   │   │   └── auth/
-│   │   │       ├── auth.context.types.ts
-│   │   │       └── AuthContext.ts
+│   │   │   ├── auth/
+│   │   │   │   ├── auth.context.types.ts
+│   │   │   │   └── AuthContext.ts
+│   │   │   └── theme/
+│   │   │       ├── theme.context.types.ts
+│   │   │       └── ThemeContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules.
 │   │   │   ├── useLogin.ts
@@ -40,11 +43,13 @@ smartquote/
 │   │   │   │   ├── useListTicket.ts
 │   │   │   │   ├── useResolveTicket.ts
 │   │   │   │   ├── useUpdateTicket.ts
-│   │   │   └── auth/
-│   │   │       ├── useAuth.ts
-│   │   │       ├── useQuotePermissions.ts
-│   │   │       ├── useTicketPermissions.ts
-│   │   │       └── useUserPermissions.ts
+│   │   │   ├── auth/
+│   │   │   │   ├── useAuth.ts                      # Auth context hook
+│   │   │   │   ├── useQuotePermissions.ts
+│   │   │   │   ├── useTicketPermissions.ts
+│   │   │   │   └── useUserPermissions.ts
+│   │   │   └── theme/
+│   │   │   │   └── useTheme.ts                     # Theme context hook
 │   │   ├── lib/
 │   │   │   ├── api/                                # Only place that knows endpoints in client
 │   │   │   │   ├── admin.api.ts
@@ -62,6 +67,7 @@ smartquote/
 │   │   │   │   ├── CustomerDashboard.css
 │   │   │   │   └── CustomerDashboard.tsx
 │   │   │   └── login/
+│   │   │       ├── Icons.tsx
 │   │   │       ├── LoginPage.css
 │   │   │       └── LoginPage.tsx
 │   │   └── styles/                                 # Global styling and design tokens only; no component-specific styling
