@@ -1,0 +1,16 @@
+.ticket-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.ticket-list li {
+  display: contents;
+}
+
+.ticket-list-no-results {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}

@@ -1,0 +1,50 @@
+.quote-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.quote-actions-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.quote-actions-reject-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-primary);
+}
+
+.quote-actions-reject-form-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.quote-actions-reject-form-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.quote-actions-settled {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+[data-theme='dark'] .quote-actions-reject-form {
+  background-color: var(--color-gray-900);
+  border-color: var(--color-gray-700);
+}
+
+[data-theme='dark'] .quote-actions-reject-form-label {
+  color: var(--color-gray-400);
+}

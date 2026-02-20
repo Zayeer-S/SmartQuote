@@ -10,7 +10,7 @@ import {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthState['user']>(null);
-  const [permissions, setPermissions] = useState<AuthState['perrmissions']>(new Set());
+  const [permissions, setPermissions] = useState<AuthState['permissions']>(new Set());
   const [isLoading, setIsLoading] = useState<AuthState['isLoading']>(true);
   const [error, setError] = useState<AuthState['error']>(null);
 
@@ -52,12 +52,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     [permissions]
   );
 
+  const logout = useCallback(async () => {
+    // Gate rendering immediately so ProtectedRoute blocks before navigation
+    setIsLoading(true);
+
+    try {
+      await authAPI.logout();
+    } finally {
+      tokenStorage.clear();
+      setUser(null);
+      setPermissions(new Set());
+      setIsLoading(false);
+    }
+  }, []);
+
   const value: AuthContextValue = {
-    user: user,
-    perrmissions: permissions,
-    isLoading: isLoading,
-    error: error,
-    hasPermission: hasPermission,
+    user,
+    permissions,
+    isLoading,
+    error,
+    hasPermission,
+    logout,
     refetch: fetchAuth,
   };
 

@@ -1,0 +1,28 @@
+.ticket-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.ticket-filters-search {
+  flex: 1;
+  min-width: 180px;
+}
+
+.ticket-filters-select {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 540px) {
+  .ticket-filters-search {
+    width: 100%;
+    flex: unset;
+  }
+
+  .ticket-filters-select {
+    width: calc(50% - var(--spacing-xs));
+  }
+}

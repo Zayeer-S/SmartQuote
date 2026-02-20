@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
 import { useLogin } from '../../hooks/useLogin';
-import { EyeIcon, EyeOffIcon } from './Icons';
+import { EyeIcon, EyeOffIcon } from '../../components/icons/LoginIcons';
 import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
@@ -27,9 +27,9 @@ const LoginPage: React.FC = () => {
         <span className="brand">Smartquote</span>
         <div className="login-panel-brand-body">
           <p className="login-panel-tagline">
-            Khalid, write something <em>nice here. idk what to</em>
+            SmartQuote: <em>A Faster Quoting System</em>
           </p>
-          <p className="login-panel-meta">© {new Date().getFullYear()} Smartquote</p>
+          <p className="login-panel-meta">© {new Date().getFullYear()} Giacom</p>
         </div>
       </aside>
 

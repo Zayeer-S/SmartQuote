@@ -63,7 +63,7 @@ export interface TicketDetailResponse extends TicketResponse {
 }
 
 export interface ListTicketsResponse {
-  tickets: TicketResponse[];
+  tickets: TicketDetailResponse[];
 }
 
 export interface AddCommentRequest {

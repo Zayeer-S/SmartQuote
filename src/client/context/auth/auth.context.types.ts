@@ -3,12 +3,13 @@ import type { GetCurrentUserResponse } from '../../../shared/contracts/auth-cont
 
 export interface AuthContextValue extends AuthState {
   hasPermission: (permission: string) => boolean;
+  logout: () => Promise<void>;
   refetch: () => Promise<void>;
 }
 
 export interface AuthState {
   user: GetCurrentUserResponse | null;
-  perrmissions: Set<string>;
+  permissions: Set<string>;
   isLoading: boolean;
   error: string | null;
 }

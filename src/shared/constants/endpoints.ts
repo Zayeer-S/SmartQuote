@@ -4,6 +4,7 @@ export const AUTH_ENDPOINTS = {
   LOGOUT: '/logout',
   ME: '/me',
   CHANGE_PASSWORD: '/change-password',
+  PERMISSIONS: '/permissions',
 } as const;
 
 export const ADMIN_ENDPOINTS = {

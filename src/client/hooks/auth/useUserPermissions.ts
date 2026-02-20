@@ -1,5 +1,5 @@
 import { PERMISSIONS } from '../../../shared/constants/lookup-values';
-import { useAuth } from './useAuth';
+import { useAuth } from '../contexts/useAuth';
 
 /**
  * Hook that provides user management permissions

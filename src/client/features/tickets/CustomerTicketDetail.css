@@ -1,0 +1,107 @@
+.ticket-detail {
+  max-width: 800px;
+}
+
+.ticket-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+.ticket-detail-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--spacing-sm);
+}
+
+.ticket-detail-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.ticket-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-lg);
+  transition: color var(--transition-fast);
+}
+
+.ticket-detail-back:hover {
+  color: var(--color-primary-600);
+}
+
+.ticket-detail-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.ticket-detail-section-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--spacing-md);
+}
+
+.ticket-detail-description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-lg);
+  white-space: pre-wrap;
+}
+
+.ticket-detail-dl {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm) var(--spacing-xl);
+}
+
+.ticket-detail-dl > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ticket-detail-dl dt {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+.ticket-detail-dl dd {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .ticket-detail-title {
+  color: var(--color-gray-50);
+}
+
+[data-theme='dark'] .ticket-detail-description {
+  color: var(--color-gray-300);
+}
+
+[data-theme='dark'] .ticket-detail-dl dd {
+  color: var(--color-gray-100);
+}
+
+@media (max-width: 540px) {
+  .ticket-detail-dl {
+    grid-template-columns: 1fr;
+  }
+}

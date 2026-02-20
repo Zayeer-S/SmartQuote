@@ -103,7 +103,6 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  /* Panel-specific: card lifts off a dark surface */
   --shadow-card-lift: -12px 0 48px rgba(0, 0, 0, 0.15);
 
   --transition-fast: 150ms ease-in-out;
@@ -121,6 +120,10 @@
   --container-max-width: 1280px;
   --container-padding: var(--spacing-md);
 }
+
+/* ─────────────────────────────────────────────
+   Reset
+───────────────────────────────────────────── */
 
 *,
 *::before,
@@ -201,6 +204,10 @@ a:hover {
   outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
 }
+
+/* ─────────────────────────────────────────────
+   Existing utilities (unchanged)
+───────────────────────────────────────────── */
 
 .container {
   width: 100%;
@@ -307,4 +314,549 @@ a:hover {
   background-color: var(--color-info-light);
   border-color: var(--color-info);
   color: var(--color-text-primary);
+}
+
+/* ─────────────────────────────────────────────
+   Buttons
+   Usage:
+     <button className="btn btn-primary">Save</button>
+     <button className="btn btn-secondary">Cancel</button>
+     <button className="btn btn-danger">Delete</button>
+     <button className="btn btn-ghost">Back</button>
+     Size modifiers: btn-sm, btn-lg
+───────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary */
+.btn-primary {
+  background-color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+  color: var(--color-text-inverse);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-700);
+  border-color: var(--color-primary-700);
+}
+
+.btn-primary:focus-visible {
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
+}
+
+/* Secondary — outlined */
+.btn-secondary {
+  background-color: transparent;
+  border-color: var(--color-border-secondary);
+  color: var(--color-text-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-border-focus);
+  color: var(--color-primary-700);
+}
+
+.btn-secondary:focus-visible {
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
+}
+
+/* Danger */
+.btn-danger {
+  background-color: var(--color-error);
+  border-color: var(--color-error);
+  color: var(--color-text-inverse);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+  border-color: #dc2626;
+}
+
+.btn-danger:focus-visible {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+/* Ghost — no border, minimal */
+.btn-ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* Size modifiers */
+.btn-sm {
+  padding: 6px 12px;
+  font-size: var(--font-size-xs);
+}
+
+.btn-lg {
+  padding: 13px 24px;
+  font-size: var(--font-size-base);
+}
+
+/* Full width */
+.btn-full {
+  width: 100%;
+}
+
+/* Dark mode button adjustments */
+[data-theme='dark'] .btn-secondary {
+  border-color: var(--color-gray-700);
+  color: var(--color-gray-200);
+}
+
+[data-theme='dark'] .btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-primary-500);
+  color: var(--color-primary-400);
+}
+
+[data-theme='dark'] .btn-ghost {
+  color: var(--color-gray-400);
+}
+
+[data-theme='dark'] .btn-ghost:hover:not(:disabled) {
+  background-color: var(--color-gray-800);
+  color: var(--color-gray-100);
+}
+
+/* ─────────────────────────────────────────────
+   Form fields
+   Usage:
+     <div className="field-group">
+       <label className="field-label" htmlFor="x">Label</label>
+       <input className="field-input" id="x" />
+       <p className="field-error">Error message</p>
+     </div>
+───────────────────────────────────────────── */
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.field-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.field-input,
+.field-textarea,
+.field-select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.field-input::placeholder,
+.field-textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.field-input:focus,
+.field-textarea:focus,
+.field-select:focus {
+  border-color: var(--color-primary-600);
+  box-shadow: 0 0 0 3px var(--focus-ring-color);
+  outline: none;
+}
+
+.field-input:disabled,
+.field-textarea:disabled,
+.field-select:disabled {
+  background-color: var(--color-bg-tertiary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.field-input--error,
+.field-textarea--error,
+.field-select--error {
+  border-color: var(--color-border-error);
+}
+
+.field-input--error:focus,
+.field-textarea--error:focus,
+.field-select--error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.field-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.field-error {
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+  margin: 0;
+}
+
+.field-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+/* Dark mode fields */
+[data-theme='dark'] .field-input,
+[data-theme='dark'] .field-textarea,
+[data-theme='dark'] .field-select {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-gray-700);
+  color: var(--color-gray-50);
+}
+
+[data-theme='dark'] .field-input:focus,
+[data-theme='dark'] .field-textarea:focus,
+[data-theme='dark'] .field-select:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--focus-ring-color-dark);
+}
+
+[data-theme='dark'] .field-input:disabled,
+[data-theme='dark'] .field-textarea:disabled,
+[data-theme='dark'] .field-select:disabled {
+  background-color: var(--color-gray-900);
+}
+
+[data-theme='dark'] .field-label {
+  color: var(--color-gray-400);
+}
+
+/* ─────────────────────────────────────────────
+   Badges
+   Usage:
+     <span className="badge badge-open">Open</span>
+     <span className="badge badge-resolved">Resolved</span>
+   Variants: badge-open, badge-assigned, badge-in-progress,
+             badge-resolved, badge-closed, badge-cancelled,
+             badge-p1, badge-p2, badge-p3, badge-p4,
+             badge-neutral, badge-info
+───────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  line-height: 1.6;
+}
+
+/* Ticket status badges */
+.badge-open {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge-assigned {
+  background-color: #ede9fe;
+  color: #6d28d9;
+}
+
+.badge-in-progress {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.badge-resolved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-closed {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-600);
+}
+
+.badge-cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Priority badges */
+.badge-p1 {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-p2 {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.badge-p3 {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-p4 {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-600);
+}
+
+/* Generic */
+.badge-neutral {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-600);
+}
+
+.badge-info {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+/* Dark mode badges */
+[data-theme='dark'] .badge-open {
+  background-color: #1e3a5f;
+  color: #93c5fd;
+}
+[data-theme='dark'] .badge-assigned {
+  background-color: #2e1065;
+  color: #c4b5fd;
+}
+[data-theme='dark'] .badge-in-progress {
+  background-color: #451a03;
+  color: #fcd34d;
+}
+[data-theme='dark'] .badge-resolved {
+  background-color: #022c22;
+  color: #6ee7b7;
+}
+[data-theme='dark'] .badge-closed {
+  background-color: var(--color-gray-800);
+  color: var(--color-gray-400);
+}
+[data-theme='dark'] .badge-cancelled {
+  background-color: #450a0a;
+  color: #fca5a5;
+}
+[data-theme='dark'] .badge-p1 {
+  background-color: #450a0a;
+  color: #fca5a5;
+}
+[data-theme='dark'] .badge-p2 {
+  background-color: #451a03;
+  color: #fcd34d;
+}
+[data-theme='dark'] .badge-p3 {
+  background-color: #1e3a5f;
+  color: #93c5fd;
+}
+[data-theme='dark'] .badge-p4 {
+  background-color: var(--color-gray-800);
+  color: var(--color-gray-400);
+}
+[data-theme='dark'] .badge-neutral {
+  background-color: var(--color-gray-800);
+  color: var(--color-gray-400);
+}
+[data-theme='dark'] .badge-info {
+  background-color: #1e1b4b;
+  color: var(--color-primary-300);
+}
+
+/* ─────────────────────────────────────────────
+   Page header
+   Usage:
+     <div className="page-header">
+       <h1 className="page-title">Tickets</h1>
+       <div className="page-header-actions">...</div>
+     </div>
+───────────────────────────────────────────── */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* ─────────────────────────────────────────────
+   Card surface
+   Usage:
+     <div className="card">...</div>
+     <div className="card card-padded">...</div>
+───────────────────────────────────────────── */
+
+.card {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-padded {
+  padding: var(--spacing-lg);
+}
+
+[data-theme='dark'] .card {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-gray-700);
+}
+
+/* ─────────────────────────────────────────────
+   Inline feedback messages
+   Usage:
+     <p className="feedback-error" role="alert">Something went wrong.</p>
+     <p className="feedback-success">Saved successfully.</p>
+───────────────────────────────────────────── */
+
+.feedback-error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  background-color: var(--color-error-light);
+  border-left: 3px solid var(--color-error);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.feedback-success {
+  font-size: var(--font-size-sm);
+  color: #065f46;
+  background-color: var(--color-success-light);
+  border-left: 3px solid var(--color-success);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+[data-theme='dark'] .feedback-success {
+  color: #6ee7b7;
+  background-color: #022c22;
+}
+
+/* ─────────────────────────────────────────────
+   Empty state
+   Usage:
+     <div className="empty-state">
+       <p className="empty-state-message">No tickets yet.</p>
+     </div>
+───────────────────────────────────────────── */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  text-align: center;
+}
+
+.empty-state-message {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────
+   Loading / skeleton text
+───────────────────────────────────────────── */
+
+.loading-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────
+   Dark mode base overrides
+───────────────────────────────────────────── */
+
+[data-theme='dark'] body {
+  background-color: var(--color-gray-900);
+  color: var(--color-gray-50);
+}
+
+[data-theme='dark'] h1,
+[data-theme='dark'] h2,
+[data-theme='dark'] h3,
+[data-theme='dark'] h4,
+[data-theme='dark'] h5,
+[data-theme='dark'] h6 {
+  color: var(--color-gray-50);
+}
+
+[data-theme='dark'] .page-title {
+  color: var(--color-gray-50);
 }
