@@ -9,7 +9,10 @@ const __dirname = path.dirname(__filename);
 const baseConfig: Partial<Knex.Config> = {
   client: 'pg',
   migrations: {
-    directory: path.join(__dirname, '..', 'database', 'migrations'),
+    directory:
+      process.env.NODE_ENV === 'production'
+        ? path.join(__dirname, 'migrations')
+        : path.join(__dirname, '..', 'database', 'migrations'),
     extension: 'ts',
     tableName: 'knex_migrations',
   },

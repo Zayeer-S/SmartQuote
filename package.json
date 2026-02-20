@@ -52,6 +52,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.994.0",
     "@react-email/components": "^1.0.7",
     "axios": "^1.13.5",
     "bcrypt": "^6.0.0",

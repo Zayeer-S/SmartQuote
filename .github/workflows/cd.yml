@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+    push:
+        branches:
+            - main
+
+concurrency:
+    group: deploy-production
+    # Wait for any in-progress deploy to finish rather than cancelling it
+    cancel-in-progress: false
+
+jobs:
+    deploy:
+        name: Build and deploy
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: ./.github/actions/actions/setup
+              with:
+                  node-version: "22"
+
+            - name: Type check server
+              run: npm run type-check:server
+
+            - name: Build frontend
+              run: npm run build:client
+              env:
+                  VITE_APP_URL: https://giacom.zayeer.dev
+                  VITE_FRONTEND_URL: https://giacom.zayeer.dev
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: eu-west-2
+
+            - name: Install CDK dependencies
+              working-directory: infra
+              run: npm ci
+
+            - name: Deploy database stack
+              working-directory: infra
+              run: npx cdk deploy SmartQuoteDatabaseStack --require-approval never
+
+            - name: Deploy app stack
+              working-directory: infra
+              run: npx cdk deploy SmartQuoteAppStack --require-approval never

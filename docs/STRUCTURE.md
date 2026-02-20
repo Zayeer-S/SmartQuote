@@ -13,6 +13,8 @@ smartquote/
 │   ├── STRUCTURE.md
 │   └── TEAM_GUIDE.md
 │
+├── infra/                                          # CDK
+│
 ├── src/
 │   ├── client/
 │   │   ├── main.tsx
