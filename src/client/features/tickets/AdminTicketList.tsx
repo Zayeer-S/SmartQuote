@@ -4,9 +4,10 @@ import { useTicketFilters } from '../../hooks/useTicketFilters';
 import AdminTicketCard from './AdminTicketCard';
 import TicketFilters from './TicketFilters';
 import TicketPagination from './TicketPagination';
+import './AdminTicketList.css';
 
 /**
- * Assigned tickets surface first, then sorted by priority (P1→P4) within each group.
+ * Assigned tickets surface first, then sorted by priority within each group.
  */
 const PRIORITY_ORDER: Record<string, number> = { P1: 1, P2: 2, P3: 3, P4: 4 };
 
@@ -45,23 +46,31 @@ const AdminTicketList: React.FC = () => {
   } = useTicketFilters(sortedTickets);
 
   if (loading) {
-    return <p data-testid="admin-tickets-loading">Loading tickets...</p>;
+    return (
+      <p className="loading-text" data-testid="admin-tickets-loading">
+        Loading tickets...
+      </p>
+    );
   }
 
   if (error) {
     return (
-      <p role="alert" data-testid="admin-tickets-error">
+      <p className="feedback-error" role="alert" data-testid="admin-tickets-error">
         {error}
       </p>
     );
   }
 
   if (sortedTickets.length === 0) {
-    return <p data-testid="admin-tickets-empty">No tickets have been submitted yet.</p>;
+    return (
+      <div className="empty-state" data-testid="admin-tickets-empty">
+        <p className="empty-state-message">No tickets have been submitted yet.</p>
+      </div>
+    );
   }
 
   return (
-    <div data-testid="admin-ticket-list-container">
+    <div className="admin-ticket-list-container" data-testid="admin-ticket-list-container">
       <TicketFilters
         search={search}
         onSearchChange={setSearch}
@@ -73,9 +82,11 @@ const AdminTicketList: React.FC = () => {
       />
 
       {filteredTickets.length === 0 ? (
-        <p data-testid="admin-tickets-no-results">No tickets match your filters.</p>
+        <div className="empty-state" data-testid="admin-tickets-no-results">
+          <p className="empty-state-message">No tickets match your filters.</p>
+        </div>
       ) : (
-        <ul role="list" data-testid="admin-ticket-list">
+        <ul className="admin-ticket-list" role="list" data-testid="admin-ticket-list">
           {filteredTickets.map((ticket) => (
             <li key={ticket.id}>
               <AdminTicketCard ticket={ticket} />

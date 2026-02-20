@@ -3,9 +3,11 @@ import { useGetTicket } from '../../hooks/tickets/useGetTicket';
 import { useListQuotes } from '../../hooks/quotes/useListQuote';
 import { useResolveTicket } from '../../hooks/tickets/useResolveTicket';
 import { useTicketPermissions } from '../../hooks/auth/useTicketPermissions';
+import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils';
 import AssignTicketForm from './AssignTicketForm';
 import QuotePanel from './QuotePanel';
 import CommentThread from './CommentThread';
+import './AdminTicketDetail.css';
 
 interface AdminTicketDetailProps {
   ticketId: string;
@@ -42,19 +44,27 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
   const error = ticket.error ?? quotes.error;
 
   if (isLoading) {
-    return <p data-testid="admin-ticket-detail-loading">Loading ticket...</p>;
+    return (
+      <p className="loading-text" data-testid="admin-ticket-detail-loading">
+        Loading ticket...
+      </p>
+    );
   }
 
   if (error) {
     return (
-      <p role="alert" data-testid="admin-ticket-detail-error">
+      <p className="feedback-error" role="alert" data-testid="admin-ticket-detail-error">
         {error}
       </p>
     );
   }
 
   if (!ticket.data) {
-    return <p data-testid="admin-ticket-detail-not-found">Ticket not found.</p>;
+    return (
+      <p className="loading-text" data-testid="admin-ticket-detail-not-found">
+        Ticket not found.
+      </p>
+    );
   }
 
   const t = ticket.data;
@@ -79,64 +89,83 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
   const isResolved = t.ticketStatusName === 'Resolved' || t.ticketStatusName === 'Closed';
 
   return (
-    <div data-testid="admin-ticket-detail">
-      <div>
-        <h1 data-testid="ticket-title">{t.title}</h1>
-        <div>
-          <span data-testid="ticket-status">{t.ticketStatusName}</span>
-          <span data-testid="ticket-priority">{t.ticketPriorityName}</span>
+    <div className="admin-ticket-detail" data-testid="admin-ticket-detail">
+      {/* ── Header ── */}
+      <div className="admin-ticket-detail-header">
+        <h1 className="admin-ticket-detail-title" data-testid="ticket-title">
+          {t.title}
+        </h1>
+        <div className="admin-ticket-detail-badges">
+          <span className={getStatusBadgeClass(t.ticketStatusName)} data-testid="ticket-status">
+            {t.ticketStatusName}
+          </span>
+          <span
+            className={getPriorityBadgeClass(t.ticketPriorityName)}
+            data-testid="ticket-priority"
+          >
+            {t.ticketPriorityName}
+          </span>
         </div>
       </div>
 
-      {/* ── Ticket details ── */}
-      <section aria-labelledby="ticket-info-heading">
-        <h2 id="ticket-info-heading">Details</h2>
+      {/* ── Details ── */}
+      <section className="admin-detail-section" aria-labelledby="ticket-info-heading">
+        <h2 className="admin-detail-section-heading" id="ticket-info-heading">
+          Details
+        </h2>
 
-        <p data-testid="ticket-description">{t.description}</p>
+        <p className="admin-ticket-detail-description" data-testid="ticket-description">
+          {t.description}
+        </p>
 
-        <dl>
-          <div>
+        <dl className="admin-detail-dl">
+          <div className="admin-detail-dl-row">
             <dt>Type</dt>
             <dd data-testid="ticket-type">{t.ticketTypeName}</dd>
           </div>
-          <div>
+          <div className="admin-detail-dl-row">
             <dt>Severity</dt>
             <dd data-testid="ticket-severity">{t.ticketSeverityName}</dd>
           </div>
-          <div>
+          <div className="admin-detail-dl-row">
             <dt>Business Impact</dt>
             <dd data-testid="ticket-business-impact">{t.businessImpactName}</dd>
           </div>
-          <div>
+          <div className="admin-detail-dl-row">
             <dt>Users Impacted</dt>
             <dd data-testid="ticket-users-impacted">{t.usersImpacted}</dd>
           </div>
-          <div>
+          <div className="admin-detail-dl-row">
             <dt>Deadline</dt>
             <dd data-testid="ticket-deadline">{formattedDeadline}</dd>
           </div>
-          <div>
+          <div className="admin-detail-dl-row">
             <dt>Organisation</dt>
             <dd data-testid="ticket-organisation">{t.organizationName}</dd>
           </div>
-          <div>
+          <div className="admin-detail-dl-row">
             <dt>Submitted</dt>
             <dd data-testid="ticket-created">{formattedCreated}</dd>
           </div>
-          <div>
+          <div className="admin-detail-dl-row">
             <dt>Assigned To</dt>
-            <dd data-testid="ticket-assignee">{t.assignedToUserId ?? <em>Unassigned</em>}</dd>
+            <dd data-testid="ticket-assignee">
+              {t.assignedToUserId ?? <em className="admin-detail-unassigned">Unassigned</em>}
+            </dd>
           </div>
         </dl>
       </section>
 
       {/* ── Assignment ── */}
       {canAssign && (
-        <section aria-labelledby="assign-heading">
-          <h2 id="assign-heading">Assignment</h2>
+        <section className="admin-detail-section" aria-labelledby="assign-heading">
+          <h2 className="admin-detail-section-heading" id="assign-heading">
+            Assignment
+          </h2>
           {!showAssignForm ? (
             <button
               type="button"
+              className="btn btn-secondary btn-sm"
               onClick={() => {
                 setShowAssignForm(true);
               }}
@@ -145,7 +174,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
               {t.assignedToUserId ? 'Reassign Ticket' : 'Assign Ticket'}
             </button>
           ) : (
-            <>
+            <div className="admin-detail-assign-block">
               <AssignTicketForm
                 ticketId={ticketId}
                 currentAssigneeId={t.assignedToUserId}
@@ -153,6 +182,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
               />
               <button
                 type="button"
+                className="btn btn-ghost btn-sm"
                 onClick={() => {
                   setShowAssignForm(false);
                 }}
@@ -160,44 +190,55 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
               >
                 Cancel
               </button>
-            </>
+            </div>
           )}
         </section>
       )}
 
-      {/* ── Resolve action ── */}
+      {/* ── Actions ── */}
       {!isResolved && (
-        <section aria-labelledby="resolve-heading">
-          <h2 id="resolve-heading">Actions</h2>
+        <section className="admin-detail-section" aria-labelledby="resolve-heading">
+          <h2 className="admin-detail-section-heading" id="resolve-heading">
+            Actions
+          </h2>
           {resolve.error && (
-            <p role="alert" data-testid="resolve-error">
+            <p className="feedback-error" role="alert" data-testid="resolve-error">
               {resolve.error}
             </p>
           )}
-          <button
-            type="button"
-            onClick={handleResolve}
-            disabled={resolve.loading}
-            aria-busy={resolve.loading}
-            data-testid="resolve-ticket-btn"
-          >
-            {resolve.loading ? 'Resolving...' : 'Mark as Resolved'}
-          </button>
+          <div className="admin-ticket-actions">
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={handleResolve}
+              disabled={resolve.loading}
+              aria-busy={resolve.loading}
+              data-testid="resolve-ticket-btn"
+            >
+              {resolve.loading ? 'Resolving...' : 'Mark as Resolved'}
+            </button>
+          </div>
         </section>
       )}
 
       {/* ── Quote ── */}
-      <section aria-labelledby="quote-section-heading">
-        <h2 id="quote-section-heading">Quote</h2>
+      <section className="admin-detail-section" aria-labelledby="quote-section-heading">
+        <h2 className="admin-detail-section-heading" id="quote-section-heading">
+          Quote
+        </h2>
         {latestQuote ? (
           <QuotePanel ticketId={ticketId} quote={latestQuote} />
         ) : (
-          <p data-testid="no-quote">No quote has been generated yet.</p>
+          <p className="loading-text" data-testid="no-quote">
+            No quote has been generated yet.
+          </p>
         )}
       </section>
 
       {/* ── Comments ── */}
-      <CommentThread ticketId={ticketId} />
+      <section className="admin-detail-section">
+        <CommentThread ticketId={ticketId} />
+      </section>
     </div>
   );
 };

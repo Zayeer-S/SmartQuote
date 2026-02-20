@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
+import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils';
 import type { TicketDetailResponse } from '../../../shared/contracts/ticket-contracts';
+import './AdminTicketCard.css';
 
 interface AdminTicketCardProps {
   ticket: TicketDetailResponse;
@@ -17,20 +19,37 @@ const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
   const isAssigned = ticket.assignedToUserId !== null;
 
   return (
-    <article data-testid={`admin-ticket-card-${ticket.id}`}>
-      <div>
-        <span data-testid="ticket-priority">{ticket.ticketPriorityName}</span>
-        <span data-testid="ticket-status">{ticket.ticketStatusName}</span>
-        <span data-testid="ticket-assigned-badge">{isAssigned ? 'Assigned' : 'Unassigned'}</span>
+    <article className="admin-ticket-card" data-testid={`admin-ticket-card-${ticket.id}`}>
+      <div className="admin-ticket-card-header">
+        <div className="admin-ticket-card-badges">
+          <span
+            className={getPriorityBadgeClass(ticket.ticketPriorityName)}
+            data-testid="ticket-priority"
+          >
+            {ticket.ticketPriorityName}
+          </span>
+          <span
+            className={getStatusBadgeClass(ticket.ticketStatusName)}
+            data-testid="ticket-status"
+          >
+            {ticket.ticketStatusName}
+          </span>
+          <span
+            className={`badge ${isAssigned ? 'badge-assigned' : 'admin-ticket-card-badge-unassigned'}`}
+            data-testid="ticket-assigned-badge"
+          >
+            {isAssigned ? 'Assigned' : 'Unassigned'}
+          </span>
+        </div>
       </div>
 
-      <h2>
+      <h2 className="admin-ticket-card-title">
         <Link to={CLIENT_ROUTES.ADMIN.TICKET(ticket.id)} data-testid="admin-ticket-card-link">
           {ticket.title}
         </Link>
       </h2>
 
-      <div>
+      <div className="admin-ticket-card-meta">
         <span data-testid="ticket-type">{ticket.ticketTypeName}</span>
         <span data-testid="ticket-severity">{ticket.ticketSeverityName}</span>
         <span data-testid="ticket-impact">{ticket.businessImpactName}</span>

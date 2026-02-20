@@ -1,0 +1,162 @@
+.admin-quote-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.admin-quote-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  padding: var(--spacing-md) 0;
+  border-top: 1px solid var(--color-border-primary);
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.admin-quote-subpanel {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-left: 3px solid var(--color-primary-400);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.admin-quote-subpanel-heading {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.admin-quote-subpanel-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.admin-quote-version {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-tertiary);
+  margin-left: var(--spacing-xs);
+}
+
+.admin-quote-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md) var(--spacing-lg);
+}
+
+.admin-quote-form-grid .field-group {
+  margin-bottom: 0;
+}
+
+.revision-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.revision-item {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.revision-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.revision-field {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary-600);
+}
+
+.revision-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-left: auto;
+}
+
+.revision-user {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.revision-diff {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.revision-old {
+  color: var(--color-error);
+  text-decoration: line-through;
+}
+
+.revision-arrow {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.revision-new {
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
+}
+
+.revision-reason {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+[data-theme='dark'] .admin-quote-actions {
+  border-color: var(--color-gray-700);
+}
+
+[data-theme='dark'] .admin-quote-subpanel {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-gray-700);
+  border-left-color: var(--color-primary-400);
+}
+
+[data-theme='dark'] .admin-quote-subpanel-heading {
+  color: var(--color-gray-50);
+}
+
+[data-theme='dark'] .revision-item {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-gray-700);
+}
+
+[data-theme='dark'] .revision-field {
+  color: var(--color-primary-400);
+}
+
+@media (max-width: 768px) {
+  .admin-quote-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-quote-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

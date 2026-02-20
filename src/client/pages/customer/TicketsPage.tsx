@@ -6,9 +6,13 @@ import TicketList from '../../features/tickets/TicketList';
 const TicketsPage: React.FC = () => {
   return (
     <div data-testid="tickets-page">
-      <div>
-        <h1>My Tickets</h1>
-        <Link to={CLIENT_ROUTES.CUSTOMER.NEW_TICKET} data-testid="new-ticket-link">
+      <div className="page-header">
+        <h1 className="page-title">My Tickets</h1>
+        <Link
+          to={CLIENT_ROUTES.CUSTOMER.NEW_TICKET}
+          className="btn btn-primary"
+          data-testid="new-ticket-link"
+        >
           Submit Ticket
         </Link>
       </div>

@@ -1,9 +1,6 @@
 import React from 'react';
 import { TICKET_SEVERITIES, TICKET_PRIORITIES } from '../../../shared/constants/lookup-values';
-
-/**
- * SLA Policies page stub.
- */
+import './AdminSLAPoliciesPage.css';
 
 interface SlaPolicyRow {
   id: string;
@@ -46,48 +43,69 @@ const STUB_POLICIES: SlaPolicyRow[] = [
 
 const AdminSLAPoliciesPage: React.FC = () => {
   return (
-    <div data-testid="admin-sla-policies-page">
-      <div>
-        <h1>SLA Policies</h1>
-        <button type="button" disabled data-testid="add-sla-policy-btn">
-          Add Policy
-        </button>
+    <div className="admin-page" data-testid="admin-sla-policies-page">
+      <div className="page-header">
+        <h1 className="page-title">SLA Policies</h1>
+        <div className="page-header-actions">
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            disabled
+            data-testid="add-sla-policy-btn"
+          >
+            Add Policy
+          </button>
+        </div>
       </div>
 
-      <p>
+      <p className="admin-page-description">
         Define response and resolution time targets by severity and priority. SLA enforcement and
         breach alerting will be available in a future release.
       </p>
 
-      <table aria-label="SLA policies" data-testid="sla-policies-table">
-        <thead>
-          <tr>
-            <th scope="col">Severity</th>
-            <th scope="col">Priority</th>
-            <th scope="col">Response Target (hrs)</th>
-            <th scope="col">Resolution Target (hrs)</th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {STUB_POLICIES.map((policy) => (
-            <tr key={policy.id} data-testid={`sla-row-${policy.id}`}>
-              <td data-testid={`sla-severity-${policy.id}`}>{policy.severity}</td>
-              <td data-testid={`sla-priority-${policy.id}`}>{policy.priority}</td>
-              <td data-testid={`sla-response-${policy.id}`}>{policy.responseTimeHours}</td>
-              <td data-testid={`sla-resolution-${policy.id}`}>{policy.resolutionTimeHours}</td>
-              <td>
-                <button type="button" disabled data-testid={`sla-edit-${policy.id}`}>
-                  Edit
-                </button>
-                <button type="button" disabled data-testid={`sla-delete-${policy.id}`}>
-                  Delete
-                </button>
-              </td>
+      <div className="card">
+        <table className="admin-table" aria-label="SLA policies" data-testid="sla-policies-table">
+          <thead>
+            <tr>
+              <th scope="col">Severity</th>
+              <th scope="col">Priority</th>
+              <th scope="col">Response Target (hrs)</th>
+              <th scope="col">Resolution Target (hrs)</th>
+              <th scope="col">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {STUB_POLICIES.map((policy) => (
+              <tr key={policy.id} data-testid={`sla-row-${policy.id}`}>
+                <td data-testid={`sla-severity-${policy.id}`}>{policy.severity}</td>
+                <td data-testid={`sla-priority-${policy.id}`}>{policy.priority}</td>
+                <td data-testid={`sla-response-${policy.id}`}>{policy.responseTimeHours}</td>
+                <td data-testid={`sla-resolution-${policy.id}`}>{policy.resolutionTimeHours}</td>
+                <td>
+                  <div className="admin-table-actions">
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      disabled
+                      data-testid={`sla-edit-${policy.id}`}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      disabled
+                      data-testid={`sla-delete-${policy.id}`}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

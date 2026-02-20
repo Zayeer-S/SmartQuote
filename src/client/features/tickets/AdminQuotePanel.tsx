@@ -12,12 +12,11 @@ import {
   QUOTE_CONFIDENCE_LEVELS,
 } from '../../../shared/constants/lookup-values';
 import type { QuoteResponse } from '../../../shared/contracts/quote-contracts';
+import './AdminQuotePanel.css';
 
 interface AdminQuotePanelProps {
   ticketId: string;
-  /** All quotes for this ticket — the latest version is displayed, full list used for history */
   quotes: QuoteResponse[];
-  /** Called after any mutation so the parent can refresh its quote list */
   onQuoteMutated: () => void;
 }
 
@@ -155,22 +154,31 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
   };
 
   return (
-    <section aria-labelledby="admin-quote-heading" data-testid="admin-quote-panel">
-      <h2 id="admin-quote-heading">Quote Management</h2>
+    <section
+      className="admin-quote-panel"
+      aria-labelledby="admin-quote-heading"
+      data-testid="admin-quote-panel"
+    >
+      <h2 className="admin-detail-section-heading" id="admin-quote-heading">
+        Quote Management
+      </h2>
 
       {/* ── Existing quote display ── */}
       {latestQuote ? (
         <QuotePanel ticketId={ticketId} quote={latestQuote} />
       ) : (
-        <p data-testid="admin-no-quote">No quote has been generated yet.</p>
+        <p className="loading-text" data-testid="admin-no-quote">
+          No quote has been generated yet.
+        </p>
       )}
 
       {/* ── Primary actions ── */}
-      <div data-testid="admin-quote-actions">
+      <div className="admin-quote-actions" data-testid="admin-quote-actions">
         {canCreate && (
           <>
             <button
               type="button"
+              className="btn btn-primary btn-sm"
               onClick={handleGenerate}
               disabled={generate.loading}
               aria-busy={generate.loading}
@@ -181,12 +189,13 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
 
             <button
               type="button"
+              className={`btn btn-sm ${activePanel === 'manual' ? 'btn-ghost' : 'btn-secondary'}`}
               onClick={() => {
                 handleTogglePanel('manual');
               }}
               data-testid="toggle-manual-quote-btn"
             >
-              {activePanel === 'manual' ? 'Cancel Manual Quote' : 'Create Manual Quote'}
+              {activePanel === 'manual' ? 'Cancel' : 'Create Manual Quote'}
             </button>
           </>
         )}
@@ -195,16 +204,18 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
           <>
             <button
               type="button"
+              className={`btn btn-sm ${activePanel === 'update' ? 'btn-ghost' : 'btn-secondary'}`}
               onClick={() => {
                 handleTogglePanel('update');
               }}
               data-testid="toggle-update-quote-btn"
             >
-              {activePanel === 'update' ? 'Cancel Update' : 'Update Quote'}
+              {activePanel === 'update' ? 'Cancel' : 'Update Quote'}
             </button>
 
             <button
               type="button"
+              className="btn btn-secondary btn-sm"
               onClick={handleSubmitForApproval}
               disabled={submitForApproval.loading}
               aria-busy={submitForApproval.loading}
@@ -213,7 +224,12 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
               {submitForApproval.loading ? 'Submitting...' : 'Submit for Approval'}
             </button>
 
-            <button type="button" onClick={handleShowRevisions} data-testid="show-revisions-btn">
+            <button
+              type="button"
+              className={`btn btn-sm ${activePanel === 'revisions' ? 'btn-ghost' : 'btn-secondary'}`}
+              onClick={handleShowRevisions}
+              data-testid="show-revisions-btn"
+            >
               Revision History
             </button>
           </>
@@ -222,22 +238,22 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
 
       {/* ── Error states ── */}
       {generate.error && (
-        <p role="alert" data-testid="generate-error">
+        <p className="feedback-error" role="alert" data-testid="generate-error">
           {generate.error}
         </p>
       )}
       {createManual.error && (
-        <p role="alert" data-testid="manual-quote-error">
+        <p className="feedback-error" role="alert" data-testid="manual-quote-error">
           {createManual.error}
         </p>
       )}
       {updateQuote.error && (
-        <p role="alert" data-testid="update-quote-error">
+        <p className="feedback-error" role="alert" data-testid="update-quote-error">
           {updateQuote.error}
         </p>
       )}
       {submitForApproval.error && (
-        <p role="alert" data-testid="submit-approval-error">
+        <p className="feedback-error" role="alert" data-testid="submit-approval-error">
           {submitForApproval.error}
         </p>
       )}
@@ -245,112 +261,134 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
       {/* ── Manual quote form ── */}
       {activePanel === 'manual' && (
         <form
+          className="admin-quote-subpanel"
           onSubmit={handleManualSubmit}
           aria-label="Create manual quote"
           data-testid="manual-quote-form"
         >
-          <h3>Create Manual Quote</h3>
+          <h3 className="admin-quote-subpanel-heading">Create Manual Quote</h3>
 
-          <div>
-            <label htmlFor="mq-hours-min">Min Hours</label>
-            <input
-              id="mq-hours-min"
-              name="estimatedHoursMinimum"
-              type="number"
-              min={0}
-              value={manualForm.estimatedHoursMinimum}
-              onChange={handleManualFormChange}
-              required
-              disabled={createManual.loading}
-              data-testid="mq-hours-min"
-            />
-          </div>
+          <div className="admin-quote-form-grid">
+            <div className="field-group">
+              <label className="field-label" htmlFor="mq-hours-min">
+                Min Hours
+              </label>
+              <input
+                className="field-input"
+                id="mq-hours-min"
+                name="estimatedHoursMinimum"
+                type="number"
+                min={0}
+                value={manualForm.estimatedHoursMinimum}
+                onChange={handleManualFormChange}
+                required
+                disabled={createManual.loading}
+                data-testid="mq-hours-min"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="mq-hours-max">Max Hours</label>
-            <input
-              id="mq-hours-max"
-              name="estimatedHoursMaximum"
-              type="number"
-              min={0}
-              value={manualForm.estimatedHoursMaximum}
-              onChange={handleManualFormChange}
-              required
-              disabled={createManual.loading}
-              data-testid="mq-hours-max"
-            />
-          </div>
+            <div className="field-group">
+              <label className="field-label" htmlFor="mq-hours-max">
+                Max Hours
+              </label>
+              <input
+                className="field-input"
+                id="mq-hours-max"
+                name="estimatedHoursMaximum"
+                type="number"
+                min={0}
+                value={manualForm.estimatedHoursMaximum}
+                onChange={handleManualFormChange}
+                required
+                disabled={createManual.loading}
+                data-testid="mq-hours-max"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="mq-rate">Hourly Rate (£)</label>
-            <input
-              id="mq-rate"
-              name="hourlyRate"
-              type="number"
-              min={0}
-              step="0.01"
-              value={manualForm.hourlyRate}
-              onChange={handleManualFormChange}
-              required
-              disabled={createManual.loading}
-              data-testid="mq-rate"
-            />
-          </div>
+            <div className="field-group">
+              <label className="field-label" htmlFor="mq-rate">
+                Hourly Rate (£)
+              </label>
+              <input
+                className="field-input"
+                id="mq-rate"
+                name="hourlyRate"
+                type="number"
+                min={0}
+                step="0.01"
+                value={manualForm.hourlyRate}
+                onChange={handleManualFormChange}
+                required
+                disabled={createManual.loading}
+                data-testid="mq-rate"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="mq-fixed-cost">Fixed Cost (£)</label>
-            <input
-              id="mq-fixed-cost"
-              name="fixedCost"
-              type="number"
-              min={0}
-              step="0.01"
-              value={manualForm.fixedCost}
-              onChange={handleManualFormChange}
-              required
-              disabled={createManual.loading}
-              data-testid="mq-fixed-cost"
-            />
-          </div>
+            <div className="field-group">
+              <label className="field-label" htmlFor="mq-fixed-cost">
+                Fixed Cost (£)
+              </label>
+              <input
+                className="field-input"
+                id="mq-fixed-cost"
+                name="fixedCost"
+                type="number"
+                min={0}
+                step="0.01"
+                value={manualForm.fixedCost}
+                onChange={handleManualFormChange}
+                required
+                disabled={createManual.loading}
+                data-testid="mq-fixed-cost"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="mq-effort">Effort Level</label>
-            <select
-              id="mq-effort"
-              name="quoteEffortLevelId"
-              value={manualForm.quoteEffortLevelId}
-              onChange={handleManualFormChange}
-              disabled={createManual.loading}
-              data-testid="mq-effort"
-            >
-              {EFFORT_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div className="field-group">
+              <label className="field-label" htmlFor="mq-effort">
+                Effort Level
+              </label>
+              <select
+                className="field-select"
+                id="mq-effort"
+                name="quoteEffortLevelId"
+                value={manualForm.quoteEffortLevelId}
+                onChange={handleManualFormChange}
+                disabled={createManual.loading}
+                data-testid="mq-effort"
+              >
+                {EFFORT_OPTIONS.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div>
-            <label htmlFor="mq-confidence">Confidence Level</label>
-            <select
-              id="mq-confidence"
-              name="quoteConfidenceLevelId"
-              value={manualForm.quoteConfidenceLevelId}
-              onChange={handleManualFormChange}
-              disabled={createManual.loading}
-              data-testid="mq-confidence"
-            >
-              {CONFIDENCE_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            <div className="field-group">
+              <label className="field-label" htmlFor="mq-confidence">
+                Confidence Level
+              </label>
+              <select
+                className="field-select"
+                id="mq-confidence"
+                name="quoteConfidenceLevelId"
+                value={manualForm.quoteConfidenceLevelId}
+                onChange={handleManualFormChange}
+                disabled={createManual.loading}
+                data-testid="mq-confidence"
+              >
+                {CONFIDENCE_OPTIONS.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <button
             type="submit"
+            className="btn btn-primary btn-sm"
             disabled={createManual.loading}
             aria-busy={createManual.loading}
             data-testid="manual-quote-submit-btn"
@@ -363,74 +401,94 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
       {/* ── Update quote form ── */}
       {activePanel === 'update' && latestQuote && (
         <form
+          className="admin-quote-subpanel"
           onSubmit={handleUpdateSubmit}
           aria-label="Update quote"
           data-testid="update-quote-form"
         >
-          <h3>Update Quote (v{latestQuote.version})</h3>
-          <p>Only fill in the fields you want to change.</p>
+          <h3 className="admin-quote-subpanel-heading">
+            Update Quote <span className="admin-quote-version">v{latestQuote.version}</span>
+          </h3>
+          <p className="admin-quote-subpanel-hint">Only fill in the fields you want to change.</p>
 
-          <div>
-            <label htmlFor="uq-hours-min">Min Hours</label>
-            <input
-              id="uq-hours-min"
-              name="estimatedHoursMinimum"
-              type="number"
-              min={0}
-              value={updateForm.estimatedHoursMinimum ?? ''}
-              onChange={handleUpdateFormChange}
-              disabled={updateQuote.loading}
-              data-testid="uq-hours-min"
-            />
+          <div className="admin-quote-form-grid">
+            <div className="field-group">
+              <label className="field-label" htmlFor="uq-hours-min">
+                Min Hours
+              </label>
+              <input
+                className="field-input"
+                id="uq-hours-min"
+                name="estimatedHoursMinimum"
+                type="number"
+                min={0}
+                value={updateForm.estimatedHoursMinimum ?? ''}
+                onChange={handleUpdateFormChange}
+                disabled={updateQuote.loading}
+                data-testid="uq-hours-min"
+              />
+            </div>
+
+            <div className="field-group">
+              <label className="field-label" htmlFor="uq-hours-max">
+                Max Hours
+              </label>
+              <input
+                className="field-input"
+                id="uq-hours-max"
+                name="estimatedHoursMaximum"
+                type="number"
+                min={0}
+                value={updateForm.estimatedHoursMaximum ?? ''}
+                onChange={handleUpdateFormChange}
+                disabled={updateQuote.loading}
+                data-testid="uq-hours-max"
+              />
+            </div>
+
+            <div className="field-group">
+              <label className="field-label" htmlFor="uq-rate">
+                Hourly Rate (£)
+              </label>
+              <input
+                className="field-input"
+                id="uq-rate"
+                name="hourlyRate"
+                type="number"
+                min={0}
+                step="0.01"
+                value={updateForm.hourlyRate ?? ''}
+                onChange={handleUpdateFormChange}
+                disabled={updateQuote.loading}
+                data-testid="uq-rate"
+              />
+            </div>
+
+            <div className="field-group">
+              <label className="field-label" htmlFor="uq-fixed-cost">
+                Fixed Cost (£)
+              </label>
+              <input
+                className="field-input"
+                id="uq-fixed-cost"
+                name="fixedCost"
+                type="number"
+                min={0}
+                step="0.01"
+                value={updateForm.fixedCost ?? ''}
+                onChange={handleUpdateFormChange}
+                disabled={updateQuote.loading}
+                data-testid="uq-fixed-cost"
+              />
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="uq-hours-max">Max Hours</label>
-            <input
-              id="uq-hours-max"
-              name="estimatedHoursMaximum"
-              type="number"
-              min={0}
-              value={updateForm.estimatedHoursMaximum ?? ''}
-              onChange={handleUpdateFormChange}
-              disabled={updateQuote.loading}
-              data-testid="uq-hours-max"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="uq-rate">Hourly Rate (£)</label>
-            <input
-              id="uq-rate"
-              name="hourlyRate"
-              type="number"
-              min={0}
-              step="0.01"
-              value={updateForm.hourlyRate ?? ''}
-              onChange={handleUpdateFormChange}
-              disabled={updateQuote.loading}
-              data-testid="uq-rate"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="uq-fixed-cost">Fixed Cost (£)</label>
-            <input
-              id="uq-fixed-cost"
-              name="fixedCost"
-              type="number"
-              min={0}
-              step="0.01"
-              value={updateForm.fixedCost ?? ''}
-              onChange={handleUpdateFormChange}
-              disabled={updateQuote.loading}
-              data-testid="uq-fixed-cost"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="uq-reason">Reason for Change</label>
+          <div className="field-group">
+            <label className="field-label" htmlFor="uq-reason">
+              Reason for Change
+            </label>
             <textarea
+              className="field-textarea"
               id="uq-reason"
               value={updateReason}
               onChange={(e) => {
@@ -447,6 +505,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
 
           <button
             type="submit"
+            className="btn btn-primary btn-sm"
             disabled={updateQuote.loading || !updateReason.trim()}
             aria-busy={updateQuote.loading}
             data-testid="update-quote-submit-btn"
@@ -458,23 +517,33 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
 
       {/* ── Revision history ── */}
       {activePanel === 'revisions' && (
-        <section aria-labelledby="revisions-heading" data-testid="revision-history">
-          <h3 id="revisions-heading">Revision History</h3>
+        <section
+          className="admin-quote-subpanel"
+          aria-labelledby="revisions-heading"
+          data-testid="revision-history"
+        >
+          <h3 className="admin-quote-subpanel-heading" id="revisions-heading">
+            Revision History
+          </h3>
 
-          {revisionHistory.loading && <p data-testid="revisions-loading">Loading revisions...</p>}
-
+          {revisionHistory.loading && (
+            <p className="loading-text" data-testid="revisions-loading">
+              Loading revisions...
+            </p>
+          )}
           {revisionHistory.error && (
-            <p role="alert" data-testid="revisions-error">
+            <p className="feedback-error" role="alert" data-testid="revisions-error">
               {revisionHistory.error}
             </p>
           )}
-
           {!revisionHistory.loading && revisionHistory.data?.revisions.length === 0 && (
-            <p data-testid="revisions-empty">No revisions recorded yet.</p>
+            <p className="loading-text" data-testid="revisions-empty">
+              No revisions recorded yet.
+            </p>
           )}
 
           {revisionHistory.data && revisionHistory.data.revisions.length > 0 && (
-            <ol role="list" data-testid="revisions-list">
+            <ol className="revision-list" role="list" data-testid="revisions-list">
               {revisionHistory.data.revisions.map((rev) => {
                 const formattedDate = new Date(rev.createdAt).toLocaleDateString('en-GB', {
                   day: 'numeric',
@@ -484,20 +553,48 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                   minute: '2-digit',
                 });
                 return (
-                  <li key={rev.id} data-testid={`revision-${String(rev.id)}`}>
-                    <div>
-                      <span data-testid={`revision-field-${String(rev.id)}`}>{rev.fieldName}</span>
-                      <span data-testid={`revision-date-${String(rev.id)}`}>{formattedDate}</span>
-                      <span data-testid={`revision-user-${String(rev.id)}`}>
+                  <li
+                    key={rev.id}
+                    className="revision-item"
+                    data-testid={`revision-${String(rev.id)}`}
+                  >
+                    <div className="revision-meta">
+                      <span
+                        className="revision-field"
+                        data-testid={`revision-field-${String(rev.id)}`}
+                      >
+                        {rev.fieldName}
+                      </span>
+                      <span
+                        className="revision-date"
+                        data-testid={`revision-date-${String(rev.id)}`}
+                      >
+                        {formattedDate}
+                      </span>
+                      <span
+                        className="revision-user"
+                        data-testid={`revision-user-${String(rev.id)}`}
+                      >
                         {rev.changedByUserId}
                       </span>
                     </div>
-                    <div>
-                      <span data-testid={`revision-old-${String(rev.id)}`}>{rev.oldValue}</span>
-                      <span aria-hidden="true"> → </span>
-                      <span data-testid={`revision-new-${String(rev.id)}`}>{rev.newValue}</span>
+                    <div className="revision-diff">
+                      <span className="revision-old" data-testid={`revision-old-${String(rev.id)}`}>
+                        {rev.oldValue}
+                      </span>
+                      <span className="revision-arrow" aria-hidden="true">
+                        →
+                      </span>
+                      <span className="revision-new" data-testid={`revision-new-${String(rev.id)}`}>
+                        {rev.newValue}
+                      </span>
                     </div>
-                    <p data-testid={`revision-reason-${String(rev.id)}`}>{rev.reason}</p>
+                    <p
+                      className="revision-reason"
+                      data-testid={`revision-reason-${String(rev.id)}`}
+                    >
+                      {rev.reason}
+                    </p>
                   </li>
                 );
               })}

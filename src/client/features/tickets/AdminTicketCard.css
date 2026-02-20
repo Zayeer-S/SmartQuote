@@ -1,0 +1,88 @@
+.admin-ticket-card {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.admin-ticket-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-secondary);
+}
+
+.admin-ticket-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.admin-ticket-card-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.admin-ticket-card-badge-unassigned {
+  background-color: var(--color-warning-light);
+  color: #92400e;
+}
+
+.admin-ticket-card-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--spacing-sm);
+}
+
+.admin-ticket-card-title a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.admin-ticket-card-title a:hover {
+  color: var(--color-primary-600);
+}
+
+.admin-ticket-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.admin-ticket-card-meta span + span::before {
+  content: '·';
+  margin-right: var(--spacing-xs);
+  color: var(--color-text-tertiary);
+}
+
+[data-theme='dark'] .admin-ticket-card {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-gray-700);
+}
+
+[data-theme='dark'] .admin-ticket-card:hover {
+  border-color: var(--color-gray-600);
+}
+
+[data-theme='dark'] .admin-ticket-card-title a {
+  color: var(--color-gray-100);
+}
+
+[data-theme='dark'] .admin-ticket-card-title a:hover {
+  color: var(--color-primary-400);
+}
+
+[data-theme='dark'] .admin-ticket-card-badge-unassigned {
+  background-color: #451a03;
+  color: #fcd34d;
+}

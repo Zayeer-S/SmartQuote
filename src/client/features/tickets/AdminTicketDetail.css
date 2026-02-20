@@ -1,0 +1,136 @@
+.admin-ticket-detail {
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.admin-ticket-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+.admin-ticket-detail-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  line-height: var(--line-height-tight);
+  flex: 1;
+}
+
+.admin-ticket-detail-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.admin-detail-section {
+  padding: var(--spacing-xl) 0;
+  border-top: 1px solid var(--color-border-primary);
+}
+
+.admin-detail-section-heading {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--spacing-lg);
+}
+
+.admin-ticket-detail-description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-lg);
+  white-space: pre-wrap;
+}
+
+.admin-detail-dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm) var(--spacing-xl);
+}
+
+.admin-detail-dl-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-detail-dl dt {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-tertiary);
+}
+
+.admin-detail-dl dd {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.admin-detail-unassigned {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.admin-detail-assign-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.admin-ticket-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+[data-theme='dark'] .admin-ticket-detail-title {
+  color: var(--color-gray-50);
+}
+
+[data-theme='dark'] .admin-detail-section {
+  border-top-color: var(--color-gray-700);
+}
+
+[data-theme='dark'] .admin-detail-section-heading {
+  color: var(--color-gray-400);
+}
+
+[data-theme='dark'] .admin-ticket-detail-description {
+  color: var(--color-gray-100);
+}
+
+[data-theme='dark'] .admin-detail-dl dt {
+  color: var(--color-gray-500);
+}
+
+[data-theme='dark'] .admin-detail-dl dd {
+  color: var(--color-gray-100);
+}
+
+@media (max-width: 768px) {
+  .admin-ticket-detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-detail-dl {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-ticket-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
