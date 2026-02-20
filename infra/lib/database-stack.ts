@@ -18,9 +18,6 @@ export class DatabaseStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // ── VPC ────────────────────────────────────────────────────────────────
-    // 2 AZs, public subnets for Lambda (no NAT Gateway cost), isolated
-    // subnets for RDS (no internet access)
     this.vpc = new ec2.Vpc(this, 'Vpc', {
       maxAzs: 2,
       subnetConfiguration: [
@@ -37,16 +34,15 @@ export class DatabaseStack extends cdk.Stack {
       ],
     });
 
-    // ── Security groups ────────────────────────────────────────────────────
     const lambdaSecurityGroup = new ec2.SecurityGroup(this, 'LambdaSg', {
       vpc: this.vpc,
-      description: 'Attached to Lambda — allows outbound to RDS',
+      description: 'Attached to Lambda - allows outbound to RDS',
       allowAllOutbound: true,
     });
 
     this.dbSecurityGroup = new ec2.SecurityGroup(this, 'DbSg', {
       vpc: this.vpc,
-      description: 'RDS Postgres — only accepts connections from Lambda',
+      description: 'RDS Postgres - only accepts connections from Lambda',
       allowAllOutbound: false,
     });
 
@@ -55,6 +51,16 @@ export class DatabaseStack extends cdk.Stack {
       ec2.Port.tcp(infraConfig.db.port),
       'Allow Postgres from Lambda'
     );
+
+    // Allows Lambda in isolated subnets to reach AWS services without
+    // internet access -- no NAT Gateway needed.
+
+    // Secrets Manager -- Lambda fetches DB + app secrets at cold start
+    this.vpc.addInterfaceEndpoint('SecretsManagerEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+      subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [lambdaSecurityGroup],
+    });
 
     // Export Lambda SG so AppStack can attach it to the function
     new cdk.CfnOutput(this, 'LambdaSecurityGroupId', {
@@ -88,15 +94,12 @@ export class DatabaseStack extends cdk.Stack {
       allocatedStorage: infraConfig.db.allocatedStorageGb,
       backupRetention: cdk.Duration.days(infraConfig.db.backupRetentionDays),
       deletionProtection: infraConfig.db.deletionProtection,
-      // Prevent accidental replacement on config changes
       applyImmediately: false,
-      // Don't create a public endpoint — Lambda reaches it via VPC
       publiclyAccessible: false,
     });
 
     this.dbEndpoint = dbInstance.dbInstanceEndpointAddress;
 
-    // ── Outputs ────────────────────────────────────────────────────────────
     new cdk.CfnOutput(this, 'DbEndpoint', {
       value: this.dbEndpoint,
       exportName: 'DbEndpoint',
@@ -112,7 +115,6 @@ export class DatabaseStack extends cdk.Stack {
       exportName: 'VpcId',
     });
 
-    // ── Tags ───────────────────────────────────────────────────────────────
     Object.entries(infraConfig.tags).forEach(([key, value]) => {
       cdk.Tags.of(this).add(key, value);
     });

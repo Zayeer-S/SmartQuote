@@ -13,7 +13,7 @@ import {
   QUOTE_APPROVAL_STATUSES,
   QUOTE_CONFIDENCE_LEVELS,
   QUOTE_EFFORT_LEVELS,
-} from '../../../../shared/constants';
+} from '../../../../shared/constants/index.js';
 
 interface LookupIdMap {
   [key: string]: number;

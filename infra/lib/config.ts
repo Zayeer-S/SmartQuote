@@ -3,13 +3,11 @@ export const infraConfig = {
   region: 'eu-west-2',
 
   domain: {
-    hostname: 'giacom.zayeer.dev',
-    // After first deploy, add a CNAME in Cloudflare:
-    // giacom.zayeer.dev -> <distribution>.cloudfront.net
+    hostname: 'smartquote.zayeer.dev',
   },
 
   cors: {
-    origin: 'https://giacom.zayeer.dev',
+    origin: 'https://smartquote.zayeer.dev',
   },
 
   db: {
@@ -18,9 +16,9 @@ export const infraConfig = {
     port: 5432,
     instanceType: 'T3_MICRO',
     allocatedStorageGb: 20,
-    backupRetentionDays: 7,
+    backupRetentionDays: 1,
     deletionProtection: true,
-    /** Secret name in Secrets Manager — holds username + password */
+    /** Secret name in Secrets Manager - holds username + password */
     secretName: 'smartquote/db-credentials',
   },
 
@@ -32,7 +30,7 @@ export const infraConfig = {
     memoryMb: 512,
     timeoutSeconds: 29, // API Gateway hard limit is 30s
     nodeEnv: 'production',
-    // Non-secret config — injected directly as env vars, not stored in Secrets Manager
+    // Non-secret config - injected directly as env vars, not stored in Secrets Manager
     sessionExpiryHours: '168',
     bcryptSaltRounds: '12',
     maxLoginAttempts: '10',

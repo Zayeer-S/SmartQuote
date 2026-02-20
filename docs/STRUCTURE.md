@@ -13,7 +13,14 @@ smartquote/
 │   ├── STRUCTURE.md
 │   └── TEAM_GUIDE.md
 │
-├── infra/                                          # CDK
+├── infra/                                          # CDK - only include custom files here
+│   ├── bin/
+│   │   └── infra.ts
+│   └── lib/
+│       ├── app-stack.ts
+│       ├── certificate-stack.ts
+│       ├── config.ts
+│       └── database-stack.ts
 │
 ├── src/
 │   ├── client/
@@ -158,6 +165,10 @@ smartquote/
 │   │   ├── bootstrap/                              # Application startup and dependency wiring, no where else creates services.
 │   │   │   ├── app.bootstrap.ts
 │   │   │   ├── database.bootstrap.ts
+│   │   │   ├── lambda.handler.ts
+│   │   │   ├── lambda.migrate.ts
+│   │   │   ├── lambda.seed.ts
+│   │   │   ├── secrets.ts
 │   │   │   └── server.ts
 │   │   ├── config/                                 # Environment and config values only; no runtime logic
 │   │   │   ├── index.ts
@@ -289,5 +300,7 @@ smartquote/
 ├── README.md
 ├── tsconfig.app.json
 ├── tsconfig.json
+├── tsconfig.migrations.json
 ├── tsconfig.node.json
+├── tsconfig.server.json
 └── vite.config.ts

@@ -30,8 +30,11 @@ jobs:
             - name: Build frontend
               run: npm run build:client
               env:
-                  VITE_APP_URL: https://giacom.zayeer.dev
-                  VITE_FRONTEND_URL: https://giacom.zayeer.dev
+                  VITE_APP_URL: https://smartquote.zayeer.dev
+                  VITE_FRONTEND_URL: https://smartquote.zayeer.dev
+
+            - name: Build database files
+              run: npm run build:db
 
             - name: Configure AWS credentials
               uses: aws-actions/configure-aws-credentials@v4

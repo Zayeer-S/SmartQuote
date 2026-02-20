@@ -7,9 +7,8 @@ import {
   BUSINESS_IMPACTS,
   TICKET_PRIORITIES,
   QUOTE_EFFORT_LEVELS,
-} from '../../../shared/constants';
+} from '../../../shared/constants/index.js';
 import {
-  getDevPasswordHash,
   buildAllLookupIdMaps,
   generateOrganizations,
   generateUsers,
@@ -33,7 +32,12 @@ import {
   QUOTE_CONFIDENCE_LEVELS_SEED_DATA,
   ANALYTICS_SCHEMAS_SEED_DATA,
   SMARTQUOTE_CONFIGS_SEED_DATA,
-} from './helpers';
+} from './helpers/index.js';
+
+// Pre-computed bcrypt hash of 'password' with 12 salt rounds.
+// Avoids importing bcrypt (native addon) into the seed Lambda bundle.
+// Re-generate if rounds change: node -e "require('bcrypt').hash('password',12).then(console.log)"
+const DEV_PASSWORD_HASH = '$2b$12$Q9dPRKBx8iHKZn7kMzhyOOrCzQs6RLYoecbB5YGDcECpvuf8URGcC';
 
 export async function seed(knex: Knex): Promise<void> {
   console.log('Truncating existing tables');
@@ -81,9 +85,9 @@ export async function seed(knex: Knex): Promise<void> {
     'roles',
   ];
 
-  for (const table of truncateTables) {
-    await knex(table).del();
-  }
+  await knex.raw(
+    `TRUNCATE TABLE ${truncateTables.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`
+  );
 
   console.log('Starting seeding');
 
@@ -123,7 +127,7 @@ export async function seed(knex: Knex): Promise<void> {
 
   const lookupIds = await buildAllLookupIdMaps(knex);
 
-  const passwordHash = await getDevPasswordHash();
+  const passwordHash = DEV_PASSWORD_HASH;
 
   const { customer1Id, customer2Id, supportAgentId, managerId } = await generateUsers(knex, {
     passwordHash,

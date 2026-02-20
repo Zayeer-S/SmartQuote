@@ -16,7 +16,7 @@ import {
   ALL_QUOTE_CONFIDENCE_LEVELS,
   ANALYTICS_SCHEMA_NAMES,
   SMARTQUOTE_CONFIG_KEYS,
-} from '../../../../shared/constants';
+} from '../../../../shared/constants/index.js';
 
 /**
  * Lookup Data Helper

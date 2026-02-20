@@ -26,23 +26,18 @@ export class AppStack extends cdk.Stack {
 
     const { databaseStack, certificateStack } = props;
 
-    // ── Secrets ────────────────────────────────────────────────────────────
-    // Must be created manually in Secrets Manager before first deploy.
-    // See docs/TEAM_GUIDE.md for setup instructions.
     const appSecret = secretsmanager.Secret.fromSecretNameV2(
       this,
       'AppSecret',
       'smartquote/app-secrets'
     );
 
-    // ── Lambda security group ──────────────────────────────────────────────
     const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
       this,
       'LambdaSg',
       cdk.Fn.importValue('LambdaSecurityGroupId')
     );
 
-    // ── Lambda function ────────────────────────────────────────────────────
     const apiFunction = new lambdaNodejs.NodejsFunction(this, 'ApiFunction', {
       functionName: infraConfig.lambda.functionName,
       entry: path.join(__dirname, '../../', infraConfig.lambda.entryPoint),
@@ -51,12 +46,13 @@ export class AppStack extends cdk.Stack {
       memorySize: infraConfig.lambda.memoryMb,
       timeout: cdk.Duration.seconds(infraConfig.lambda.timeoutSeconds),
       vpc: databaseStack.vpc,
-      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       securityGroups: [lambdaSecurityGroup],
-      allowPublicSubnet: true,
       bundling: {
         target: 'node22',
         format: OutputFormat.ESM,
+        banner:
+          'import { createRequire } from "module"; const require = createRequire(import.meta.url);',
         externalModules: [
           'pg-native',
           'better-sqlite3',
@@ -82,7 +78,6 @@ export class AppStack extends cdk.Stack {
         BCRYPT_SALT_ROUNDS: infraConfig.lambda.bcryptSaltRounds,
         MAX_LOGIN_ATTEMPTS: infraConfig.lambda.maxLoginAttempts,
         LOGIN_RATE_LIMIT_WINDOW_MINUTES: infraConfig.lambda.loginRateLimitWindowMinutes,
-        // Secret ARNs — actual values fetched at runtime by secrets.ts
         DB_SECRET_ARN: databaseStack.dbSecret.secretArn,
         APP_SECRET_ARN: appSecret.secretArn,
       },
@@ -91,19 +86,8 @@ export class AppStack extends cdk.Stack {
     databaseStack.dbSecret.grantRead(apiFunction);
     appSecret.grantRead(apiFunction);
 
-    // ── Migration Lambda ───────────────────────────────────────────────────
     // Invoked manually via AWS CLI when migrations need to run.
     // Lives in the same VPC as RDS so it can reach the private DB endpoint.
-    const migrationsSourceDir = path.join(
-      __dirname,
-      '..',
-      '..',
-      'src',
-      'server',
-      'database',
-      'migrations'
-    );
-
     const migrateFunction = new lambdaNodejs.NodejsFunction(this, 'MigrateFunction', {
       functionName: 'smartquote-migrate',
       entry: path.join(__dirname, '../../', 'src/server/bootstrap/lambda.migrate.ts'),
@@ -112,12 +96,13 @@ export class AppStack extends cdk.Stack {
       memorySize: 256,
       timeout: cdk.Duration.minutes(5),
       vpc: databaseStack.vpc,
-      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       securityGroups: [lambdaSecurityGroup],
-      allowPublicSubnet: true,
       bundling: {
         target: 'node22',
         format: OutputFormat.ESM,
+        banner:
+          'import { createRequire } from "module"; const require = createRequire(import.meta.url);',
         externalModules: [
           'pg-native',
           'better-sqlite3',
@@ -133,13 +118,9 @@ export class AppStack extends cdk.Stack {
         commandHooks: {
           beforeBundling: () => [],
           beforeInstall: () => [],
-          afterBundling: (_inputDir: string, outputDir: string) => {
-            // JSON.stringify produces properly escaped path strings that survive
-            // shell interpolation on both Windows (backslashes) and Unix.
-            const src = JSON.stringify(migrationsSourceDir);
-            const dest = JSON.stringify(path.join(outputDir, 'migrations'));
-            return [`node -e "require('fs').cpSync(${src},${dest},{recursive:true})"`];
-          },
+          afterBundling: (inputDir: string, outputDir: string) => [
+            `cp -r ${inputDir}/../dist-db/server/database/migrations ${outputDir}/migrations`,
+          ],
         },
       },
       environment: {
@@ -161,11 +142,70 @@ export class AppStack extends cdk.Stack {
         'Invoke this Lambda to run DB migrations: aws lambda invoke --function-name smartquote-migrate --region eu-west-2 response.json',
     });
 
-    // ── API Gateway ────────────────────────────────────────────────────────
+    // Invoked manually via AWS CLI to populate the database with seed data.
+    const seedFunction = new lambdaNodejs.NodejsFunction(this, 'SeedFunction', {
+      functionName: 'smartquote-seed',
+      entry: path.join(__dirname, '../../', 'src/server/bootstrap/lambda.seed.ts'),
+      handler: 'handler',
+      runtime: lambda.Runtime.NODEJS_22_X,
+      memorySize: 256,
+      timeout: cdk.Duration.minutes(5),
+      vpc: databaseStack.vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [lambdaSecurityGroup],
+      bundling: {
+        target: 'node22',
+        format: OutputFormat.ESM,
+        banner:
+          'import { createRequire } from "module"; const require = createRequire(import.meta.url);',
+        externalModules: [
+          'pg-native',
+          'better-sqlite3',
+          'mysql',
+          'mysql2',
+          'sqlite3',
+          'pg-query-stream',
+          'oracledb',
+          'tedious',
+        ],
+        minify: true,
+        sourceMap: true,
+        commandHooks: {
+          beforeBundling: () => [],
+          beforeInstall: () => [],
+          afterBundling: (inputDir: string, outputDir: string) => [
+            `mkdir -p ${outputDir}/server/database`,
+            `cp -r ${inputDir}/../dist-db/server/database/seeds ${outputDir}/server/database/seeds`,
+            `cp -r ${inputDir}/../dist-db/shared ${outputDir}/shared`,
+            `echo '{"type":"module"}' > ${outputDir}/server/database/seeds/package.json`,
+            `echo '{"type":"module","exports":{".":" ./index.js"}}' > ${outputDir}/shared/constants/package.json`,
+          ],
+        },
+      },
+      environment: {
+        NODE_ENV: infraConfig.lambda.nodeEnv,
+        DB_HOST: databaseStack.dbEndpoint,
+        DB_PORT: String(infraConfig.db.port),
+        DB_NAME: infraConfig.db.databaseName,
+        DB_SECRET_ARN: databaseStack.dbSecret.secretArn,
+        APP_SECRET_ARN: appSecret.secretArn,
+      },
+    });
+
+    databaseStack.dbSecret.grantRead(seedFunction);
+    appSecret.grantRead(seedFunction);
+
+    new cdk.CfnOutput(this, 'SeedFunctionName', {
+      value: seedFunction.functionName,
+      description:
+        'Invoke this Lambda to seed the database: aws lambda invoke --function-name smartquote-seed --region eu-west-2 response.json',
+    });
+
     const api = new apigateway.LambdaRestApi(this, 'ApiGateway', {
       handler: apiFunction,
       proxy: true,
       deployOptions: { stageName: 'prod' },
+      binaryMediaTypes: [], // explicitly disable binary handling for rest api
       defaultCorsPreflightOptions: {
         allowOrigins: [infraConfig.cors.origin],
         allowMethods: apigateway.Cors.ALL_METHODS,
@@ -173,7 +213,14 @@ export class AppStack extends cdk.Stack {
       },
     });
 
-    // ── S3 bucket (frontend) ───────────────────────────────────────────────
+    api.addGatewayResponse('Default4xx', {
+      type: apigateway.ResponseType.DEFAULT_4XX,
+      responseHeaders: {
+        'Access-Control-Allow-Origin': `'${infraConfig.cors.origin}'`,
+        'Access-Control-Allow-Headers': "'*'",
+      },
+    });
+
     const frontendBucket = new s3.Bucket(this, 'FrontendBucket', {
       bucketName: infraConfig.s3.bucketName,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -181,7 +228,6 @@ export class AppStack extends cdk.Stack {
       autoDeleteObjects: false,
     });
 
-    // ── CloudFront ─────────────────────────────────────────────────────────
     const distribution = new cloudfront.Distribution(this, 'CfDistribution', {
       comment: infraConfig.cloudfront.comment,
       defaultRootObject: infraConfig.cloudfront.defaultRootObject,
@@ -221,7 +267,6 @@ export class AppStack extends cdk.Stack {
       ],
     });
 
-    // ── Deploy frontend assets to S3 ───────────────────────────────────────
     new s3deploy.BucketDeployment(this, 'FrontendDeployment', {
       sources: [s3deploy.Source.asset(path.join(__dirname, '../../', infraConfig.s3.assetsPath))],
       destinationBucket: frontendBucket,
@@ -229,7 +274,6 @@ export class AppStack extends cdk.Stack {
       distributionPaths: ['/*'],
     });
 
-    // ── Outputs ────────────────────────────────────────────────────────────
     new cdk.CfnOutput(this, 'CloudFrontUrl', {
       value: `https://${infraConfig.domain.hostname}`,
       description: 'Frontend URL',
@@ -237,7 +281,7 @@ export class AppStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'CloudFrontDomain', {
       value: distribution.distributionDomainName,
-      description: 'Add this as a CNAME in Cloudflare pointing to giacom.zayeer.dev',
+      description: 'Add this as a CNAME in Cloudflare pointing to smartquote.zayeer.dev',
     });
 
     new cdk.CfnOutput(this, 'ApiGatewayUrl', {

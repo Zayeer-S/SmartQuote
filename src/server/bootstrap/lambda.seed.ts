@@ -13,29 +13,29 @@ export const handler = async (): Promise<{ success: boolean; message: string }> 
       database: process.env.DB_NAME,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
+      ssl: { rejectUnauthorized: false },
     },
-    migrations: {
-      directory: './migrations',
-      tableName: 'knex_migrations',
+    seeds: {
+      directory: './server/database/seeds',
       loadExtensions: ['.js'],
     },
   });
 
   try {
-    console.log('Running migrations...');
-    const [batchNo, migrations] = (await db.migrate.latest()) as [number, string[]];
+    console.log('Running seeds...');
+    const [log] = (await db.seed.run()) as unknown as [string[], unknown];
 
-    if (migrations.length === 0) {
-      const message = 'No migrations to run — already up to date';
+    if (log.length === 0) {
+      const message = 'No seed files found';
       console.log(message);
       return { success: true, message };
     }
 
-    const message = `Batch ${String(batchNo)} — ran ${String(migrations.length)} migration(s): ${migrations.join(', ')}`;
+    const message = `Ran ${String(log.length)} seed file(s): ${log.join(', ')}`;
     console.log(message);
     return { success: true, message };
   } catch (error) {
-    const message = `Migration failed: ${error instanceof Error ? error.message : String(error)}`;
+    const message = `Seeding failed: ${error instanceof Error ? error.message : String(error)}`;
     console.error(message);
     throw new Error(message);
   } finally {

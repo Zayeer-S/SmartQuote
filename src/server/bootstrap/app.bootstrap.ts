@@ -28,6 +28,11 @@ export async function bootstrapApplication(
 
   const app = express();
 
+  // Trust the first proxy hop (CloudFront => API Gateway => Lambda).
+  // Required so express-rate-limit can read X-Forwarded-For without throwing
+  // ERR_ERL_UNEXPECTED_X_FORWARDED_FOR, and so req.ip reflects the real client IP.
+  app.set('trust proxy', 1);
+
   app.use(helmet());
   app.use(
     cors({
@@ -36,11 +41,24 @@ export async function bootstrapApplication(
     })
   );
 
-  app.use(express.json());
+  app.use((req, res, next) => {
+    if (req.body instanceof Buffer) {
+      try {
+        req.body = JSON.parse(req.body.toString('utf8')) as unknown;
+      } catch {
+        req.body = {};
+      }
+      next();
+    } else {
+      express.json()(req, res, next);
+    }
+  });
   app.use(express.urlencoded({ extended: true }));
 
   app.use((req, _res, next) => {
     console.log(`${req.method} ${req.path}`);
+    console.log('Content-Type:', req.headers['content-type']);
+    console.log('Body after parse:', JSON.stringify(req.body));
     next();
   });
 

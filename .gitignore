@@ -163,3 +163,5 @@ sketch
 
 # loc counter
 .VSCodeCounter
+
+dist-db/
