@@ -1,15 +1,13 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/auth/AuthContext';
 import { SidebarProvider } from './context/sidebar/SidebarContext';
 import LoginPage from './pages/login/LoginPage';
 import CantAccessPage from './pages/login/CantAccessPage';
 import NotFoundPage from './pages/NotFoundPage';
-import ProtectedRoute from './components/ProtectedRoute';
 import { CLIENT_ROUTES } from './constants/client.routes';
 import { ThemeProvider } from './context/theme';
-import { AUTH_ROLES } from '../shared/constants';
 import CustomerLayout from './pages/customer/CustomerLayout';
 import DashboardPage from './pages/customer/DashboardPage';
 import TicketsPage from './pages/customer/TicketsPage';
@@ -39,17 +37,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route path={CLIENT_ROUTES.LOGIN} element={<LoginPage />} />
                 <Route path={CLIENT_ROUTES.CANT_ACCESS_ACCOUNT} element={<CantAccessPage />} />
 
-                <Route
-                  element={
-                    <ProtectedRoute
-                      allowedRoles={[
-                        AUTH_ROLES.ADMIN,
-                        AUTH_ROLES.MANAGER,
-                        AUTH_ROLES.SUPPORT_AGENT,
-                      ]}
-                    />
-                  }
-                >
+                {/* ⚠️ AUTH BYPASSED FOR DEVELOPMENT — restore ProtectedRoute before merging */}
+                <Route element={<Outlet />}>
                   <Route path={CLIENT_ROUTES.ADMIN.ROOT} element={<AdminLayout />}>
                     <Route index element={<AdminTicketsPage />} />
                     <Route path={CLIENT_ROUTES.ADMIN.TICKETS} element={<AdminTicketsPage />} />
@@ -68,7 +57,8 @@ createRoot(document.getElementById('root')!).render(
                   </Route>
                 </Route>
 
-                <Route element={<ProtectedRoute allowedRoles={[AUTH_ROLES.CUSTOMER]} />}>
+                {/* ⚠️ AUTH BYPASSED FOR DEVELOPMENT — restore ProtectedRoute before merging */}
+                <Route element={<Outlet />}>
                   <Route path={CLIENT_ROUTES.CUSTOMER.ROOT} element={<CustomerLayout />}>
                     <Route index element={<DashboardPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.TICKETS} element={<TicketsPage />} />

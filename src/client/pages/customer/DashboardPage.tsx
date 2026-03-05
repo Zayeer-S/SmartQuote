@@ -25,20 +25,27 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="dashboard-page" data-testid="dashboard-page">
-      <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
+      {/* ── Header ── */}
+      <div className="dashboard-header">
+        <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
+        <p className="dashboard-subheading">Overview of your support tickets and quotes</p>
+      </div>
 
+      {/* ── Loading ── */}
       {loading && (
         <p className="loading-text" data-testid="dashboard-loading">
           Loading...
         </p>
       )}
 
+      {/* ── Error ── */}
       {error && (
         <p className="feedback-error" role="alert" data-testid="dashboard-error">
           {error}
         </p>
       )}
 
+      {/* ── Stats + Chart overview ── */}
       {!loading && !error && (
         <div className="card dashboard-overview" data-testid="dashboard-overview">
           <TicketStatusChart tickets={allTickets} />
@@ -49,6 +56,7 @@ const DashboardPage: React.FC = () => {
         </div>
       )}
 
+      {/* ── Recent Tickets ── */}
       {!loading && !error && (
         <section aria-labelledby="recent-tickets-heading">
           <div className="dashboard-section-header">

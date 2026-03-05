@@ -1,56 +1,106 @@
+/* ═══════════════════════════════════════════════════
+   GIACOM Dashboard — Official Brand Colours 2025
+   Deep Navy   : #100235  (Pantone 2768)
+   Mid Purple  : #99338a  (Pantone 258)
+   Dark Purple : #67236a  (Pantone 2623)
+   Magenta     : #ec008c  (Pantone 233)
+   Amber       : #ffb91d  (Pantone 7549)
+   Font        : Montserrat
+   ═══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap');
+
+/* ── Page wrapper ── */
 .dashboard-page {
   max-width: 900px;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+/* ── Header ── */
+.dashboard-header {
+  margin-bottom: var(--spacing-xl);
 }
 
 .dashboard-heading {
   font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  font-weight: 700;
+  color: #100235;
   letter-spacing: -0.02em;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: 4px;
+  font-family: 'Montserrat', Arial, sans-serif;
 }
 
+.dashboard-subheading {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+/* ── Overview card (stats + chart) ── */
 .dashboard-overview {
   display: flex;
   align-items: center;
   gap: var(--spacing-xl);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
+  border-radius: 12px;
+  border: 1px solid #ede8f5;
+  box-shadow: 0 2px 8px rgba(16, 2, 53, 0.07);
+  background: #ffffff;
+  transition: box-shadow 0.2s ease;
 }
 
+.dashboard-overview:hover {
+  box-shadow: 0 4px 18px rgba(16, 2, 53, 0.11);
+}
+
+/* ── Divider between chart and stats ── */
 .dashboard-overview-divider {
   width: 1px;
   height: 120px;
-  background-color: var(--color-border-primary);
+  background: linear-gradient(to bottom, transparent, #99338a44, transparent);
   flex-shrink: 0;
 }
 
+/* ── Section header (Recent Tickets) ── */
 .dashboard-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-md);
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ec008c22;
 }
 
 .dashboard-section-title {
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  font-weight: 700;
+  color: #100235;
+  font-family: 'Montserrat', Arial, sans-serif;
+  letter-spacing: -0.01em;
 }
 
+/* ── View all link ── */
 .dashboard-view-all {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-primary-600);
+  font-weight: 600;
+  color: #99338a;
+  text-decoration: none;
+  font-family: 'Montserrat', Arial, sans-serif;
+  letter-spacing: 0.02em;
   transition: opacity var(--transition-fast);
 }
 
 .dashboard-view-all:hover {
-  opacity: 0.75;
+  opacity: 0.7;
 }
 
+/* ── Recent tickets list ── */
 .dashboard-recent-list {
   list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -60,18 +110,74 @@
   display: contents;
 }
 
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 40px 24px;
+  border-radius: 12px;
+  border: 1.5px dashed #99338a44;
+  background: #fdf8ff;
+}
+
+.empty-state-message {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+/* ── Loading / error text ── */
+.loading-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-family: 'Montserrat', Arial, sans-serif;
+  padding: 16px 0;
+}
+
+.feedback-error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error, #dc2626);
+  background-color: var(--color-error-light, #fef2f2);
+  border-left: 3px solid #ec008c;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-family: 'Montserrat', Arial, sans-serif;
+  margin-bottom: var(--spacing-md);
+}
+
+/* ── Dark mode ── */
 [data-theme='dark'] .dashboard-heading {
   color: var(--color-gray-50);
 }
 
+[data-theme='dark'] .dashboard-subheading {
+  color: var(--color-gray-400);
+}
+
+[data-theme='dark'] .dashboard-overview {
+  background: var(--color-gray-800, #1f2937);
+  border-color: #374151;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 [data-theme='dark'] .dashboard-overview-divider {
-  background-color: var(--color-gray-700);
+  background: linear-gradient(to bottom, transparent, #99338a66, transparent);
 }
 
 [data-theme='dark'] .dashboard-section-title {
   color: var(--color-gray-100);
 }
 
+[data-theme='dark'] .dashboard-section-header {
+  border-bottom-color: #ec008c33;
+}
+
+[data-theme='dark'] .empty-state {
+  background: #1a1030;
+  border-color: #99338a55;
+}
+
+/* ── Responsive ── */
 @media (max-width: 600px) {
   .dashboard-overview {
     flex-direction: column;
