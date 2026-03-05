@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/contexts/useAuth';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
 import './CustomerLayout.css';
 
-/* ── Inline SVG icons — no emoji, no external deps ── */
+/* ── Inline SVG icons ── */
 const IconDashboard = () => (
   <svg
     width="16"
@@ -131,7 +131,7 @@ const CustomerLayout: React.FC = () => {
           <span className="customer-sidebar-sub">Customer Portal</span>
         </div>
 
-        {/* Nav links */}
+        {/* Nav */}
         <ul className="customer-sidebar-nav" role="list">
           <li>
             <NavLink

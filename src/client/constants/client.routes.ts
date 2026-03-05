@@ -6,6 +6,7 @@ export const CLIENT_ROUTES = {
     TICKETS: '/customer/tickets',
     TICKET: (id = ':ticketId') => `/customer/tickets/${id}`,
     NEW_TICKET: '/customer/tickets/new',
+    QUOTES: '/customer/quotes',
     SETTINGS: '/customer/settings',
   },
   ADMIN: {

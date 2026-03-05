@@ -10,6 +10,54 @@ import './DashboardPage.css';
 
 const RECENT_TICKET_COUNT = 5;
 
+/* ── SVG Icons ── */
+const IconPlus = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+const IconArrowRight = () => (
+  <svg
+    width="13"
+    height="13"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+
+const IconTicket = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9z" />
+  </svg>
+);
+
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { execute, data, loading, error } = useListTickets();
@@ -25,17 +73,29 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="dashboard-page" data-testid="dashboard-page">
-      {/* ── Header ── */}
+      {/* ── Page header ── */}
       <div className="dashboard-header">
-        <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
-        <p className="dashboard-subheading">Overview of your support tickets and quotes</p>
+        <div>
+          <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
+          <p className="dashboard-subheading">Overview of your support tickets and quotes</p>
+        </div>
+        <Link
+          to={CLIENT_ROUTES.CUSTOMER.NEW_TICKET}
+          className="dashboard-new-ticket-btn"
+          data-testid="dashboard-new-ticket"
+        >
+          <IconPlus />
+          New Ticket
+        </Link>
       </div>
 
-      {/* ── Loading ── */}
+      {/* ── Loading skeletons ── */}
       {loading && (
-        <p className="loading-text" data-testid="dashboard-loading">
-          Loading...
-        </p>
+        <div className="dashboard-skeletons" data-testid="dashboard-loading">
+          <div className="dashboard-skeleton" />
+          <div className="dashboard-skeleton" />
+          <div className="dashboard-skeleton" />
+        </div>
       )}
 
       {/* ── Error ── */}
@@ -45,7 +105,7 @@ const DashboardPage: React.FC = () => {
         </p>
       )}
 
-      {/* ── Stats + Chart overview ── */}
+      {/* ── Stats + Chart ── */}
       {!loading && !error && (
         <div className="card dashboard-overview" data-testid="dashboard-overview">
           <TicketStatusChart tickets={allTickets} />
@@ -58,7 +118,7 @@ const DashboardPage: React.FC = () => {
 
       {/* ── Recent Tickets ── */}
       {!loading && !error && (
-        <section aria-labelledby="recent-tickets-heading">
+        <section className="dashboard-section" aria-labelledby="recent-tickets-heading">
           <div className="dashboard-section-header">
             <h2 className="dashboard-section-title" id="recent-tickets-heading">
               Recent Tickets
@@ -68,15 +128,20 @@ const DashboardPage: React.FC = () => {
               className="dashboard-view-all"
               data-testid="view-all-tickets-link"
             >
-              View all
+              View all <IconArrowRight />
             </Link>
           </div>
 
           {recentTickets.length === 0 ? (
             <div className="empty-state" data-testid="dashboard-no-tickets">
-              <p className="empty-state-message">You have not submitted any tickets yet.</p>
-              <Link className="btn btn-primary btn-sm" to={CLIENT_ROUTES.CUSTOMER.NEW_TICKET}>
-                Submit your first ticket
+              <div className="empty-state-icon-wrap">
+                <IconTicket />
+              </div>
+              <p className="empty-state-title">No tickets yet</p>
+              <p className="empty-state-message">Submit your first ticket to get started.</p>
+              <Link className="dashboard-new-ticket-btn" to={CLIENT_ROUTES.CUSTOMER.NEW_TICKET}>
+                <IconPlus />
+                Submit a ticket
               </Link>
             </div>
           ) : (

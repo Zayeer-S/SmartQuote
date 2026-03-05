@@ -13,6 +13,7 @@ import DashboardPage from './pages/customer/DashboardPage';
 import TicketsPage from './pages/customer/TicketsPage';
 import TicketDetailPage from './pages/customer/TicketDetailPage';
 import NewTicketPage from './pages/customer/NewTicketPage';
+import QuotesPage from './pages/customer/QuotesPage';
 import SettingsPage from './pages/customer/CustomerSettingsPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminTicketsPage from './pages/admin/AdminTicketsPage';
@@ -64,6 +65,7 @@ createRoot(document.getElementById('root')!).render(
                     <Route path={CLIENT_ROUTES.CUSTOMER.TICKETS} element={<TicketsPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.TICKET()} element={<TicketDetailPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.NEW_TICKET} element={<NewTicketPage />} />
+                    <Route path={CLIENT_ROUTES.CUSTOMER.QUOTES} element={<QuotesPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.SETTINGS} element={<SettingsPage />} />
                   </Route>
                 </Route>

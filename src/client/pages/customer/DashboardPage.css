@@ -1,16 +1,11 @@
-/* ═══════════════════════════════════════════════════
-   GIACOM Dashboard — Official Brand Colours 2025
-   Deep Navy   : #100235  (Pantone 2768)
-   Mid Purple  : #99338a  (Pantone 258)
-   Dark Purple : #67236a  (Pantone 2623)
-   Magenta     : #ec008c  (Pantone 233)
-   Amber       : #ffb91d  (Pantone 7549)
-   Font        : Montserrat
-   ═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   GIACOM Dashboard Page
+   Navy #100235 | Purple #99338a | Magenta #ec008c
+   Amber #ffb91d | Font: Montserrat
+   ═══════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap');
 
-/* ── Page wrapper ── */
 .dashboard-page {
   max-width: 900px;
   font-family: 'Montserrat', Arial, sans-serif;
@@ -18,11 +13,15 @@
 
 /* ── Header ── */
 .dashboard-header {
-  margin-bottom: var(--spacing-xl);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 16px;
 }
 
 .dashboard-heading {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-2xl, 1.5rem);
   font-weight: 700;
   color: #100235;
   letter-spacing: -0.02em;
@@ -31,154 +30,237 @@
 }
 
 .dashboard-subheading {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, #6b7280);
   margin: 0;
   font-family: 'Montserrat', Arial, sans-serif;
 }
 
-/* ── Overview card (stats + chart) ── */
+/* ── New ticket button ── */
+.dashboard-new-ticket-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  background: #99338a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dashboard-new-ticket-btn:hover {
+  background: #67236a;
+  transform: translateY(-1px);
+}
+
+/* ── Overview card ── */
 .dashboard-overview {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xl);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-xl, 24px);
+  padding: var(--spacing-lg, 20px);
+  margin-bottom: var(--spacing-xl, 24px);
   border-radius: 12px;
-  border: 1px solid #ede8f5;
-  box-shadow: 0 2px 8px rgba(16, 2, 53, 0.07);
+  border: 1px solid #e8e0f0;
+  box-shadow: 0 2px 12px rgba(16, 2, 53, 0.06);
   background: #ffffff;
   transition: box-shadow 0.2s ease;
 }
 
 .dashboard-overview:hover {
-  box-shadow: 0 4px 18px rgba(16, 2, 53, 0.11);
+  box-shadow: 0 4px 20px rgba(16, 2, 53, 0.1);
 }
 
-/* ── Divider between chart and stats ── */
 .dashboard-overview-divider {
   width: 1px;
   height: 120px;
-  background: linear-gradient(to bottom, transparent, #99338a44, transparent);
+  background: linear-gradient(to bottom, transparent, rgba(153, 51, 138, 0.25), transparent);
   flex-shrink: 0;
 }
 
-/* ── Section header (Recent Tickets) ── */
+/* ── Section ── */
+.dashboard-section {
+  margin-top: 8px;
+}
+
 .dashboard-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-md);
-  padding-bottom: 10px;
-  border-bottom: 2px solid #ec008c22;
+  margin-bottom: var(--spacing-md, 16px);
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid rgba(153, 51, 138, 0.12);
 }
 
 .dashboard-section-title {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-base, 1rem);
   font-weight: 700;
   color: #100235;
   font-family: 'Montserrat', Arial, sans-serif;
   letter-spacing: -0.01em;
 }
 
-/* ── View all link ── */
 .dashboard-view-all {
-  font-size: var(--font-size-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--font-size-sm, 0.875rem);
   font-weight: 600;
   color: #99338a;
   text-decoration: none;
   font-family: 'Montserrat', Arial, sans-serif;
-  letter-spacing: 0.02em;
-  transition: opacity var(--transition-fast);
+  transition: opacity 0.15s ease;
 }
 
 .dashboard-view-all:hover {
   opacity: 0.7;
 }
 
-/* ── Recent tickets list ── */
+/* ── Recent list ── */
 .dashboard-recent-list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-sm, 8px);
 }
 
 .dashboard-recent-list li {
   display: contents;
 }
 
-/* ── Empty state ── */
-.empty-state {
-  text-align: center;
-  padding: 40px 24px;
-  border-radius: 12px;
-  border: 1.5px dashed #99338a44;
-  background: #fdf8ff;
+/* ── Loading skeletons ── */
+.dashboard-skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
-.empty-state-message {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-bottom: 16px;
-  font-family: 'Montserrat', Arial, sans-serif;
+.dashboard-skeleton {
+  height: 80px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #f0eaf8 25%, #e4d8f0 50%, #f0eaf8 75%);
+  background-size: 200% 100%;
+  animation: giacom-shimmer 1.5s infinite;
 }
 
-/* ── Loading / error text ── */
-.loading-text {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  font-family: 'Montserrat', Arial, sans-serif;
-  padding: 16px 0;
+@keyframes giacom-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
+/* ── Error ── */
 .feedback-error {
-  font-size: var(--font-size-sm);
-  color: var(--color-error, #dc2626);
-  background-color: var(--color-error-light, #fef2f2);
+  font-size: var(--font-size-sm, 0.875rem);
+  color: #dc2626;
+  background-color: #fef2f2;
   border-left: 3px solid #ec008c;
   padding: 10px 14px;
   border-radius: 6px;
   font-family: 'Montserrat', Arial, sans-serif;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 56px 24px;
+  border-radius: 12px;
+  border: 1.5px dashed rgba(153, 51, 138, 0.25);
+  background: #fdf8ff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.empty-state-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(153, 51, 138, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #99338a;
+  margin-bottom: 4px;
+}
+
+.empty-state-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #100235;
+  margin: 0;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+.empty-state-message {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, #6b7280);
+  margin: 0;
+  font-family: 'Montserrat', Arial, sans-serif;
 }
 
 /* ── Dark mode ── */
 [data-theme='dark'] .dashboard-heading {
-  color: var(--color-gray-50);
+  color: var(--color-gray-50, #f9fafb);
 }
 
 [data-theme='dark'] .dashboard-subheading {
-  color: var(--color-gray-400);
+  color: var(--color-gray-400, #9ca3af);
 }
 
 [data-theme='dark'] .dashboard-overview {
   background: var(--color-gray-800, #1f2937);
   border-color: #374151;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 [data-theme='dark'] .dashboard-overview-divider {
-  background: linear-gradient(to bottom, transparent, #99338a66, transparent);
+  background: linear-gradient(to bottom, transparent, rgba(153, 51, 138, 0.35), transparent);
 }
 
 [data-theme='dark'] .dashboard-section-title {
-  color: var(--color-gray-100);
+  color: var(--color-gray-100, #f3f4f6);
 }
 
 [data-theme='dark'] .dashboard-section-header {
-  border-bottom-color: #ec008c33;
+  border-bottom-color: rgba(153, 51, 138, 0.2);
 }
 
 [data-theme='dark'] .empty-state {
   background: #1a1030;
-  border-color: #99338a55;
+  border-color: rgba(153, 51, 138, 0.3);
+}
+
+[data-theme='dark'] .dashboard-skeleton {
+  background: linear-gradient(90deg, #1f1535 25%, #2d1f45 50%, #1f1535 75%);
+  background-size: 200% 100%;
 }
 
 /* ── Responsive ── */
 @media (max-width: 600px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .dashboard-overview {
     flex-direction: column;
     align-items: flex-start;
