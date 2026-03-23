@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import rateLimit, { type Store } from 'express-rate-limit';
+import rateLimit, { Store } from 'express-rate-limit';
+import { type NextFunction, type Request, type Response } from 'express';
 import RedisStore from 'rate-limit-redis';
 import { createClient } from 'redis';
 import { backEnv } from '../config/env.backend.js';
 import { authRateLimitConfig } from '../config/auth-config.js';
-import { NextFunction } from 'express';
 
 const redisEnvPresent =
   backEnv.REDIS_HOST !== undefined &&

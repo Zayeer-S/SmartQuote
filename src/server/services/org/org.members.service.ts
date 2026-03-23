@@ -84,7 +84,8 @@ export class OrgMembersService {
 
     // Single-org constraint: customers may not belong to more than one org
     const existingMemberships = await this.orgMembersDAO.findByUser(data.targetUserId, options);
-    if (existingMemberships.length > 0) {
+
+    if (existingMemberships && existingMemberships.length > 0) {
       const alreadyInThisOrg = existingMemberships.some((m) => m.organization_id === data.orgId);
       const msg = alreadyInThisOrg
         ? ORG_MEMBERS_ERROR_MSGS.ALREADY_MEMBER_THIS_ORG
@@ -163,7 +164,7 @@ export class OrgMembersService {
     orgId: OrganizationId,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<OrganizationMember[]> {
+  ): Promise<OrganizationMember[] | null> {
     const canView = await this.orgRBACService.hasOrgPermission(
       actorId,
       orgId,
@@ -175,7 +176,7 @@ export class OrgMembersService {
     const org = await this.orgsDAO.getById(orgId, options);
     if (!org) throw new OrgError(ORG_ERROR_MSGS.NOT_FOUND, 404);
 
-    return this.orgMembersDAO.findByOrganization(orgId, options);
+    return await this.orgMembersDAO.findByOrganization(orgId, options);
   }
 
   /**
@@ -190,6 +191,7 @@ export class OrgMembersService {
    */
   async getMyOrg(actorId: UserId, options?: TransactionContext): Promise<Organization | null> {
     const memberships = await this.orgMembersDAO.findByUser(actorId, options);
+    if (!memberships) return null;
     if (memberships.length === 0) return null;
 
     return this.orgsDAO.getById(memberships[0].organization_id, options);

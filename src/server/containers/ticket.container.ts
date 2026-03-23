@@ -14,6 +14,7 @@ import {
   TicketPriorityRulesDAO,
   TicketPriorityThresholdsDAO,
 } from '../daos/children/ticket.priority.dao.js';
+import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
 
 export class TicketContainer {
   public readonly ticketsDAO: TicketsDAO;
@@ -32,6 +33,7 @@ export class TicketContainer {
   constructor(
     db: Knex,
     rbacService: RBACService,
+    orgMembersDAO: OrganizationMembersDAO,
     lookupResolver: LookupResolver,
     embedder: BertEmbedder
   ) {
@@ -52,6 +54,7 @@ export class TicketContainer {
     this.ticketService = new TicketService(
       this.ticketsDAO,
       this.usersDAO,
+      orgMembersDAO,
       rbacService,
       lookupResolver,
       this.priorityEngine

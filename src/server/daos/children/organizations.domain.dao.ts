@@ -55,7 +55,7 @@ export class OrganizationMembersDAO extends CompositeKeyDAO<OrganizationMember> 
    * @param options
    * @returns Array of OrganizationMember rows
    */
-  async findByUser(userId: UserId, options?: QueryOptions): Promise<OrganizationMember[]> {
+  async findByUser(userId: UserId, options?: QueryOptions): Promise<OrganizationMember[] | null> {
     return this.getMany({ user_id: userId }, options);
   }
 
@@ -69,7 +69,7 @@ export class OrganizationMembersDAO extends CompositeKeyDAO<OrganizationMember> 
   async findByOrganization(
     organizationId: OrganizationId,
     options?: QueryOptions
-  ): Promise<OrganizationMember[]> {
+  ): Promise<OrganizationMember[] | null> {
     return this.getMany({ organization_id: organizationId }, options);
   }
 

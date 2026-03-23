@@ -14,7 +14,6 @@ import { OrgController } from '../controllers/org.controller.js';
 
 export class OrgContainer {
   public readonly orgsDAO: OrganizationsDAO;
-  public readonly orgMembersDAO: OrganizationMembersDAO;
   public readonly orgPermissionsDAO: OrgPermissionsDAO;
   public readonly rolesDAO: RolesDAO;
   public readonly orgRolesDAO: OrgRolesDAO;
@@ -26,24 +25,19 @@ export class OrgContainer {
 
   public readonly orgController: OrgController;
 
-  constructor(db: Knex, rbacService: RBACService) {
+  constructor(db: Knex, rbacService: RBACService, orgMembersDAO: OrganizationMembersDAO) {
     this.orgsDAO = new OrganizationsDAO(db);
-    this.orgMembersDAO = new OrganizationMembersDAO(db);
     this.orgPermissionsDAO = new OrgPermissionsDAO(db);
     this.rolesDAO = new RolesDAO(db);
     this.orgRolesDAO = new OrgRolesDAO(db);
     this.usersDAO = new UsersDAO(db);
 
-    this.orgRBACService = new OrgRBACService(
-      this.orgMembersDAO,
-      this.orgPermissionsDAO,
-      rbacService
-    );
+    this.orgRBACService = new OrgRBACService(orgMembersDAO, this.orgPermissionsDAO, rbacService);
 
     this.orgService = new OrgService(this.orgsDAO, rbacService);
 
     this.orgMembersService = new OrgMembersService(
-      this.orgMembersDAO,
+      orgMembersDAO,
       this.orgsDAO,
       this.usersDAO,
       this.rolesDAO,

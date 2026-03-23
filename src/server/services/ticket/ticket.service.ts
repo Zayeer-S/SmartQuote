@@ -2,7 +2,7 @@ import { PERMISSIONS, TICKET_STATUSES } from '../../../shared/constants';
 import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types.js';
 import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
 import type { UsersDAO } from '../../daos/children/users.dao.js';
-import type { TicketId, UserId } from '../../database/types/ids.js';
+import type { OrganizationId, TicketId, UserId } from '../../database/types/ids.js';
 import type { Ticket, TicketWithDetails } from '../../database/types/tables.js';
 import type { RBACService } from '../rbac/rbac.service.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
@@ -13,10 +13,12 @@ import type {
   UpdateTicketData,
 } from './ticket.service.types.js';
 import type { TicketPriorityEngine } from './ticket.priority.engine.js';
+import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
 
 export class TicketService {
   private ticketsDAO: TicketsDAO;
   private usersDAO: UsersDAO;
+  private orgMembersDAO: OrganizationMembersDAO;
   private rbacService: RBACService;
   private lookup: LookupResolver;
   private priorityEngine: TicketPriorityEngine;
@@ -24,12 +26,14 @@ export class TicketService {
   constructor(
     ticketsDAO: TicketsDAO,
     usersDAO: UsersDAO,
+    orgMembersDAO: OrganizationMembersDAO,
     rbacService: RBACService,
     lookup: LookupResolver,
     priorityEngine: TicketPriorityEngine
   ) {
     this.ticketsDAO = ticketsDAO;
     this.usersDAO = usersDAO;
+    this.orgMembersDAO = orgMembersDAO;
     this.rbacService = rbacService;
     this.lookup = lookup;
     this.priorityEngine = priorityEngine;
@@ -56,8 +60,8 @@ export class TicketService {
 
     const actor = await this.usersDAO.getById(actorId, options);
     if (!actor) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
-    if (!actor.organization_id)
-      throw new TicketError(`Actor does not belong to an organization`, 422);
+
+    const orgId = await this.getOrgId(actor.id);
 
     const ticketPriorityId = await this.priorityEngine.calculatePriority({
       ticketSeverity: this.lookup.ticketSeverityName(data.ticket_severity_id as unknown as number),
@@ -71,7 +75,7 @@ export class TicketService {
       {
         ...data,
         creator_user_id: actorId,
-        organization_id: actor.organization_id,
+        organization_id: orgId,
         ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.OPEN),
         ticket_priority_id: ticketPriorityId,
         assigned_to_user_id: null,
@@ -130,9 +134,11 @@ export class TicketService {
     }
 
     const actor = await this.usersDAO.getById(actorId, options);
-    if (!actor?.organization_id) return [];
+    if (!actor) return [];
 
-    const criteria: Partial<Ticket> = { organization_id: actor.organization_id };
+    const orgId = await this.getOrgId(actor.id);
+
+    const criteria: Partial<Ticket> = { organization_id: orgId };
     if (filters.ticketStatus)
       criteria.ticket_status_id = this.lookup.ticketStatusId(filters.ticketStatus);
 
@@ -311,7 +317,16 @@ export class TicketService {
     if (canReadAll) return;
 
     const actor = await this.usersDAO.getById(actorId, options);
-    if (actor?.organization_id !== ticket.organization_id)
-      throw new ForbiddenError(TICKET_ERROR_MSGS.FORBIDDEN);
+    if (!actor) throw new ForbiddenError(TICKET_ERROR_MSGS.ASSIGNEE_NOT_FOUND);
+
+    const orgId = await this.getOrgId(actor.id);
+
+    if (orgId !== ticket.organization_id) throw new ForbiddenError(TICKET_ERROR_MSGS.FORBIDDEN);
+  }
+
+  private async getOrgId(actorId: UserId): Promise<OrganizationId | null> {
+    const orgMemberships = await this.orgMembersDAO.findByUser(actorId);
+
+    return orgMemberships ? orgMemberships[0].organization_id : null;
   }
 }

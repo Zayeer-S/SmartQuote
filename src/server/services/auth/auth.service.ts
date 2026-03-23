@@ -9,23 +9,27 @@ import type {
   CreateUserResponse,
 } from '../../../shared/contracts/user-contracts.js';
 import type { TransactionContext } from '../../daos/base/types.js';
+import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
 import type { UsersDAO } from '../../daos/children/users.dao.js';
-import type { OrganizationId, RoleId, UserId } from '../../database/types/ids.js';
+import type { RoleId, UserId } from '../../database/types/ids.js';
 import { AUTH_ERROR_MSGS, AuthError, PasswordValidationError } from './auth.errors.js';
 import type { PasswordService } from './password.service.js';
 import type { SessionService } from './session.service.js';
 
 export class AuthService {
   private usersDAO: UsersDAO;
+  private orgMembersDAO: OrganizationMembersDAO;
   private sessionService: SessionService;
   private passwordService: PasswordService;
 
   constructor(
     usersDAO: UsersDAO,
+    orgMembersDAO: OrganizationMembersDAO,
     sessionService: SessionService,
     passwordService: PasswordService
   ) {
     this.usersDAO = usersDAO;
+    this.orgMembersDAO = orgMembersDAO;
     this.sessionService = sessionService;
     this.passwordService = passwordService;
   }
@@ -107,10 +111,9 @@ export class AuthService {
 
     // Get user with role
     const user = await this.usersDAO.findWithRole(session.user_id, options);
+    if (!user) throw new AuthError('User not found');
 
-    if (!user) {
-      throw new AuthError('User not found');
-    }
+    const organizationIds = await this.orgMembersDAO.findByUser(user.id);
 
     return {
       id: user.id,
@@ -124,7 +127,7 @@ export class AuthService {
         id: user.role.id,
         name: user.role.name,
       },
-      organizationId: user.organization_id,
+      organizationId: organizationIds as unknown as string,
       createdAt: user.created_at.toISOString(),
     };
   }
@@ -166,7 +169,6 @@ export class AuthService {
         password: hashedPassword,
         phone_number: userData.phoneNumber,
         role_id: userData.roleId as RoleId,
-        organization_id: userData.organizationId as OrganizationId,
         email_verified: false,
         deleted_at: null,
       },
@@ -190,7 +192,6 @@ export class AuthService {
         id: userWithRole.role.id,
         name: userWithRole.role.name,
       },
-      organizationId: userWithRole.organization_id,
       createdAt: userWithRole.created_at.toISOString(),
     };
   }
