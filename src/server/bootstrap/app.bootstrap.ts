@@ -106,7 +106,7 @@ export async function bootstrapApplication(
   );
 
   app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
   if (options.runBackgroundJobs) {
