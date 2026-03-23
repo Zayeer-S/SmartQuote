@@ -5,7 +5,7 @@ import type { AuthConfig } from '../../../src/server/services/auth/auth.config.t
 import type { SessionsDAO } from '../../../src/server/daos/children/sessions.dao';
 import type { Session } from '../../../src/server/database/types/tables';
 import type { UserId } from '../../../src/server/database/types/ids';
-import { makeMockSessionsDAO } from '../../utils/mock.daos';
+import { makeMockSessionsDAO } from './utils/mock.daos';
 
 const TEST_USER_ID = 1 as unknown as UserId;
 const TEST_TOKEN = `test-session-token`;
