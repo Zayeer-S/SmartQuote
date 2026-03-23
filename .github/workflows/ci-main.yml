@@ -68,7 +68,7 @@ jobs:
         run: npm run test:integration
 
       - name: Install new Playwright browsers
-        run: npx playwright install
+        run: npx playwright install --with-deps
 
       - name: Run Smoke tests
         run: npm run test:e2e:smoke
