@@ -1,4 +1,4 @@
-name: ci-branch
+name: ci-unit-integration
 
 on:
     push:
