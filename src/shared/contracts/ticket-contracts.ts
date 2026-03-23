@@ -13,7 +13,6 @@ export interface CreateTicketRequest {
   ticketType: TicketType;
   ticketSeverity: TicketSeverity;
   businessImpact: BusinessImpact;
-  ticketPriority: TicketPriority;
   /** ISO 8601 date string */
   deadline: string;
   usersImpacted: number;

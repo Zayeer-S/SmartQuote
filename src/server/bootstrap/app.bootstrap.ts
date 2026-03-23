@@ -15,6 +15,8 @@ import { createTicketRoutes } from '../routes/ticket.routes.js';
 import { QuoteContainer } from '../containers/quote.container.js';
 import { LookupResolver } from '../lib/lookup-resolver.js';
 import { loadLookupMaps } from '../lib/lookup-maps.js';
+import { BertEmbedder } from '../lib/nlp/bert-embedder.js';
+import { PriorityEngineAnchorsDAO } from '../daos/children/ticket.priority.dao.js';
 
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
@@ -28,6 +30,13 @@ export async function bootstrapApplication(
 
   const db = await initializeDatabase();
   const lookupResolver = new LookupResolver(await loadLookupMaps(db));
+
+  console.log('Initializing NLP embedder...');
+  const embedder = new BertEmbedder();
+  await embedder.init();
+  const anchors = await new PriorityEngineAnchorsDAO(db).getAll({ includeInactive: true });
+  await embedder.warmAnchors(anchors);
+  console.log(`NLP embedder ready (${String(anchors.length)} anchors warmed).`);
 
   const app = express();
 
@@ -68,7 +77,12 @@ export async function bootstrapApplication(
   console.log('Initializing containers...');
   const authContainer = new AuthContainer(db);
   const adminContainer = new AdminContainer(db, authContainer.authService);
-  const ticketContainer = new TicketContainer(db, adminContainer.rbacService, lookupResolver);
+  const ticketContainer = new TicketContainer(
+    db,
+    adminContainer.rbacService,
+    lookupResolver,
+    embedder
+  );
   const quoteContainer = new QuoteContainer(db, adminContainer.rbacService, lookupResolver);
 
   console.log('Registering routes...');

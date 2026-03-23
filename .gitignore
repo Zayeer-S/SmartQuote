@@ -165,3 +165,5 @@ sketch
 .VSCodeCounter
 
 dist-db/
+
+.playwright

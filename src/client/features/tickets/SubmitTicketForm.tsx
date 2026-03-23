@@ -50,13 +50,6 @@ const BUSINESS_IMPACT_OPTIONS: { value: BusinessImpact; label: string }[] = [
   { value: BUSINESS_IMPACTS.CRITICAL, label: BUSINESS_IMPACTS.CRITICAL },
 ];
 
-const TICKET_PRIORITY_OPTIONS: { value: TicketPriority; label: string }[] = [
-  { value: TICKET_PRIORITIES.P1, label: TICKET_PRIORITIES.P1 },
-  { value: TICKET_PRIORITIES.P2, label: TICKET_PRIORITIES.P2 },
-  { value: TICKET_PRIORITIES.P3, label: TICKET_PRIORITIES.P3 },
-  { value: TICKET_PRIORITIES.P4, label: TICKET_PRIORITIES.P4 },
-];
-
 const INITIAL_FORM_STATE: FormState = {
   title: '',
   description: '',
@@ -91,7 +84,6 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
       ticketType: form.ticketType,
       ticketSeverity: form.ticketSeverity,
       businessImpact: form.businessImpact,
-      ticketPriority: form.ticketPriority,
       deadline: new Date(form.deadline).toISOString(),
       usersImpacted,
     };
@@ -213,28 +205,6 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
             data-testid="field-business-impact"
           >
             {BUSINESS_IMPACT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="field-group">
-          <label className="field-label" htmlFor="ticketPriority">
-            Priority
-          </label>
-          <select
-            id="ticketPriority"
-            name="ticketPriority"
-            className="field-select"
-            value={form.ticketPriority}
-            onChange={handleChange}
-            required
-            disabled={loading}
-            data-testid="field-priority"
-          >
-            {TICKET_PRIORITY_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
