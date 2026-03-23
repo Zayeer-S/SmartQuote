@@ -22,7 +22,7 @@ export interface UpdateQuoteRequest {
   fixedCost?: number;
   quoteEffortLevel?: QuoteEffortLevel;
   quoteConfidenceLevel?: QuoteConfidenceLevel | null;
-  /** Mandatory reason for the change — used to populate quote_detail_revisions */
+  /** Mandatory reason for the change -- used to populate quote_detail_revisions */
   reason: string;
 }
 
@@ -62,7 +62,7 @@ export interface QuoteWithApprovalResponse extends QuoteResponse {
 }
 
 export interface ListQuotesResponse {
-  quotes: QuoteResponse[];
+  quotes: QuoteWithApprovalResponse[];
 }
 
 export interface QuoteApprovalResponse {

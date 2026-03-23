@@ -118,13 +118,13 @@ export class QuoteService {
     ticketId: TicketId,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<Quote[]> {
+  ): Promise<QuoteWithApproval[]> {
     const ticket = await this.ticketsDAO.getById(ticketId, options);
     if (!ticket) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
 
     await this.assertTicketVisibility(ticket, actorId, options);
 
-    return this.quotesDAO.findByTicket(ticketId, options);
+    return this.quotesDAO.findManyWithApproval(ticketId, options);
   }
 
   /**

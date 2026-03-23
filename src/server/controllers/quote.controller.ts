@@ -105,7 +105,9 @@ export class QuoteController {
         actor.id as UserId
       );
 
-      const response: ListQuotesResponse = { quotes: quotes.map((q) => this.mapQuote(q)) };
+      const response: ListQuotesResponse = {
+        quotes: quotes.map((q) => this.mapQuoteWithApproval(q)),
+      };
       success(res, response, 200);
     } catch (err: unknown) {
       handleError(res, err);

@@ -87,4 +87,42 @@ export class QuotesDAO extends DeletableDAO<Quote, QuoteId> {
     const result = await query.first();
     return result ? (result as QuoteWithApproval) : null;
   }
+
+  /**
+   * Find all quotes for a ticket with approval status joined in, newest version first.
+   * Quotes without an approval record will have null approval fields.
+   *
+   * @param ticketId Ticket ID
+   * @param options Query options
+   * @returns Array of QuoteWithApproval ordered by version descending
+   */
+  async findManyWithApproval(
+    ticketId: TicketId,
+    options?: GetManyOptions
+  ): Promise<QuoteWithApproval[]> {
+    const q = MAIN_TABLES.QUOTES;
+    const approvals = MAIN_TABLES.QUOTE_APPROVALS;
+    const statuses = LOOKUP_TABLES.QUOTE_APPROVAL_STATUSES;
+
+    let query = this.getQuery(options);
+
+    query = query
+      .select(
+        `${q}.*`,
+        `${statuses}.name as approval_status_name`,
+        `${approvals}.comment as approval_comment`,
+        `${approvals}.approved_at as approved_at`,
+        `${approvals}.approved_by_user_id as approved_by_user_id`
+      )
+      .leftJoin(approvals, `${q}.quote_approval_id`, `${approvals}.id`)
+      .leftJoin(statuses, `${approvals}.approval_status_id`, `${statuses}.id`)
+      .where(`${q}.ticket_id`, ticketId);
+
+    query = this.applyFilters(query, options);
+    query = query.orderBy(`${q}.version`, 'desc');
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const results = await query;
+    return results as QuoteWithApproval[];
+  }
 }
