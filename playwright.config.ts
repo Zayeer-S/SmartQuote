@@ -7,8 +7,8 @@ export default defineConfig({
 
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 2,
-  workers: 4,
+  retries: process.env.CI ? 1 : 0,
+  workers: 3,
 
   reporter: process.env.CI
     ? [['html', { outputFolder: 'coverage/e2e/report' }], ['github']]
@@ -24,13 +24,8 @@ export default defineConfig({
   projects: [
     // --- Setup projects ---
     {
-      name: 'db-setup',
-      testMatch: '**/setup/db.setup.ts',
-    },
-    {
       name: 'customer-setup',
       testMatch: '**/setup/customer.setup.ts',
-      dependencies: ['db-setup'],
       use: { ...devices['Desktop Chrome'] },
     },
 
@@ -38,7 +33,6 @@ export default defineConfig({
     {
       name: 'chromium',
       testIgnore: '**/smoke/ticket.smoke.test.ts',
-      dependencies: ['db-setup'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: { cookies: [], origins: [] },
@@ -47,7 +41,6 @@ export default defineConfig({
     {
       name: 'firefox',
       testIgnore: '**/smoke/ticket.smoke.test.ts',
-      dependencies: ['db-setup'],
       use: {
         ...devices['Desktop Firefox'],
         storageState: { cookies: [], origins: [] },
@@ -56,7 +49,6 @@ export default defineConfig({
     {
       name: 'webkit',
       testIgnore: '**/smoke/ticket.smoke.test.ts',
-      dependencies: ['db-setup'],
       use: {
         ...devices['Desktop Safari'],
         storageState: { cookies: [], origins: [] },
@@ -95,7 +87,8 @@ export default defineConfig({
 
   webServer: [
     {
-      command: 'cross-env NODE_ENV=test npm run dev:server',
+      command:
+        'cross-env NODE_ENV=test npm run db:migrate && npm run db:seed && cross-env NODE_ENV=test npm run dev:server',
       url: 'http://localhost:3000/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
