@@ -281,6 +281,22 @@ smartquote/
 │           └── user-contracts.ts
 │
 ├── tests/
+│   ├── e2e/
+│   │   ├── auth.smoke.test.ts
+│   ├── helpers/
+│   │   ├── setup.client.ts
+│   │   ├── setup.integration.ts
+│   │   ├── setup.server.ts
+│   ├── integration/
+│   │   ├── auth.routes.test.ts
+│   ├── unit/
+│   │   ├── server/
+│   │       ├── auth.service.test.ts
+│   │       ├── password.service.test.ts
+│   │       ├── session.service.test.ts
+│   └── utils/
+│       ├── mock.daos.ts
+│       ├── mock.services.ts
 │
 ├── .dockerignore
 ├── .env.example

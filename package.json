@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:server": "tsx watch src/server/bootstrap/server.ts",
     "dev:full": "concurrently \"npm run dev\" \"npm run dev:server\"",
+    "dev:full:setup": "npm run dev:full && npm run db:reset",
     "build": "tsc -b && vite build",
     "build:server": "tsc --project tsconfig.server.json --noEmit",
     "build:client": "vite build",

@@ -23,31 +23,35 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: { cookies: [], origins: [] },
+      },
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: { cookies: [], origins: [] },
+      },
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: {
+        ...devices['Desktop Safari'],
+        storageState: { cookies: [], origins: [] },
+      },
     },
   ],
 
-  // Spin up both servers before running E2E tests
+  globalSetup: './tests/e2e/global.setup.ts',
+
   webServer: [
     {
-      command: 'npm run dev',
-      url: 'http://localhost:5173',
+      command: 'cross-env NODE_ENV=test npm run dev:full',
+      url: 'http://localhost:3000/health',
       reuseExistingServer: !process.env.CI,
-      timeout: 30_000,
-    },
-    {
-      command: 'npm run dev:server',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      timeout: 30_000,
+      timeout: 60_000,
     },
   ],
 });
