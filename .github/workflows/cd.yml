@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - main
-
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
 concurrency:
   group: deploy-production
   # Wait for any in-progress deploy to finish rather than cancelling it
