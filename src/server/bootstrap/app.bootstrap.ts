@@ -13,9 +13,11 @@ import { errorHandler, notFoundHandler } from '../middleware/error.middleware.js
 import { TicketContainer } from '../containers/ticket.container.js';
 import { createTicketRoutes } from '../routes/ticket.routes.js';
 import { QuoteContainer } from '../containers/quote.container.js';
+import { LookupResolver } from '../lib/lookup-resolver.js';
+import { loadLookupMaps } from '../lib/lookup-maps.js';
 
 interface BootstrapOptions {
-  /** Set to false in Lambda — background jobs are meaningless in stateless invocations */
+  /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
   runBackgroundJobs?: boolean;
 }
 
@@ -25,6 +27,7 @@ export async function bootstrapApplication(
   console.log('Bootstrapping application...');
 
   const db = await initializeDatabase();
+  const lookupResolver = new LookupResolver(await loadLookupMaps(db));
 
   const app = express();
 
@@ -65,8 +68,8 @@ export async function bootstrapApplication(
   console.log('Initializing containers...');
   const authContainer = new AuthContainer(db);
   const adminContainer = new AdminContainer(db, authContainer.authService);
-  const ticketContainer = new TicketContainer(db, adminContainer.rbacService);
-  const quoteContainer = new QuoteContainer(db, adminContainer.rbacService);
+  const ticketContainer = new TicketContainer(db, adminContainer.rbacService, lookupResolver);
+  const quoteContainer = new QuoteContainer(db, adminContainer.rbacService, lookupResolver);
 
   console.log('Registering routes...');
   app.use('/api/auth', createAuthRoutes(authContainer.authController, authContainer.authService));
