@@ -21,6 +21,7 @@ export const authRateLimitConfig: AuthRateLimitConfig = {
     windowMs: 15 * 60 * 1000,
     maxAttempts: 100,
   },
+  disabled: backEnv.NODE_ENV === 'test',
 };
 
 export const authConfig: AuthConfig = {
