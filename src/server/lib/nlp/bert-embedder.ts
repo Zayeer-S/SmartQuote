@@ -9,7 +9,7 @@ interface TitanEmbedResponse {
 }
 
 export class BertEmbedder {
-  private client: BedrockRuntimeClient;
+  private client: BedrockRuntimeClient | null = null;
 
   /**
    * In-memory cache of anchor embeddings, keyed by label.
@@ -17,14 +17,13 @@ export class BertEmbedder {
    */
   private anchorEmbeddings = new Map<string, { embedding: number[]; urgency_score: number }>();
 
-  constructor() {
-    // Region must be one where Titan Embeddings V2 is available.
-    // Inherits credentials from the Lambda execution role (no explicit key needed).
-    this.client = new BedrockRuntimeClient({ region: process.env.AWS_REGION ?? 'us-east-1' });
+  private getClient(): BedrockRuntimeClient {
+    // Instantiated lazily so importing this module in non-AWS environments (CI, local dev) does not trigger credential resolution at startup.
+    this.client ??= new BedrockRuntimeClient({ region: process.env.AWS_REGION ?? 'us-east-1' });
+    return this.client;
   }
 
-  /**
-   * Embeds all active anchor rows and caches the results in memory.
+  /** and caches the results in memory.
    * Must be called after `init()` and before the first `calculatePriority` call.
    *
    * Embeddings are generated from each anchor's description_text.
@@ -69,7 +68,7 @@ export class BertEmbedder {
       body: JSON.stringify({ inputText: text }),
     });
 
-    const response = await this.client.send(command);
+    const response = await this.getClient().send(command);
     const parsed = JSON.parse(Buffer.from(response.body).toString('utf-8')) as TitanEmbedResponse;
 
     return parsed.embedding;
