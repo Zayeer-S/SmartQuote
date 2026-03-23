@@ -1,5 +1,6 @@
 import {
   ALL_ROLES,
+  ALL_ORG_ROLES,
   ALL_PERMISSIONS,
   ALL_NOTIFICATION_TYPES,
   ALL_NOTIFICATION_TOKEN_TYPES,
@@ -69,6 +70,8 @@ function toLookupRows(values: readonly string[]): LookupTableRow[] {
 }
 
 export const ROLES_SEED_DATA = toLookupRows(ALL_ROLES);
+
+export const ORG_ROLES_SEED_DATA = toLookupRows(ALL_ORG_ROLES);
 
 export const PERMISSIONS_SEED_DATA = toLookupRows(ALL_PERMISSIONS);
 
