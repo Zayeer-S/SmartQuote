@@ -23,16 +23,13 @@ const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
       <div className="admin-ticket-card-header">
         <div className="admin-ticket-card-badges">
           <span
-            className={getPriorityBadgeClass(ticket.ticketPriorityName)}
+            className={getPriorityBadgeClass(ticket.ticketPriority)}
             data-testid="ticket-priority"
           >
-            {ticket.ticketPriorityName}
+            {ticket.ticketPriority}
           </span>
-          <span
-            className={getStatusBadgeClass(ticket.ticketStatusName)}
-            data-testid="ticket-status"
-          >
-            {ticket.ticketStatusName}
+          <span className={getStatusBadgeClass(ticket.ticketStatus)} data-testid="ticket-status">
+            {ticket.ticketStatus}
           </span>
           <span
             className={`badge ${isAssigned ? 'badge-assigned' : 'admin-ticket-card-badge-unassigned'}`}
@@ -50,9 +47,9 @@ const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
       </h2>
 
       <div className="admin-ticket-card-meta">
-        <span data-testid="ticket-type">{ticket.ticketTypeName}</span>
-        <span data-testid="ticket-severity">{ticket.ticketSeverityName}</span>
-        <span data-testid="ticket-impact">{ticket.businessImpactName}</span>
+        <span data-testid="ticket-type">{ticket.ticketType}</span>
+        <span data-testid="ticket-severity">{ticket.ticketSeverity}</span>
+        <span data-testid="ticket-impact">{ticket.businessImpact}</span>
         <span data-testid="ticket-org">{ticket.organizationName}</span>
         <span data-testid="ticket-deadline">Due {formattedDeadline}</span>
       </div>

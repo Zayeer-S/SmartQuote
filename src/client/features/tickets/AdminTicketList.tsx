@@ -25,8 +25,8 @@ const AdminTicketList: React.FC = () => {
       const aAssigned = a.assignedToUserId !== null ? 0 : 1;
       const bAssigned = b.assignedToUserId !== null ? 0 : 1;
       if (aAssigned !== bAssigned) return aAssigned - bAssigned;
-      const aPriority = PRIORITY_ORDER[a.ticketPriorityName] ?? 99;
-      const bPriority = PRIORITY_ORDER[b.ticketPriorityName] ?? 99;
+      const aPriority = PRIORITY_ORDER[a.ticketPriority] ?? 99;
+      const bPriority = PRIORITY_ORDER[b.ticketPriority] ?? 99;
       return aPriority - bPriority;
     });
   }, [data]);

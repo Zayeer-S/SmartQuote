@@ -5,7 +5,12 @@ import {
   TICKET_SEVERITIES,
   BUSINESS_IMPACTS,
   TICKET_PRIORITIES,
-  LOOKUP_IDS,
+} from '../../../shared/constants/lookup-values.js';
+import type {
+  TicketType,
+  TicketSeverity,
+  BusinessImpact,
+  TicketPriority,
 } from '../../../shared/constants/lookup-values.js';
 import type { CreateTicketRequest } from '../../../shared/contracts/ticket-contracts.js';
 import './SubmitTicketForm.css';
@@ -17,48 +22,48 @@ interface SubmitTicketFormProps {
 interface FormState {
   title: string;
   description: string;
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
-  ticketPriorityId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
+  ticketPriority: TicketPriority;
   deadline: string;
   usersImpacted: string;
 }
 
-const TICKET_TYPE_OPTIONS = [
-  { id: LOOKUP_IDS.TICKET_TYPE.SUPPORT, label: TICKET_TYPES.SUPPORT },
-  { id: LOOKUP_IDS.TICKET_TYPE.INCIDENT, label: TICKET_TYPES.INCIDENT },
-  { id: LOOKUP_IDS.TICKET_TYPE.ENHANCEMENT, label: TICKET_TYPES.ENHANCEMENT },
-] as const;
+const TICKET_TYPE_OPTIONS: { value: TicketType; label: string }[] = [
+  { value: TICKET_TYPES.SUPPORT, label: TICKET_TYPES.SUPPORT },
+  { value: TICKET_TYPES.INCIDENT, label: TICKET_TYPES.INCIDENT },
+  { value: TICKET_TYPES.ENHANCEMENT, label: TICKET_TYPES.ENHANCEMENT },
+];
 
-const TICKET_SEVERITY_OPTIONS = [
-  { id: LOOKUP_IDS.TICKET_SEVERITY.LOW, label: TICKET_SEVERITIES.LOW },
-  { id: LOOKUP_IDS.TICKET_SEVERITY.MEDIUM, label: TICKET_SEVERITIES.MEDIUM },
-  { id: LOOKUP_IDS.TICKET_SEVERITY.HIGH, label: TICKET_SEVERITIES.HIGH },
-  { id: LOOKUP_IDS.TICKET_SEVERITY.CRITICAL, label: TICKET_SEVERITIES.CRITICAL },
-] as const;
+const TICKET_SEVERITY_OPTIONS: { value: TicketSeverity; label: string }[] = [
+  { value: TICKET_SEVERITIES.LOW, label: TICKET_SEVERITIES.LOW },
+  { value: TICKET_SEVERITIES.MEDIUM, label: TICKET_SEVERITIES.MEDIUM },
+  { value: TICKET_SEVERITIES.HIGH, label: TICKET_SEVERITIES.HIGH },
+  { value: TICKET_SEVERITIES.CRITICAL, label: TICKET_SEVERITIES.CRITICAL },
+];
 
-const BUSINESS_IMPACT_OPTIONS = [
-  { id: LOOKUP_IDS.BUSINESS_IMPACT.MINOR, label: BUSINESS_IMPACTS.MINOR },
-  { id: LOOKUP_IDS.BUSINESS_IMPACT.MODERATE, label: BUSINESS_IMPACTS.MODERATE },
-  { id: LOOKUP_IDS.BUSINESS_IMPACT.MAJOR, label: BUSINESS_IMPACTS.MAJOR },
-  { id: LOOKUP_IDS.BUSINESS_IMPACT.CRITICAL, label: BUSINESS_IMPACTS.CRITICAL },
-] as const;
+const BUSINESS_IMPACT_OPTIONS: { value: BusinessImpact; label: string }[] = [
+  { value: BUSINESS_IMPACTS.MINOR, label: BUSINESS_IMPACTS.MINOR },
+  { value: BUSINESS_IMPACTS.MODERATE, label: BUSINESS_IMPACTS.MODERATE },
+  { value: BUSINESS_IMPACTS.MAJOR, label: BUSINESS_IMPACTS.MAJOR },
+  { value: BUSINESS_IMPACTS.CRITICAL, label: BUSINESS_IMPACTS.CRITICAL },
+];
 
-const TICKET_PRIORITY_OPTIONS = [
-  { id: LOOKUP_IDS.TICKET_PRIORITY.P1, label: TICKET_PRIORITIES.P1 },
-  { id: LOOKUP_IDS.TICKET_PRIORITY.P2, label: TICKET_PRIORITIES.P2 },
-  { id: LOOKUP_IDS.TICKET_PRIORITY.P3, label: TICKET_PRIORITIES.P3 },
-  { id: LOOKUP_IDS.TICKET_PRIORITY.P4, label: TICKET_PRIORITIES.P4 },
-] as const;
+const TICKET_PRIORITY_OPTIONS: { value: TicketPriority; label: string }[] = [
+  { value: TICKET_PRIORITIES.P1, label: TICKET_PRIORITIES.P1 },
+  { value: TICKET_PRIORITIES.P2, label: TICKET_PRIORITIES.P2 },
+  { value: TICKET_PRIORITIES.P3, label: TICKET_PRIORITIES.P3 },
+  { value: TICKET_PRIORITIES.P4, label: TICKET_PRIORITIES.P4 },
+];
 
 const INITIAL_FORM_STATE: FormState = {
   title: '',
   description: '',
-  ticketTypeId: LOOKUP_IDS.TICKET_TYPE.SUPPORT,
-  ticketSeverityId: LOOKUP_IDS.TICKET_SEVERITY.LOW,
-  businessImpactId: LOOKUP_IDS.BUSINESS_IMPACT.MINOR,
-  ticketPriorityId: LOOKUP_IDS.TICKET_PRIORITY.P4,
+  ticketType: TICKET_TYPES.SUPPORT,
+  ticketSeverity: TICKET_SEVERITIES.LOW,
+  businessImpact: BUSINESS_IMPACTS.MINOR,
+  ticketPriority: TICKET_PRIORITIES.P4,
   deadline: '',
   usersImpacted: '',
 };
@@ -74,10 +79,6 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectNumber = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setForm((prev) => ({ ...prev, [e.target.name]: Number(e.target.value) }));
-  };
-
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
@@ -87,10 +88,10 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
     const payload: CreateTicketRequest = {
       title: form.title,
       description: form.description,
-      ticketTypeId: form.ticketTypeId,
-      ticketSeverityId: form.ticketSeverityId,
-      businessImpactId: form.businessImpactId,
-      ticketPriorityId: form.ticketPriorityId,
+      ticketType: form.ticketType,
+      ticketSeverity: form.ticketSeverity,
+      businessImpact: form.businessImpact,
+      ticketPriority: form.ticketPriority,
       deadline: new Date(form.deadline).toISOString(),
       usersImpacted,
     };
@@ -154,21 +155,21 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
 
       <div className="submit-ticket-form-grid">
         <div className="field-group">
-          <label className="field-label" htmlFor="ticketTypeId">
+          <label className="field-label" htmlFor="ticketType">
             Ticket Type
           </label>
           <select
-            id="ticketTypeId"
-            name="ticketTypeId"
+            id="ticketType"
+            name="ticketType"
             className="field-select"
-            value={form.ticketTypeId}
-            onChange={handleSelectNumber}
+            value={form.ticketType}
+            onChange={handleChange}
             required
             disabled={loading}
             data-testid="field-ticket-type"
           >
             {TICKET_TYPE_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>
+              <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
             ))}
@@ -176,21 +177,21 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
         </div>
 
         <div className="field-group">
-          <label className="field-label" htmlFor="ticketSeverityId">
+          <label className="field-label" htmlFor="ticketSeverity">
             Severity
           </label>
           <select
-            id="ticketSeverityId"
-            name="ticketSeverityId"
+            id="ticketSeverity"
+            name="ticketSeverity"
             className="field-select"
-            value={form.ticketSeverityId}
-            onChange={handleSelectNumber}
+            value={form.ticketSeverity}
+            onChange={handleChange}
             required
             disabled={loading}
             data-testid="field-severity"
           >
             {TICKET_SEVERITY_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>
+              <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
             ))}
@@ -198,21 +199,21 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
         </div>
 
         <div className="field-group">
-          <label className="field-label" htmlFor="businessImpactId">
+          <label className="field-label" htmlFor="businessImpact">
             Business Impact
           </label>
           <select
-            id="businessImpactId"
-            name="businessImpactId"
+            id="businessImpact"
+            name="businessImpact"
             className="field-select"
-            value={form.businessImpactId}
-            onChange={handleSelectNumber}
+            value={form.businessImpact}
+            onChange={handleChange}
             required
             disabled={loading}
             data-testid="field-business-impact"
           >
             {BUSINESS_IMPACT_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>
+              <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
             ))}
@@ -220,21 +221,21 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
         </div>
 
         <div className="field-group">
-          <label className="field-label" htmlFor="ticketPriorityId">
+          <label className="field-label" htmlFor="ticketPriority">
             Priority
           </label>
           <select
-            id="ticketPriorityId"
-            name="ticketPriorityId"
+            id="ticketPriority"
+            name="ticketPriority"
             className="field-select"
-            value={form.ticketPriorityId}
-            onChange={handleSelectNumber}
+            value={form.ticketPriority}
+            onChange={handleChange}
             required
             disabled={loading}
             data-testid="field-priority"
           >
             {TICKET_PRIORITY_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>
+              <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
             ))}

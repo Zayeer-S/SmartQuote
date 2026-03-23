@@ -19,14 +19,14 @@ const CustomerTicketCard: React.FC<CustomerTicketCardProps> = ({ ticket }) => {
   return (
     <article className="card ticket-card" data-testid={`ticket-card-${ticket.id}`}>
       <div className="ticket-card-badges">
-        <span className={getStatusBadgeClass(ticket.ticketStatusName)} data-testid="ticket-status">
-          {ticket.ticketStatusName}
+        <span className={getStatusBadgeClass(ticket.ticketStatus)} data-testid="ticket-status">
+          {ticket.ticketStatus}
         </span>
         <span
-          className={getPriorityBadgeClass(ticket.ticketPriorityName)}
+          className={getPriorityBadgeClass(ticket.ticketPriority)}
           data-testid="ticket-priority"
         >
-          {ticket.ticketPriorityName}
+          {ticket.ticketPriority}
         </span>
       </div>
 
@@ -38,11 +38,11 @@ const CustomerTicketCard: React.FC<CustomerTicketCardProps> = ({ ticket }) => {
 
       <div className="ticket-card-meta">
         <span className="ticket-card-meta-item" data-testid="ticket-type">
-          {ticket.ticketTypeName}
+          {ticket.ticketType}
         </span>
         <span className="ticket-card-meta-divider" aria-hidden="true" />
         <span className="ticket-card-meta-item" data-testid="ticket-severity">
-          {ticket.ticketSeverityName}
+          {ticket.ticketSeverity}
         </span>
         <span className="ticket-card-meta-divider" aria-hidden="true" />
         <span className="ticket-card-meta-item" data-testid="ticket-deadline">
