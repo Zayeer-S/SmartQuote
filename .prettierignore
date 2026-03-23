@@ -9,8 +9,6 @@ coverage
 .env*
 !.env.example
 
-*.config.*
-
 package.json
 package-lock.json
 tsconfig.json

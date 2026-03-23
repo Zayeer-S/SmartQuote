@@ -61,22 +61,41 @@ const INITIAL_FORM_STATE: FormState = {
   usersImpacted: '',
 };
 
+function validateForm(form: FormState): string | null {
+  if (!form.title.trim()) return 'Title is required.';
+  if (!form.description.trim()) return 'Description is required.';
+  if (!form.deadline) return 'Deadline is required.';
+
+  const today = new Date().toISOString().split('T')[0];
+  if (form.deadline < today) return 'Deadline must be today or in the future.';
+
+  if (!/^\d+$/.test(form.usersImpacted)) return 'Users impacted must be a whole number.';
+
+  return null;
+}
+
 const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
   const [form, setForm] = useState<FormState>(INITIAL_FORM_STATE);
+  const [validationError, setValidationError] = useState<string | null>(null);
   const { execute, loading, error, data } = useCreateTicket();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ): void => {
     const { name, value } = e.target;
+    if (name === 'usersImpacted' && value !== '' && !/^\d+$/.test(value)) return;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
+    setValidationError(null);
 
-    const usersImpacted = parseInt(form.usersImpacted, 10);
-    if (isNaN(usersImpacted) || usersImpacted < 0) return;
+    const formError = validateForm(form);
+    if (formError) {
+      setValidationError(formError);
+      return;
+    }
 
     const payload: CreateTicketRequest = {
       title: form.title,
@@ -85,7 +104,7 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
       ticketSeverity: form.ticketSeverity,
       businessImpact: form.businessImpact,
       deadline: new Date(form.deadline).toISOString(),
-      usersImpacted,
+      usersImpacted: parseInt(form.usersImpacted, 10),
     };
 
     await execute(payload);
@@ -98,6 +117,7 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
   }, [data, onSuccess]);
 
   const today = new Date().toISOString().split('T')[0];
+  const displayError = validationError ?? error;
 
   return (
     <form
@@ -238,9 +258,9 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
           <input
             id="usersImpacted"
             name="usersImpacted"
-            type="number"
+            type="text"
+            inputMode="numeric"
             className="field-input"
-            min={0}
             value={form.usersImpacted}
             onChange={handleChange}
             placeholder="Number of users affected"
@@ -252,9 +272,9 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
         </div>
       </div>
 
-      {error && (
+      {displayError && (
         <p className="feedback-error" role="alert" data-testid="submit-error">
-          {error}
+          {displayError}
         </p>
       )}
 

@@ -167,3 +167,4 @@ sketch
 dist-db/
 
 .playwright
+tests/coverage/
