@@ -1,6 +1,7 @@
 import type { Knex } from 'knex';
 import {
   AUTH_ROLES,
+  ORG_ROLES,
   PERMISSIONS,
   TICKET_TYPES,
   TICKET_SEVERITIES,
@@ -16,6 +17,7 @@ import {
   generateQuoteApprovals,
   generateQuotes,
   ROLES_SEED_DATA,
+  ORG_ROLES_SEED_DATA,
   PERMISSIONS_SEED_DATA,
   NOTIFICATION_TYPES_SEED_DATA,
   NOTIFICATION_TOKEN_TYPES_SEED_DATA,
@@ -57,6 +59,7 @@ export async function seed(knex: Knex): Promise<void> {
     'quote_detail_revisions',
     'user_notification_preferences',
     'role_permissions',
+    'org_role_permissions',
     // Main
     'analytics',
     'quote_calculation_rules',
@@ -84,11 +87,15 @@ export async function seed(knex: Knex): Promise<void> {
     'organizations',
     'permissions',
     'notification_types',
+    'org_roles',
     'roles',
     // 005:
     'priority_engine_anchors',
     'ticket_priority_thresholds',
     'ticket_priority_rules',
+    // 006:
+    'org_roles',
+    'org_role_permissions',
   ];
 
   await knex.raw(
@@ -98,6 +105,8 @@ export async function seed(knex: Knex): Promise<void> {
   console.log('Starting seeding');
 
   await knex('roles').insert(ROLES_SEED_DATA);
+
+  await knex('org_roles').insert(ORG_ROLES_SEED_DATA);
 
   await knex('permissions').insert(PERMISSIONS_SEED_DATA);
 
@@ -137,8 +146,6 @@ export async function seed(knex: Knex): Promise<void> {
 
   const { customer1Id, customer2Id, supportAgentId, managerId } = await generateUsers(knex, {
     passwordHash,
-    org1Id,
-    org2Id,
     roleIdMap: lookupIds.roles,
   });
 
@@ -549,6 +556,22 @@ export async function seed(knex: Knex): Promise<void> {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
       permission_id: lookupIds.permissions[PERMISSIONS.ANALYTICS_READ],
     },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_CREATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_UPDATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_DELETE],
+    },
 
     // ADMIN permissions (all permissions)
     ...Object.values(PERMISSIONS).map((permission) => ({
@@ -557,17 +580,36 @@ export async function seed(knex: Knex): Promise<void> {
     })),
   ]);
 
-  // Organization Members - map customers to their orgs
+  // Org Role Permissions
+  await knex('org_role_permissions').insert([
+    // MEMBER: can view members of their own org
+    {
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORG_VIEW_MEMBERS],
+    },
+
+    // MANAGER: can view and manage members of their own org
+    {
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORG_VIEW_MEMBERS],
+    },
+    {
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORG_MANAGE_MEMBERS],
+    },
+  ]);
+
+  // Organization Members - map customers to their orgs with org roles
   await knex('organization_members').insert([
     {
       organization_id: org1Id,
       user_id: customer1Id,
-      role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
     },
     {
       organization_id: org2Id,
       user_id: customer2Id,
-      role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
     },
   ]);
 

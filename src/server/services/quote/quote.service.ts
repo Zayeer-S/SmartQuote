@@ -8,7 +8,13 @@ import type {
   QuoteDetailRevision,
   QuoteWithApproval,
 } from '../../database/types/tables.js';
-import type { QuoteApprovalId, QuoteId, TicketId, UserId } from '../../database/types/ids.js';
+import type {
+  OrganizationId,
+  QuoteApprovalId,
+  QuoteId,
+  TicketId,
+  UserId,
+} from '../../database/types/ids.js';
 import type { InsertData, TransactionContext } from '../../daos/base/types.js';
 import {
   PERMISSIONS,
@@ -24,6 +30,7 @@ import type { QuoteDetailRevisionsDAO } from '../../daos/children/quote.detail.r
 import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket.errors.js';
 import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
+import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
 
 export interface CreateManualQuoteData {
   estimated_hours_minimum: number;
@@ -49,6 +56,7 @@ export class QuoteService {
   private quoteDetailRevisionsDAO: QuoteDetailRevisionsDAO;
   private ticketsDAO: TicketsDAO;
   private usersDAO: UsersDAO;
+  private orgMembersDAO: OrganizationMembersDAO;
   private rbacService: RBACService;
   private lookup: LookupResolver;
 
@@ -58,6 +66,7 @@ export class QuoteService {
     quoteDetailRevisionsDAO: QuoteDetailRevisionsDAO,
     ticketsDAO: TicketsDAO,
     usersDAO: UsersDAO,
+    orgMembersDAO: OrganizationMembersDAO,
     rbacService: RBACService,
     lookup: LookupResolver
   ) {
@@ -66,6 +75,7 @@ export class QuoteService {
     this.quoteDetailRevisionsDAO = quoteDetailRevisionsDAO;
     this.ticketsDAO = ticketsDAO;
     this.usersDAO = usersDAO;
+    this.orgMembersDAO = orgMembersDAO;
     this.rbacService = rbacService;
     this.lookup = lookup;
   }
@@ -108,13 +118,13 @@ export class QuoteService {
     ticketId: TicketId,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<Quote[]> {
+  ): Promise<QuoteWithApproval[]> {
     const ticket = await this.ticketsDAO.getById(ticketId, options);
     if (!ticket) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
 
     await this.assertTicketVisibility(ticket, actorId, options);
 
-    return this.quotesDAO.findByTicket(ticketId, options);
+    return this.quotesDAO.findManyWithApproval(ticketId, options);
   }
 
   /**
@@ -527,9 +537,24 @@ export class QuoteService {
     if (canReadAll) return;
 
     const actor = await this.usersDAO.getById(actorId, options);
+    if (!actor) throw new ForbiddenError(QUOTE_ERROR_MSGS.USER_NOT_FOUND);
+
     const t = ticket as { organization_id: unknown };
-    if (actor?.organization_id !== t.organization_id) {
+
+    const orgId = await this.getOrgId(actor.id);
+
+    if (orgId !== t.organization_id) {
       throw new ForbiddenError(QUOTE_ERROR_MSGS.FORBIDDEN);
     }
+  }
+
+  private async getOrgId(actorId: UserId): Promise<OrganizationId | null> {
+    const orgMemberships = await this.orgMembersDAO.findByUser(actorId);
+
+    if (orgMemberships && orgMemberships.length > 0) {
+      return orgMemberships[0].organization_id;
+    }
+
+    return null;
   }
 }

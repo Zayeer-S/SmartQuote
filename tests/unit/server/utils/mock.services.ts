@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
-import { PasswordService } from '../../src/server/services/auth/password.service';
-import { SessionService } from '../../src/server/services/auth/session.service';
+import { PasswordService } from '../../../../src/server/services/auth/password.service';
+import { SessionService } from '../../../../src/server/services/auth/session.service';
 
 export function makeMockSessionService(): SessionService {
   return {

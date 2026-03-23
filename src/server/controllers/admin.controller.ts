@@ -8,14 +8,21 @@ import { validateOrThrow } from '../validators/validation-utils.js';
 import { createUserSchema, listUsersQuerySchema } from '../validators/user.validator.js';
 import type { CreateUserRequest } from '../../shared/contracts/user-contracts.js';
 import { error, success } from '../lib/respond.js';
+import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
 
 export class AdminController {
   private authService: AuthService;
   private usersDAO: UsersDAO;
+  private organizationMembersDAO: OrganizationMembersDAO;
 
-  constructor(authService: AuthService, usersDAO: UsersDAO) {
+  constructor(
+    authService: AuthService,
+    usersDAO: UsersDAO,
+    organizationMembersDAO: OrganizationMembersDAO
+  ) {
     this.authService = authService;
     this.usersDAO = usersDAO;
+    this.organizationMembersDAO = organizationMembersDAO;
   }
 
   createUser = async (req: Request, res: Response): Promise<void> => {
@@ -49,7 +56,6 @@ export class AdminController {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const criteria: any = {};
       if (queryParams.roleId) criteria.role_id = queryParams.roleId;
-      if (queryParams.organizationId) criteria.organization_id = queryParams.organizationId;
 
       const users = await this.usersDAO.getMany(criteria, {
         limit: queryParams.limit,
@@ -73,7 +79,9 @@ export class AdminController {
               id: userWithRole?.role.id,
               name: userWithRole?.role.name,
             },
-            organizationId: userWithRole?.organization_id,
+            organizationId: userWithRole
+              ? this.organizationMembersDAO.findByUser(userWithRole.id)
+              : null,
             createdAt: userWithRole?.created_at.toISOString(),
           };
         })

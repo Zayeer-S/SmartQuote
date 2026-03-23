@@ -1,6 +1,7 @@
 // TODO REFACTOR TO DOMAIN
 export const LOOKUP_TABLES = {
   ROLES: 'roles',
+  ORG_ROLES: 'org_roles',
   NOTIFICATION_TYPES: 'notification_types',
   PERMISSIONS: 'permissions',
   ORGANIZATIONS: 'organizations',
@@ -31,6 +32,7 @@ export const MAIN_TABLES = {
 
 export const LINK_TABLES = {
   ROLE_PERMISSIONS: 'role_permissions',
+  ORG_ROLE_PERMISSIONS: 'org_role_permissions',
   USER_NOTIFICATION_PREFERENCES: 'user_notification_preferences',
   QUOTE_DETAIL_REVISIONS: 'quote_detail_revisions',
   TICKET_COMMENTS: 'ticket_comments',
@@ -43,14 +45,14 @@ export const LINK_TABLES = {
   NOTIFICATION_TOKENS: 'notification_tokens',
 } as const;
 
-export const CONFIG_TABLES = {
-  SMARTQUOTE_CONFIGS: 'smartquote_configs',
-};
-
 export const TICKET_PRIORITY_ENGINE_TABLES = {
   TICKET_PRIORITY_RULES: 'ticket_priority_rules',
   TICKET_PRIORITY_THRESHOLDS: 'ticket_priority_thresholds',
   PRIORITY_ENGINE_ANCHORS: 'priority_engine_anchors',
+};
+
+export const CONFIG_TABLES = {
+  SMARTQUOTE_CONFIGS: 'smartquote_configs',
 };
 
 export const TABLE_NAMES = {
@@ -58,7 +60,6 @@ export const TABLE_NAMES = {
   ...LINK_TABLES,
   ...MAIN_TABLES,
   ...CONFIG_TABLES,
-  ...TICKET_PRIORITY_ENGINE_TABLES,
 };
 
 export type LookupTableName = (typeof LOOKUP_TABLES)[keyof typeof LOOKUP_TABLES];

@@ -7,7 +7,15 @@ export const AUTH_ROLES = {
 
 export type RoleName = (typeof AUTH_ROLES)[keyof typeof AUTH_ROLES];
 
+export const ORG_ROLES = {
+  MEMBER: 'Member',
+  MANAGER: 'Manager',
+} as const;
+
+export type OrgRoleName = (typeof ORG_ROLES)[keyof typeof ORG_ROLES];
+
 export const PERMISSIONS = {
+  // System scoped permission
   TICKETS_CREATE: 'tickets:create',
   TICKETS_READ_OWN: 'tickets:read:own',
   TICKETS_READ_ALL: 'tickets:read:all',
@@ -51,6 +59,10 @@ export const PERMISSIONS = {
 
   CONFIG_READ: 'config:read',
   CONFIG_UPDATE: 'config:update',
+
+  // Org-scoped / Local permissions
+  ORG_VIEW_MEMBERS: 'org:view_members',
+  ORG_MANAGE_MEMBERS: 'org:manage_members',
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -201,6 +213,7 @@ export type DeadlineProximityBucket =
   (typeof TICKET_DEADLINE_PROXIMITY_BUCKETS)[keyof typeof TICKET_DEADLINE_PROXIMITY_BUCKETS];
 
 export const ALL_ROLES = Object.values(AUTH_ROLES);
+export const ALL_ORG_ROLES = Object.values(ORG_ROLES);
 export const ALL_PERMISSIONS = Object.values(PERMISSIONS);
 export const ALL_NOTIFICATION_TYPES = Object.values(NOTIFICATION_TYPES);
 export const ALL_NOTIFICATION_TOKEN_TYPES = Object.values(NOTIFICATION_TOKEN_TYPES);

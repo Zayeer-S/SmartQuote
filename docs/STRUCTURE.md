@@ -259,22 +259,29 @@ smartquote/
 │   │   │   │   └── session.service.ts
 │   │   │   ├── email/
 │   │   │   ├── notification/
+│   │   │   ├── org/
+│   │   │   │   ├── org.errors.ts
+│   │   │   │   ├── org.members.service.ts
+│   │   │   │   ├── org.members.service.types.ts
+│   │   │   │   ├── org.service.ts
+│   │   │   │   └── org.service.types.ts
 │   │   │   ├── quote/
-│   │   │   │   ├── comment.engine.service.ts
-│   │   │   │   ├── comment.errors.ts
-│   │   │   │   └── comment.service.ts
+│   │   │   │   ├── quote.engine.service.ts
+│   │   │   │   ├── quote.errors.ts
+│   │   │   │   └── quote.service.ts
 │   │   │   ├── rbac/
-│   │   │   │   └── rbac.service.ts
-│   │   │   ├── ticket/
-│   │   │   │   ├── comment.service.ts
-│   │   │   │   ├── ticket.errors.ts
-│   │   │   │   ├── ticket.service.ts
-│   │   │   │   ├── ticket.priority.engine.ts
-│   │   │   │   ├── ticket.priority.engine.types.ts
-│   │   │   │   └── ticket.service.types.ts
-│   │   │   └── user/
+│   │   │   │   ├── org.rbac.service.ts             # Local/Org RBAC
+│   │   │   │   └── rbac.service.ts                 # System RBAC
+│   │   │   └── ticket/
+│   │   │       ├── comment.service.ts
+│   │   │       ├── ticket.errors.ts
+│   │   │       ├── ticket.service.ts
+│   │   │       ├── ticket.priority.engine.ts
+│   │   │       ├── ticket.priority.engine.types.ts
+│   │   │       └── ticket.service.types.ts
 │   │   └── validators/                             # Input shape validation only; must not access database or services.
 │   │       ├── auth.validator.ts
+│   │       ├── org.validator.ts
 │   │       ├── quote.validator.ts
 │   │       ├── ticket.validator.ts
 │   │       ├── user.validator.ts
@@ -287,12 +294,14 @@ smartquote/
 │       │   └── lookup-values.ts
 │       └── contracts/                              # Define all DTO types here so frontend/backend share to prevent drift
 │           ├── auth-contracts.ts
+│           ├── org-contracts.ts
 │           ├── quote-contracts.ts
 │           ├── ticket-contracts.ts
 │           └── user-contracts.ts
 │
 ├── tests/
 │   ├── e2e/
+│   │   ├── global.setup.ts
 │   │   ├── constants/
 │   │   │   ├── e2e.paths.ts
 │   │   │   └── test.user.credentials.ts
@@ -307,14 +316,15 @@ smartquote/
 │   ├── helpers/
 │   │   ├── setup.client.ts
 │   │   ├── setup.integration.ts
-│   │   ├── setup.server.ts
+│   │   └── setup.server.ts
 │   ├── integration/
 │   │   ├── auth.routes.test.ts
+│   │   └── ticket.routes.test.ts
 │   ├── unit/
-│   │   ├── server/
+│   │   └── server/
 │   │       ├── auth.service.test.ts
 │   │       ├── password.service.test.ts
-│   │       ├── session.service.test.ts
+│   │       └── session.service.test.ts
 │   └── utils/
 │       ├── mock.daos.ts
 │       ├── mock.services.ts

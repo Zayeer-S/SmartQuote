@@ -7,6 +7,7 @@ import type {
   NotificationTokenId,
   NotificationTokenTypeId,
   NotificationTypeId,
+  OrgRoleId,
   OrganizationId,
   PermissionId,
   PriorityEngineAnchorsId,
@@ -77,15 +78,13 @@ export type QuoteCreator = BaseLookupTable<QuoteCreatorId>;
 export type QuoteApprovalStatus = BaseLookupTable<QuoteApprovalStatusId>;
 export type QuoteConfidenceLevel = BaseLookupTable<QuoteConfidenceId>;
 export type NotificationTokenType = BaseLookupTable<NotificationTokenTypeId>;
+export type OrgRole = BaseLookupTable<OrgRoleId>;
+export type Organization = BaseLookupTable<OrganizationId>;
 
 export interface AnalyticsSchema extends NameRow, ActivatableRow, BaseAuditRows {
   id: AnalyticsSchemaId;
   description: string | null;
   schema_definition: JsonB;
-}
-
-export interface Organization extends NameRow, ActivatableRow, BaseAuditRows {
-  id: OrganizationId;
 }
 
 export interface User extends BaseAuditRows, DeletableRow {
@@ -98,7 +97,6 @@ export interface User extends BaseAuditRows, DeletableRow {
   email_verified: boolean;
   phone_number: string;
   role_id: RoleId;
-  organization_id: OrganizationId | null;
 }
 
 export interface Ticket extends BaseAuditRows, DeletableRow {
@@ -106,7 +104,7 @@ export interface Ticket extends BaseAuditRows, DeletableRow {
   creator_user_id: UserId;
   resolved_by_user_id: UserId | null;
   assigned_to_user_id: UserId | null;
-  organization_id: OrganizationId;
+  organization_id: OrganizationId | null;
   title: string;
   description: string;
   ticket_type_id: TicketTypeId;
@@ -201,6 +199,17 @@ export interface RolePermission extends BaseAuditRows {
   permission_id: PermissionId;
 }
 
+export interface OrgRolePermission extends BaseAuditRows {
+  org_role_id: OrgRoleId;
+  permission_id: PermissionId;
+}
+
+export interface OrganizationMember extends BaseAuditRows {
+  organization_id: OrganizationId;
+  user_id: UserId;
+  org_role_id: OrgRoleId;
+}
+
 export interface UserNotificationPreference extends BaseAuditRows {
   user_id: UserId;
   notification_type_id: NotificationTypeId;
@@ -232,13 +241,6 @@ export interface TicketAttachment extends BaseAuditRows {
   storage_type_id: FileStorageTypeId;
   size_bytes: number;
   mime_type: string;
-}
-
-export interface OrganizationMember extends BaseAuditRows {
-  id: number;
-  organization_id: OrganizationId;
-  user_id: UserId;
-  role_id: RoleId;
 }
 
 export interface SlaPolicy extends BaseAuditRows {

@@ -6,7 +6,11 @@ export type IntegerId<T> = Brand<number, T>;
 /** UUID in database. String in TypeScript. */
 export type StringId<T> = Brand<string, T>;
 
+/** System Role */
 export type RoleId = IntegerId<'Role'>;
+
+/** Local Org Role */
+export type OrgRoleId = IntegerId<'OrgRole'>;
 export type NotificationTypeId = IntegerId<'NotificationType'>;
 export type PermissionId = IntegerId<'Permission'>;
 export type FileStorageTypeId = IntegerId<'FileStorageType'>;

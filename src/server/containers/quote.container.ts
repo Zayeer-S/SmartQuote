@@ -13,6 +13,7 @@ import { UsersDAO } from '../daos/children/users.dao.js';
 import { QuoteService } from '../services/quote/quote.service.js';
 import { QuoteEngineService } from '../services/quote/quote.engine.service.js';
 import { QuoteController } from '../controllers/quote.controller.js';
+import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
 
 export class QuoteContainer {
   public readonly ticketsDAO: TicketsDAO;
@@ -28,7 +29,12 @@ export class QuoteContainer {
 
   public readonly quoteController: QuoteController;
 
-  constructor(db: Knex, rbacService: RBACService, lookup: LookupResolver) {
+  constructor(
+    db: Knex,
+    rbacService: RBACService,
+    lookup: LookupResolver,
+    orgMembersDAO: OrganizationMembersDAO
+  ) {
     this.ticketsDAO = new TicketsDAO(db);
     this.quotesDAO = new QuotesDAO(db);
     this.quoteApprovalsDAO = new QuoteApprovalsDAO(db);
@@ -43,6 +49,7 @@ export class QuoteContainer {
       this.quoteDetailRevisionsDAO,
       this.ticketsDAO,
       this.usersDAO,
+      orgMembersDAO,
       rbacService,
       lookup
     );

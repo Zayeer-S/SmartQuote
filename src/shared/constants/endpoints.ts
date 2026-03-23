@@ -25,6 +25,19 @@ export const TICKET_ENDPOINTS = {
   ADD_COMMENT: (ticketId = ':ticketId') => `/${ticketId}/comments`,
 } as const;
 
+export const ORG_ENDPOINTS = {
+  BASE: '/orgs',
+  LIST: '/',
+  CREATE: '/',
+  GET: (orgId = ':orgId') => `/${orgId}`,
+  UPDATE: (orgId = ':orgId') => `/${orgId}`,
+  DELETE: (orgId = ':orgId') => `/${orgId}`,
+  MY_ORG: '/me',
+  LIST_MEMBERS: (orgId = ':orgId') => `/${orgId}/members`,
+  ADD_MEMBER: (orgId = ':orgId') => `/${orgId}/members`,
+  REMOVE_MEMBER: (orgId = ':orgId', userId = ':userId') => `/${orgId}/members/${userId}`,
+} as const;
+
 export const QUOTE_ENDPOINTS = {
   BASE: (ticketId = ':ticketId') => `/${ticketId}/quotes`,
   LIST: (ticketId = ':ticketId') => `/${ticketId}/quotes`,
