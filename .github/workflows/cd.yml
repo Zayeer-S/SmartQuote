@@ -1,17 +1,24 @@
-name: Deploy
+name: cd
 
 on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+  workflow_run:
+    workflows: ["CI-Main"]
+    types: [completed]
+    branches: [main]
 
 concurrency:
   group: deploy-production
-  # Wait for any in-progress deploy to finish rather than cancelling it
   cancel-in-progress: false
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Build and deploy
     runs-on: ubuntu-latest
 
