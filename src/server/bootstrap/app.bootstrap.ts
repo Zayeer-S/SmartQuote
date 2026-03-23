@@ -13,6 +13,8 @@ import { errorHandler, notFoundHandler } from '../middleware/error.middleware.js
 import { TicketContainer } from '../containers/ticket.container.js';
 import { createTicketRoutes } from '../routes/ticket.routes.js';
 import { QuoteContainer } from '../containers/quote.container.js';
+import { OrgContainer } from '../containers/org.container.js';
+import { createOrgRoutes } from '../routes/org.routes.js';
 import { LookupResolver } from '../lib/lookup-resolver.js';
 import { loadLookupMaps } from '../lib/lookup-maps.js';
 import { BertEmbedder } from '../lib/nlp/bert-embedder.js';
@@ -84,6 +86,7 @@ export async function bootstrapApplication(
     embedder
   );
   const quoteContainer = new QuoteContainer(db, adminContainer.rbacService, lookupResolver);
+  const orgContainer = new OrgContainer(db, adminContainer.rbacService);
 
   console.log('Registering routes...');
   app.use('/api/auth', createAuthRoutes(authContainer.authController, authContainer.authService));
@@ -104,6 +107,7 @@ export async function bootstrapApplication(
       adminContainer.rbacService
     )
   );
+  app.use('/api/orgs', createOrgRoutes(orgContainer.orgController, authContainer.authService));
 
   app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
