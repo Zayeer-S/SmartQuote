@@ -6,8 +6,8 @@ smartquote/
 │   │       └── setup/
 │   └── workflows/
 │       ├── cd.yml
-│       ├── ci-branch.yml
-│       └── ci-main.yml
+│       ├── ci-unit-integaration.yml
+│       └── ci-e2e.yml
 │
 ├── .husky/
 │   └── pre-commit/                                 # Lint-staged

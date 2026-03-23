@@ -1,4 +1,4 @@
-name: ci-branch
+name: ci-unit-integration
 
 on:
     push:
@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
     quality:
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.head_ref == '')
         name: Code Quality
         runs-on: ubuntu-latest
 

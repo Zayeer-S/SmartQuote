@@ -8,7 +8,7 @@ on:
       - "**/*.md"
       - "docs/**"
   workflow_run:
-    workflows: ["CI-Main"]
+    workflows: ["ci-e2e"]
     types: [completed]
     branches: [main]
 

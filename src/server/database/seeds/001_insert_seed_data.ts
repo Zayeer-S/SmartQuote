@@ -32,6 +32,8 @@ import {
   QUOTE_CONFIDENCE_LEVELS_SEED_DATA,
   ANALYTICS_SCHEMAS_SEED_DATA,
   SMARTQUOTE_CONFIGS_SEED_DATA,
+  generatePriorityEngineRules,
+  generatePriorityEngineAnchors,
 } from './helpers/index.js';
 
 // Pre-computed bcrypt hash of 'password' with 12 salt rounds.
@@ -83,6 +85,10 @@ export async function seed(knex: Knex): Promise<void> {
     'permissions',
     'notification_types',
     'roles',
+    // 005:
+    'priority_engine_anchors',
+    'ticket_priority_thresholds',
+    'ticket_priority_rules',
   ];
 
   await knex.raw(
@@ -681,6 +687,9 @@ export async function seed(knex: Knex): Promise<void> {
   ]);
 
   await knex('smartquote_configs').insert(SMARTQUOTE_CONFIGS_SEED_DATA);
+
+  await generatePriorityEngineRules(knex, lookupIds.ticketPriorities);
+  await generatePriorityEngineAnchors(knex);
 
   console.log('\nSeeding complete');
   console.log('Summary:');

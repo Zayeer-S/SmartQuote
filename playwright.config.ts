@@ -7,7 +7,7 @@ export default defineConfig({
 
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 3,
+  retries: process.env.CI ? 1 : 0,
   workers: 3,
 
   reporter: process.env.CI
@@ -22,14 +22,14 @@ export default defineConfig({
   },
 
   projects: [
-    // Setup projects
+    // --- Setup projects ---
     {
       name: 'customer-setup',
       testMatch: '**/setup/customer.setup.ts',
       use: { ...devices['Desktop Chrome'] },
     },
 
-    // Unauthenticated browsers
+    // --- Unauthenticated browsers ---
     {
       name: 'chromium',
       testIgnore: '**/smoke/ticket.smoke.test.ts',
@@ -55,7 +55,7 @@ export default defineConfig({
       },
     },
 
-    // Authenticated browsers (customer session)
+    // --- Authenticated browsers (customer session) ---
     {
       name: 'chromium-customer',
       testMatch: '**/smoke/ticket.smoke.test.ts',
@@ -85,12 +85,17 @@ export default defineConfig({
     },
   ],
 
-  globalSetup: './tests/e2e/global.setup.ts',
-
   webServer: [
     {
-      command: 'cross-env NODE_ENV=test npm run dev:full',
+      command:
+        'cross-env NODE_ENV=test npm run db:migrate && npm run db:seed && cross-env NODE_ENV=test npm run dev:server',
       url: 'http://localhost:3000/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command: 'npm run dev',
+      url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
     },

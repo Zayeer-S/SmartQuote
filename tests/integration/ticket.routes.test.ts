@@ -163,10 +163,9 @@ describe(`POST ${BASE}${TICKET_ENDPOINTS.CREATE}`, () => {
   const validTicket = {
     title: 'Integration test ticket',
     description: 'Created during integration testing.',
-    ticketTypeId: 1,
-    ticketSeverityId: 1,
-    businessImpactId: 1,
-    ticketPriorityId: 3,
+    ticketType: 'Support',
+    ticketSeverity: 'Low',
+    businessImpact: 'Minor',
     deadline: new Date(Date.now() + 86400000 * 7).toISOString(),
     usersImpacted: 3,
   };
@@ -183,6 +182,8 @@ describe(`POST ${BASE}${TICKET_ENDPOINTS.CREATE}`, () => {
       .set('Authorization', `Bearer ${customer1Token}`)
       .send(validTicket);
 
+    console.log('res.body:');
+    console.log(res.body.error ?? JSON.stringify(res.body));
     expect(res.status).toBe(201);
     expect(res.body.data).toMatchObject({
       title: validTicket.title,
