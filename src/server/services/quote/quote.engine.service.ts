@@ -1,4 +1,4 @@
-import { PERMISSIONS } from '../../../shared/constants';
+import { PERMISSIONS, QUOTE_CREATORS } from '../../../shared/constants';
 import type { InsertData, TransactionContext } from '../../daos/base/types.js';
 import type { QuoteCalculationRulesDAO } from '../../daos/children/quote.calculation.rules.dao.js';
 import type { QuotesDAO } from '../../daos/children/quotes.dao.js';
@@ -12,6 +12,7 @@ import type {
   Ticket,
 } from '../../database/types/tables.js';
 import type { RBACService } from '../rbac/rbac.service.js';
+import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket.errors.js';
 import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
 
@@ -63,27 +64,28 @@ export function computeQuote(input: ComputeQuoteInput): ComputeQuoteResult {
   };
 }
 
-// ─── Service ──────────────────────────────────────────────────────────────────
-
 export class QuoteEngineService {
   private quotesDAO: QuotesDAO;
   private ticketsDAO: TicketsDAO;
   private rateProfilesDAO: RateProfilesDAO;
   private quoteCalculationRulesDAO: QuoteCalculationRulesDAO;
   private rbacService: RBACService;
+  private lookup: LookupResolver;
 
   constructor(
     quotesDAO: QuotesDAO,
     ticketsDAO: TicketsDAO,
     rateProfilesDAO: RateProfilesDAO,
     quoteCalculationRulesDAO: QuoteCalculationRulesDAO,
-    rbacService: RBACService
+    rbacService: RBACService,
+    lookup: LookupResolver
   ) {
     this.quotesDAO = quotesDAO;
     this.ticketsDAO = ticketsDAO;
     this.rateProfilesDAO = rateProfilesDAO;
     this.quoteCalculationRulesDAO = quoteCalculationRulesDAO;
     this.rbacService = rbacService;
+    this.lookup = lookup;
   }
 
   /**
@@ -130,7 +132,8 @@ export class QuoteEngineService {
 
     const nextVersion = await this.resolveNextVersion(ticketId, options);
 
-    // AUTOMATED creator (id=2)
+    // TODO: rule.quote_effort_level_id should be used here once QuoteCalculationRule
+    // carries that field - currently the rule only has suggested_ticket_priority_id.
     const newQuote = await this.quotesDAO.create(
       {
         ticket_id: ticketId,
@@ -144,7 +147,7 @@ export class QuoteEngineService {
         final_cost: null,
         quote_confidence_level_id: null,
         quote_approval_id: null,
-        quote_creator_id: 2 as unknown as Quote['quote_creator_id'],
+        quote_creator_id: this.lookup.quoteCreatorId(QUOTE_CREATORS.AUTOMATED),
         suggested_ticket_priority_id:
           computed.suggested_ticket_priority_id as unknown as Quote['suggested_ticket_priority_id'],
         quote_effort_level_id:
@@ -154,7 +157,6 @@ export class QuoteEngineService {
       options
     );
 
-    // Update the ticket's priority to match the engine's recommendation
     await this.ticketsDAO.update(
       { id: ticketId },
       {
@@ -166,8 +168,6 @@ export class QuoteEngineService {
 
     return newQuote;
   }
-
-  // ─── Private Helpers ───────────────────────────────────────────────────────
 
   /**
    * Find the highest-priority active calculation rule that matches the ticket's
@@ -241,14 +241,10 @@ export class QuoteEngineService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _options?: TransactionContext
   ): Promise<{ effortHoursMin: number; effortHoursMax: number }> {
-    // Fall back to a sensible default range if no effort level range is seeded.
-    // The quote engine should not fail hard on missing configuration, it should bruh bruh
-    // produce a quote with a visible indicator that defaults were used.
     // TODO: inject QuoteEffortLevelRangesDAO and query properly when seed data is in place.
     return { effortHoursMin: 1, effortHoursMax: 8 };
   }
 
-  /** Determine the next version number for a ticket's quotes */
   private async resolveNextVersion(
     ticketId: TicketId,
     options?: TransactionContext

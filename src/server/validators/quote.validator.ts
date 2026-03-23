@@ -1,20 +1,18 @@
 import { z } from 'zod';
-
-// ─── Shared Primitives ────────────────────────────────────────────────────────
+import {
+  ALL_QUOTE_EFFORT_LEVELS,
+  ALL_QUOTE_CONFIDENCE_LEVELS,
+} from '../../shared/constants/lookup-values.js';
 
 const positiveDecimal = z.number().positive();
-
-const lookupId = z.number().int().positive();
-
-// ─── Quote Schemas ────────────────────────────────────────────────────────────
 
 const baseQuoteFields = z.object({
   estimatedHoursMinimum: positiveDecimal,
   estimatedHoursMaximum: positiveDecimal,
   hourlyRate: positiveDecimal,
   fixedCost: z.number().min(0, 'Fixed cost must be zero or greater'),
-  quoteEffortLevelId: lookupId,
-  quoteConfidenceLevelId: lookupId.nullable(),
+  quoteEffortLevel: z.enum(ALL_QUOTE_EFFORT_LEVELS),
+  quoteConfidenceLevel: z.enum(ALL_QUOTE_CONFIDENCE_LEVELS).nullable(),
 });
 
 export const createManualQuoteSchema = baseQuoteFields.refine(
@@ -59,8 +57,6 @@ export const updateQuoteSchema = baseQuoteFields
   );
 
 export type UpdateQuoteInput = z.infer<typeof updateQuoteSchema>;
-
-// ─── Approval Schemas ─────────────────────────────────────────────────────────
 
 export const approveQuoteSchema = z.object({
   comment: z.string().min(1).nullable().optional().default(null),
