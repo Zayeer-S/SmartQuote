@@ -4,7 +4,7 @@ import { backEnv } from './env.backend.js';
 export const passwordConfig: PasswordConfig = {
   saltRounds: backEnv.BCRYPT_SALT_ROUNDS,
   minLength: 8,
-  maxLength: 8,
+  maxLength: 128,
   requireSpecialChar: true,
   requireNumber: true,
   requireUppercase: true,
