@@ -1,4 +1,4 @@
-import { PERMISSIONS, TICKET_STATUSES, TICKET_PRIORITIES } from '../../../shared/constants';
+import { PERMISSIONS, TICKET_STATUSES } from '../../../shared/constants';
 import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types.js';
 import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
 import type { UsersDAO } from '../../daos/children/users.dao.js';
@@ -7,24 +7,32 @@ import type { Ticket, TicketWithDetails } from '../../database/types/tables.js';
 import type { RBACService } from '../rbac/rbac.service.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from './ticket.errors.js';
-import type { CreateTicketData, ListTicketsFilters, UpdateTicketData } from './ticket.types.js';
+import type {
+  CreateTicketData,
+  ListTicketsFilters,
+  UpdateTicketData,
+} from './ticket.service.types.js';
+import type { TicketPriorityEngine } from './ticket.priority.engine.js';
 
 export class TicketService {
   private ticketsDAO: TicketsDAO;
   private usersDAO: UsersDAO;
   private rbacService: RBACService;
   private lookup: LookupResolver;
+  private priorityEngine: TicketPriorityEngine;
 
   constructor(
     ticketsDAO: TicketsDAO,
     usersDAO: UsersDAO,
     rbacService: RBACService,
-    lookup: LookupResolver
+    lookup: LookupResolver,
+    priorityEngine: TicketPriorityEngine
   ) {
     this.ticketsDAO = ticketsDAO;
     this.usersDAO = usersDAO;
     this.rbacService = rbacService;
     this.lookup = lookup;
+    this.priorityEngine = priorityEngine;
   }
 
   /**
@@ -51,13 +59,21 @@ export class TicketService {
     if (!actor.organization_id)
       throw new TicketError(`Actor does not belong to an organization`, 422);
 
+    const ticketPriorityId = await this.priorityEngine.calculatePriority({
+      ticketSeverity: this.lookup.ticketSeverityName(data.ticket_severity_id as unknown as number),
+      businessImpact: this.lookup.businessImpactName(data.business_impact_id as unknown as number),
+      usersImpacted: data.users_impacted,
+      deadline: data.deadline,
+      description: data.description,
+    });
+
     return this.ticketsDAO.create(
       {
         ...data,
         creator_user_id: actorId,
         organization_id: actor.organization_id,
         ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.OPEN),
-        ticket_priority_id: this.lookup.ticketPriorityId(TICKET_PRIORITIES.P3),
+        ticket_priority_id: ticketPriorityId,
         assigned_to_user_id: null,
         resolved_by_user_id: null,
         deleted_at: null,

@@ -1,4 +1,4 @@
-import { TicketStatus } from '../../../shared/constants';
+import { TicketStatus } from '../../../shared/constants/index.js';
 import type {
   BusinessImpactId,
   OrganizationId,
