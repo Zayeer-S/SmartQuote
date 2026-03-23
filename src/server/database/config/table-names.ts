@@ -1,3 +1,4 @@
+// TODO REFACTOR TO DOMAIN
 export const LOOKUP_TABLES = {
   ROLES: 'roles',
   NOTIFICATION_TYPES: 'notification_types',
@@ -46,11 +47,18 @@ export const CONFIG_TABLES = {
   SMARTQUOTE_CONFIGS: 'smartquote_configs',
 };
 
+export const TICKET_PRIORITY_ENGINE_TABLES = {
+  TICKET_PRIORITY_RULES: 'ticket_priority_rules',
+  TICKET_PRIORITY_THRESHOLDS: 'ticket_priority_thresholds',
+  PRIORITY_ENGINE_ANCHORS: 'priority_engine_anchors',
+};
+
 export const TABLE_NAMES = {
   ...LOOKUP_TABLES,
   ...LINK_TABLES,
   ...MAIN_TABLES,
   ...CONFIG_TABLES,
+  ...TICKET_PRIORITY_ENGINE_TABLES,
 };
 
 export type LookupTableName = (typeof LOOKUP_TABLES)[keyof typeof LOOKUP_TABLES];

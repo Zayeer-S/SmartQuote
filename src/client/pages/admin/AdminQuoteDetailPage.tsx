@@ -94,10 +94,10 @@ const AdminQuoteDetailPage: React.FC = () => {
         <h1 className="admin-quote-detail-title">{ticket.data.title}</h1>
         <div className="admin-quote-detail-meta">
           <span
-            className={getStatusBadgeClass(ticket.data.ticketStatusName)}
+            className={getStatusBadgeClass(ticket.data.ticketStatus)}
             data-testid="quote-detail-ticket-status"
           >
-            {ticket.data.ticketStatusName}
+            {ticket.data.ticketStatus}
           </span>
           <span className="admin-quote-detail-org" data-testid="quote-detail-ticket-org">
             {ticket.data.organizationName}

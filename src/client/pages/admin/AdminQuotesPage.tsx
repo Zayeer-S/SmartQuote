@@ -82,10 +82,10 @@ const TicketQuoteRow: React.FC<TicketQuoteRowProps> = ({ ticket }) => {
           {latestQuote.estimatedHoursMinimum}–{latestQuote.estimatedHoursMaximum} hrs
         </span>
         <span
-          className={getStatusBadgeClass(ticket.ticketStatusName)}
+          className={getStatusBadgeClass(ticket.ticketStatus)}
           data-testid={`quote-row-status-${ticket.id}`}
         >
-          {ticket.ticketStatusName}
+          {ticket.ticketStatus}
         </span>
       </div>
 
@@ -124,7 +124,7 @@ const AdminQuotesPage: React.FC = () => {
   const filteredTickets = tickets.filter((t) => {
     if (
       !TICKETS_WITH_ACTIVE_QUOTES.includes(
-        t.ticketStatusName as (typeof TICKETS_WITH_ACTIVE_QUOTES)[number]
+        t.ticketStatus as (typeof TICKETS_WITH_ACTIVE_QUOTES)[number]
       )
     )
       return false;

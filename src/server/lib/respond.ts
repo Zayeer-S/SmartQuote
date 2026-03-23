@@ -1,5 +1,6 @@
 import type { Response } from 'express';
 
+// TODO REFACTOR TO STRONGER TYPES
 export function success(res: Response, data: unknown, status = 200) {
   return res.status(status).json({
     success: true,

@@ -81,7 +81,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
     year: 'numeric',
   });
 
-  const isResolved = t.ticketStatusName === 'Resolved' || t.ticketStatusName === 'Closed';
+  const isResolved = t.ticketStatus === 'Resolved' || t.ticketStatus === 'Closed';
 
   return (
     <div className="admin-ticket-detail" data-testid="admin-ticket-detail">
@@ -91,14 +91,11 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
           {t.title}
         </h1>
         <div className="admin-ticket-detail-badges">
-          <span className={getStatusBadgeClass(t.ticketStatusName)} data-testid="ticket-status">
-            {t.ticketStatusName}
+          <span className={getStatusBadgeClass(t.ticketStatus)} data-testid="ticket-status">
+            {t.ticketStatus}
           </span>
-          <span
-            className={getPriorityBadgeClass(t.ticketPriorityName)}
-            data-testid="ticket-priority"
-          >
-            {t.ticketPriorityName}
+          <span className={getPriorityBadgeClass(t.ticketPriority)} data-testid="ticket-priority">
+            {t.ticketPriority}
           </span>
         </div>
       </div>
@@ -116,15 +113,15 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
         <dl className="admin-detail-dl">
           <div className="admin-detail-dl-row">
             <dt>Type</dt>
-            <dd data-testid="ticket-type">{t.ticketTypeName}</dd>
+            <dd data-testid="ticket-type">{t.ticketType}</dd>
           </div>
           <div className="admin-detail-dl-row">
             <dt>Severity</dt>
-            <dd data-testid="ticket-severity">{t.ticketSeverityName}</dd>
+            <dd data-testid="ticket-severity">{t.ticketSeverity}</dd>
           </div>
           <div className="admin-detail-dl-row">
             <dt>Business Impact</dt>
-            <dd data-testid="ticket-business-impact">{t.businessImpactName}</dd>
+            <dd data-testid="ticket-business-impact">{t.businessImpact}</dd>
           </div>
           <div className="admin-detail-dl-row">
             <dt>Users Impacted</dt>

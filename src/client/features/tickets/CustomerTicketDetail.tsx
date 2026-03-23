@@ -74,14 +74,11 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
             {t.title}
           </h1>
           <div className="ticket-detail-badges">
-            <span className={getStatusBadgeClass(t.ticketStatusName)} data-testid="ticket-status">
-              {t.ticketStatusName}
+            <span className={getStatusBadgeClass(t.ticketStatus)} data-testid="ticket-status">
+              {t.ticketStatus}
             </span>
-            <span
-              className={getPriorityBadgeClass(t.ticketPriorityName)}
-              data-testid="ticket-priority"
-            >
-              {t.ticketPriorityName}
+            <span className={getPriorityBadgeClass(t.ticketPriority)} data-testid="ticket-priority">
+              {t.ticketPriority}
             </span>
           </div>
         </div>
@@ -102,15 +99,15 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
         <dl className="ticket-detail-dl">
           <div>
             <dt>Type</dt>
-            <dd data-testid="ticket-type">{t.ticketTypeName}</dd>
+            <dd data-testid="ticket-type">{t.ticketType}</dd>
           </div>
           <div>
             <dt>Severity</dt>
-            <dd data-testid="ticket-severity">{t.ticketSeverityName}</dd>
+            <dd data-testid="ticket-severity">{t.ticketSeverity}</dd>
           </div>
           <div>
             <dt>Business Impact</dt>
-            <dd data-testid="ticket-business-impact">{t.businessImpactName}</dd>
+            <dd data-testid="ticket-business-impact">{t.businessImpact}</dd>
           </div>
           <div>
             <dt>Users Impacted</dt>

@@ -6,49 +6,23 @@ import { useSubmitForApproval } from '../../hooks/quotes/useSubmitForApproval.js
 import { useGetRevisionHistory } from '../../hooks/quotes/useGetRevisionHistory.js';
 import { useQuotePermissions } from '../../hooks/auth/useQuotePermissions.js';
 import {
-  LOOKUP_IDS,
   QUOTE_EFFORT_LEVELS,
   QUOTE_CONFIDENCE_LEVELS,
-  QUOTE_CREATORS,
-  TICKET_PRIORITIES,
   QUOTE_APPROVAL_STATUSES,
 } from '../../../shared/constants/lookup-values.js';
-import type { QuoteResponse } from '../../../shared/contracts/quote-contracts.js';
+import type {
+  QuoteEffortLevel,
+  QuoteConfidenceLevel,
+  QuoteApprovalStatus,
+} from '../../../shared/constants/lookup-values.js';
+import type { QuoteWithApprovalResponse } from '../../../shared/contracts/quote-contracts.js';
+import './AdminQuotePanel.css';
 
-const EFFORT_LABEL: Record<number, string> = {
-  [LOOKUP_IDS.QUOTE_EFFORT_LEVEL.LOW]: QUOTE_EFFORT_LEVELS.LOW,
-  [LOOKUP_IDS.QUOTE_EFFORT_LEVEL.MEDIUM]: QUOTE_EFFORT_LEVELS.MEDIUM,
-  [LOOKUP_IDS.QUOTE_EFFORT_LEVEL.HIGH]: QUOTE_EFFORT_LEVELS.HIGH,
-};
-
-const CONFIDENCE_LABEL: Record<number, string> = {
-  [LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.LOW]: QUOTE_CONFIDENCE_LEVELS.LOW,
-  [LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.MEDIUM]: QUOTE_CONFIDENCE_LEVELS.MEDIUM,
-  [LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.HIGH]: QUOTE_CONFIDENCE_LEVELS.HIGH,
-};
-
-const CREATOR_LABEL: Record<number, string> = {
-  [LOOKUP_IDS.QUOTE_CREATOR.MANUAL]: QUOTE_CREATORS.MANUAL,
-  [LOOKUP_IDS.QUOTE_CREATOR.AUTOMATED]: QUOTE_CREATORS.AUTOMATED,
-};
-
-const PRIORITY_LABEL: Record<number, string> = {
-  [LOOKUP_IDS.TICKET_PRIORITY.P1]: TICKET_PRIORITIES.P1,
-  [LOOKUP_IDS.TICKET_PRIORITY.P2]: TICKET_PRIORITIES.P2,
-  [LOOKUP_IDS.TICKET_PRIORITY.P3]: TICKET_PRIORITIES.P3,
-  [LOOKUP_IDS.TICKET_PRIORITY.P4]: TICKET_PRIORITIES.P4,
-};
-
-const APPROVAL_STATUS_LABEL: Record<number, string> = {
-  [LOOKUP_IDS.QUOTE_APPROVAL_STATUS.PENDING]: QUOTE_APPROVAL_STATUSES.PENDING,
-  [LOOKUP_IDS.QUOTE_APPROVAL_STATUS.APPROVED]: QUOTE_APPROVAL_STATUSES.APPROVED,
-  [LOOKUP_IDS.QUOTE_APPROVAL_STATUS.REJECTED]: QUOTE_APPROVAL_STATUSES.REJECTED,
-};
-
-const APPROVAL_STATUS_BADGE: Record<number, string> = {
-  [LOOKUP_IDS.QUOTE_APPROVAL_STATUS.PENDING]: 'badge badge-in-progress',
-  [LOOKUP_IDS.QUOTE_APPROVAL_STATUS.APPROVED]: 'badge badge-resolved',
-  [LOOKUP_IDS.QUOTE_APPROVAL_STATUS.REJECTED]: 'badge badge-cancelled',
+const APPROVAL_STATUS_BADGE: Record<QuoteApprovalStatus, string> = {
+  [QUOTE_APPROVAL_STATUSES.PENDING]: 'badge badge-in-progress',
+  [QUOTE_APPROVAL_STATUSES.APPROVED]: 'badge badge-resolved',
+  [QUOTE_APPROVAL_STATUSES.REJECTED]: 'badge badge-cancelled',
+  [QUOTE_APPROVAL_STATUSES.REVISED]: 'badge badge-neutral',
 };
 
 const fmt = {
@@ -64,120 +38,107 @@ const fmt = {
     }),
 };
 
-/* ─── Inline admin quote display — shows every field ─── */
+const EFFORT_OPTIONS: { value: QuoteEffortLevel; label: string }[] = [
+  { value: QUOTE_EFFORT_LEVELS.LOW, label: QUOTE_EFFORT_LEVELS.LOW },
+  { value: QUOTE_EFFORT_LEVELS.MEDIUM, label: QUOTE_EFFORT_LEVELS.MEDIUM },
+  { value: QUOTE_EFFORT_LEVELS.HIGH, label: QUOTE_EFFORT_LEVELS.HIGH },
+];
 
-const AdminQuoteDisplay: React.FC<{ quote: QuoteResponse }> = ({ quote }) => (
-  <div className="admin-quote-display" data-testid="admin-quote-display">
-    <div className="admin-quote-display-header">
-      <span className="admin-quote-version-badge">v{quote.version}</span>
-      <span className={APPROVAL_STATUS_BADGE[quote.quoteApprovalId ?? 0] ?? 'badge badge-neutral'}>
-        {quote.quoteApprovalId != null
-          ? (APPROVAL_STATUS_LABEL[quote.quoteApprovalId] ?? 'Unknown')
-          : 'Not Submitted'}
-      </span>
-      <span className="badge badge-neutral">
-        {CREATOR_LABEL[quote.quoteCreatorId] ?? 'Unknown'}
-      </span>
+const CONFIDENCE_OPTIONS: { value: QuoteConfidenceLevel; label: string }[] = [
+  { value: QUOTE_CONFIDENCE_LEVELS.LOW, label: QUOTE_CONFIDENCE_LEVELS.LOW },
+  { value: QUOTE_CONFIDENCE_LEVELS.MEDIUM, label: QUOTE_CONFIDENCE_LEVELS.MEDIUM },
+  { value: QUOTE_CONFIDENCE_LEVELS.HIGH, label: QUOTE_CONFIDENCE_LEVELS.HIGH },
+];
+
+const AdminQuoteDisplay: React.FC<{ quote: QuoteWithApprovalResponse }> = ({ quote }) => {
+  const approvalBadgeClass =
+    quote.approvalStatus != null
+      ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        (APPROVAL_STATUS_BADGE[quote.approvalStatus] ?? 'badge badge-neutral')
+      : 'badge badge-neutral';
+
+  const approvalLabel = quote.approvalStatus ?? 'Not Submitted';
+
+  return (
+    <div className="admin-quote-display" data-testid="admin-quote-display">
+      <div className="admin-quote-display-header">
+        <span className="admin-quote-version-badge">v{quote.version}</span>
+        <span className={approvalBadgeClass}>{approvalLabel}</span>
+        <span className="badge badge-neutral">{quote.quoteCreator}</span>
+      </div>
+
+      <dl className="admin-detail-dl">
+        <div className="admin-detail-dl-row">
+          <dt>Estimated Cost</dt>
+          <dd data-testid="quote-estimated-cost">{fmt.currency(quote.estimatedCost)}</dd>
+        </div>
+        <div className="admin-detail-dl-row">
+          <dt>Fixed Cost</dt>
+          <dd data-testid="quote-fixed-cost">{fmt.currency(quote.fixedCost)}</dd>
+        </div>
+        <div className="admin-detail-dl-row">
+          <dt>Final Cost</dt>
+          <dd data-testid="quote-final-cost">
+            {quote.finalCost != null ? (
+              fmt.currency(quote.finalCost)
+            ) : (
+              <em className="admin-detail-unassigned">Not set</em>
+            )}
+          </dd>
+        </div>
+
+        <div className="admin-detail-dl-row">
+          <dt>Estimated Hours</dt>
+          <dd data-testid="quote-hours">
+            {quote.estimatedHoursMinimum}–{quote.estimatedHoursMaximum} hrs
+          </dd>
+        </div>
+        <div className="admin-detail-dl-row">
+          <dt>Est. Resolution Time</dt>
+          <dd data-testid="quote-resolution-time">{quote.estimatedResolutionTime} days</dd>
+        </div>
+        <div className="admin-detail-dl-row">
+          <dt>Hourly Rate</dt>
+          <dd data-testid="quote-hourly-rate">{fmt.currency(quote.hourlyRate)}/hr</dd>
+        </div>
+
+        <div className="admin-detail-dl-row">
+          <dt>Effort Level</dt>
+          <dd data-testid="quote-effort">{quote.quoteEffortLevel}</dd>
+        </div>
+        <div className="admin-detail-dl-row">
+          <dt>Confidence Level</dt>
+          <dd data-testid="quote-confidence">
+            {quote.quoteConfidenceLevel ?? <em className="admin-detail-unassigned">Not set</em>}
+          </dd>
+        </div>
+        <div className="admin-detail-dl-row">
+          <dt>Suggested Priority</dt>
+          <dd data-testid="quote-suggested-priority">{quote.suggestedTicketPriority}</dd>
+        </div>
+
+        <div className="admin-detail-dl-row">
+          <dt>Created</dt>
+          <dd data-testid="quote-created-at">{fmt.date(quote.createdAt)}</dd>
+        </div>
+        <div className="admin-detail-dl-row">
+          <dt>Last Updated</dt>
+          <dd data-testid="quote-updated-at">{fmt.date(quote.updatedAt)}</dd>
+        </div>
+      </dl>
     </div>
+  );
+};
 
-    <dl className="admin-detail-dl">
-      {/* ── Costs ── */}
-      <div className="admin-detail-dl-row">
-        <dt>Estimated Cost</dt>
-        <dd data-testid="quote-estimated-cost">{fmt.currency(quote.estimatedCost)}</dd>
-      </div>
-      <div className="admin-detail-dl-row">
-        <dt>Fixed Cost</dt>
-        <dd data-testid="quote-fixed-cost">{fmt.currency(quote.fixedCost)}</dd>
-      </div>
-      <div className="admin-detail-dl-row">
-        <dt>Final Cost</dt>
-        <dd data-testid="quote-final-cost">
-          {quote.finalCost != null ? (
-            fmt.currency(quote.finalCost)
-          ) : (
-            <em className="admin-detail-unassigned">Not set</em>
-          )}
-        </dd>
-      </div>
-
-      {/* ── Hours & time ── */}
-      <div className="admin-detail-dl-row">
-        <dt>Estimated Hours</dt>
-        <dd data-testid="quote-hours">
-          {quote.estimatedHoursMinimum}–{quote.estimatedHoursMaximum} hrs
-        </dd>
-      </div>
-      <div className="admin-detail-dl-row">
-        <dt>Est. Resolution Time</dt>
-        <dd data-testid="quote-resolution-time">{quote.estimatedResolutionTime} days</dd>
-      </div>
-      <div className="admin-detail-dl-row">
-        <dt>Hourly Rate</dt>
-        <dd data-testid="quote-hourly-rate">{fmt.currency(quote.hourlyRate)}/hr</dd>
-      </div>
-
-      {/* ── Classification ── */}
-      <div className="admin-detail-dl-row">
-        <dt>Effort Level</dt>
-        <dd data-testid="quote-effort">{EFFORT_LABEL[quote.quoteEffortLevelId] ?? '—'}</dd>
-      </div>
-      <div className="admin-detail-dl-row">
-        <dt>Confidence Level</dt>
-        <dd data-testid="quote-confidence">
-          {quote.quoteConfidenceLevelId != null ? (
-            (CONFIDENCE_LABEL[quote.quoteConfidenceLevelId] ?? '—')
-          ) : (
-            <em className="admin-detail-unassigned">Not set</em>
-          )}
-        </dd>
-      </div>
-      <div className="admin-detail-dl-row">
-        <dt>Suggested Priority</dt>
-        <dd data-testid="quote-suggested-priority">
-          {PRIORITY_LABEL[quote.suggestedTicketPriorityId] ?? '—'}
-        </dd>
-      </div>
-
-      {/* ── Timestamps ── */}
-      <div className="admin-detail-dl-row">
-        <dt>Created</dt>
-        <dd data-testid="quote-created-at">{fmt.date(quote.createdAt)}</dd>
-      </div>
-      <div className="admin-detail-dl-row">
-        <dt>Last Updated</dt>
-        <dd data-testid="quote-updated-at">{fmt.date(quote.updatedAt)}</dd>
-      </div>
-    </dl>
-  </div>
-);
-import './AdminQuotePanel.css';
-
-interface AdminQuotePanelProps {
-  ticketId: string;
-  quotes: QuoteResponse[];
-  onQuoteMutated: () => void;
-}
-
-const EFFORT_OPTIONS = [
-  { id: LOOKUP_IDS.QUOTE_EFFORT_LEVEL.LOW, label: QUOTE_EFFORT_LEVELS.LOW },
-  { id: LOOKUP_IDS.QUOTE_EFFORT_LEVEL.MEDIUM, label: QUOTE_EFFORT_LEVELS.MEDIUM },
-  { id: LOOKUP_IDS.QUOTE_EFFORT_LEVEL.HIGH, label: QUOTE_EFFORT_LEVELS.HIGH },
-] as const;
-
-const CONFIDENCE_OPTIONS = [
-  { id: LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.LOW, label: QUOTE_CONFIDENCE_LEVELS.LOW },
-  { id: LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.MEDIUM, label: QUOTE_CONFIDENCE_LEVELS.MEDIUM },
-  { id: LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.HIGH, label: QUOTE_CONFIDENCE_LEVELS.HIGH },
-] as const;
+// ─── Form state ───────────────────────────────────────────────────────────────
 
 interface ManualQuoteFormState {
   estimatedHoursMinimum: string;
   estimatedHoursMaximum: string;
   hourlyRate: string;
   fixedCost: string;
-  quoteEffortLevelId: number;
-  quoteConfidenceLevelId: number;
+  quoteEffortLevel: QuoteEffortLevel;
+  quoteConfidenceLevel: QuoteConfidenceLevel;
 }
 
 const INITIAL_MANUAL_FORM: ManualQuoteFormState = {
@@ -185,11 +146,28 @@ const INITIAL_MANUAL_FORM: ManualQuoteFormState = {
   estimatedHoursMaximum: '',
   hourlyRate: '',
   fixedCost: '0',
-  quoteEffortLevelId: LOOKUP_IDS.QUOTE_EFFORT_LEVEL.MEDIUM,
-  quoteConfidenceLevelId: LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.MEDIUM,
+  quoteEffortLevel: QUOTE_EFFORT_LEVELS.MEDIUM,
+  quoteConfidenceLevel: QUOTE_CONFIDENCE_LEVELS.MEDIUM,
 };
 
+interface UpdateQuoteFormState {
+  estimatedHoursMinimum?: string;
+  estimatedHoursMaximum?: string;
+  hourlyRate?: string;
+  fixedCost?: string;
+  quoteEffortLevel?: QuoteEffortLevel;
+  quoteConfidenceLevel?: QuoteConfidenceLevel;
+}
+
 type ActivePanel = 'none' | 'manual' | 'update' | 'revisions';
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+interface AdminQuotePanelProps {
+  ticketId: string;
+  quotes: QuoteWithApprovalResponse[];
+  onQuoteMutated: () => void;
+}
 
 const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQuoteMutated }) => {
   const { canCreate, canUpdate } = useQuotePermissions();
@@ -203,7 +181,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
   const [activePanel, setActivePanel] = useState<ActivePanel>('none');
   const [manualForm, setManualForm] = useState<ManualQuoteFormState>(INITIAL_MANUAL_FORM);
   const [updateReason, setUpdateReason] = useState('');
-  const [updateForm, setUpdateForm] = useState<Partial<ManualQuoteFormState>>({});
+  const [updateForm, setUpdateForm] = useState<UpdateQuoteFormState>({});
 
   const latestQuote =
     quotes.length > 0 ? quotes.reduce((a, b) => (a.version > b.version ? a : b)) : null;
@@ -216,9 +194,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
     const { name, value } = e.target;
-    // ID fields come back from <select> as strings — coerce them immediately
-    const isIdField = name === 'quoteEffortLevelId' || name === 'quoteConfidenceLevelId';
-    setManualForm((prev) => ({ ...prev, [name]: isIdField ? Number(value) : value }));
+    setManualForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleManualSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
@@ -229,8 +205,8 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
         estimatedHoursMaximum: Number(manualForm.estimatedHoursMaximum),
         hourlyRate: Number(manualForm.hourlyRate),
         fixedCost: Number(manualForm.fixedCost),
-        quoteEffortLevelId: manualForm.quoteEffortLevelId,
-        quoteConfidenceLevelId: manualForm.quoteConfidenceLevelId,
+        quoteEffortLevel: manualForm.quoteEffortLevel,
+        quoteConfidenceLevel: manualForm.quoteConfidenceLevel,
       })
       .then(() => {
         setManualForm(INITIAL_MANUAL_FORM);
@@ -263,11 +239,11 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
         ...(updateForm.fixedCost !== undefined && {
           fixedCost: Number(updateForm.fixedCost),
         }),
-        ...(updateForm.quoteEffortLevelId !== undefined && {
-          quoteEffortLevelId: updateForm.quoteEffortLevelId,
+        ...(updateForm.quoteEffortLevel !== undefined && {
+          quoteEffortLevel: updateForm.quoteEffortLevel,
         }),
-        ...(updateForm.quoteConfidenceLevelId !== undefined && {
-          quoteConfidenceLevelId: updateForm.quoteConfidenceLevelId,
+        ...(updateForm.quoteConfidenceLevel !== undefined && {
+          quoteConfidenceLevel: updateForm.quoteConfidenceLevel,
         }),
         reason: updateReason,
       })
@@ -304,7 +280,6 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
         Quote Management
       </h2>
 
-      {/* ── Existing quote display ── */}
       {latestQuote ? (
         <AdminQuoteDisplay quote={latestQuote} />
       ) : (
@@ -313,7 +288,6 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
         </p>
       )}
 
-      {/* ── Primary actions ── */}
       <div className="admin-quote-actions" data-testid="admin-quote-actions">
         {canCreate && (
           <>
@@ -377,7 +351,6 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
         )}
       </div>
 
-      {/* ── Error states ── */}
       {generate.error && (
         <p className="feedback-error" role="alert" data-testid="generate-error">
           {generate.error}
@@ -491,14 +464,14 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
               <select
                 className="field-select"
                 id="mq-effort"
-                name="quoteEffortLevelId"
-                value={manualForm.quoteEffortLevelId}
+                name="quoteEffortLevel"
+                value={manualForm.quoteEffortLevel}
                 onChange={handleManualFormChange}
                 disabled={createManual.loading}
                 data-testid="mq-effort"
               >
                 {EFFORT_OPTIONS.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
+                  <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
                 ))}
@@ -512,14 +485,14 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
               <select
                 className="field-select"
                 id="mq-confidence"
-                name="quoteConfidenceLevelId"
-                value={manualForm.quoteConfidenceLevelId}
+                name="quoteConfidenceLevel"
+                value={manualForm.quoteConfidenceLevel}
                 onChange={handleManualFormChange}
                 disabled={createManual.loading}
                 data-testid="mq-confidence"
               >
                 {CONFIDENCE_OPTIONS.map((opt) => (
-                  <option key={opt.id} value={opt.id}>
+                  <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
                 ))}
@@ -685,60 +658,42 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
 
           {revisionHistory.data && revisionHistory.data.revisions.length > 0 && (
             <ol className="revision-list" role="list" data-testid="revisions-list">
-              {revisionHistory.data.revisions.map((rev) => {
-                const formattedDate = new Date(rev.createdAt).toLocaleDateString('en-GB', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                });
-                return (
-                  <li
-                    key={rev.id}
-                    className="revision-item"
-                    data-testid={`revision-${String(rev.id)}`}
-                  >
-                    <div className="revision-meta">
-                      <span
-                        className="revision-field"
-                        data-testid={`revision-field-${String(rev.id)}`}
-                      >
-                        {rev.fieldName}
-                      </span>
-                      <span
-                        className="revision-date"
-                        data-testid={`revision-date-${String(rev.id)}`}
-                      >
-                        {formattedDate}
-                      </span>
-                      <span
-                        className="revision-user"
-                        data-testid={`revision-user-${String(rev.id)}`}
-                      >
-                        {rev.changedByUserId}
-                      </span>
-                    </div>
-                    <div className="revision-diff">
-                      <span className="revision-old" data-testid={`revision-old-${String(rev.id)}`}>
-                        {rev.oldValue}
-                      </span>
-                      <span className="revision-arrow" aria-hidden="true">
-                        →
-                      </span>
-                      <span className="revision-new" data-testid={`revision-new-${String(rev.id)}`}>
-                        {rev.newValue}
-                      </span>
-                    </div>
-                    <p
-                      className="revision-reason"
-                      data-testid={`revision-reason-${String(rev.id)}`}
+              {revisionHistory.data.revisions.map((rev) => (
+                <li
+                  key={rev.id}
+                  className="revision-item"
+                  data-testid={`revision-${String(rev.id)}`}
+                >
+                  <div className="revision-meta">
+                    <span
+                      className="revision-field"
+                      data-testid={`revision-field-${String(rev.id)}`}
                     >
-                      {rev.reason}
-                    </p>
-                  </li>
-                );
-              })}
+                      {rev.fieldName}
+                    </span>
+                    <span className="revision-date" data-testid={`revision-date-${String(rev.id)}`}>
+                      {fmt.date(rev.createdAt)}
+                    </span>
+                    <span className="revision-user" data-testid={`revision-user-${String(rev.id)}`}>
+                      {rev.changedByUserId}
+                    </span>
+                  </div>
+                  <div className="revision-diff">
+                    <span className="revision-old" data-testid={`revision-old-${String(rev.id)}`}>
+                      {rev.oldValue}
+                    </span>
+                    <span className="revision-arrow" aria-hidden="true">
+                      →
+                    </span>
+                    <span className="revision-new" data-testid={`revision-new-${String(rev.id)}`}>
+                      {rev.newValue}
+                    </span>
+                  </div>
+                  <p className="revision-reason" data-testid={`revision-reason-${String(rev.id)}`}>
+                    {rev.reason}
+                  </p>
+                </li>
+              ))}
             </ol>
           )}
         </section>

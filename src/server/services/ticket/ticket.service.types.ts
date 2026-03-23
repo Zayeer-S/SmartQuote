@@ -1,3 +1,4 @@
+import { TicketStatus } from '../../../shared/constants/index.js';
 import type {
   BusinessImpactId,
   OrganizationId,
@@ -35,6 +36,6 @@ export interface UpdateTicketData {
 
 export interface ListTicketsFilters {
   organizationId?: OrganizationId;
-  statusId?: TicketStatusId;
+  ticketStatus?: TicketStatus;
   assigneeId?: UserId;
 }

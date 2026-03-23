@@ -1,15 +1,18 @@
-export interface LookupItem {
-  id: number;
-  name: string;
-}
+import {
+  BusinessImpact,
+  CommentType,
+  TicketPriority,
+  TicketSeverity,
+  TicketStatus,
+  TicketType,
+} from '../constants';
 
 export interface CreateTicketRequest {
   title: string;
   description: string;
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
-  ticketPriorityId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
   /** ISO 8601 date string */
   deadline: string;
   usersImpacted: number;
@@ -18,14 +21,14 @@ export interface CreateTicketRequest {
 export interface UpdateTicketRequest {
   title?: string;
   description?: string;
-  ticketTypeId?: number;
-  ticketSeverityId?: number;
-  businessImpactId?: number;
+  ticketType?: TicketType;
+  ticketSeverity?: TicketSeverity;
+  businessImpact?: BusinessImpact;
   /** ISO 8601 date string */
   deadline?: string;
   usersImpacted?: number;
   /** Admin-only, stripped for customers */
-  ticketStatusId?: number;
+  ticketStatus?: TicketStatus;
   /** Admin-only, stripped for customers */
   assignedToUserId?: string | null;
 }
@@ -42,11 +45,11 @@ export interface TicketResponse {
   creatorUserId: string;
   assignedToUserId: string | null;
   resolvedByUserId: string | null;
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
-  ticketStatusId: number;
-  ticketPriorityId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
+  ticketStatus: TicketStatus;
+  ticketPriority: TicketPriority;
   deadline: string;
   usersImpacted: number;
   createdAt: string;
@@ -54,11 +57,6 @@ export interface TicketResponse {
 }
 
 export interface TicketDetailResponse extends TicketResponse {
-  ticketTypeName: string;
-  ticketSeverityName: string;
-  businessImpactName: string;
-  ticketStatusName: string;
-  ticketPriorityName: string;
   organizationName: string;
 }
 
@@ -68,7 +66,7 @@ export interface ListTicketsResponse {
 
 export interface AddCommentRequest {
   commentText: string;
-  commentTypeId: number;
+  commentType: CommentType;
 }
 
 export interface CommentResponse {
@@ -76,7 +74,7 @@ export interface CommentResponse {
   ticketId: string;
   userId: string;
   commentText: string;
-  commentTypeId: number;
+  commentType: CommentType;
   createdAt: string;
   updatedAt: string;
 }

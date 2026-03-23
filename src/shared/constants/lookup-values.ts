@@ -177,69 +177,28 @@ export type AnalyticsSchemaName =
 export const SMARTQUOTE_CONFIG_KEYS = {
   HOURS_PER_DAY: 'hours_per_day',
   VELOCITY_MULTIPLIER: 'velocity_multiplier',
+  TICKET_PRIORITY_NLP_WEIGHT: 'ticket_priority_nlp_weight',
+  TICKET_PRIORITY_USERS_IMPACTED_TIERS: 'ticket_priority_users_impacted_tiers',
 } as const;
 
 export type SmartQuoteConfigKey =
   (typeof SMARTQUOTE_CONFIG_KEYS)[keyof typeof SMARTQUOTE_CONFIG_KEYS];
 
-export const LOOKUP_IDS = {
-  TICKET_TYPE: {
-    SUPPORT: 1,
-    INCIDENT: 2,
-    ENHANCEMENT: 3,
-  },
-  TICKET_SEVERITY: {
-    LOW: 1,
-    MEDIUM: 2,
-    HIGH: 3,
-    CRITICAL: 4,
-  },
-  BUSINESS_IMPACT: {
-    MINOR: 1,
-    MODERATE: 2,
-    MAJOR: 3,
-    CRITICAL: 4,
-  },
-  TICKET_STATUS: {
-    OPEN: 1,
-    ASSIGNED: 2,
-    IN_PROGRESS: 3,
-    RESOLVED: 4,
-    CLOSED: 5,
-    CANCELLED: 6,
-  },
-  TICKET_PRIORITY: {
-    P1: 1,
-    P2: 2,
-    P3: 3,
-    P4: 4,
-  },
-  COMMENT_TYPE: {
-    INTERNAL: 1,
-    EXTERNAL: 2,
-    SYSTEM: 3,
-  },
-  QUOTE_EFFORT_LEVEL: {
-    LOW: 1,
-    MEDIUM: 2,
-    HIGH: 3,
-  },
-  QUOTE_CREATOR: {
-    MANUAL: 1,
-    AUTOMATED: 2,
-  },
-  QUOTE_APPROVAL_STATUS: {
-    PENDING: 1,
-    APPROVED: 2,
-    REJECTED: 3,
-    REVISED: 4,
-  },
-  QUOTE_CONFIDENCE_LEVEL: {
-    LOW: 1,
-    MEDIUM: 2,
-    HIGH: 3,
-  },
+export const TICKET_DEADLINE_PROXIMITY_BUCKETS = {
+  UNDER_24H: 'Under 24h',
+  ONE_TO_THREE_DAYS: '1-3 days',
+  THREE_TO_SEVEN_DAYS: '3-7 days',
+  OVER_SEVEN_DAYS: 'Over 7 days',
 } as const;
+
+export const TICKET_DEADLINE_PROXIMITY_HOURS = {
+  UNDER_24H: 24,
+  ONE_TO_THREE_DAYS: 72,
+  THREE_TO_SEVEN_DAYS: 168,
+} as const;
+
+export type DeadlineProximityBucket =
+  (typeof TICKET_DEADLINE_PROXIMITY_BUCKETS)[keyof typeof TICKET_DEADLINE_PROXIMITY_BUCKETS];
 
 export const ALL_ROLES = Object.values(AUTH_ROLES);
 export const ALL_PERMISSIONS = Object.values(PERMISSIONS);

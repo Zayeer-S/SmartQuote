@@ -1,16 +1,11 @@
 import React, { useEffect } from 'react';
 import { useListComments } from '../../hooks/tickets/useListComments.js';
-import { COMMENT_TYPES, LOOKUP_IDS } from '../../../shared/constants/lookup-values.js';
+import { COMMENT_TYPES } from '../../../shared/constants/lookup-values.js';
 import './TicketTimeline.css';
 
 interface TicketTimelineProps {
   ticketId: string;
 }
-
-const COMMENT_TYPE_LABELS: Record<number, string> = {
-  [LOOKUP_IDS.COMMENT_TYPE.EXTERNAL]: COMMENT_TYPES.EXTERNAL,
-  [LOOKUP_IDS.COMMENT_TYPE.SYSTEM]: COMMENT_TYPES.SYSTEM,
-};
 
 const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
   const { execute, data, loading, error } = useListComments();
@@ -43,7 +38,7 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
   }
 
   const visibleComments = (data?.comments ?? []).filter(
-    (c) => c.commentTypeId !== LOOKUP_IDS.COMMENT_TYPE.INTERNAL
+    (c) => c.commentType !== COMMENT_TYPES.INTERNAL
   );
 
   return (
@@ -63,8 +58,7 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
       ) : (
         <ol className="ticket-timeline-list" data-testid="timeline-list">
           {visibleComments.map((comment) => {
-            const isSystem = comment.commentTypeId === LOOKUP_IDS.COMMENT_TYPE.SYSTEM;
-            const typeLabel = COMMENT_TYPE_LABELS[comment.commentTypeId] ?? '';
+            const isSystem = comment.commentType === COMMENT_TYPES.SYSTEM;
 
             const formattedDate = new Date(comment.createdAt).toLocaleString('en-GB', {
               day: 'numeric',
@@ -83,9 +77,9 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
                 data-testid={`timeline-item-${String(comment.id)}`}
               >
                 <div className="ticket-timeline-item-header">
-                  {typeLabel && (
+                  {comment.commentType !== COMMENT_TYPES.EXTERNAL && (
                     <span className="badge badge-info" data-testid="comment-type-badge">
-                      {typeLabel}
+                      {comment.commentType}
                     </span>
                   )}
                   <time className="ticket-timeline-item-time" dateTime={comment.createdAt}>

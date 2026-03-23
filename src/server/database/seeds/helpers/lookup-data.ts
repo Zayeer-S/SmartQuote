@@ -16,6 +16,9 @@ import {
   ALL_QUOTE_CONFIDENCE_LEVELS,
   ANALYTICS_SCHEMA_NAMES,
   SMARTQUOTE_CONFIG_KEYS,
+  TICKET_SEVERITIES,
+  BUSINESS_IMPACTS,
+  TICKET_DEADLINE_PROXIMITY_BUCKETS,
 } from '../../../../shared/constants/index.js';
 
 /**
@@ -40,6 +43,21 @@ interface AnalyticsSchemaRow {
   description: string | null;
   schema_definition: Record<string, unknown>;
   is_active: boolean;
+}
+
+export interface PriorityRuleRow {
+  dimension: string;
+  value_name: string;
+  points: number;
+  is_active: boolean;
+}
+
+export interface PriorityAnchorRow {
+  label: string;
+  description_text: string;
+  urgency_score: number;
+  is_active: boolean;
+  // embedding is populated separately by the BertEmbedder at seed time
 }
 
 /** Converts an array of constant values to lookup table rows */
@@ -138,5 +156,170 @@ export const SMARTQUOTE_CONFIGS_SEED_DATA: ConfigRow[] = [
     key: SMARTQUOTE_CONFIG_KEYS.VELOCITY_MULTIPLIER,
     value: '1.5',
     description: 'Velocity multiplier for adjusting time estimates based on team capacity',
+  },
+  {
+    key: SMARTQUOTE_CONFIG_KEYS.TICKET_PRIORITY_NLP_WEIGHT,
+    value: '3',
+    description:
+      'Maximum score points the NLP modifier can add or subtract from the rule-based base score. ' +
+      'The NLP urgency signal [-1.0, 1.0] is multiplied by this value before being added to the score.',
+  },
+  {
+    key: SMARTQUOTE_CONFIG_KEYS.TICKET_PRIORITY_USERS_IMPACTED_TIERS,
+    value: JSON.stringify([1, 10, 50, 200]),
+    description:
+      'Ascending breakpoints defining users-impacted score buckets. ' +
+      'Format: [tier1Max, tier2Max, tier3Max, tier4Max]. ' +
+      'Values <= tier1Max = 1pt, <= tier2Max = 2pts, <= tier3Max = 3pts, above = 4pts.',
+  },
+];
+
+/**
+ * Priority engine scoring rules.
+ *
+ * Four dimensions each contribute points to the base score:
+ *   severity (1–4) + business_impact (1–4) + users_impacted (1–4) + deadline_proximity (1–4)
+ *
+ * Max base score = 16. With NLP weight of 3, max total = 19.
+ *
+ * Thresholds defined in PRIORITY_THRESHOLDS_SEED_DATA map score ranges to priorities.
+ */
+export const PRIORITY_RULES_SEED_DATA: PriorityRuleRow[] = [
+  // --- Severity ---
+  { dimension: 'severity', value_name: TICKET_SEVERITIES.LOW, points: 1, is_active: true },
+  { dimension: 'severity', value_name: TICKET_SEVERITIES.MEDIUM, points: 2, is_active: true },
+  { dimension: 'severity', value_name: TICKET_SEVERITIES.HIGH, points: 3, is_active: true },
+  { dimension: 'severity', value_name: TICKET_SEVERITIES.CRITICAL, points: 4, is_active: true },
+
+  // --- Business Impact ---
+  { dimension: 'business_impact', value_name: BUSINESS_IMPACTS.MINOR, points: 1, is_active: true },
+  {
+    dimension: 'business_impact',
+    value_name: BUSINESS_IMPACTS.MODERATE,
+    points: 2,
+    is_active: true,
+  },
+  { dimension: 'business_impact', value_name: BUSINESS_IMPACTS.MAJOR, points: 3, is_active: true },
+  {
+    dimension: 'business_impact',
+    value_name: BUSINESS_IMPACTS.CRITICAL,
+    points: 4,
+    is_active: true,
+  },
+
+  // --- Users Impacted ---
+  // Tier labels must stay in sync with PRIORITY_USERS_IMPACTED_TIERS config value.
+  // The engine resolves which label to use at runtime using the config breakpoints.
+  { dimension: 'users_impacted', value_name: '1–10', points: 1, is_active: true },
+  { dimension: 'users_impacted', value_name: '11–50', points: 2, is_active: true },
+  { dimension: 'users_impacted', value_name: '51–200', points: 3, is_active: true },
+  { dimension: 'users_impacted', value_name: '200+', points: 4, is_active: true },
+
+  // --- Deadline Proximity ---
+  // Labels are sourced from DEADLINE_PROXIMITY_BUCKETS to ensure engine and DB stay in sync.
+  {
+    dimension: 'deadline_proximity',
+    value_name: TICKET_DEADLINE_PROXIMITY_BUCKETS.OVER_SEVEN_DAYS,
+    points: 1,
+    is_active: true,
+  },
+  {
+    dimension: 'deadline_proximity',
+    value_name: TICKET_DEADLINE_PROXIMITY_BUCKETS.THREE_TO_SEVEN_DAYS,
+    points: 2,
+    is_active: true,
+  },
+  {
+    dimension: 'deadline_proximity',
+    value_name: TICKET_DEADLINE_PROXIMITY_BUCKETS.ONE_TO_THREE_DAYS,
+    points: 3,
+    is_active: true,
+  },
+  {
+    dimension: 'deadline_proximity',
+    value_name: TICKET_DEADLINE_PROXIMITY_BUCKETS.UNDER_24H,
+    points: 4,
+    is_active: true,
+  },
+];
+
+/**
+ * Score-to-priority threshold mappings.
+ *
+ * Covers the full possible score range (4–19).
+ * Ranges are non-overlapping and contiguous — the engine throws if no threshold matches.
+ *
+ * Score breakdown:
+ *   P4:  4–5   (all-low inputs, minimal NLP nudge)
+ *   P3:  6–9   (low-to-moderate inputs)
+ *   P2: 10–13  (moderate-to-high inputs)
+ *   P1: 14–19  (high/critical inputs, or strong NLP nudge into critical territory)
+ *
+ * ticket_priority_id is resolved from the priority name at seed time in data-generators.ts.
+ */
+export interface PriorityThresholdRow {
+  priority_name: string;
+  min_score: number;
+  max_score: number;
+  is_active: boolean;
+}
+
+export const PRIORITY_THRESHOLDS_SEED_DATA: PriorityThresholdRow[] = [
+  { priority_name: 'P4', min_score: 4, max_score: 5, is_active: true },
+  { priority_name: 'P3', min_score: 6, max_score: 9, is_active: true },
+  { priority_name: 'P2', min_score: 10, max_score: 13, is_active: true },
+  { priority_name: 'P1', min_score: 14, max_score: 19, is_active: true },
+];
+
+/**
+ * NLP anchor embeddings for the priority engine.
+ *
+ * Each anchor represents a labelled urgency pole. At runtime the engine embeds
+ * the ticket description and takes the urgency_score of the highest-similarity anchor
+ * as the NLP signal.
+ *
+ * urgency_score is in [-1.0, 1.0]:
+ *   +1.0 = maximally urgent (nudges score toward P1)
+ *   -1.0 = maximally trivial (nudges score toward P4)
+ *    0.0 = neutral (no NLP influence)
+ *
+ * The `embedding` column is populated at seed time by the BertEmbedder — these rows
+ * intentionally omit it; data-generators.ts handles embedding generation before insert.
+ */
+export const PRIORITY_ANCHORS_SEED_DATA: PriorityAnchorRow[] = [
+  {
+    label: 'critical_outage',
+    description_text:
+      'Complete system outage. All users cannot access the platform. Production is down. Immediate response required.',
+    urgency_score: 1.0,
+    is_active: true,
+  },
+  {
+    label: 'severe_degradation',
+    description_text:
+      'Core functionality is severely degraded. Major features are broken and blocking business operations for most users.',
+    urgency_score: 0.75,
+    is_active: true,
+  },
+  {
+    label: 'partial_disruption',
+    description_text:
+      'Some features are not working correctly. A workaround exists but the issue is causing notable inconvenience.',
+    urgency_score: 0.25,
+    is_active: true,
+  },
+  {
+    label: 'routine_request',
+    description_text:
+      'Standard support request or question. No system functionality is affected. User is seeking guidance or information.',
+    urgency_score: -0.25,
+    is_active: true,
+  },
+  {
+    label: 'minor_cosmetic',
+    description_text:
+      'Minor cosmetic issue or low-priority enhancement request. No functional impact. Can be addressed in a future release.',
+    urgency_score: -0.75,
+    is_active: true,
   },
 ];

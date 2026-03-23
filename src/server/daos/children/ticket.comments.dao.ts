@@ -16,6 +16,7 @@ export class TicketCommentsDAO extends BaseDAO<TicketComment, TicketCommentId> {
     );
   }
 
+  // TODO ADD FILE UPLOADS
   /**
    * Find all comments for a ticket, ordered oldest first
    *

@@ -1,5 +1,6 @@
 import type { Knex } from 'knex';
 import type { RBACService } from '../services/rbac/rbac.service.js';
+import type { LookupResolver } from '../lib/lookup-resolver.js';
 
 import { TicketsDAO } from '../daos/children/tickets.dao.js';
 import { QuotesDAO } from '../daos/children/quotes.dao.js';
@@ -11,7 +12,6 @@ import { UsersDAO } from '../daos/children/users.dao.js';
 
 import { QuoteService } from '../services/quote/quote.service.js';
 import { QuoteEngineService } from '../services/quote/quote.engine.service.js';
-
 import { QuoteController } from '../controllers/quote.controller.js';
 
 export class QuoteContainer {
@@ -28,7 +28,7 @@ export class QuoteContainer {
 
   public readonly quoteController: QuoteController;
 
-  constructor(db: Knex, rbacService: RBACService) {
+  constructor(db: Knex, rbacService: RBACService, lookup: LookupResolver) {
     this.ticketsDAO = new TicketsDAO(db);
     this.quotesDAO = new QuotesDAO(db);
     this.quoteApprovalsDAO = new QuoteApprovalsDAO(db);
@@ -43,16 +43,18 @@ export class QuoteContainer {
       this.quoteDetailRevisionsDAO,
       this.ticketsDAO,
       this.usersDAO,
-      rbacService
+      rbacService,
+      lookup
     );
     this.quoteEngineService = new QuoteEngineService(
       this.quotesDAO,
       this.ticketsDAO,
       this.rateProfilesDAO,
       this.quoteCalculationRulesDAO,
-      rbacService
+      rbacService,
+      lookup
     );
 
-    this.quoteController = new QuoteController(this.quoteService, this.quoteEngineService);
+    this.quoteController = new QuoteController(this.quoteService, this.quoteEngineService, lookup);
   }
 }

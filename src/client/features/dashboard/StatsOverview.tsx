@@ -30,8 +30,8 @@ const OPEN_STATUSES: string[] = [
 
 const StatsOverview: React.FC<StatsOverviewProps> = ({ tickets }) => {
   const total = tickets.length;
-  const open = tickets.filter((t) => OPEN_STATUSES.includes(t.ticketStatusName)).length;
-  const resolved = tickets.filter((t) => t.ticketStatusName === TICKET_STATUSES.RESOLVED).length;
+  const open = tickets.filter((t) => OPEN_STATUSES.includes(t.ticketStatus)).length;
+  const resolved = tickets.filter((t) => t.ticketStatus === TICKET_STATUSES.RESOLVED).length;
 
   return (
     <div

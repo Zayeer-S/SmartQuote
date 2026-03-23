@@ -1,10 +1,5 @@
 import React from 'react';
 import type { QuoteResponse } from '../../../shared/contracts/quote-contracts.js';
-import {
-  LOOKUP_IDS,
-  QUOTE_EFFORT_LEVELS,
-  QUOTE_CONFIDENCE_LEVELS,
-} from '../../../shared/constants/lookup-values.js';
 import QuoteActions from './QuoteActions.js';
 import './QuotePanel.css';
 
@@ -13,28 +8,10 @@ interface QuotePanelProps {
   quote: QuoteResponse;
 }
 
-const EFFORT_LEVEL_LABELS: Record<number, string> = {
-  [LOOKUP_IDS.QUOTE_EFFORT_LEVEL.LOW]: QUOTE_EFFORT_LEVELS.LOW,
-  [LOOKUP_IDS.QUOTE_EFFORT_LEVEL.MEDIUM]: QUOTE_EFFORT_LEVELS.MEDIUM,
-  [LOOKUP_IDS.QUOTE_EFFORT_LEVEL.HIGH]: QUOTE_EFFORT_LEVELS.HIGH,
-};
-
-const CONFIDENCE_LEVEL_LABELS: Record<number, string> = {
-  [LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.LOW]: QUOTE_CONFIDENCE_LEVELS.LOW,
-  [LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.MEDIUM]: QUOTE_CONFIDENCE_LEVELS.MEDIUM,
-  [LOOKUP_IDS.QUOTE_CONFIDENCE_LEVEL.HIGH]: QUOTE_CONFIDENCE_LEVELS.HIGH,
-};
-
 const formatCurrency = (value: number): string =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value);
 
 const QuotePanel: React.FC<QuotePanelProps> = ({ ticketId, quote }) => {
-  const effortLabel = EFFORT_LEVEL_LABELS[quote.quoteEffortLevelId] ?? 'Unknown';
-  const confidenceLabel =
-    quote.quoteConfidenceLevelId !== null
-      ? (CONFIDENCE_LEVEL_LABELS[quote.quoteConfidenceLevelId] ?? 'Unknown')
-      : null;
-
   return (
     <section className="card quote-panel" aria-labelledby="quote-heading" data-testid="quote-panel">
       <h2 className="quote-panel-title" id="quote-heading">
@@ -69,24 +46,20 @@ const QuotePanel: React.FC<QuotePanelProps> = ({ ticketId, quote }) => {
         <div>
           <dt>Effort</dt>
           <dd className="quote-panel-dd-sm" data-testid="quote-effort-level">
-            {effortLabel}
+            {quote.quoteEffortLevel}
           </dd>
         </div>
 
-        {confidenceLabel && (
+        {quote.quoteConfidenceLevel !== null && (
           <div>
             <dt>Confidence</dt>
             <dd className="quote-panel-dd-sm" data-testid="quote-confidence-level">
-              {confidenceLabel}
+              {quote.quoteConfidenceLevel}
             </dd>
           </div>
         )}
       </dl>
 
-      {/*
-        TODO Approval status gating is a stub pending the richer list endpoint.
-        Once available, pass approvalStatus={quote.approvalStatusName} here.
-      */}
       <QuoteActions ticketId={ticketId} quoteId={quote.id} />
     </section>
   );

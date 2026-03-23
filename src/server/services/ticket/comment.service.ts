@@ -1,27 +1,31 @@
 import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
 import type { RBACService } from '../rbac/rbac.service.js';
 import type { TicketComment } from '../../database/types/tables.js';
-import type { CommentTypeId, TicketId, UserId } from '../../database/types/ids.js';
+import type { TicketId, UserId } from '../../database/types/ids.js';
 import type { InsertData, TransactionContext } from '../../daos/base/types.js';
-import { PERMISSIONS } from '../../../shared/constants/lookup-values.js';
+import { PERMISSIONS, COMMENT_TYPES } from '../../../shared/constants/lookup-values.js';
+import type { CommentType } from '../../../shared/constants/lookup-values.js';
 import { ForbiddenError, TicketError, TICKET_ERROR_MSGS } from './ticket.errors.js';
 import type { TicketCommentsDAO } from '../../daos/children/ticket.comments.dao.js';
+import type { LookupResolver } from '../../lib/lookup-resolver.js';
 
 export class CommentService {
   private ticketCommentsDAO: TicketCommentsDAO;
   private ticketsDAO: TicketsDAO;
   private rbacService: RBACService;
+  private lookup: LookupResolver;
 
   constructor(
     ticketCommentsDAO: TicketCommentsDAO,
     ticketsDAO: TicketsDAO,
-    rbacService: RBACService
+    rbacService: RBACService,
+    lookup: LookupResolver
   ) {
     this.ticketCommentsDAO = ticketCommentsDAO;
     this.ticketsDAO = ticketsDAO;
     this.rbacService = rbacService;
+    this.lookup = lookup;
   }
-
   /**
    * Add a comment to a ticket.
    * Ticket must exist and not be soft-deleted.
@@ -40,7 +44,7 @@ export class CommentService {
   async addComment(
     ticketId: TicketId,
     text: string,
-    commentTypeId: CommentTypeId,
+    commentType: CommentType,
     actorId: UserId,
     options?: TransactionContext
   ): Promise<TicketComment> {
@@ -54,11 +58,9 @@ export class CommentService {
     );
 
     if (!canUpdateAll) {
-      // Customers: EXTERNAL type only (id=2)
-      if ((commentTypeId as unknown as number) !== 2)
+      if (commentType !== COMMENT_TYPES.EXTERNAL)
         throw new ForbiddenError('Customers may only post external comments');
 
-      // Also scope-check: customer must belong to the ticket's organisation
       const canReadAll = await this.rbacService.hasPermission(
         actorId,
         PERMISSIONS.TICKETS_READ_ALL,
@@ -70,6 +72,8 @@ export class CommentService {
         // that the route has already validated visibility before calling this)
       }
     }
+
+    const commentTypeId = this.lookup.commentTypeId(commentType);
 
     return this.ticketCommentsDAO.create(
       {
@@ -84,8 +88,6 @@ export class CommentService {
 
   /**
    * List comments on a ticket.
-   * Customers only see EXTERNAL (id=2) and SYSTEM (id=3) comment types.
-   * Agents see all comment types.
    *
    * @param ticketId Ticket to list comments for
    * @param actorId Actor requesting comments
@@ -111,11 +113,17 @@ export class CommentService {
       return this.ticketCommentsDAO.findByTicket(ticketId, options);
     }
 
-    // Customers: fetch EXTERNAL (id=2) and SYSTEM (id=3) separately then merge,
-    // preserving created_at order
     const [external, system] = await Promise.all([
-      this.ticketCommentsDAO.findByType(ticketId, 2 as unknown as CommentTypeId, options),
-      this.ticketCommentsDAO.findByType(ticketId, 3 as unknown as CommentTypeId, options),
+      this.ticketCommentsDAO.findByType(
+        ticketId,
+        this.lookup.commentTypeId(COMMENT_TYPES.EXTERNAL),
+        options
+      ),
+      this.ticketCommentsDAO.findByType(
+        ticketId,
+        this.lookup.commentTypeId(COMMENT_TYPES.SYSTEM),
+        options
+      ),
     ]);
 
     return [...external, ...system].sort((a, b) => a.created_at.getTime() - b.created_at.getTime());

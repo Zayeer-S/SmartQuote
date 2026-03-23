@@ -211,6 +211,7 @@ smartquote/
 │   │   │       ├── sessions.dao.ts
 │   │   │       ├── ticket.attachments.dao.ts
 │   │   │       ├── ticket.comments.dao.ts
+│   │   │       ├── ticket.priority.dao.ts
 │   │   │       ├── tickets.dao.ts
 │   │   │       └── users.dao.ts
 │   │   ├── database/                               # Connection, migrations, and schema definitions only.
@@ -233,6 +234,11 @@ smartquote/
 │   │   │       ├── ids.ts
 │   │   │       └── tables.ts
 │   │   ├── lib/
+│   │   │   ├── nlp/
+│   │   │   │   ├── bert-embedder.ts
+│   │   │   │   └── cosine-similarity.ts
+│   │   │   ├── lookup-maps.ts
+│   │   │   ├── lookup-resolver.ts
 │   │   │   └── respond.ts
 │   │   ├── middleware/                             # Cross-cutting HTTP behaviour (auth, errors, logging), never business decisions.
 │   │   │   ├── auth.middleware.ts
@@ -263,7 +269,9 @@ smartquote/
 │   │   │   │   ├── comment.service.ts
 │   │   │   │   ├── ticket.errors.ts
 │   │   │   │   ├── ticket.service.ts
-│   │   │   │   └── ticket.types.ts
+│   │   │   │   ├── ticket.priority.engine.ts
+│   │   │   │   ├── ticket.priority.engine.types.ts
+│   │   │   │   └── ticket.service.types.ts
 │   │   │   └── user/
 │   │   └── validators/                             # Input shape validation only; must not access database or services.
 │   │       ├── auth.validator.ts

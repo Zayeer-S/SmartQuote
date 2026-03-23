@@ -1,19 +1,10 @@
 import type { Knex } from 'knex';
-
-export function updatedAtTriggerSQL(tableName: string) {
-  return `
-        create trigger ${tableName}_set_updated_at
-        before update on ${tableName}
-        for each row
-        execute function set_updated_at();
-    `;
-}
-
-export function dropUpdatedAtTriggerSQL(tableName: string) {
-  return `
-        drop trigger if exists ${tableName}_set_updated_at on ${tableName};
-    `;
-}
+import {
+  createUpdatedAtFunction,
+  dropUpdatedAtFunction,
+  dropUpdatedAtTriggerSQL,
+  updatedAtTriggerSQL,
+} from '../migration-utils';
 
 const TABLES = [
   'roles',
@@ -58,17 +49,7 @@ const TABLES = [
 ];
 
 export async function up(knex: Knex): Promise<void> {
-  await knex.raw(`
-        create or replace function set_updated_at()
-        returns trigger
-        language plpgsql
-        as $trigger$
-        begin
-            new.updated_at = now();
-            return new;
-        end;
-        $trigger$;
-    `);
+  await createUpdatedAtFunction(knex);
 
   for (const table of TABLES) {
     await knex.raw(updatedAtTriggerSQL(table));
@@ -80,5 +61,5 @@ export async function down(knex: Knex): Promise<void> {
     await knex.raw(dropUpdatedAtTriggerSQL(table));
   }
 
-  await knex.raw('drop function if exists set_updated_at()');
+  await dropUpdatedAtFunction(knex);
 }

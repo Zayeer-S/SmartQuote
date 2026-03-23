@@ -1,37 +1,41 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import { PERMISSIONS } from '../../../shared/constants';
+import { PERMISSIONS, TICKET_STATUSES } from '../../../shared/constants';
 import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types.js';
 import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
 import type { UsersDAO } from '../../daos/children/users.dao.js';
-import type {
-  BusinessImpactId,
-  TicketId,
-  TicketSeverityId,
-  TicketStatusId,
-  TicketTypeId,
-  UserId,
-} from '../../database/types/ids.js';
+import type { TicketId, UserId } from '../../database/types/ids.js';
 import type { Ticket, TicketWithDetails } from '../../database/types/tables.js';
 import type { RBACService } from '../rbac/rbac.service.js';
+import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from './ticket.errors.js';
-import type { CreateTicketData, ListTicketsFilters, UpdateTicketData } from './ticket.types.js';
+import type {
+  CreateTicketData,
+  ListTicketsFilters,
+  UpdateTicketData,
+} from './ticket.service.types.js';
+import type { TicketPriorityEngine } from './ticket.priority.engine.js';
 
 export class TicketService {
   private ticketsDAO: TicketsDAO;
   private usersDAO: UsersDAO;
   private rbacService: RBACService;
+  private lookup: LookupResolver;
+  private priorityEngine: TicketPriorityEngine;
 
-  constructor(ticketsDAO: TicketsDAO, usersDAO: UsersDAO, rbacService: RBACService) {
+  constructor(
+    ticketsDAO: TicketsDAO,
+    usersDAO: UsersDAO,
+    rbacService: RBACService,
+    lookup: LookupResolver,
+    priorityEngine: TicketPriorityEngine
+  ) {
     this.ticketsDAO = ticketsDAO;
     this.usersDAO = usersDAO;
     this.rbacService = rbacService;
+    this.lookup = lookup;
+    this.priorityEngine = priorityEngine;
   }
 
   /**
-   * Create a new ticket.
-   * Organization is sourced from the actor's own organization_id.
-   * Initial status is OPEN. Priority defaults to P3 — overridden later by the quote engine.
-   *
    * @param data Ticket fields supplied by the user
    * @param actorId ID of the user creating the ticket
    * @param options Optional transaction context
@@ -55,19 +59,21 @@ export class TicketService {
     if (!actor.organization_id)
       throw new TicketError(`Actor does not belong to an organization`, 422);
 
+    const ticketPriorityId = await this.priorityEngine.calculatePriority({
+      ticketSeverity: this.lookup.ticketSeverityName(data.ticket_severity_id as unknown as number),
+      businessImpact: this.lookup.businessImpactName(data.business_impact_id as unknown as number),
+      usersImpacted: data.users_impacted,
+      deadline: data.deadline,
+      description: data.description,
+    });
+
     return this.ticketsDAO.create(
       {
         ...data,
         creator_user_id: actorId,
         organization_id: actor.organization_id,
-        ticket_type_id: data.ticket_type_id as TicketTypeId,
-        ticket_severity_id: data.ticket_severity_id as TicketSeverityId,
-        business_impact_id: data.business_impact_id as BusinessImpactId,
-        // Status OPEN (id=1). Priority P3 (id=3). Both are seeded lookup values —
-        // the quote engine will update priority after generating a quote.
-        // Using literal seed IDs here is intentional: these are fixed bootstrap values.
-        ticket_status_id: 1 as unknown as Ticket['ticket_status_id'],
-        ticket_priority_id: 3 as unknown as Ticket['ticket_priority_id'],
+        ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.OPEN),
+        ticket_priority_id: ticketPriorityId,
         assigned_to_user_id: null,
         resolved_by_user_id: null,
         deleted_at: null,
@@ -77,9 +83,6 @@ export class TicketService {
   }
 
   /**
-   * Get a single ticket with full lookup details joined.
-   * Customers may only access tickets in their own organisation.
-   *
    * @param ticketId Ticket to retrieve
    * @param actorId Actor requesting the ticket
    * @param options Optional transaction context
@@ -101,10 +104,6 @@ export class TicketService {
   }
 
   /**
-   * List tickets with optional filters.
-   * Customers are always scoped to their own organisation regardless of filters.
-   * Agents and admins may filter freely.
-   *
    * @param filters Optional filters: organizationId, statusId, assigneeId
    * @param actorId Actor requesting the list
    * @param options Optional query and transaction options
@@ -124,7 +123,8 @@ export class TicketService {
     if (canReadAll) {
       const criteria: Partial<Ticket> = {};
       if (filters.organizationId) criteria.organization_id = filters.organizationId;
-      if (filters.statusId) criteria.ticket_status_id = filters.statusId as TicketStatusId;
+      if (filters.ticketStatus)
+        criteria.ticket_status_id = this.lookup.ticketStatusId(filters.ticketStatus);
       if (filters.assigneeId) criteria.assigned_to_user_id = filters.assigneeId;
       return this.ticketsDAO.findManyWithDetails(criteria, options);
     }
@@ -133,17 +133,13 @@ export class TicketService {
     if (!actor?.organization_id) return [];
 
     const criteria: Partial<Ticket> = { organization_id: actor.organization_id };
-    if (filters.statusId) criteria.ticket_status_id = filters.statusId as TicketStatusId;
+    if (filters.ticketStatus)
+      criteria.ticket_status_id = this.lookup.ticketStatusId(filters.ticketStatus);
 
     return this.ticketsDAO.findManyWithDetails(criteria, options);
   }
 
   /**
-   * Update a ticket.
-   * Customers may only update their own tickets while status is OPEN,
-   * and may not touch agent-only fields (status, assignee).
-   * Agents may update any ticket and any field.
-   *
    * @param ticketId Ticket to update
    * @param data Fields to update
    * @param actorId Actor performing the update
@@ -183,11 +179,10 @@ export class TicketService {
 
     await this.assertVisibility(ticket, actorId, options);
 
-    // Customers can only edit OPEN tickets (status id=1)
-    if ((ticket.ticket_status_id as unknown as number) !== 1)
+    const openStatusId = this.lookup.ticketStatusId(TICKET_STATUSES.OPEN);
+    if ((ticket.ticket_status_id as unknown as number) !== (openStatusId as unknown as number))
       throw new TicketError(TICKET_ERROR_MSGS.CANNOT_UPDATE, 422);
 
-    // Strip agent-only fields from customer updates
     const { ticket_status_id, assigned_to_user_id, ...customerFields } = data;
     void ticket_status_id;
     void assigned_to_user_id;
@@ -199,9 +194,6 @@ export class TicketService {
   }
 
   /**
-   * Assign a ticket to a user. Sets status to ASSIGNED.
-   * Requires TICKETS_ASSIGN permission.
-   *
    * @param ticketId Ticket to assign
    * @param assigneeId User to assign to
    * @param actorId Actor performing the assignment
@@ -233,7 +225,7 @@ export class TicketService {
       { id: ticketId },
       {
         assigned_to_user_id: assigneeId,
-        ticket_status_id: 2 as unknown as Ticket['ticket_status_id'],
+        ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.ASSIGNED),
       },
       options
     );
@@ -244,9 +236,6 @@ export class TicketService {
   }
 
   /**
-   * Resolve a ticket. Sets status to RESOLVED and records the resolver.
-   * Requires TICKETS_UPDATE_ALL permission.
-   *
    * @param ticketId Ticket to resolve
    * @param actorId Actor resolving the ticket
    * @param options Optional transaction context
@@ -273,7 +262,7 @@ export class TicketService {
       { id: ticketId },
       {
         resolved_by_user_id: actorId,
-        ticket_status_id: 4 as unknown as Ticket['ticket_status_id'],
+        ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.RESOLVED),
       },
       options
     );
@@ -284,8 +273,6 @@ export class TicketService {
   }
 
   /**
-   * Soft-delete a ticket.
-   *
    * @param ticketId Ticket to delete
    * @param actorId Actor performing the deletion
    * @param options Optional transaction context
