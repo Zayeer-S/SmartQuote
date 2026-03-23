@@ -1,15 +1,8 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { login } from '../utils/login.utils';
 
 const CUSTOMER = { email: 'customer1@demo.com', password: 'password' };
 const ADMIN = { email: 'admin@giacom.com', password: 'password' };
-
-async function login(page: Page, email: string, password: string, redirectPattern: RegExp) {
-  await page.goto('/login');
-  await page.getByTestId('email-input').fill(email);
-  await page.getByTestId('password-input').fill(password);
-  await page.getByTestId('login-submit-btn').click();
-  await page.waitForURL(redirectPattern);
-}
 
 test.describe('Unauthenticated access', () => {
   test('visiting /admin redirects to /login', async ({ page }) => {

@@ -1,0 +1,35 @@
+name: ci-branch
+
+on:
+    push:
+        branches-ignore:
+            - "main"
+        paths-ignore:
+            - "**/*.md"
+            - "docs/**"
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    quality:
+        name: Code Quality
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - uses: ./.github/actions/setup
+              with:
+                  node-version: "22"
+
+            - uses: ./.github/actions/code-quality
+
+            - name: Run unit tests
+              run: npm run test:unit:server
+
+            - name: Run integration tests
+              run: npm run test:integration

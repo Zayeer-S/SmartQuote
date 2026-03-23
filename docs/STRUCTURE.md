@@ -2,9 +2,12 @@ smartquote/
 ├── .github/
 │   ├── actions/
 │   │   └── actions/
+│   │       ├── code-quality/
 │   │       └── setup/
 │   └── workflows/
-│       └── push.yml
+│       ├── cd.yml
+│       ├── ci-branch.yml
+│       └── ci-main.yml
 │
 ├── .husky/
 │   └── pre-commit/                                 # Lint-staged
@@ -282,7 +285,17 @@ smartquote/
 │
 ├── tests/
 │   ├── e2e/
-│   │   ├── auth.smoke.test.ts
+│   │   ├── constants/
+│   │   │   ├── e2e.paths.ts
+│   │   │   └── test.user.credentials.ts
+│   │   ├── flows/
+│   │   ├── setup/
+│   │   │   └── customer.setup.ts
+│   │   ├── smoke/
+│   │   │   ├── auth.smoke.test.ts
+│   │   │   └── ticket.smoke.test.ts
+│   │   └── utils/
+│   │       └── login.utils.ts
 │   ├── helpers/
 │   │   ├── setup.client.ts
 │   │   ├── setup.integration.ts

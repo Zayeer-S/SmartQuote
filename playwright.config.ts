@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { SESSION_PATHS } from './tests/e2e/constants/e2e.paths.js';
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -6,8 +7,8 @@ export default defineConfig({
 
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: 3,
+  workers: 3,
 
   reporter: process.env.CI
     ? [['html', { outputFolder: 'coverage/e2e/report' }], ['github']]
@@ -21,8 +22,17 @@ export default defineConfig({
   },
 
   projects: [
+    // Setup projects
+    {
+      name: 'customer-setup',
+      testMatch: '**/setup/customer.setup.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+
+    // Unauthenticated browsers
     {
       name: 'chromium',
+      testIgnore: '**/smoke/ticket.smoke.test.ts',
       use: {
         ...devices['Desktop Chrome'],
         storageState: { cookies: [], origins: [] },
@@ -30,6 +40,7 @@ export default defineConfig({
     },
     {
       name: 'firefox',
+      testIgnore: '**/smoke/ticket.smoke.test.ts',
       use: {
         ...devices['Desktop Firefox'],
         storageState: { cookies: [], origins: [] },
@@ -37,9 +48,39 @@ export default defineConfig({
     },
     {
       name: 'webkit',
+      testIgnore: '**/smoke/ticket.smoke.test.ts',
       use: {
         ...devices['Desktop Safari'],
         storageState: { cookies: [], origins: [] },
+      },
+    },
+
+    // Authenticated browsers (customer session)
+    {
+      name: 'chromium-customer',
+      testMatch: '**/smoke/ticket.smoke.test.ts',
+      dependencies: ['customer-setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: SESSION_PATHS.CUSTOMER,
+      },
+    },
+    {
+      name: 'firefox-customer',
+      testMatch: '**/smoke/ticket.smoke.test.ts',
+      dependencies: ['customer-setup'],
+      use: {
+        ...devices['Desktop Firefox'],
+        storageState: SESSION_PATHS.CUSTOMER,
+      },
+    },
+    {
+      name: 'webkit-customer',
+      testMatch: '**/smoke/ticket.smoke.test.ts',
+      dependencies: ['customer-setup'],
+      use: {
+        ...devices['Desktop Safari'],
+        storageState: SESSION_PATHS.CUSTOMER,
       },
     },
   ],
