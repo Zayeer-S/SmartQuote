@@ -7,6 +7,7 @@ import { TicketService } from '../services/ticket/ticket.service.js';
 import { CommentService } from '../services/ticket/comment.service.js';
 import { TicketController } from '../controllers/ticket.controller.js';
 import { RBACService } from '../services/rbac/rbac.service.js';
+import { LookupResolver } from '../lib/lookup-resolver.js';
 
 export class TicketContainer {
   public readonly ticketsDAO: TicketsDAO;
@@ -19,15 +20,29 @@ export class TicketContainer {
 
   public readonly ticketController: TicketController;
 
-  constructor(db: Knex, rbacService: RBACService) {
+  constructor(db: Knex, rbacService: RBACService, lookupResolver: LookupResolver) {
     this.ticketsDAO = new TicketsDAO(db);
     this.ticketCommentsDAO = new TicketCommentsDAO(db);
     this.ticketAttachmentsDAO = new TicketAttachmentsDAO(db);
     this.usersDAO = new UsersDAO(db);
 
-    this.ticketService = new TicketService(this.ticketsDAO, this.usersDAO, rbacService);
-    this.commentService = new CommentService(this.ticketCommentsDAO, this.ticketsDAO, rbacService);
+    this.ticketService = new TicketService(
+      this.ticketsDAO,
+      this.usersDAO,
+      rbacService,
+      lookupResolver
+    );
+    this.commentService = new CommentService(
+      this.ticketCommentsDAO,
+      this.ticketsDAO,
+      rbacService,
+      lookupResolver
+    );
 
-    this.ticketController = new TicketController(this.ticketService, this.commentService);
+    this.ticketController = new TicketController(
+      this.ticketService,
+      this.commentService,
+      lookupResolver
+    );
   }
 }
