@@ -63,6 +63,10 @@ export async function up(knex: Knex): Promise<void> {
     table.dropColumn('organization_id');
   });
 
+  await knex.schema.alterTable('tickets', (table) => {
+    table.setNullable('organization_id');
+  });
+
   for (const table of TABLES) {
     await knex.raw(updatedAtTriggerSQL(table));
   }
@@ -98,4 +102,6 @@ export async function down(knex: Knex): Promise<void> {
 
   await knex.schema.dropTable('org_role_permissions');
   await knex.schema.dropTable('org_roles');
+
+  // Let organization_id stay null on purpose - it is unlikely to change in the future and removing nullability would need us to either archive existing null values or drop them completely
 }

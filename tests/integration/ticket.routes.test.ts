@@ -191,13 +191,15 @@ describe(`POST ${BASE}${TICKET_ENDPOINTS.CREATE}`, () => {
     });
   });
 
-  it('returns 422 when admin (no org) tries to create a ticket', async () => {
+  it('allows admin (no org) to create a ticket with null organization_id', async () => {
     const res = await request(app)
       .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send(validTicket);
 
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(201); // or 200 depending on your controller
+    expect(res.body.data.organizationId).toBeNull();
+    expect(res.body.success).toBe(true);
   });
 
   it('returns 400 on a malformed request body', async () => {

@@ -93,6 +93,9 @@ export async function seed(knex: Knex): Promise<void> {
     'priority_engine_anchors',
     'ticket_priority_thresholds',
     'ticket_priority_rules',
+    // 006:
+    'org_roles',
+    'org_role_permissions',
   ];
 
   await knex.raw(
@@ -143,8 +146,6 @@ export async function seed(knex: Knex): Promise<void> {
 
   const { customer1Id, customer2Id, supportAgentId, managerId } = await generateUsers(knex, {
     passwordHash,
-    org1Id,
-    org2Id,
     roleIdMap: lookupIds.roles,
   });
 

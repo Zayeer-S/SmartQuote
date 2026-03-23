@@ -7,15 +7,17 @@ import {
   AUTH_ERROR_MSGS,
 } from '../../../src/server/services/auth/auth.errors';
 import type { UsersDAO } from '../../../src/server/daos/children/users.dao';
+import type { OrganizationMembersDAO } from '../../../src/server/daos/children/organizations.domain.dao';
 import type { SessionService } from '../../../src/server/services/auth/session.service';
 import type { PasswordService } from '../../../src/server/services/auth/password.service';
 import type { UserId } from '../../../src/server/database/types/ids';
-import { makeMockUsersDAO } from '../../utils/mock.daos';
-import { makeMockPasswordService, makeMockSessionService } from '../../utils/mock.services';
+import { makeMockOrganizationMembersDAO, makeMockUsersDAO } from './utils/mock.daos';
+import { makeMockPasswordService, makeMockSessionService } from './utils/mock.services';
 
 const USER_ID = 1 as unknown as UserId;
 const TOKEN = 'valid-session-token';
 
+// organization_id removed from users table - membership is via organization_members
 const baseUser = {
   id: USER_ID,
   email: 'user@example.com',
@@ -26,7 +28,6 @@ const baseUser = {
   deleted_at: null,
   email_verified: true,
   phone_number: null,
-  organization_id: 1,
   created_at: new Date(),
   updated_at: new Date(),
 };
@@ -48,15 +49,17 @@ const session = {
 
 describe('AuthService', () => {
   let usersDAO: UsersDAO;
+  let orgMembersDAO: OrganizationMembersDAO;
   let sessionService: SessionService;
   let passwordService: PasswordService;
   let authService: AuthService;
 
   beforeEach(() => {
     usersDAO = makeMockUsersDAO();
+    orgMembersDAO = makeMockOrganizationMembersDAO();
     sessionService = makeMockSessionService();
     passwordService = makeMockPasswordService();
-    authService = new AuthService(usersDAO, sessionService, passwordService);
+    authService = new AuthService(usersDAO, orgMembersDAO, sessionService, passwordService);
   });
 
   describe('login', () => {
@@ -144,6 +147,7 @@ describe('AuthService', () => {
     it('returns user data for a valid session token', async () => {
       vi.mocked(sessionService.validate).mockResolvedValue(session as never);
       vi.mocked(usersDAO.findWithRole).mockResolvedValue(userWithRole as never);
+      vi.mocked(orgMembersDAO.findByUser).mockResolvedValue([]);
 
       const result = await authService.getCurrentUser(TOKEN);
 
@@ -175,7 +179,6 @@ describe('AuthService', () => {
       lastName: 'Smith',
       phoneNumber: null,
       roleId: 2,
-      organizationId: 1,
     };
 
     it('creates and returns a new user when the email is not taken', async () => {

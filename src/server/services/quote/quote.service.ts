@@ -551,6 +551,10 @@ export class QuoteService {
   private async getOrgId(actorId: UserId): Promise<OrganizationId | null> {
     const orgMemberships = await this.orgMembersDAO.findByUser(actorId);
 
-    return orgMemberships ? orgMemberships[0].organization_id : null;
+    if (orgMemberships && orgMemberships.length > 0) {
+      return orgMemberships[0].organization_id;
+    }
+
+    return null;
   }
 }

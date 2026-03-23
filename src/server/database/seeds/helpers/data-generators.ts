@@ -43,14 +43,12 @@ export async function generateOrganizations(
 
 interface GenerateUsersParams {
   passwordHash: string;
-  org1Id: string;
-  org2Id: string;
   roleIdMap: LookupIdMap;
 }
 
 export async function generateUsers(
   knex: Knex,
-  { passwordHash, org1Id, org2Id, roleIdMap }: GenerateUsersParams
+  { passwordHash, roleIdMap }: GenerateUsersParams
 ): Promise<{
   customer1Id: string;
   customer2Id: string;
@@ -68,7 +66,6 @@ export async function generateUsers(
         password: passwordHash,
         phone_number: '+44 11 1111 0001',
         role_id: roleIdMap[AUTH_ROLES.CUSTOMER],
-        organization_id: org1Id,
         email_verified: true,
       },
       // Customer 2 - belongs to org2
@@ -79,7 +76,6 @@ export async function generateUsers(
         password: passwordHash,
         phone_number: '+44 11 1111 0002',
         role_id: roleIdMap[AUTH_ROLES.CUSTOMER],
-        organization_id: org2Id,
         email_verified: true,
       },
       // Support Agent - no organization
@@ -90,7 +86,6 @@ export async function generateUsers(
         password: passwordHash,
         phone_number: '+44 11 1111 0003',
         role_id: roleIdMap[AUTH_ROLES.SUPPORT_AGENT],
-        organization_id: null,
         email_verified: true,
       },
       // Manager - no organization
@@ -101,7 +96,6 @@ export async function generateUsers(
         password: passwordHash,
         phone_number: '+44 11 1111 0004',
         role_id: roleIdMap[AUTH_ROLES.MANAGER],
-        organization_id: null,
         email_verified: true,
       },
       // Admin - no organization
@@ -112,7 +106,6 @@ export async function generateUsers(
         password: passwordHash,
         phone_number: '+44 11 1111 0005',
         role_id: roleIdMap[AUTH_ROLES.ADMIN],
-        organization_id: null,
         email_verified: true,
       },
     ])
