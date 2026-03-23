@@ -35,7 +35,6 @@ export async function bootstrapApplication(
 
   console.log('Initializing NLP embedder...');
   const embedder = new BertEmbedder();
-  await embedder.init();
   const anchors = await new PriorityEngineAnchorsDAO(db).getAll({ includeInactive: true });
   await embedder.warmAnchors(anchors);
   console.log(`NLP embedder ready (${String(anchors.length)} anchors warmed).`);

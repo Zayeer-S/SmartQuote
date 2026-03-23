@@ -1,10 +1,15 @@
-import { pipeline, FeatureExtractionPipeline } from '@xenova/transformers';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { PriorityEngineAnchor } from '../../database/types/tables.js';
 
-const MODEL_ID = 'Xenova/all-MiniLM-L6-v2' as const;
+const MODEL_ID = 'amazon.titan-embed-text-v2:0' as const;
+
+interface TitanEmbedResponse {
+  embedding: number[];
+  inputTextTokenCount: number;
+}
 
 export class BertEmbedder {
-  private extractor: FeatureExtractionPipeline | null = null;
+  private client: BedrockRuntimeClient;
 
   /**
    * In-memory cache of anchor embeddings, keyed by label.
@@ -12,12 +17,10 @@ export class BertEmbedder {
    */
   private anchorEmbeddings = new Map<string, { embedding: number[]; urgency_score: number }>();
 
-  /**
-   * Loads and warms the model. Must be called once before any other method.
-   * Safe to await at application bootstrap.
-   */
-  async init(): Promise<void> {
-    this.extractor = await pipeline('feature-extraction', MODEL_ID);
+  constructor() {
+    // Region must be one where Titan Embeddings V2 is available.
+    // Inherits credentials from the Lambda execution role (no explicit key needed).
+    this.client = new BedrockRuntimeClient({ region: process.env.AWS_REGION ?? 'us-east-1' });
   }
 
   /**
@@ -41,7 +44,7 @@ export class BertEmbedder {
 
   /**
    * Returns the cached anchor embeddings for use by TicketPriorityEngine.
-   * Returns an empty map if warmAnchors() has not been called — the engine
+   * Returns an empty map if warmAnchors() has not been called -- the engine
    * degrades gracefully to pure rule-based scoring in this case.
    */
   getAnchorEmbeddings(): Map<string, { embedding: number[]; urgency_score: number }> {
@@ -49,34 +52,26 @@ export class BertEmbedder {
   }
 
   /**
-   * Embeds a single text string into a 384-dimensional float vector.
+   * Embeds a single text string into a 1024-dimensional float vector
+   * using Amazon Titan Text Embeddings V2.
    *
-   * Uses mean pooling over token embeddings and L2 normalisation,
-   * which is the standard approach for sentence similarity tasks with
-   * MiniLM-style models.
+   * Titan V2 returns normalized vectors by default, so cosine similarity
+   * over the cached anchor embeddings works identically to before.
    *
    * @param text The text to embed (ticket description or anchor sentence)
-   * @returns A flat number[] of length 384
-   * @throws If `init()` has not been called
+   * @returns A flat number[] of length 1024
    */
   async embed(text: string): Promise<number[]> {
-    if (!this.extractor) {
-      throw new Error('BertEmbedder: call init() before embed()');
-    }
+    const command = new InvokeModelCommand({
+      modelId: MODEL_ID,
+      contentType: 'application/json',
+      accept: 'application/json',
+      body: JSON.stringify({ inputText: text }),
+    });
 
-    // The FeatureExtractionPipelineOptions type has a known quirk where the
-    // `normalize` field is typed as `boolean & string` due to the JSDoc-generated
-    // types. We cast the options object to bypass it — the runtime behaviour is correct.
-    const result = await this.extractor(text, {
-      pooling: 'mean',
-      normalize: true,
-    } as Parameters<FeatureExtractionPipeline>[1]);
+    const response = await this.client.send(command);
+    const parsed = JSON.parse(Buffer.from(response.body).toString('utf-8')) as TitanEmbedResponse;
 
-    // result is a Tensor of shape [1, 384] for a single input.
-    // tolist() is defined on Tensor but the pipeline return union is wide,
-    // so we assert to Tensor to access it. The cast is safe: feature-extraction
-    // with mean pooling always returns a Tensor, never a RawImage or other union member.
-    const nested = (result as unknown as { tolist: () => number[][] }).tolist();
-    return nested[0];
+    return parsed.embedding;
   }
 }

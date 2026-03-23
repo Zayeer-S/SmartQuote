@@ -9,6 +9,7 @@ import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
 import { Construct } from 'constructs';
 import { infraConfig } from './config';
@@ -85,6 +86,15 @@ export class AppStack extends cdk.Stack {
 
     databaseStack.dbSecret.grantRead(apiFunction);
     appSecret.grantRead(apiFunction);
+
+    apiFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['bedrock:InvokeModel'],
+        resources: [
+          `arn:aws:bedrock:${this.region}::foundation-model/amazon.titan-embed-text-v2:0`,
+        ],
+      })
+    );
 
     // Invoked manually via AWS CLI when migrations need to run.
     // Lives in the same VPC as RDS so it can reach the private DB endpoint.
