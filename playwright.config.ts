@@ -7,8 +7,8 @@ export default defineConfig({
 
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 3,
-  workers: 3,
+  retries: 2,
+  workers: 4,
 
   reporter: process.env.CI
     ? [['html', { outputFolder: 'coverage/e2e/report' }], ['github']]
@@ -22,17 +22,23 @@ export default defineConfig({
   },
 
   projects: [
-    // Setup projects
+    // --- Setup projects ---
+    {
+      name: 'db-setup',
+      testMatch: '**/setup/db.setup.ts',
+    },
     {
       name: 'customer-setup',
       testMatch: '**/setup/customer.setup.ts',
+      dependencies: ['db-setup'],
       use: { ...devices['Desktop Chrome'] },
     },
 
-    // Unauthenticated browsers
+    // --- Unauthenticated browsers ---
     {
       name: 'chromium',
       testIgnore: '**/smoke/ticket.smoke.test.ts',
+      dependencies: ['db-setup'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: { cookies: [], origins: [] },
@@ -41,6 +47,7 @@ export default defineConfig({
     {
       name: 'firefox',
       testIgnore: '**/smoke/ticket.smoke.test.ts',
+      dependencies: ['db-setup'],
       use: {
         ...devices['Desktop Firefox'],
         storageState: { cookies: [], origins: [] },
@@ -49,13 +56,14 @@ export default defineConfig({
     {
       name: 'webkit',
       testIgnore: '**/smoke/ticket.smoke.test.ts',
+      dependencies: ['db-setup'],
       use: {
         ...devices['Desktop Safari'],
         storageState: { cookies: [], origins: [] },
       },
     },
 
-    // Authenticated browsers (customer session)
+    // --- Authenticated browsers (customer session) ---
     {
       name: 'chromium-customer',
       testMatch: '**/smoke/ticket.smoke.test.ts',
@@ -85,17 +93,15 @@ export default defineConfig({
     },
   ],
 
-  globalSetup: './tests/e2e/global.setup.ts',
-
   webServer: [
     {
-      command: 'cross-env NODE_ENV=test tsx src/server/bootstrap/server.ts',
+      command: 'cross-env NODE_ENV=test npm run dev:server',
       url: 'http://localhost:3000/health',
       reuseExistingServer: !process.env.CI,
-      timeout: 60_000,
+      timeout: 120_000,
     },
     {
-      command: 'vite',
+      command: 'npm run dev',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
