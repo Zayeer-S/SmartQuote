@@ -50,7 +50,6 @@ export class TicketController {
           ticket_type_id: this.lookup.ticketTypeId(body.ticketType),
           ticket_severity_id: this.lookup.ticketSeverityId(body.ticketSeverity),
           business_impact_id: this.lookup.businessImpactId(body.businessImpact),
-          ticket_priority_id: this.lookup.ticketPriorityId(body.ticketPriority),
           deadline: new Date(body.deadline),
           users_impacted: body.usersImpacted,
         },

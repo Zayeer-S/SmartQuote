@@ -2,7 +2,6 @@ import { TicketStatus } from '../../../shared/constants/index.js';
 import type {
   BusinessImpactId,
   OrganizationId,
-  TicketPriorityId,
   TicketSeverityId,
   TicketStatusId,
   TicketTypeId,
@@ -15,7 +14,6 @@ export interface CreateTicketData {
   ticket_type_id: TicketTypeId;
   ticket_severity_id: TicketSeverityId;
   business_impact_id: BusinessImpactId;
-  ticket_priority_id: TicketPriorityId;
   deadline: Date;
   users_impacted: number;
 }

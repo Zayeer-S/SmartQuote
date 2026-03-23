@@ -166,7 +166,7 @@ export const SMARTQUOTE_CONFIGS_SEED_DATA: ConfigRow[] = [
   },
   {
     key: SMARTQUOTE_CONFIG_KEYS.TICKET_PRIORITY_USERS_IMPACTED_TIERS,
-    value: JSON.stringify([1, 10, 50, 200]),
+    value: JSON.stringify([10, 50, 200]),
     description:
       'Ascending breakpoints defining users-impacted score buckets. ' +
       'Format: [tier1Max, tier2Max, tier3Max, tier4Max]. ' +
@@ -178,7 +178,7 @@ export const SMARTQUOTE_CONFIGS_SEED_DATA: ConfigRow[] = [
  * Priority engine scoring rules.
  *
  * Four dimensions each contribute points to the base score:
- *   severity (1–4) + business_impact (1–4) + users_impacted (1–4) + deadline_proximity (1–4)
+ *   severity (1-4) + business_impact (1-4) + users_impacted (1-4) + deadline_proximity (1-4)
  *
  * Max base score = 16. With NLP weight of 3, max total = 19.
  *
@@ -210,9 +210,9 @@ export const PRIORITY_RULES_SEED_DATA: PriorityRuleRow[] = [
   // --- Users Impacted ---
   // Tier labels must stay in sync with PRIORITY_USERS_IMPACTED_TIERS config value.
   // The engine resolves which label to use at runtime using the config breakpoints.
-  { dimension: 'users_impacted', value_name: '1–10', points: 1, is_active: true },
-  { dimension: 'users_impacted', value_name: '11–50', points: 2, is_active: true },
-  { dimension: 'users_impacted', value_name: '51–200', points: 3, is_active: true },
+  { dimension: 'users_impacted', value_name: '1-10', points: 1, is_active: true },
+  { dimension: 'users_impacted', value_name: '11-50', points: 2, is_active: true },
+  { dimension: 'users_impacted', value_name: '51-200', points: 3, is_active: true },
   { dimension: 'users_impacted', value_name: '200+', points: 4, is_active: true },
 
   // --- Deadline Proximity ---
@@ -246,14 +246,14 @@ export const PRIORITY_RULES_SEED_DATA: PriorityRuleRow[] = [
 /**
  * Score-to-priority threshold mappings.
  *
- * Covers the full possible score range (4–19).
+ * Covers the full possible score range (4-19).
  * Ranges are non-overlapping and contiguous — the engine throws if no threshold matches.
  *
  * Score breakdown:
- *   P4:  4–5   (all-low inputs, minimal NLP nudge)
- *   P3:  6–9   (low-to-moderate inputs)
- *   P2: 10–13  (moderate-to-high inputs)
- *   P1: 14–19  (high/critical inputs, or strong NLP nudge into critical territory)
+ *   P4:  4-5   (all-low inputs, minimal NLP nudge)
+ *   P3:  6-9   (low-to-moderate inputs)
+ *   P2: 10-13  (moderate-to-high inputs)
+ *   P1: 14-19  (high/critical inputs, or strong NLP nudge into critical territory)
  *
  * ticket_priority_id is resolved from the priority name at seed time in data-generators.ts.
  */

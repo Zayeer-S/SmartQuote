@@ -3,7 +3,6 @@ import {
   ALL_TICKET_TYPES,
   ALL_TICKET_SEVERITIES,
   ALL_BUSINESS_IMPACTS,
-  ALL_TICKET_PRIORITIES,
   ALL_TICKET_STATUSES,
   ALL_COMMENT_TYPES,
 } from '../../shared/constants/';
@@ -24,7 +23,6 @@ export const createTicketSchema = z.object({
   ticketType: z.enum(ALL_TICKET_TYPES),
   ticketSeverity: z.enum(ALL_TICKET_SEVERITIES),
   businessImpact: z.enum(ALL_BUSINESS_IMPACTS),
-  ticketPriority: z.enum(ALL_TICKET_PRIORITIES),
   deadline: futureDate,
   usersImpacted: z.number().int().min(1, 'At least 1 user must be impacted'),
 });
@@ -42,7 +40,6 @@ export const updateTicketSchema = z
     ticketType: z.enum(ALL_TICKET_TYPES).optional(),
     ticketSeverity: z.enum(ALL_TICKET_SEVERITIES).optional(),
     businessImpact: z.enum(ALL_BUSINESS_IMPACTS).optional(),
-    ticketPriority: z.enum(ALL_TICKET_PRIORITIES).optional(),
     deadline: futureDate.optional(),
     usersImpacted: z.number().int().min(1, 'At least 1 user must be impacted').optional(),
     ticketStatus: z.enum(ALL_TICKET_STATUSES).optional(),

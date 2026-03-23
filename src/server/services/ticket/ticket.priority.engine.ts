@@ -91,9 +91,9 @@ export class TicketPriorityEngine {
   }
 
   private resolveUsersTierLabel(usersImpacted: number, tiers: number[]): string {
-    if (tiers.length < 4)
+    if (tiers.length < 3)
       throw new Error(
-        `TicketPriorityEngine: PRIORITY_USERS_IMPACTED_TIERS must have at least 4 breakpoints, got ${String(tiers.length)}`
+        `TicketPriorityEngine: PRIORITY_USERS_IMPACTED_TIERS must have at least 3 breakpoints, got ${String(tiers.length)}`
       );
 
     const [t1, t2, t3] = tiers;
@@ -101,7 +101,7 @@ export class TicketPriorityEngine {
     if (usersImpacted <= t1) return `1-${String(t1)}`;
     if (usersImpacted <= t2) return `${String(t1 + 1)}-${String(t2)}`;
     if (usersImpacted <= t3) return `${String(t2 + 1)}-${String(t3)}`;
-    return `${String(t3)}+`;
+    return `${String(t3 + 1)}+`;
   }
 
   private resolveDeadlineBucket(deadline: Date): string {
