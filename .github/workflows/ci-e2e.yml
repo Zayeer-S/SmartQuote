@@ -59,8 +59,6 @@ jobs:
         with:
           node-version: "22"
 
-      - uses: ./.github/actions/code-quality
-
       - name: Install new Playwright browsers
         run: npx playwright install --with-deps
 

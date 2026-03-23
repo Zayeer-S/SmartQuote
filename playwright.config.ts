@@ -89,8 +89,14 @@ export default defineConfig({
 
   webServer: [
     {
-      command: 'cross-env NODE_ENV=test npm run dev:full',
+      command: 'cross-env NODE_ENV=test tsx src/server/bootstrap/server.ts',
       url: 'http://localhost:3000/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+    },
+    {
+      command: 'vite',
+      url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
     },
