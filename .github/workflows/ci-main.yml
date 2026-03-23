@@ -67,5 +67,8 @@ jobs:
       - name: Run integration tests
         run: npm run test:integration
 
+      - name: Install new Playwright browsers
+        run: npx playwright install
+
       - name: Run Smoke tests
         run: npm run test:e2e:smoke
