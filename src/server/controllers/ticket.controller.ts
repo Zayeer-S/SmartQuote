@@ -118,7 +118,7 @@ export class TicketController {
       );
 
       const response: ListTicketsResponse = {
-        tickets: tickets.map((t) => this.mapTicketDetail(t, [])),
+        tickets: tickets.map((t) => this.mapTicket(t)),
       };
       success(res, response, 200);
     } catch (err: unknown) {

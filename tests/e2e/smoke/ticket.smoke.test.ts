@@ -1,4 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const VALID_TICKET = {
   title: 'Smoke test ticket',
@@ -10,6 +15,25 @@ const VALID_TICKET = {
 const NEW_TICKET_URL = '/customer/tickets/new';
 const TICKETS_URL = '/customer/tickets';
 
+const FIXTURES_DIR = path.join(__dirname, 'fixtures');
+const FIXTURE_PDF = path.join(FIXTURES_DIR, 'sample.pdf');
+const FIXTURE_JPG = path.join(FIXTURES_DIR, 'sample.jpg');
+const FIXTURE_PNG = path.join(FIXTURES_DIR, 'sample.png');
+const FIXTURE_TXT = path.join(FIXTURES_DIR, 'sample.txt');
+
+const ATTACHMENT_HAPPY_PATH_CASES = [
+  { label: 'PDF', fixture: FIXTURE_PDF },
+  { label: 'JPG', fixture: FIXTURE_JPG },
+  { label: 'PNG', fixture: FIXTURE_PNG },
+];
+
+async function fillRequiredFields(page: Page): Promise<void> {
+  await page.getByTestId('field-title').fill(VALID_TICKET.title);
+  await page.getByTestId('field-description').fill(VALID_TICKET.description);
+  await page.getByTestId('field-deadline').fill(VALID_TICKET.deadline);
+  await page.getByTestId('field-users-impacted').fill(VALID_TICKET.usersAffected);
+}
+
 test.describe('Ticket submission', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(NEW_TICKET_URL);
@@ -17,14 +41,23 @@ test.describe('Ticket submission', () => {
   });
 
   test('valid submission succeeds and redirects to tickets list', async ({ page }) => {
-    await page.getByTestId('field-title').fill(VALID_TICKET.title);
-    await page.getByTestId('field-description').fill(VALID_TICKET.description);
-    await page.getByTestId('field-deadline').fill(VALID_TICKET.deadline);
-    await page.getByTestId('field-users-impacted').fill(VALID_TICKET.usersAffected);
+    await fillRequiredFields(page);
     await page.getByTestId('submit-ticket-btn').click();
 
     await expect(page).toHaveURL(new RegExp(TICKETS_URL));
   });
+
+  for (const { label, fixture } of ATTACHMENT_HAPPY_PATH_CASES) {
+    test(`valid submission with a ${label} attachment succeeds`, async ({ page }) => {
+      await fillRequiredFields(page);
+
+      await page.getByTestId('field-attachments').setInputFiles(fixture);
+      await expect(page.getByTestId('attachment-count')).toBeVisible();
+
+      await page.getByTestId('submit-ticket-btn').click();
+      await expect(page).toHaveURL(new RegExp(TICKETS_URL));
+    });
+  }
 
   test('empty title fails validation', async ({ page }) => {
     await page.getByTestId('field-description').fill(VALID_TICKET.description);
@@ -32,7 +65,9 @@ test.describe('Ticket submission', () => {
     await page.getByTestId('field-users-impacted').fill(VALID_TICKET.usersAffected);
     await page.getByTestId('submit-ticket-btn').click();
 
-    await expect(page.getByTestId('submit-error')).toBeVisible();
+    const errorEl = page.getByTestId('submit-error');
+    await expect(errorEl).toBeVisible();
+    await expect(errorEl).toContainText('Title is required');
   });
 
   test('empty description fails validation', async ({ page }) => {
@@ -41,7 +76,9 @@ test.describe('Ticket submission', () => {
     await page.getByTestId('field-users-impacted').fill(VALID_TICKET.usersAffected);
     await page.getByTestId('submit-ticket-btn').click();
 
-    await expect(page.getByTestId('submit-error')).toBeVisible();
+    const errorEl = page.getByTestId('submit-error');
+    await expect(errorEl).toBeVisible();
+    await expect(errorEl).toContainText('Description is required');
   });
 
   test('past deadline fails validation', async ({ page }) => {
@@ -51,7 +88,9 @@ test.describe('Ticket submission', () => {
     await page.getByTestId('field-users-impacted').fill(VALID_TICKET.usersAffected);
     await page.getByTestId('submit-ticket-btn').click();
 
-    await expect(page.getByTestId('submit-error')).toBeVisible();
+    const errorEl = page.getByTestId('submit-error');
+    await expect(errorEl).toBeVisible();
+    await expect(errorEl).toContainText('future');
   });
 
   test('negative users affected fails validation', async ({ page }) => {
@@ -61,16 +100,34 @@ test.describe('Ticket submission', () => {
     await page.getByTestId('field-users-impacted').fill('-69');
     await page.getByTestId('submit-ticket-btn').click();
 
-    await expect(page.getByTestId('submit-error')).toBeVisible();
+    const errorEl = page.getByTestId('submit-error');
+    await expect(errorEl).toBeVisible();
+    await expect(errorEl).toContainText('whole number');
   });
 
-  test('scientific notation in users affected fails validation', async ({ page }) => {
+  test('non-numeric input in users affected is blocked and submit shows validation error', async ({
+    page,
+  }) => {
     await page.getByTestId('field-title').fill(VALID_TICKET.title);
     await page.getByTestId('field-description').fill(VALID_TICKET.description);
     await page.getByTestId('field-deadline').fill(VALID_TICKET.deadline);
+    // 'e' is swallowed by the handleChange guard, leaving the field empty
     await page.getByTestId('field-users-impacted').fill('e');
     await page.getByTestId('submit-ticket-btn').click();
 
-    await expect(page.getByTestId('submit-error')).toBeVisible();
+    const errorEl = page.getByTestId('submit-error');
+    await expect(errorEl).toBeVisible();
+    await expect(errorEl).toContainText('whole number');
+  });
+
+  test('disallowed file type shows validation error before submission', async ({ page }) => {
+    await fillRequiredFields(page);
+
+    await page.getByTestId('field-attachments').setInputFiles(FIXTURE_TXT);
+    await page.getByTestId('submit-ticket-btn').click();
+
+    const errorEl = page.getByTestId('submit-error');
+    await expect(errorEl).toBeVisible();
+    await expect(errorEl).toContainText('not an allowed file type');
   });
 });

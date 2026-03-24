@@ -17,6 +17,8 @@ export interface CreateTicketRequest {
   /** ISO 8601 date string */
   deadline: string;
   usersImpacted: number;
+  /** Optional file attachments - PDF, JPG, PNG only, max 5MB each, max 5 files */
+  attachments?: File[];
 }
 
 export interface UpdateTicketRequest {
@@ -75,7 +77,7 @@ export interface TicketDetailResponse extends TicketResponse {
 }
 
 export interface ListTicketsResponse {
-  tickets: TicketDetailResponse[];
+  tickets: TicketResponse[];
 }
 
 export interface AddCommentRequest {
