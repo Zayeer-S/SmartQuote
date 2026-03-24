@@ -62,6 +62,13 @@ export async function bootstrapApplication(
   );
 
   app.use((req, res, next) => {
+    // Skip all body parsing for multipart - multer handles it at the route level.
+    // Parsing the stream here would consume it before multer can read it.
+    if (req.headers['content-type']?.startsWith('multipart/form-data')) {
+      next();
+      return;
+    }
+
     if (req.body instanceof Buffer) {
       try {
         req.body = JSON.parse(req.body.toString('utf8')) as unknown;
@@ -73,7 +80,15 @@ export async function bootstrapApplication(
       express.json()(req, res, next);
     }
   });
-  app.use(express.urlencoded({ extended: true }));
+
+  app.use((req, res, next) => {
+    // Same guard - urlencoded parser must not run on multipart requests
+    if (req.headers['content-type']?.startsWith('multipart/form-data')) {
+      next();
+      return;
+    }
+    express.urlencoded({ extended: true })(req, res, next);
+  });
 
   app.use((req, _res, next) => {
     console.log(`${req.method} ${req.path}`);

@@ -168,3 +168,5 @@ dist-db/
 
 .playwright
 tests/coverage/
+
+uploads
