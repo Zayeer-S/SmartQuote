@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useListComments } from '../../hooks/tickets/useListComments.js';
 import { useAddComment } from '../../hooks/tickets/useAddComment.js';
+import { useTicketPermissions } from '../../hooks/auth/useTicketPermissions.js';
 import { COMMENT_TYPES } from '../../../shared/constants/lookup-values.js';
 import type { CommentType } from '../../../shared/constants/lookup-values.js';
 import './CommentThread.css';
@@ -8,11 +9,6 @@ import './CommentThread.css';
 interface CommentThreadProps {
   ticketId: string;
 }
-
-const COMMENT_TYPE_OPTIONS: { value: CommentType; label: string }[] = [
-  { value: COMMENT_TYPES.EXTERNAL, label: COMMENT_TYPES.EXTERNAL },
-  { value: COMMENT_TYPES.INTERNAL, label: COMMENT_TYPES.INTERNAL },
-];
 
 const COMMENT_TYPE_CLASS: Record<CommentType, string> = {
   [COMMENT_TYPES.INTERNAL]: 'comment-item comment-item--internal',
@@ -29,9 +25,18 @@ const COMMENT_TYPE_BADGE_CLASS: Record<CommentType, string> = {
 const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
   const list = useListComments();
   const add = useAddComment();
+  const { canUpdateAll } = useTicketPermissions();
 
   const [commentText, setCommentText] = useState('');
   const [commentType, setCommentType] = useState<CommentType>(COMMENT_TYPES.EXTERNAL);
+
+  // Reset type selection to EXTERNAL if the user loses the canUpdateAll permission
+  // (e.g. session change) while INTERNAL is selected
+  useEffect(() => {
+    if (!canUpdateAll && commentType === COMMENT_TYPES.INTERNAL) {
+      setCommentType(COMMENT_TYPES.EXTERNAL);
+    }
+  }, [canUpdateAll, commentType]);
 
   useEffect(() => {
     void list.execute(ticketId);
@@ -127,27 +132,26 @@ const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
         data-testid="add-comment-form"
       >
         <div className="add-comment-form-controls">
-          <div className="field-group add-comment-type-field">
-            <label className="field-label" htmlFor="comment-type">
-              Type
-            </label>
-            <select
-              className="field-select"
-              id="comment-type"
-              value={commentType}
-              onChange={(e) => {
-                setCommentType(e.target.value as CommentType);
-              }}
-              disabled={add.loading}
-              data-testid="comment-type-select"
-            >
-              {COMMENT_TYPE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {canUpdateAll && (
+            <div className="field-group add-comment-type-field">
+              <label className="field-label" htmlFor="comment-type">
+                Type
+              </label>
+              <select
+                className="field-select"
+                id="comment-type"
+                value={commentType}
+                onChange={(e) => {
+                  setCommentType(e.target.value as CommentType);
+                }}
+                disabled={add.loading}
+                data-testid="comment-type-select"
+              >
+                <option value={COMMENT_TYPES.EXTERNAL}>{COMMENT_TYPES.EXTERNAL}</option>
+                <option value={COMMENT_TYPES.INTERNAL}>{COMMENT_TYPES.INTERNAL}</option>
+              </select>
+            </div>
+          )}
 
           <div className="field-group add-comment-text-field">
             <label className="field-label" htmlFor="comment-text">
@@ -163,7 +167,9 @@ const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
               placeholder={
                 commentType === COMMENT_TYPES.INTERNAL
                   ? 'Internal note (not visible to customer)...'
-                  : 'Reply to customer...'
+                  : canUpdateAll
+                    ? 'Reply to customer'
+                    : 'Reply to Giacom'
               }
               required
               disabled={add.loading}
