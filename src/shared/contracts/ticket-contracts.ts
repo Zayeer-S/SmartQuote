@@ -1,6 +1,7 @@
 import {
   BusinessImpact,
   CommentType,
+  FileStorageType,
   TicketPriority,
   TicketSeverity,
   TicketStatus,
@@ -56,8 +57,21 @@ export interface TicketResponse {
   updatedAt: string;
 }
 
+export interface AttachmentResponse {
+  id: string;
+  ticketId: string;
+  uploadedByUserId: string;
+  originalName: string;
+  storageKey: string;
+  storageType: FileStorageType;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: string;
+}
+
 export interface TicketDetailResponse extends TicketResponse {
   organizationName: string;
+  attachments: AttachmentResponse[];
 }
 
 export interface ListTicketsResponse {

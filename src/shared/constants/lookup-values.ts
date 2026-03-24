@@ -84,10 +84,17 @@ export type NotificationTokenType =
 export const FILE_STORAGE_TYPES = {
   LOCAL: 'Local',
   S3: 'S3',
-  AZURE: 'Azure Blob Storage',
 } as const;
 
 export type FileStorageType = (typeof FILE_STORAGE_TYPES)[keyof typeof FILE_STORAGE_TYPES];
+
+export const ATTACHMENT_CONFIG = {
+  MAX_SIZE_BYTES: 5 * 1024 * 1024, // 5MB
+  ALLOWED_MIME_TYPES: ['application/pdf', 'image/jpeg', 'image/png'],
+  MAX_COUNT: 5,
+} as const;
+
+export type AttachmentConfigType = (typeof ATTACHMENT_CONFIG)[keyof typeof ATTACHMENT_CONFIG];
 
 export const TICKET_TYPES = {
   SUPPORT: 'Support',

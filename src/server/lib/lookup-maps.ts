@@ -8,6 +8,7 @@ export interface LookupMaps {
   businessImpacts: Record<string, number>;
   ticketPriorities: Record<string, number>;
   commentTypes: Record<string, number>;
+  fileStorageTypes: Record<string, number>;
   quoteEffortLevels: Record<string, number>;
   quoteConfidenceLevels: Record<string, number>;
   quoteCreators: Record<string, number>;
@@ -22,6 +23,7 @@ export async function loadLookupMaps(knex: Knex): Promise<LookupMaps> {
     businessImpacts,
     ticketPriorities,
     commentTypes,
+    fileStorageTypes,
     quoteEffortLevels,
     quoteConfidenceLevels,
     quoteCreators,
@@ -33,6 +35,7 @@ export async function loadLookupMaps(knex: Knex): Promise<LookupMaps> {
     buildLookupIdMap(knex, 'business_impacts'),
     buildLookupIdMap(knex, 'ticket_priorities'),
     buildLookupIdMap(knex, 'comment_types'),
+    buildLookupIdMap(knex, 'file_storage_types'),
     buildLookupIdMap(knex, 'quote_effort_levels'),
     buildLookupIdMap(knex, 'quote_confidence_levels'),
     buildLookupIdMap(knex, 'quote_creators'),
@@ -46,6 +49,7 @@ export async function loadLookupMaps(knex: Knex): Promise<LookupMaps> {
     businessImpacts,
     ticketPriorities,
     commentTypes,
+    fileStorageTypes,
     quoteEffortLevels,
     quoteConfidenceLevels,
     quoteCreators,

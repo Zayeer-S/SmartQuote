@@ -237,7 +237,8 @@ export interface TicketAttachment extends BaseAuditRows {
   id: TicketAttachmentId;
   uploaded_by_user_id: UserId;
   ticket_id: TicketId;
-  name: string;
+  storage_key: string;
+  original_name: string;
   storage_type_id: FileStorageTypeId;
   size_bytes: number;
   mime_type: string;
