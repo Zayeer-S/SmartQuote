@@ -42,7 +42,7 @@
 .directory-grid {
   display: grid;
   gap: 24px;
-  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .directory-card {
@@ -98,7 +98,22 @@
 }
 
 .directory-table-wrap {
-  overflow-x: auto;
+  overflow: visible;
+}
+
+.directory-page .admin-table {
+  table-layout: fixed;
+}
+
+.directory-page .admin-table th,
+.directory-page .admin-table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.directory-page .admin-table-actions {
+  flex-wrap: wrap;
 }
 
 .directory-name-cell {
@@ -170,12 +185,6 @@
   color: #fca5a5;
 }
 
-@media (max-width: 1080px) {
-  .directory-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 640px) {
   .directory-hero {
     flex-direction: column;
@@ -183,5 +192,14 @@
 
   .directory-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .directory-toolbar {
+    align-items: stretch;
+  }
+
+  .directory-filter {
+    min-width: 0;
+    width: 100%;
   }
 }

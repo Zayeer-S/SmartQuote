@@ -20,7 +20,12 @@ const AdminLayout: React.FC = () => {
   return (
     <div className="admin-layout" data-testid="admin-layout">
       <nav className="admin-nav" aria-label="Admin navigation">
-        <span className="admin-nav-brand">Smartquote</span>
+        <div className="admin-nav-brand">
+          <span className="admin-nav-logo">
+            GIACOM<span className="admin-nav-logo-dot">.</span>
+          </span>
+          <span className="admin-nav-sub">Admin Portal</span>
+        </div>
 
         <ul className="admin-nav-links" role="list">
           <li>
@@ -105,8 +110,11 @@ const AdminLayout: React.FC = () => {
         <div className="admin-nav-footer">
           {user && (
             <div className="admin-nav-user" data-testid="sidebar-user">
-              <span className="admin-nav-user-name">{fullName}</span>
-              <span className="admin-nav-user-role">{user.role.name}</span>
+              <div className="admin-nav-avatar">{user.firstName[0].toUpperCase()}</div>
+              <div className="admin-nav-user-info">
+                <span className="admin-nav-user-name">{fullName}</span>
+                <span className="admin-nav-user-role">{user.role.name}</span>
+              </div>
             </div>
           )}
           <button
