@@ -1,5 +1,5 @@
 import React from 'react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Tooltip, ResponsiveContainer } from 'recharts';
 import type { TicketDetailResponse } from '../../../shared/contracts/ticket-contracts';
 import { TICKET_STATUSES } from '../../../shared/constants/lookup-values';
 
@@ -25,7 +25,11 @@ const TicketStatusChart: React.FC<TicketStatusChartProps> = ({ tickets }) => {
     return acc;
   }, {});
 
-  const chartData = Object.entries(counts).map(([name, value]) => ({ name, value }));
+  const chartData = Object.entries(counts).map(([name, value]) => ({
+    name,
+    value,
+    fill: STATUS_COLORS[name] ?? FALLBACK_COLOR,
+  }));
 
   if (chartData.length === 0) {
     return null;
@@ -42,12 +46,9 @@ const TicketStatusChart: React.FC<TicketStatusChartProps> = ({ tickets }) => {
             innerRadius={46}
             outerRadius={72}
             dataKey="value"
+            fill={FALLBACK_COLOR}
             strokeWidth={2}
-          >
-            {chartData.map((entry) => (
-              <Cell key={entry.name} fill={STATUS_COLORS[entry.name] ?? FALLBACK_COLOR} />
-            ))}
-          </Pie>
+          />
           <Tooltip />
         </PieChart>
       </ResponsiveContainer>
