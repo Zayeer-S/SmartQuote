@@ -247,28 +247,81 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
     setUpdateForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Returns only the fields that are filled in AND differ from the current quote values.
+  // Numeric fields are compared as numbers so "40" does not differ from 40.
+  const buildUpdatePayload = (): Omit<UpdateQuoteFormState, 'reason'> => {
+    if (!latestQuote) return {};
+    const changed: Omit<UpdateQuoteFormState, 'reason'> = {};
+
+    if (
+      updateForm.estimatedHoursMinimum !== undefined &&
+      updateForm.estimatedHoursMinimum !== '' &&
+      Number(updateForm.estimatedHoursMinimum) !== latestQuote.estimatedHoursMinimum
+    ) {
+      changed.estimatedHoursMinimum = updateForm.estimatedHoursMinimum;
+    }
+    if (
+      updateForm.estimatedHoursMaximum !== undefined &&
+      updateForm.estimatedHoursMaximum !== '' &&
+      Number(updateForm.estimatedHoursMaximum) !== latestQuote.estimatedHoursMaximum
+    ) {
+      changed.estimatedHoursMaximum = updateForm.estimatedHoursMaximum;
+    }
+    if (
+      updateForm.hourlyRate !== undefined &&
+      updateForm.hourlyRate !== '' &&
+      Number(updateForm.hourlyRate) !== latestQuote.hourlyRate
+    ) {
+      changed.hourlyRate = updateForm.hourlyRate;
+    }
+    if (
+      updateForm.fixedCost !== undefined &&
+      updateForm.fixedCost !== '' &&
+      Number(updateForm.fixedCost) !== latestQuote.fixedCost
+    ) {
+      changed.fixedCost = updateForm.fixedCost;
+    }
+    if (
+      updateForm.quoteEffortLevel !== undefined &&
+      updateForm.quoteEffortLevel !== latestQuote.quoteEffortLevel
+    ) {
+      changed.quoteEffortLevel = updateForm.quoteEffortLevel;
+    }
+    if (
+      updateForm.quoteConfidenceLevel !== undefined &&
+      updateForm.quoteConfidenceLevel !== latestQuote.quoteConfidenceLevel
+    ) {
+      changed.quoteConfidenceLevel = updateForm.quoteConfidenceLevel;
+    }
+
+    return changed;
+  };
+
+  const hasValidChanges = (): boolean => Object.keys(buildUpdatePayload()).length > 0;
+
   const handleUpdateSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    if (!latestQuote || !updateReason.trim()) return;
+    if (!latestQuote || !updateReason.trim() || !hasValidChanges()) return;
+    const payload = buildUpdatePayload();
     void updateQuote
       .execute(ticketId, latestQuote.id, {
-        ...(updateForm.estimatedHoursMinimum !== undefined && {
-          estimatedHoursMinimum: Number(updateForm.estimatedHoursMinimum),
+        ...(payload.estimatedHoursMinimum !== undefined && {
+          estimatedHoursMinimum: Number(payload.estimatedHoursMinimum),
         }),
-        ...(updateForm.estimatedHoursMaximum !== undefined && {
-          estimatedHoursMaximum: Number(updateForm.estimatedHoursMaximum),
+        ...(payload.estimatedHoursMaximum !== undefined && {
+          estimatedHoursMaximum: Number(payload.estimatedHoursMaximum),
         }),
-        ...(updateForm.hourlyRate !== undefined && {
-          hourlyRate: Number(updateForm.hourlyRate),
+        ...(payload.hourlyRate !== undefined && {
+          hourlyRate: Number(payload.hourlyRate),
         }),
-        ...(updateForm.fixedCost !== undefined && {
-          fixedCost: Number(updateForm.fixedCost),
+        ...(payload.fixedCost !== undefined && {
+          fixedCost: Number(payload.fixedCost),
         }),
-        ...(updateForm.quoteEffortLevel !== undefined && {
-          quoteEffortLevel: updateForm.quoteEffortLevel,
+        ...(payload.quoteEffortLevel !== undefined && {
+          quoteEffortLevel: payload.quoteEffortLevel,
         }),
-        ...(updateForm.quoteConfidenceLevel !== undefined && {
-          quoteConfidenceLevel: updateForm.quoteConfidenceLevel,
+        ...(payload.quoteConfidenceLevel !== undefined && {
+          quoteConfidenceLevel: payload.quoteConfidenceLevel,
         }),
         reason: updateReason,
       })
@@ -333,16 +386,9 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
         </p>
       )}
 
-      {latestQuote?.approvalComment == 'string' && latestQuote.approvalStatus == 'Rejected' && (
-        <div className="admin-quote-rejection-comment" data-testid="quote-rejection-comment">
-          <span className="admin-quote-rejection-comment-label">Rejection Reason:</span>
-          <p className="admin-quote-rejection-comment-body">{latestQuote.approvalComment}</p>
-        </div>
-      )}
-
-      {latestQuote?.approvalComment == 'string' && latestQuote.approvalStatus == 'Approved' && (
-        <div className="admin-quote-approval-comment" data-testid="quote-approval-comment">
-          <span className="admin-quote-approval-comment-label">Approval Reason:</span>
+      {latestQuote?.approvalComment && (
+        <div className="admin-quote-approval-comment" data-testid="approval-comment">
+          <span className="admin-quote-approval-comment-label">Approval Comment</span>
           <p className="admin-quote-approval-comment-body">{latestQuote.approvalComment}</p>
         </div>
       )}
@@ -630,7 +676,10 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
           <h3 className="admin-quote-subpanel-heading">
             Update Quote <span className="admin-quote-version">v{latestQuote.version}</span>
           </h3>
-          <p className="admin-quote-subpanel-hint">Only fill in the fields you want to change.</p>
+          <p className="admin-quote-subpanel-hint">
+            Only fill in the fields you want to change. Fields matching the current value will not
+            be submitted.
+          </p>
 
           <div className="admin-quote-form-grid">
             <div className="field-group">
@@ -643,6 +692,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                 name="estimatedHoursMinimum"
                 type="number"
                 min={0}
+                placeholder={String(latestQuote.estimatedHoursMinimum)}
                 value={updateForm.estimatedHoursMinimum ?? ''}
                 onChange={handleUpdateFormChange}
                 disabled={updateQuote.loading}
@@ -660,6 +710,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                 name="estimatedHoursMaximum"
                 type="number"
                 min={0}
+                placeholder={String(latestQuote.estimatedHoursMaximum)}
                 value={updateForm.estimatedHoursMaximum ?? ''}
                 onChange={handleUpdateFormChange}
                 disabled={updateQuote.loading}
@@ -678,6 +729,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                 type="number"
                 min={0}
                 step="0.01"
+                placeholder={String(latestQuote.hourlyRate)}
                 value={updateForm.hourlyRate ?? ''}
                 onChange={handleUpdateFormChange}
                 disabled={updateQuote.loading}
@@ -696,6 +748,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                 type="number"
                 min={0}
                 step="0.01"
+                placeholder={String(latestQuote.fixedCost)}
                 value={updateForm.fixedCost ?? ''}
                 onChange={handleUpdateFormChange}
                 disabled={updateQuote.loading}
@@ -727,7 +780,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
           <button
             type="submit"
             className="btn btn-primary btn-sm"
-            disabled={updateQuote.loading || !updateReason.trim()}
+            disabled={updateQuote.loading || !updateReason.trim() || !hasValidChanges()}
             aria-busy={updateQuote.loading}
             data-testid="update-quote-submit-btn"
           >
