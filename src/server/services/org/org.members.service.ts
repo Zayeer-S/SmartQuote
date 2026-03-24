@@ -197,3 +197,5 @@ export class OrgMembersService {
     return this.orgsDAO.getById(memberships[0].organization_id, options);
   }
 }
+
+// TODO ADD FUNC TO ADD/REMOVE ORG MANAGER STATUS

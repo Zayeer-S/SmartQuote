@@ -1,4 +1,5 @@
 import { PERMISSIONS, TICKET_STATUSES } from '../../../shared/constants';
+import type { Knex } from 'knex';
 import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types.js';
 import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
 import type { UsersDAO } from '../../daos/children/users.dao.js';
@@ -13,52 +14,56 @@ import type {
   UpdateTicketData,
 } from './ticket.service.types.js';
 import type { TicketPriorityEngine } from './ticket.priority.engine.js';
+import type { AttachmentService } from './attachment.service.js';
+import type { IncomingFile } from '../storage/storage.service.types.js';
 import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
 
 export class TicketService {
+  private db: Knex;
   private ticketsDAO: TicketsDAO;
   private usersDAO: UsersDAO;
   private orgMembersDAO: OrganizationMembersDAO;
   private rbacService: RBACService;
   private lookup: LookupResolver;
   private priorityEngine: TicketPriorityEngine;
+  private attachmentService: AttachmentService;
 
   constructor(
+    db: Knex,
     ticketsDAO: TicketsDAO,
     usersDAO: UsersDAO,
     orgMembersDAO: OrganizationMembersDAO,
     rbacService: RBACService,
     lookup: LookupResolver,
-    priorityEngine: TicketPriorityEngine
+    priorityEngine: TicketPriorityEngine,
+    attachmentService: AttachmentService
   ) {
+    this.db = db;
     this.ticketsDAO = ticketsDAO;
     this.usersDAO = usersDAO;
     this.orgMembersDAO = orgMembersDAO;
     this.rbacService = rbacService;
     this.lookup = lookup;
     this.priorityEngine = priorityEngine;
+    this.attachmentService = attachmentService;
   }
 
   /**
    * @param data Ticket fields supplied by the user
    * @param actorId ID of the user creating the ticket
-   * @param options Optional transaction context
+   * @param files Optional pre-validated files from the multipart request
    * @returns Created ticket
    * @throws TicketError if actor has no organization
    */
   async createTicket(
     data: CreateTicketData,
     actorId: UserId,
-    options?: TransactionContext
+    files: IncomingFile[] = []
   ): Promise<Ticket> {
-    const canCreate = await this.rbacService.hasPermission(
-      actorId,
-      PERMISSIONS.TICKETS_CREATE,
-      options
-    );
+    const canCreate = await this.rbacService.hasPermission(actorId, PERMISSIONS.TICKETS_CREATE);
     if (!canCreate) throw new ForbiddenError(TICKET_ERROR_MSGS.FORBIDDEN);
 
-    const actor = await this.usersDAO.getById(actorId, options);
+    const actor = await this.usersDAO.getById(actorId);
     if (!actor) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
 
     const orgId = await this.getOrgId(actor.id);
@@ -71,19 +76,42 @@ export class TicketService {
       description: data.description,
     });
 
-    return this.ticketsDAO.create(
-      {
-        ...data,
-        creator_user_id: actorId,
-        organization_id: orgId,
-        ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.OPEN),
-        ticket_priority_id: ticketPriorityId,
-        assigned_to_user_id: null,
-        resolved_by_user_id: null,
-        deleted_at: null,
-      } satisfies InsertData<Ticket>,
-      options
-    );
+    // Step 1: open an explicit transaction so the ticket row and attachment
+    // records are committed atomically. Storage writes happen AFTER commit
+    // since storage is not transactional.
+    let ticket!: Ticket;
+
+    const pendingUploads = await this.db.transaction(async (trx) => {
+      const ctx: TransactionContext = { trx };
+
+      ticket = await this.ticketsDAO.create(
+        {
+          ...data,
+          creator_user_id: actorId,
+          organization_id: orgId,
+          ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.OPEN),
+          ticket_priority_id: ticketPriorityId,
+          assigned_to_user_id: null,
+          resolved_by_user_id: null,
+          deleted_at: null,
+        } satisfies InsertData<Ticket>,
+        ctx
+      );
+
+      // Step 2: persist attachment DB records inside the same transaction.
+      // If this fails, the whole transaction rolls back and nothing is written
+      // to storage (uploads haven't happened yet).
+      return this.attachmentService.persistAttachmentRecords(files, ticket.id, actorId, ctx);
+    });
+
+    // Step 3: upload files to storage now that the transaction has committed.
+    // Failures are handled per-file inside uploadAttachments() - the ticket
+    // itself is never rolled back at this point.
+    if (pendingUploads.length > 0) {
+      await this.attachmentService.uploadAttachments(pendingUploads);
+    }
+
+    return ticket;
   }
 
   /**
