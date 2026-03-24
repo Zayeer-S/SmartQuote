@@ -217,7 +217,10 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
         <AdminQuotePanel
           ticketId={ticketId}
           quotes={quotes.data?.quotes ?? []}
-          onQuoteMutated={loadTicket}
+          onQuoteMutated={() => {
+            loadTicket();
+            void quotes.execute(ticketId);
+          }}
         />
       </section>
 
