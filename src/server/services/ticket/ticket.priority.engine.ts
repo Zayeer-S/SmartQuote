@@ -34,7 +34,7 @@ export class TicketPriorityEngine {
   constructor(
     rulesDAO: TicketPriorityRulesDAO,
     thresholdsDAO: TicketPriorityThresholdsDAO,
-    embedder: BertEmbedder,
+    embedder: BertEmbedder | null,
     db: Knex
   ) {
     this.rulesDAO = rulesDAO;
