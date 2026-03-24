@@ -31,6 +31,10 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId]);
 
+  useEffect(() => {
+    console.log('quotes data updated:', JSON.stringify(quotes.data, null, 2));
+  }, [quotes.data]);
+
   const handleResolve = (): void => {
     void resolve.execute(ticketId).then(loadTicket);
   };
@@ -217,7 +221,12 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
         <AdminQuotePanel
           ticketId={ticketId}
           quotes={quotes.data?.quotes ?? []}
-          onQuoteMutated={loadTicket}
+          onQuoteMutated={() => {
+            loadTicket();
+            void quotes.execute(ticketId).then((result) => {
+              console.log('quotes re-fetched:', result);
+            });
+          }}
         />
       </section>
 

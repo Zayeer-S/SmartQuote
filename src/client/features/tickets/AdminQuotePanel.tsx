@@ -3,6 +3,8 @@ import { useGenerateQuote } from '../../hooks/quotes/useGenerateQuote.js';
 import { useCreateManualQuote } from '../../hooks/quotes/useCreateManualQuote.js';
 import { useUpdateQuote } from '../../hooks/quotes/useUpdateQuote.js';
 import { useSubmitForApproval } from '../../hooks/quotes/useSubmitForApproval.js';
+import { useApproveQuote } from '../../hooks/quotes/useApproveQuote.js';
+import { useRejectQuote } from '../../hooks/quotes/useRejectQuote.js';
 import { useGetRevisionHistory } from '../../hooks/quotes/useGetRevisionHistory.js';
 import { useQuotePermissions } from '../../hooks/auth/useQuotePermissions.js';
 import {
@@ -50,6 +52,8 @@ const CONFIDENCE_OPTIONS: { value: QuoteConfidenceLevel; label: string }[] = [
   { value: QUOTE_CONFIDENCE_LEVELS.HIGH, label: QUOTE_CONFIDENCE_LEVELS.HIGH },
 ];
 
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
 const AdminQuoteDisplay: React.FC<{ quote: QuoteWithApprovalResponse }> = ({ quote }) => {
   const approvalBadgeClass =
     quote.approvalStatus != null
@@ -90,7 +94,7 @@ const AdminQuoteDisplay: React.FC<{ quote: QuoteWithApprovalResponse }> = ({ quo
         <div className="admin-detail-dl-row">
           <dt>Estimated Hours</dt>
           <dd data-testid="quote-hours">
-            {quote.estimatedHoursMinimum}–{quote.estimatedHoursMaximum} hrs
+            {quote.estimatedHoursMinimum}-{quote.estimatedHoursMaximum} hrs
           </dd>
         </div>
         <div className="admin-detail-dl-row">
@@ -159,7 +163,23 @@ interface UpdateQuoteFormState {
   quoteConfidenceLevel?: QuoteConfidenceLevel;
 }
 
-type ActivePanel = 'none' | 'manual' | 'update' | 'revisions';
+// 'reject' opens the inline rejection-reason subpanel
+type ActivePanel = 'none' | 'manual' | 'update' | 'revisions' | 'reject';
+
+// ─── Derived status helpers ───────────────────────────────────────────────────
+
+function isSubmittable(status: QuoteApprovalStatus | null): boolean {
+  return status === null || status === QUOTE_APPROVAL_STATUSES.REJECTED;
+}
+
+function isPending(status: QuoteApprovalStatus | null): boolean {
+  return status === QUOTE_APPROVAL_STATUSES.PENDING;
+}
+
+function isEditable(status: QuoteApprovalStatus | null): boolean {
+  // A quote under review must not be mutated until it is approved/rejected
+  return status !== QUOTE_APPROVAL_STATUSES.PENDING;
+}
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
@@ -170,21 +190,26 @@ interface AdminQuotePanelProps {
 }
 
 const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQuoteMutated }) => {
-  const { canCreate, canUpdate } = useQuotePermissions();
+  const { canCreate, canUpdate, canApprove, canReject } = useQuotePermissions();
 
   const generate = useGenerateQuote();
   const createManual = useCreateManualQuote();
   const updateQuote = useUpdateQuote();
   const submitForApproval = useSubmitForApproval();
+  const approveQuote = useApproveQuote();
+  const rejectQuote = useRejectQuote();
   const revisionHistory = useGetRevisionHistory();
 
   const [activePanel, setActivePanel] = useState<ActivePanel>('none');
   const [manualForm, setManualForm] = useState<ManualQuoteFormState>(INITIAL_MANUAL_FORM);
   const [updateReason, setUpdateReason] = useState('');
   const [updateForm, setUpdateForm] = useState<UpdateQuoteFormState>({});
+  const [rejectionNotes, setRejectionNotes] = useState('');
 
   const latestQuote =
     quotes.length > 0 ? quotes.reduce((a, b) => (a.version > b.version ? a : b)) : null;
+
+  // ─── Handlers ───────────────────────────────────────────────────────────────
 
   const handleGenerate = (): void => {
     void generate.execute(ticketId).then(onQuoteMutated);
@@ -222,28 +247,81 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
     setUpdateForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Returns only the fields that are filled in AND differ from the current quote values.
+  // Numeric fields are compared as numbers so "40" does not differ from 40.
+  const buildUpdatePayload = (): Omit<UpdateQuoteFormState, 'reason'> => {
+    if (!latestQuote) return {};
+    const changed: Omit<UpdateQuoteFormState, 'reason'> = {};
+
+    if (
+      updateForm.estimatedHoursMinimum !== undefined &&
+      updateForm.estimatedHoursMinimum !== '' &&
+      Number(updateForm.estimatedHoursMinimum) !== latestQuote.estimatedHoursMinimum
+    ) {
+      changed.estimatedHoursMinimum = updateForm.estimatedHoursMinimum;
+    }
+    if (
+      updateForm.estimatedHoursMaximum !== undefined &&
+      updateForm.estimatedHoursMaximum !== '' &&
+      Number(updateForm.estimatedHoursMaximum) !== latestQuote.estimatedHoursMaximum
+    ) {
+      changed.estimatedHoursMaximum = updateForm.estimatedHoursMaximum;
+    }
+    if (
+      updateForm.hourlyRate !== undefined &&
+      updateForm.hourlyRate !== '' &&
+      Number(updateForm.hourlyRate) !== latestQuote.hourlyRate
+    ) {
+      changed.hourlyRate = updateForm.hourlyRate;
+    }
+    if (
+      updateForm.fixedCost !== undefined &&
+      updateForm.fixedCost !== '' &&
+      Number(updateForm.fixedCost) !== latestQuote.fixedCost
+    ) {
+      changed.fixedCost = updateForm.fixedCost;
+    }
+    if (
+      updateForm.quoteEffortLevel !== undefined &&
+      updateForm.quoteEffortLevel !== latestQuote.quoteEffortLevel
+    ) {
+      changed.quoteEffortLevel = updateForm.quoteEffortLevel;
+    }
+    if (
+      updateForm.quoteConfidenceLevel !== undefined &&
+      updateForm.quoteConfidenceLevel !== latestQuote.quoteConfidenceLevel
+    ) {
+      changed.quoteConfidenceLevel = updateForm.quoteConfidenceLevel;
+    }
+
+    return changed;
+  };
+
+  const hasValidChanges = (): boolean => Object.keys(buildUpdatePayload()).length > 0;
+
   const handleUpdateSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    if (!latestQuote || !updateReason.trim()) return;
+    if (!latestQuote || !updateReason.trim() || !hasValidChanges()) return;
+    const payload = buildUpdatePayload();
     void updateQuote
       .execute(ticketId, latestQuote.id, {
-        ...(updateForm.estimatedHoursMinimum !== undefined && {
-          estimatedHoursMinimum: Number(updateForm.estimatedHoursMinimum),
+        ...(payload.estimatedHoursMinimum !== undefined && {
+          estimatedHoursMinimum: Number(payload.estimatedHoursMinimum),
         }),
-        ...(updateForm.estimatedHoursMaximum !== undefined && {
-          estimatedHoursMaximum: Number(updateForm.estimatedHoursMaximum),
+        ...(payload.estimatedHoursMaximum !== undefined && {
+          estimatedHoursMaximum: Number(payload.estimatedHoursMaximum),
         }),
-        ...(updateForm.hourlyRate !== undefined && {
-          hourlyRate: Number(updateForm.hourlyRate),
+        ...(payload.hourlyRate !== undefined && {
+          hourlyRate: Number(payload.hourlyRate),
         }),
-        ...(updateForm.fixedCost !== undefined && {
-          fixedCost: Number(updateForm.fixedCost),
+        ...(payload.fixedCost !== undefined && {
+          fixedCost: Number(payload.fixedCost),
         }),
-        ...(updateForm.quoteEffortLevel !== undefined && {
-          quoteEffortLevel: updateForm.quoteEffortLevel,
+        ...(payload.quoteEffortLevel !== undefined && {
+          quoteEffortLevel: payload.quoteEffortLevel,
         }),
-        ...(updateForm.quoteConfidenceLevel !== undefined && {
-          quoteConfidenceLevel: updateForm.quoteConfidenceLevel,
+        ...(payload.quoteConfidenceLevel !== undefined && {
+          quoteConfidenceLevel: payload.quoteConfidenceLevel,
         }),
         reason: updateReason,
       })
@@ -260,6 +338,21 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
     void submitForApproval.execute(ticketId, latestQuote.id).then(onQuoteMutated);
   };
 
+  const handleApprove = (): void => {
+    if (!latestQuote) return;
+    void approveQuote.execute(ticketId, latestQuote.id, {}).then(onQuoteMutated);
+  };
+
+  const handleRejectSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    if (!latestQuote || !rejectionNotes.trim()) return;
+    void rejectQuote.execute(ticketId, latestQuote.id, { comment: rejectionNotes }).then(() => {
+      setRejectionNotes('');
+      setActivePanel('none');
+      onQuoteMutated();
+    });
+  };
+
   const handleShowRevisions = (): void => {
     if (!latestQuote) return;
     setActivePanel('revisions');
@@ -269,6 +362,11 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
   const handleTogglePanel = (panel: ActivePanel): void => {
     setActivePanel((prev) => (prev === panel ? 'none' : panel));
   };
+
+  // ─── Derived flags ───────────────────────────────────────────────────────────
+
+  const status = latestQuote?.approvalStatus ?? null;
+  const quoteIsEditable = !latestQuote || isEditable(status);
 
   return (
     <section
@@ -288,8 +386,16 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
         </p>
       )}
 
+      {latestQuote?.approvalComment && (
+        <div className="admin-quote-approval-comment" data-testid="approval-comment">
+          <span className="admin-quote-approval-comment-label">Approval Comment</span>
+          <p className="admin-quote-approval-comment-body">{latestQuote.approvalComment}</p>
+        </div>
+      )}
+
       <div className="admin-quote-actions" data-testid="admin-quote-actions">
-        {canCreate && (
+        {/* ── Agent actions: create ── */}
+        {canCreate && quoteIsEditable && (
           <>
             <button
               type="button"
@@ -315,29 +421,34 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
           </>
         )}
 
+        {/* ── Agent actions: update + submit ── */}
         {canUpdate && latestQuote && (
           <>
-            <button
-              type="button"
-              className={`btn btn-sm ${activePanel === 'update' ? 'btn-ghost' : 'btn-secondary'}`}
-              onClick={() => {
-                handleTogglePanel('update');
-              }}
-              data-testid="toggle-update-quote-btn"
-            >
-              {activePanel === 'update' ? 'Cancel' : 'Update Quote'}
-            </button>
+            {quoteIsEditable && (
+              <button
+                type="button"
+                className={`btn btn-sm ${activePanel === 'update' ? 'btn-ghost' : 'btn-secondary'}`}
+                onClick={() => {
+                  handleTogglePanel('update');
+                }}
+                data-testid="toggle-update-quote-btn"
+              >
+                {activePanel === 'update' ? 'Cancel' : 'Update Quote'}
+              </button>
+            )}
 
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={handleSubmitForApproval}
-              disabled={submitForApproval.loading}
-              aria-busy={submitForApproval.loading}
-              data-testid="submit-approval-btn"
-            >
-              {submitForApproval.loading ? 'Submitting...' : 'Submit for Approval'}
-            </button>
+            {isSubmittable(status) && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={handleSubmitForApproval}
+                disabled={submitForApproval.loading}
+                aria-busy={submitForApproval.loading}
+                data-testid="submit-approval-btn"
+              >
+                {submitForApproval.loading ? 'Submitting...' : 'Submit for Approval'}
+              </button>
+            )}
 
             <button
               type="button"
@@ -349,8 +460,40 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
             </button>
           </>
         )}
+
+        {/* ── Manager/Admin actions: approve + reject ── */}
+        {latestQuote && isPending(status) && (
+          <>
+            {canApprove && (
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={handleApprove}
+                disabled={approveQuote.loading}
+                aria-busy={approveQuote.loading}
+                data-testid="approve-quote-btn"
+              >
+                {approveQuote.loading ? 'Approving...' : 'Approve'}
+              </button>
+            )}
+
+            {canReject && (
+              <button
+                type="button"
+                className={`btn btn-sm ${activePanel === 'reject' ? 'btn-ghost' : 'btn-danger'}`}
+                onClick={() => {
+                  handleTogglePanel('reject');
+                }}
+                data-testid="toggle-reject-quote-btn"
+              >
+                {activePanel === 'reject' ? 'Cancel' : 'Reject'}
+              </button>
+            )}
+          </>
+        )}
       </div>
 
+      {/* ── Error feedback ── */}
       {generate.error && (
         <p className="feedback-error" role="alert" data-testid="generate-error">
           {generate.error}
@@ -369,6 +512,16 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
       {submitForApproval.error && (
         <p className="feedback-error" role="alert" data-testid="submit-approval-error">
           {submitForApproval.error}
+        </p>
+      )}
+      {approveQuote.error && (
+        <p className="feedback-error" role="alert" data-testid="approve-quote-error">
+          {approveQuote.error}
+        </p>
+      )}
+      {rejectQuote.error && (
+        <p className="feedback-error" role="alert" data-testid="reject-quote-error">
+          {rejectQuote.error}
         </p>
       )}
 
@@ -421,7 +574,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
 
             <div className="field-group">
               <label className="field-label" htmlFor="mq-rate">
-                Hourly Rate (£)
+                Hourly Rate (GBP)
               </label>
               <input
                 className="field-input"
@@ -440,7 +593,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
 
             <div className="field-group">
               <label className="field-label" htmlFor="mq-fixed-cost">
-                Fixed Cost (£)
+                Fixed Cost (GBP)
               </label>
               <input
                 className="field-input"
@@ -523,7 +676,10 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
           <h3 className="admin-quote-subpanel-heading">
             Update Quote <span className="admin-quote-version">v{latestQuote.version}</span>
           </h3>
-          <p className="admin-quote-subpanel-hint">Only fill in the fields you want to change.</p>
+          <p className="admin-quote-subpanel-hint">
+            Only fill in the fields you want to change. Fields matching the current value will not
+            be submitted.
+          </p>
 
           <div className="admin-quote-form-grid">
             <div className="field-group">
@@ -536,6 +692,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                 name="estimatedHoursMinimum"
                 type="number"
                 min={0}
+                placeholder={String(latestQuote.estimatedHoursMinimum)}
                 value={updateForm.estimatedHoursMinimum ?? ''}
                 onChange={handleUpdateFormChange}
                 disabled={updateQuote.loading}
@@ -553,6 +710,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                 name="estimatedHoursMaximum"
                 type="number"
                 min={0}
+                placeholder={String(latestQuote.estimatedHoursMaximum)}
                 value={updateForm.estimatedHoursMaximum ?? ''}
                 onChange={handleUpdateFormChange}
                 disabled={updateQuote.loading}
@@ -562,7 +720,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
 
             <div className="field-group">
               <label className="field-label" htmlFor="uq-rate">
-                Hourly Rate (£)
+                Hourly Rate (GBP)
               </label>
               <input
                 className="field-input"
@@ -571,6 +729,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                 type="number"
                 min={0}
                 step="0.01"
+                placeholder={String(latestQuote.hourlyRate)}
                 value={updateForm.hourlyRate ?? ''}
                 onChange={handleUpdateFormChange}
                 disabled={updateQuote.loading}
@@ -580,7 +739,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
 
             <div className="field-group">
               <label className="field-label" htmlFor="uq-fixed-cost">
-                Fixed Cost (£)
+                Fixed Cost (GBP)
               </label>
               <input
                 className="field-input"
@@ -589,6 +748,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                 type="number"
                 min={0}
                 step="0.01"
+                placeholder={String(latestQuote.fixedCost)}
                 value={updateForm.fixedCost ?? ''}
                 onChange={handleUpdateFormChange}
                 disabled={updateQuote.loading}
@@ -608,7 +768,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
               onChange={(e) => {
                 setUpdateReason(e.target.value);
               }}
-              placeholder="Required — describe what changed and why"
+              placeholder="Required -- describe what changed and why"
               required
               disabled={updateQuote.loading}
               rows={3}
@@ -620,11 +780,53 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
           <button
             type="submit"
             className="btn btn-primary btn-sm"
-            disabled={updateQuote.loading || !updateReason.trim()}
+            disabled={updateQuote.loading || !updateReason.trim() || !hasValidChanges()}
             aria-busy={updateQuote.loading}
             data-testid="update-quote-submit-btn"
           >
             {updateQuote.loading ? 'Saving...' : 'Save Changes'}
+          </button>
+        </form>
+      )}
+
+      {/* ── Reject quote form ── */}
+      {activePanel === 'reject' && latestQuote && (
+        <form
+          className="admin-quote-subpanel"
+          onSubmit={handleRejectSubmit}
+          aria-label="Reject quote"
+          data-testid="reject-quote-form"
+        >
+          <h3 className="admin-quote-subpanel-heading">Reject Quote</h3>
+
+          <div className="field-group">
+            <label className="field-label" htmlFor="rq-notes">
+              Rejection Reason
+            </label>
+            <textarea
+              className="field-textarea"
+              id="rq-notes"
+              value={rejectionNotes}
+              onChange={(e) => {
+                setRejectionNotes(e.target.value);
+              }}
+              placeholder="Required -- explain why this quote is being rejected"
+              required
+              disabled={rejectQuote.loading}
+              rows={3}
+              aria-required="true"
+              data-testid="rq-notes"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-danger btn-sm"
+            disabled={rejectQuote.loading || !rejectionNotes.trim()}
+            aria-busy={rejectQuote.loading}
+            data-testid="reject-quote-submit-btn"
+          >
+            {rejectQuote.loading ? 'Rejecting...' : 'Confirm Rejection'}
           </button>
         </form>
       )}
@@ -683,7 +885,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
                       {rev.oldValue}
                     </span>
                     <span className="revision-arrow" aria-hidden="true">
-                      →
+                      &rarr;
                     </span>
                     <span className="revision-new" data-testid={`revision-new-${String(rev.id)}`}>
                       {rev.newValue}
