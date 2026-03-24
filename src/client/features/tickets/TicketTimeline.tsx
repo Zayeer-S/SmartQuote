@@ -52,9 +52,7 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
       </h2>
 
       {visibleComments.length === 0 ? (
-        <p className="ticket-timeline-empty" data-testid="timeline-empty">
-          No updates yet.
-        </p>
+        <p className="ticket-timeline-empty" data-testid="timeline-empty"></p>
       ) : (
         <ol className="ticket-timeline-list" data-testid="timeline-list">
           {visibleComments.map((comment) => {

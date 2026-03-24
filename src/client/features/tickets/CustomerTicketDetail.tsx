@@ -4,6 +4,7 @@ import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
 import QuotePanel from './QuotePanel.js';
 import TicketTimeline from './TicketTimeline.js';
+import CommentThread from './CommentThread.js';
 import './CustomerTicketDetail.css';
 
 interface CustomerTicketDetailProps {
@@ -142,6 +143,10 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
       </section>
 
       <TicketTimeline ticketId={ticketId} />
+
+      <section className="ticket-detail-section">
+        <CommentThread ticketId={ticketId} />
+      </section>
     </div>
   );
 };

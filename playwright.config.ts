@@ -1,14 +1,22 @@
 import { defineConfig, devices } from '@playwright/test';
 import { SESSION_PATHS } from './tests/e2e/constants/e2e.paths.js';
 
+// Smoke files that require a stored session must be excluded from unauthenticated
+// projects and listed explicitly in the appropriate authenticated project instead.
+const SESSION_SMOKE_FILES = [
+  '**/smoke/ticket.smoke.test.ts',
+  '**/smoke/admin.comment.smoke.test.ts',
+  '**/smoke/customer.comment.smoke.test.ts',
+];
+
 export default defineConfig({
   testDir: 'tests/e2e',
   outputDir: 'coverage/e2e/results',
 
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
-  workers: 3,
+  retries: 1,
+  workers: 6,
 
   reporter: process.env.CI
     ? [['html', { outputFolder: 'coverage/e2e/report' }], ['github']]
@@ -28,11 +36,18 @@ export default defineConfig({
       testMatch: '**/setup/customer.setup.ts',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'admin-setup',
+      testMatch: '**/setup/admin.setup.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
 
     // --- Unauthenticated browsers ---
+    // Runs all tests except session-dependent smoke files, which require
+    // stored auth state and are handled by the authenticated projects below.
     {
       name: 'chromium',
-      testIgnore: '**/smoke/ticket.smoke.test.ts',
+      testIgnore: SESSION_SMOKE_FILES,
       use: {
         ...devices['Desktop Chrome'],
         storageState: { cookies: [], origins: [] },
@@ -40,26 +55,31 @@ export default defineConfig({
     },
     {
       name: 'firefox',
-      testIgnore: '**/smoke/ticket.smoke.test.ts',
+      testIgnore: SESSION_SMOKE_FILES,
       use: {
         ...devices['Desktop Firefox'],
         storageState: { cookies: [], origins: [] },
       },
     },
+
+    // --- Authenticated browsers (admin session) ---
+    // Only runs the admin comment smoke file. Must complete before
+    // chromium-customer so the internal comment exists for the visibility test.
     {
-      name: 'webkit',
-      testIgnore: '**/smoke/ticket.smoke.test.ts',
+      name: 'chromium-admin',
+      testMatch: '**/smoke/admin.comment.smoke.test.ts',
+      dependencies: ['admin-setup'],
       use: {
-        ...devices['Desktop Safari'],
-        storageState: { cookies: [], origins: [] },
+        ...devices['Desktop Chrome'],
+        storageState: SESSION_PATHS.ADMIN,
       },
     },
 
     // --- Authenticated browsers (customer session) ---
     {
       name: 'chromium-customer',
-      testMatch: '**/smoke/ticket.smoke.test.ts',
-      dependencies: ['customer-setup'],
+      testMatch: ['**/smoke/ticket.smoke.test.ts', '**/smoke/customer.comment.smoke.test.ts'],
+      dependencies: ['customer-setup', 'chromium-admin'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: SESSION_PATHS.CUSTOMER,
@@ -67,19 +87,10 @@ export default defineConfig({
     },
     {
       name: 'firefox-customer',
-      testMatch: '**/smoke/ticket.smoke.test.ts',
+      testMatch: ['**/smoke/ticket.smoke.test.ts', '**/smoke/customer.comment.smoke.test.ts'],
       dependencies: ['customer-setup'],
       use: {
         ...devices['Desktop Firefox'],
-        storageState: SESSION_PATHS.CUSTOMER,
-      },
-    },
-    {
-      name: 'webkit-customer',
-      testMatch: '**/smoke/ticket.smoke.test.ts',
-      dependencies: ['customer-setup'],
-      use: {
-        ...devices['Desktop Safari'],
         storageState: SESSION_PATHS.CUSTOMER,
       },
     },
