@@ -33,4 +33,15 @@ export class TicketAttachmentsDAO extends BaseDAO<TicketAttachment, TicketAttach
     const results = await query;
     return results as TicketAttachment[];
   }
+
+  /**
+   * Delete an attachment record by its storage key.
+   * Used by AttachmentService to clean up DB records when a post-commit
+   * storage upload fails.
+   *
+   * @param storageKey The provider-agnostic storage key
+   */
+  async deleteByStorageKey(storageKey: string): Promise<void> {
+    await this.getQuery().where({ storage_key: storageKey }).delete();
+  }
 }
