@@ -35,7 +35,7 @@ export class TicketContainer {
     rbacService: RBACService,
     orgMembersDAO: OrganizationMembersDAO,
     lookupResolver: LookupResolver,
-    embedder: BertEmbedder
+    embedder: BertEmbedder | null
   ) {
     this.ticketsDAO = new TicketsDAO(db);
     this.ticketCommentsDAO = new TicketCommentsDAO(db);

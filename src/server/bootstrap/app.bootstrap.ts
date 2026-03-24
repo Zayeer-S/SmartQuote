@@ -33,11 +33,18 @@ export async function bootstrapApplication(
   const db = await initializeDatabase();
   const lookupResolver = new LookupResolver(await loadLookupMaps(db));
 
-  console.log('Initializing NLP embedder...');
-  const embedder = new BertEmbedder();
-  const anchors = await new PriorityEngineAnchorsDAO(db).getAll({ includeInactive: true });
-  await embedder.warmAnchors(anchors);
-  console.log(`NLP embedder ready (${String(anchors.length)} anchors warmed).`);
+  let embedder: BertEmbedder | null = null;
+  if (backEnv.AWS_REGION && backEnv.AWS_ACCESS_KEY_ID) {
+    console.log('Initializing NLP embedder...');
+    embedder = new BertEmbedder();
+    const anchors = await new PriorityEngineAnchorsDAO(db).getAll({ includeInactive: true });
+    await embedder.warmAnchors(anchors);
+    console.log(`NLP embedder ready (${String(anchors.length)} anchors warmed).`);
+  } else {
+    console.log(
+      'AWS credentials not present -- NLP embedder skipped, using rule-based scoring only.'
+    );
+  }
 
   const app = express();
 

@@ -28,7 +28,7 @@ type RuleMap = Map<string, Map<string, number>>;
 export class TicketPriorityEngine {
   private rulesDAO: TicketPriorityRulesDAO;
   private thresholdsDAO: TicketPriorityThresholdsDAO;
-  private embedder: BertEmbedder;
+  private embedder: BertEmbedder | null;
   private db: Knex;
 
   constructor(
@@ -117,6 +117,8 @@ export class TicketPriorityEngine {
   }
 
   private async computeNlpSignal(description: string): Promise<number> {
+    if (!this.embedder) return 0;
+
     const anchorEmbeddings = this.embedder.getAnchorEmbeddings();
     if (anchorEmbeddings.size === 0) return 0;
 
