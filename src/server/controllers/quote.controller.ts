@@ -26,6 +26,7 @@ import type {
   QuoteWithApprovalResponse,
 } from '../../shared/contracts/quote-contracts.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
+import { QuoteApprovalStatus } from '../../shared/constants/lookup-values.js';
 
 export class QuoteController {
   private quoteService: QuoteService;
@@ -235,13 +236,7 @@ export class QuoteController {
   private mapQuoteWithApproval(quote: QuoteWithApproval): QuoteWithApprovalResponse {
     return {
       ...this.mapQuote(quote),
-      approvalStatus: this.lookup.quoteApprovalStatusName(
-        quote.approval_status_name
-          ? (this.lookup.quoteApprovalStatusId(
-              quote.approval_status_name as Parameters<typeof this.lookup.quoteApprovalStatusId>[0]
-            ) as unknown as number)
-          : null
-      ),
+      approvalStatus: (quote.approval_status_name as QuoteApprovalStatus | null) ?? null,
       approvalComment: quote.approval_comment,
       approvedAt: quote.approved_at?.toISOString() ?? null,
       approvedByUserId: quote.approved_by_user_id as string | null,
