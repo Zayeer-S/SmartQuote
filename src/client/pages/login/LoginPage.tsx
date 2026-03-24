@@ -12,6 +12,10 @@ const LoginPage: React.FC = () => {
 
   const { login, isLoading, error } = useLogin();
 
+  const onSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+    void handleSubmit(e);
+  };
+
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     await login({ email, password }, rememberMe).catch(() => {
@@ -38,7 +42,7 @@ const LoginPage: React.FC = () => {
         </h1>
         <p className="login-subtitle">Sign in to your account to continue</p>
 
-        <form onSubmit={handleSubmit} noValidate aria-label="Login form" data-testid="login-form">
+        <form onSubmit={onSubmit} noValidate aria-label="Login form" data-testid="login-form">
           <div className="input-group">
             <label htmlFor="email">Email</label>
             <input

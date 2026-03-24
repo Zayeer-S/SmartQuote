@@ -18,15 +18,15 @@ function filterTickets(tickets: TicketDetailResponse[], query: string): TicketDe
   const q = query.trim().toLowerCase();
   if (!q) return tickets;
   return tickets.filter((t) => {
-    const title = (t.title ?? '').toLowerCase();
-    const desc = (t.description ?? '').toLowerCase();
+    const title = t.title.toLowerCase();
+    const desc = t.description.toLowerCase();
     return title.includes(q) || desc.includes(q);
   });
 }
 
-function formatDateGB(value: unknown): string {
+function formatDateGB(value: string): string {
   if (!value) return '—';
-  const d = new Date(String(value));
+  const d = new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
   return d.toLocaleDateString('en-GB');
 }
@@ -52,7 +52,7 @@ const CustomerPage: React.FC = () => {
   // ✅ FIX: accept string ids too
   const onRowClick = useCallback(
     (ticketId: string | number) => {
-      void navigate(`${CLIENT_ROUTES.CUSTOMER_TICKETS}/${ticketId}`);
+      void navigate(`${CLIENT_ROUTES.CUSTOMER_TICKETS}/${ticketId.toString()}`);
     },
     [navigate]
   );
@@ -115,7 +115,9 @@ const CustomerPage: React.FC = () => {
             id="ticket-search"
             className="searchInput"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+            }}
             placeholder="Search tickets..."
             aria-label="Search tickets"
             data-testid="ticket-search-input"
@@ -125,7 +127,9 @@ const CustomerPage: React.FC = () => {
         <button
           className="primaryBtn"
           type="button"
-          onClick={() => void navigate(CLIENT_ROUTES.CUSTOMER_CREATE)}
+          onClick={() => {
+            void navigate(CLIENT_ROUTES.CUSTOMER_CREATE);
+          }}
           data-testid="new-ticket-btn"
         >
           <span className="btnPlus" aria-hidden="true">
@@ -144,7 +148,7 @@ const CustomerPage: React.FC = () => {
 
         {error && !loading && (
           <div className="emptyState" role="alert" data-testid="tickets-error">
-            Failed to load tickets: {String(error)}
+            Failed to load tickets: {error}
           </div>
         )}
 
@@ -171,7 +175,9 @@ const CustomerPage: React.FC = () => {
                 <tr
                   key={ticket.id}
                   data-testid={`ticket-row-${ticket.id}`}
-                  onClick={() => onRowClick(ticket.id)}
+                  onClick={() => {
+                    onRowClick(ticket.id);
+                  }}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -183,7 +189,7 @@ const CustomerPage: React.FC = () => {
                   <td>{ticket.ticketPriorityName}</td>
                   <td>{ticket.ticketStatusName}</td>
                   <td>{formatDateGB(ticket.deadline)}</td>
-                  <td>{ticket.usersImpacted ?? '—'}</td>
+                  <td>{ticket.usersImpacted}</td>
                 </tr>
               ))}
             </tbody>
