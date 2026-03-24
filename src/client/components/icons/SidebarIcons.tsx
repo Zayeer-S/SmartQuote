@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const SidebarIcons = {
   Home: (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -148,6 +146,88 @@ export const SidebarIcons = {
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
+      />
+    </svg>
+  ),
+  // Admin-specific additions below
+  /** Document with corner fold — used for Quotes in admin nav */
+  QuoteDoc: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M7 3h10l3 3v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17 3v4h4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 11h8M8 15h8M8 19h5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  /** Group silhouette — used for Customers in admin nav (distinct from single User) */
+  Users: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3 21a9 9 0 0 1 18 0"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  /** Bar chart — used for Analytics in admin nav */
+  Analytics: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 19V5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M4 19h16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M8 17V11M12 17V7M16 17v-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  /** Cog — used for Settings in admin nav */
+  Settings: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M19.4 15a7.7 7.7 0 0 0 .1-1 7.7 7.7 0 0 0-.1-1l2-1.2-2-3.4-2.2.8c-.5-.4-1.1-.8-1.8-1l-.3-2.3h-4l-.3 2.3c-.7.2-1.3.6-1.8 1l-2.2-.8-2 3.4 2 1.2a7.7 7.7 0 0 0-.1 1c0 .3 0 .7.1 1l-2 1.2 2 3.4 2.2-.8c.5.4 1.1.8 1.8 1l.3 2.3h4l.3-2.3c.7-.2 1.3-.6 1.8-1l2.2.8 2-3.4-2-1.2Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   ),

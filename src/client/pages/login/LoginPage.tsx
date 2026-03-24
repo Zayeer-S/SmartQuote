@@ -25,9 +25,9 @@ const LoginPage: React.FC = () => {
         <span className="brand">Smartquote</span>
         <div className="login-panel-brand-body">
           <p className="login-panel-tagline">
-            Khalid, write something <em>nice here. idk what to</em>
+            SmartQuote: <em>A Faster Quoting System</em>
           </p>
-          <p className="login-panel-meta">© {new Date().getFullYear()} Smartquote</p>
+          <p className="login-panel-meta">© {new Date().getFullYear()} Giacom</p>
         </div>
       </aside>
 
