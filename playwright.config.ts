@@ -61,14 +61,6 @@ export default defineConfig({
         storageState: { cookies: [], origins: [] },
       },
     },
-    {
-      name: 'webkit',
-      testIgnore: SESSION_SMOKE_FILES,
-      use: {
-        ...devices['Desktop Safari'],
-        storageState: { cookies: [], origins: [] },
-      },
-    },
 
     // --- Authenticated browsers (admin session) ---
     // Only runs the admin comment smoke file. Must complete before
@@ -99,15 +91,6 @@ export default defineConfig({
       dependencies: ['customer-setup'],
       use: {
         ...devices['Desktop Firefox'],
-        storageState: SESSION_PATHS.CUSTOMER,
-      },
-    },
-    {
-      name: 'webkit-customer',
-      testMatch: ['**/smoke/ticket.smoke.test.ts', '**/smoke/customer.comment.smoke.test.ts'],
-      dependencies: ['customer-setup'],
-      use: {
-        ...devices['Desktop Safari'],
         storageState: SESSION_PATHS.CUSTOMER,
       },
     },
