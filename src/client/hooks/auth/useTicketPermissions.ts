@@ -1,5 +1,5 @@
 import { PERMISSIONS } from '../../../shared/constants';
-import { useAuth } from './useAuth';
+import { useAuth } from '../contexts/useAuth';
 
 /**
  * Hook that provides ticket management permissions

@@ -3,7 +3,7 @@ import type { LoginRequest } from '../../shared/contracts/auth-contracts';
 import { useState } from 'react';
 import { authAPI } from '../lib/api/auth.api';
 import { tokenStorage } from '../lib/storage/tokenStorage';
-import { useAuth } from './auth/useAuth';
+import { useAuth } from './contexts/useAuth';
 import { AUTH_ROLES } from '../../shared/constants';
 import { CLIENT_ROUTES } from '../constants/client.routes';
 
@@ -31,8 +31,8 @@ export function useLogin(): UseLoginReturn {
 
       const destination =
         response.user.role.name === AUTH_ROLES.CUSTOMER
-          ? CLIENT_ROUTES.CUSTOMER
-          : CLIENT_ROUTES.ADMIN;
+          ? CLIENT_ROUTES.CUSTOMER.ROOT
+          : CLIENT_ROUTES.ADMIN.ROOT;
 
       await navigate(destination, { replace: true });
     } catch (err) {

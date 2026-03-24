@@ -17,19 +17,15 @@ smartquote/
 │   ├── client/
 │   │   ├── main.tsx
 │   │   ├── components/                             # Pure reusable UI elements; must not know about APIs, auths, or domain concepts
-│   │   │   ├── ProtectedRoute.tsx
-│   │   │   ├── icons/
-│   │   │   │   ├── CustomerIcons.tsx
-│   │   │   │   ├── LoginIcons.tsx
-│   │   │   │   ├── SidebarIcons.tsx
-│   │   │   ├── layout/
-│   │   │   │   ├── CustomerSidebar.tsx
+│   │   │   ├── auth/
+│   │   │   │   └── LoginIcons.tsx
+│   │   │   └── ProtectedRoute.tsx
 │   │   ├── config/                                 # Environment and config values only; no runtime logic
 │   │   │   ├── index.ts
 │   │   │   ├── env.frontend.ts
 │   │   ├── constants/
 │   │   │   ├── index.ts
-│   │   │   ├── client.routes.ts
+│   │   │   └── client.routes.ts
 │   │   ├── context/
 │   │   │   ├── auth/
 │   │   │   │   ├── auth.context.types.ts
@@ -38,21 +34,57 @@ smartquote/
 │   │   │   │   ├── sidebar.context.types.ts
 │   │   │   │   └── SidebarContext.ts
 │   │   │   └── theme/
+│   │   │       ├── index.ts
 │   │   │       ├── theme.context.types.ts
 │   │   │       └── ThemeContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
-│   │   │   ├── customerDashboard/
-│   │   │   │   ├── customerDashboard.constants.ts
-│   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules.
+│   │   │   ├── dashboard/
+│   │   │   │   ├── StatsOverview.css
+│   │   │   │   ├── StatsOverview.tsx
+│   │   │   │   └── TicketStatusChart.tsx
+│   │   │   └── tickets/
+│   │   │       ├── AdminQuotePanel.css
+│   │   │       ├── AdminQuotePanel.tsx
+│   │   │       ├── AdminTicketCard.css
+│   │   │       ├── AdminTicketCard.tsx
+│   │   │       ├── AdminTicketDetail.css
+│   │   │       ├── AdminTicketDetail.tsx
+│   │   │       ├── AdminTicketList.css
+│   │   │       ├── AdminTicketList.tsx
+│   │   │       ├── AdminTicketForm.css
+│   │   │       ├── AdminTicketForm.tsx
+│   │   │       ├── CommentThread.css
+│   │   │       ├── CommentThread.tsx
+│   │   │       ├── CustomerTicketCard.css
+│   │   │       ├── CustomerTicketCard.tsx
+│   │   │       ├── CustomerTicketDetail.css
+│   │   │       ├── CustomerTicketDetail.tsx
+│   │   │       ├── QuoteActions.css
+│   │   │       ├── QuoteActions.tsx
+│   │   │       ├── QuotePanel.css
+│   │   │       ├── QuotePanel.tsx
+│   │   │       ├── SubmitTicketForm.css
+│   │   │       ├── SubmitTicketForm.tsx
+│   │   │       ├── TicketFilters.css
+│   │   │       ├── TicketFilters.tsx
+│   │   │       ├── TicketList.css
+│   │   │       ├── TicketList.tsx
+│   │   │       ├── TicketPagination.css
+│   │   │       ├── TicketPagination.tsx
+│   │   │       ├── TicketTimeline.css
+│   │   │       └── TicketTimeline.tsx
+│   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules. All context hooks
 │   │   │   ├── useLogin.ts
-│   │   │   ├── useSidebar.ts                       # Context hook
-│   │   │   ├── useTheme.ts                         # Context hook
+│   │   │   ├── useTicketFilters.ts
 │   │   │   ├── auth/
-│   │   │   │   ├── useAuth.ts                      # Context hook
 │   │   │   │   ├── useQuotePermissions.ts
 │   │   │   │   ├── useTicketPermissions.ts
 │   │   │   │   └── useUserPermissions.ts
-│   │   │   ├── quotes/
+│   │   │   ├── context/                            # All context hook
+│   │   │   │   ├── useAuth.ts
+│   │   │   │   ├── useSidebar.ts
+│   │   │   │   └── useTheme.ts
+│   │   │   ├── quotes/ 
 │   │   │   │   ├── useApproveQuote.ts
 │   │   │   │   ├── useCreateManualQuote.ts
 │   │   │   │   ├── useGenerateQuote.ts
@@ -83,20 +115,38 @@ smartquote/
 │   │   │   │   ├── keys.ts
 │   │   │   │   └── tokenStorage.ts
 │   │   │   └── utils/                              # Generic helpers only; if it knows about e.g. tickets, it doesn't belong here
+│   │   │       └── badge-utils.ts                  # Make lookup maps for XTicketCard and XTicketDetail files
 │   │   ├── pages/                                  # Route level composition (no logic, only assemble features)
 │   │   │   ├── admin/
-│   │   │   │   ├── AdminDashboard.css
-│   │   │   │   └── AdminDashboard.tsx
+│   │   │   │   ├── AdminAnalyticsPage.css
+│   │   │   │   ├── AdminAnalyticsPage.tsx
+│   │   │   │   ├── AdminLayout.css
+│   │   │   │   ├── AdminLayout.tsx
+│   │   │   │   ├── AdminQuoteDetailPage.css
+│   │   │   │   ├── AdminQuoteDetailPage.tsx
+│   │   │   │   ├── AdminQuotesPage.css
+│   │   │   │   ├── AdminQuotesPage.tsx
+│   │   │   │   ├── AdminSettingsPage.css
+│   │   │   │   ├── AdminSettingsPage.tsx
+│   │   │   │   ├── AdminSLAPoliciesPage.css
+│   │   │   │   ├── AdminSLAPoliciesPage.tsx
+│   │   │   │   ├── AdminTicketDetailPage.css
+│   │   │   │   ├── AdminTicketDetailPage.tsx
+│   │   │   │   ├── AdminTicketsPage.css
+│   │   │   │   └── AdminTicketsPage.tsx
 │   │   │   ├── customer/
-│   │   │   │   ├── CreateTicketPage.css
-│   │   │   │   ├── CreateTicketPage.tsx
+│   │   │   │   ├── CustomerLayout.css
 │   │   │   │   ├── CustomerLayout.tsx
-│   │   │   │   ├── CustomerPage.css
-│   │   │   │   ├── CustomerPage.tsx
-│   │   │   │   ├── CustomerSidebar.css
-│   │   │   │   └── CustomerSidebar.tsx
+│   │   │   │   ├── CustomerSettingsPage.css
+│   │   │   │   ├── CustomerSettingsPage.tsx
+│   │   │   │   ├── DashboardPage.css
+│   │   │   │   ├── DashboardPage.tsx
+│   │   │   │   ├── NewTicketPage.tsx
+│   │   │   │   ├── TicketDetailPage.tsx
+│   │   │   │   └── TicketsPage.tsx
 │   │   │   └── login/
-│   │   │       ├── Icons.tsx
+│   │   │       ├── CantAccessPage.css
+│   │   │       ├── CantAccessPage.tsx
 │   │   │       ├── LoginPage.css
 │   │   │       └── LoginPage.tsx
 │   │   └── styles/                                 # Global styling and design tokens only; no component-specific styling

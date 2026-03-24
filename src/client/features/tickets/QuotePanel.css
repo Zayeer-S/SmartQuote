@@ -1,0 +1,65 @@
+.quote-panel {
+  padding: var(--spacing-lg);
+}
+
+.quote-panel-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.quote-panel-dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md) var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.quote-panel-dl > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quote-panel-dl dt {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+.quote-panel-dl dd {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.quote-panel-dl dd.quote-panel-dd-sm {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+[data-theme='dark'] .quote-panel-dl dt {
+  color: var(--color-gray-500);
+}
+
+[data-theme='dark'] .quote-panel-dl dd {
+  color: var(--color-gray-50);
+}
+
+[data-theme='dark'] .quote-panel-dl {
+  border-bottom-color: var(--color-gray-700);
+}
+
+@media (max-width: 540px) {
+  .quote-panel-dl {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

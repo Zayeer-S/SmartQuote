@@ -1,0 +1,122 @@
+.settings-page {
+  max-width: 560px;
+}
+
+.settings-page > h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--spacing-xl);
+}
+
+.settings-section {
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.settings-section h2 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border-primary);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-sm) 0;
+}
+
+.settings-row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-row-label-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.settings-row-label-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.theme-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-sans);
+}
+
+.theme-toggle-track {
+  width: 44px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-gray-200);
+  position: relative;
+  transition: background-color var(--transition-base);
+  flex-shrink: 0;
+}
+
+.theme-toggle-track--on {
+  background-color: var(--color-primary-600);
+}
+
+.theme-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background-color: white;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base);
+}
+
+.theme-toggle-thumb--on {
+  transform: translateX(20px);
+}
+
+.theme-toggle-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  min-width: 32px;
+}
+
+.settings-stub-notice {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  margin: 0;
+}
+
+[data-theme='dark'] .settings-section h2 {
+  color: var(--color-gray-200);
+  border-bottom-color: var(--color-gray-700);
+}
+
+[data-theme='dark'] .settings-row-label-title {
+  color: var(--color-gray-100);
+}
+
+[data-theme='dark'] .theme-toggle-track {
+  background-color: var(--color-gray-700);
+}
+
+[data-theme='dark'] .theme-toggle-track--on {
+  background-color: var(--color-primary-500);
+}

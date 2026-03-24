@@ -25,20 +25,31 @@ const LoginPage: React.FC = () => {
 
   return (
     <main className="login-container" data-testid="login-page">
+      {/* ── Left brand panel ── */}
       <aside className="login-panel-brand" aria-hidden="true">
-        <span className="brand">Smartquote</span>
+        <span className="brand">
+          GIACOM<span className="brand-dot">.</span>
+        </span>
         <div className="login-panel-brand-body">
           <p className="login-panel-tagline">
-            SmartQuote: <em>A Faster Quoting System</em>
+            Smarter quoting.
+            <br />
+            <em>Faster results.</em>
           </p>
           <p className="login-panel-meta">© {new Date().getFullYear()} Giacom</p>
         </div>
       </aside>
 
-      {/* ── Middle panel ── */}
+      {/* ── Middle login card ── */}
       <section className="login-card" aria-labelledby="login-heading">
+        <div className="login-card-logo">
+          <span className="login-card-brand">
+            GIACOM<span className="login-card-brand-dot">.</span>
+          </span>
+        </div>
+
         <h1 id="login-heading" className="login-title">
-          Welcome
+          Welcome back
         </h1>
         <p className="login-subtitle">Sign in to your account to continue</p>
 
@@ -140,7 +151,7 @@ const LoginPage: React.FC = () => {
         </form>
       </section>
 
-      {/* ── Right panel — empty breathing room ── */}
+      {/* ── Right panel — decorative ── */}
       <div className="login-panel-right" aria-hidden="true" />
     </main>
   );
