@@ -10,6 +10,8 @@ import { ThemeProvider } from './context/theme';
 import NotFoundPage from './pages/NotFoundPage';
 import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
 import AdminLayout from './pages/admin/AdminLayout';
+import AdminOrganizationMembersPage from './pages/admin/AdminOrganizationMembersPage';
+import AdminOrganizationsPage from './pages/admin/AdminOrganizationsPage';
 import AdminQuoteDetailPage from './pages/admin/AdminQuoteDetailPage';
 import AdminQuotesPage from './pages/admin/AdminQuotesPage';
 import AdminSLAPoliciesPage from './pages/admin/AdminSLAPoliciesPage';
@@ -17,6 +19,7 @@ import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 import AdminTicketDetailPage from './pages/admin/AdminTicketDetailPage';
 import AdminTicketsPage from './pages/admin/AdminTicketsPage';
 import CustomerSettingsPage from './pages/customer/CustomerSettingsPage';
+import CustomerOrganizationMembersPage from './pages/customer/CustomerOrganizationMembersPage';
 import CustomerLayout from './pages/customer/CustomerLayout';
 import DashboardPage from './pages/customer/DashboardPage';
 import NewTicketPage from './pages/customer/NewTicketPage';
@@ -63,6 +66,14 @@ createRoot(document.getElementById('root')!).render(
                     <Route path={CLIENT_ROUTES.ADMIN.QUOTE()} element={<AdminQuoteDetailPage />} />
                     <Route path={CLIENT_ROUTES.ADMIN.ANALYTICS} element={<AdminAnalyticsPage />} />
                     <Route
+                      path={CLIENT_ROUTES.ADMIN.ORGANIZATION_MEMBERS}
+                      element={<AdminOrganizationMembersPage />}
+                    />
+                    <Route
+                      path={CLIENT_ROUTES.ADMIN.ORGANIZATIONS}
+                      element={<AdminOrganizationsPage />}
+                    />
+                    <Route
                       path={CLIENT_ROUTES.ADMIN.SLA_POLICIES}
                       element={<AdminSLAPoliciesPage />}
                     />
@@ -77,6 +88,10 @@ createRoot(document.getElementById('root')!).render(
                     <Route path={CLIENT_ROUTES.CUSTOMER.TICKET()} element={<TicketDetailPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.NEW_TICKET} element={<NewTicketPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.QUOTES} element={<QuotesPage />} />
+                    <Route
+                      path={CLIENT_ROUTES.CUSTOMER.ORGANIZATION_MEMBERS}
+                      element={<CustomerOrganizationMembersPage />}
+                    />
                     <Route
                       path={CLIENT_ROUTES.CUSTOMER.SETTINGS}
                       element={<CustomerSettingsPage />}

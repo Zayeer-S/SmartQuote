@@ -61,6 +61,28 @@ const AdminLayout: React.FC = () => {
               className={({ isActive }) =>
                 `admin-nav-link${isActive ? ' admin-nav-link--active' : ''}`
               }
+              to={CLIENT_ROUTES.ADMIN.ORGANIZATION_MEMBERS}
+              data-testid="nav-organisation-members"
+            >
+              Organisation Members
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              className={({ isActive }) =>
+                `admin-nav-link${isActive ? ' admin-nav-link--active' : ''}`
+              }
+              to={CLIENT_ROUTES.ADMIN.ORGANIZATIONS}
+              data-testid="nav-organisations"
+            >
+              Organisations
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              className={({ isActive }) =>
+                `admin-nav-link${isActive ? ' admin-nav-link--active' : ''}`
+              }
               to={CLIENT_ROUTES.ADMIN.SLA_POLICIES}
               data-testid="nav-sla-policies"
             >

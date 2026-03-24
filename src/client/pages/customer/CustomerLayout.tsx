@@ -90,6 +90,28 @@ const IconSettings = () => (
   </svg>
 );
 
+const IconOrganisation = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 21h18" />
+    <path d="M5 21V7l7-4 7 4v14" />
+    <path d="M9 9h.01" />
+    <path d="M9 13h.01" />
+    <path d="M9 17h.01" />
+    <path d="M15 9h.01" />
+    <path d="M15 13h.01" />
+    <path d="M15 17h.01" />
+  </svg>
+);
+
 const IconSignOut = () => (
   <svg
     width="14"
@@ -192,6 +214,20 @@ const CustomerLayout: React.FC = () => {
           </li>
           <li>
             <NavLink
+              to={CLIENT_ROUTES.CUSTOMER.ORGANIZATION_MEMBERS}
+              className={({ isActive }) =>
+                ['customer-sidebar-link', isActive ? 'active' : ''].filter(Boolean).join(' ')
+              }
+              data-testid="nav-organisation"
+            >
+              <span className="nav-icon">
+                <IconOrganisation />
+              </span>
+              Organisation
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
               to={CLIENT_ROUTES.CUSTOMER.SETTINGS}
               className={({ isActive }) =>
                 ['customer-sidebar-link', isActive ? 'active' : ''].filter(Boolean).join(' ')
@@ -210,9 +246,7 @@ const CustomerLayout: React.FC = () => {
         <div className="customer-sidebar-footer">
           {user && (
             <div className="customer-sidebar-user" data-testid="sidebar-user">
-              <div className="customer-sidebar-avatar">
-                {user.firstName[0].toUpperCase()}
-              </div>
+              <div className="customer-sidebar-avatar">{user.firstName[0].toUpperCase()}</div>
               <div className="customer-sidebar-user-info">
                 <span className="customer-sidebar-user-name">{fullName}</span>
                 <span className="customer-sidebar-user-role">{user.role.name}</span>
