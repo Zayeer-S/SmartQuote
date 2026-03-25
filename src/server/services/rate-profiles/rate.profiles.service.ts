@@ -288,7 +288,7 @@ export class RateProfileService {
     });
 
     const conflict = existing.find((profile) => {
-      if (excludeId !== null && profile.id === excludeId) return false;
+      if (excludeId !== null && String(profile.id) === String(excludeId)) return false;
 
       const sameCombo =
         (profile.ticket_type_id as unknown as number) === ticketTypeId &&

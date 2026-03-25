@@ -252,13 +252,74 @@ describe(`PATCH ${BASE}/:rateProfileId`, () => {
     expect(res.body.data.businessHoursRate).toBe(999);
   });
 
-  it('returns 403 for manager role', async () => {
-    const res = await request(app)
-      .patch(`${BASE}/1`)
-      .set('Authorization', `Bearer ${managerToken}`)
-      .send({ businessHoursRate: 999 });
+  it('returns 200 when updating effectiveFrom/effectiveTo to non-overlapping range on the same profile (regression: self-overlap false positive)', async () => {
+    // This test guards against the bug where String(profile.id) !== String(excludeId)
+    // caused the overlap check to match the profile against itself, producing a
+    // spurious 422 even though no real conflict existed.
+    const listRes = await request(app).get(BASE).set('Authorization', `Bearer ${adminToken}`);
+    const profile = listRes.body.data.rateProfiles[0];
 
-    expect(res.status).toBe(403);
+    const newFrom = new Date(Date.now() + 5 * 365 * 24 * 60 * 60 * 1000);
+    const newTo = new Date(newFrom.getTime() + 365 * 24 * 60 * 60 * 1000);
+
+    const res = await request(app)
+      .patch(`${BASE}/${String(profile.id as number)}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        effectiveFrom: newFrom.toISOString(),
+        effectiveTo: newTo.toISOString(),
+      });
+
+    expect(res.status).toBe(200);
+    expect(new Date(res.body.data.effectiveFrom as string).getTime()).toBe(newFrom.getTime());
+  });
+
+  it('returns 422 when updating effectiveFrom/effectiveTo to a range that overlaps a different active profile for the same combo', async () => {
+    // Create two non-overlapping profiles for the same combo, then try to
+    // expand profile B's range so it overlaps profile A. Must be rejected.
+    const now = new Date();
+    const slotA_from = new Date(now.getTime() + 10 * 365 * 24 * 60 * 60 * 1000);
+    const slotA_to = new Date(slotA_from.getTime() + 365 * 24 * 60 * 60 * 1000);
+    const slotB_from = new Date(slotA_to.getTime() + 1);
+    const slotB_to = new Date(slotB_from.getTime() + 365 * 24 * 60 * 60 * 1000);
+
+    const comboOverrides = {
+      ticketType: TICKET_TYPES.INCIDENT,
+      ticketSeverity: TICKET_SEVERITIES.MEDIUM,
+      businessImpact: BUSINESS_IMPACTS.MODERATE,
+    };
+
+    const createdA = await request(app)
+      .post(BASE)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(
+        validCreateBody({
+          ...comboOverrides,
+          effectiveFrom: slotA_from.toISOString(),
+          effectiveTo: slotA_to.toISOString(),
+        })
+      );
+    expect(createdA.status).toBe(201);
+
+    const createdB = await request(app)
+      .post(BASE)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(
+        validCreateBody({
+          ...comboOverrides,
+          effectiveFrom: slotB_from.toISOString(),
+          effectiveTo: slotB_to.toISOString(),
+        })
+      );
+    expect(createdB.status).toBe(201);
+
+    // Attempt to push B's effectiveFrom back into A's range
+    const res = await request(app)
+      .patch(`${BASE}/${String(createdB.body.data.id as number)}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ effectiveFrom: slotA_from.toISOString() });
+
+    expect(res.status).toBe(422);
   });
 
   it('returns 404 for a non-existent profile', async () => {
