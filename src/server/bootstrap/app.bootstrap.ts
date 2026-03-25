@@ -128,7 +128,11 @@ export async function bootstrapApplication(
     adminContainer.rbacService,
     authContainer.orgMembersDAO
   );
-  const rateProfileContainer = new RateProfileContainer(db, adminContainer.rbacService);
+  const rateProfileContainer = new RateProfileContainer(
+    db,
+    adminContainer.rbacService,
+    lookupResolver
+  );
   const analyticsContainer = new AnalyticsContainer(db, adminContainer.rbacService);
 
   console.log('Registering routes...');
