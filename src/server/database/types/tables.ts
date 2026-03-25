@@ -164,11 +164,11 @@ export interface QuoteWithApproval extends Quote {
 
 export interface RateProfile extends BaseAuditRows, ActivatableRow {
   id: RateProfileId;
-  name: string;
   ticket_type_id: TicketTypeId;
   ticket_severity_id: TicketSeverityId;
   business_impact_id: BusinessImpactId;
-  base_hourly_rate: Decimal;
+  business_hours_rate: Decimal;
+  after_hours_rate: Decimal;
   multiplier: Decimal;
   effective_from: Date;
   effective_to: Date;

@@ -209,14 +209,22 @@ export class QuoteController {
     return {
       id: quote.id as string,
       ticketId: quote.ticket_id as string,
-      version: quote.version,
-      estimatedHoursMinimum: quote.estimated_hours_minimum,
-      estimatedHoursMaximum: quote.estimated_hours_maximum,
-      estimatedResolutionTime: quote.estimated_resolution_time,
-      hourlyRate: quote.hourly_rate,
-      estimatedCost: quote.estimated_cost,
-      fixedCost: quote.fixed_cost,
-      finalCost: quote.final_cost,
+      // Coerce types with Number() over assertion due to pg driver not casting to numbers
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      version: Number(quote.version),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      estimatedHoursMinimum: Number(quote.estimated_hours_minimum),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      estimatedHoursMaximum: Number(quote.estimated_hours_maximum),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      estimatedResolutionTime: Number(quote.estimated_resolution_time),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      hourlyRate: Number(quote.hourly_rate),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      estimatedCost: Number(quote.estimated_cost),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      fixedCost: Number(quote.fixed_cost),
+      finalCost: Number(quote.final_cost),
       quoteConfidenceLevel: this.lookup.quoteConfidenceLevelName(
         quote.quote_confidence_level_id as unknown as number | null
       ),

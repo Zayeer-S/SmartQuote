@@ -219,6 +219,11 @@ export const TICKET_DEADLINE_PROXIMITY_HOURS = {
 export type DeadlineProximityBucket =
   (typeof TICKET_DEADLINE_PROXIMITY_BUCKETS)[keyof typeof TICKET_DEADLINE_PROXIMITY_BUCKETS];
 
+export const BUSINESS_HOURS = {
+  START_HOUR: 9, // 09:00 inclusive
+  END_HOUR: 17, // 17:00 exclusive
+} as const;
+
 export const ALL_ROLES = Object.values(AUTH_ROLES);
 export const ALL_ORG_ROLES = Object.values(ORG_ROLES);
 export const ALL_PERMISSIONS = Object.values(PERMISSIONS);

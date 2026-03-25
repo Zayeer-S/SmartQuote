@@ -15,12 +15,15 @@ import { createTicketRoutes } from '../routes/ticket.routes.js';
 import { QuoteContainer } from '../containers/quote.container.js';
 import { OrgContainer } from '../containers/org.container.js';
 import { createOrgRoutes } from '../routes/org.routes.js';
+import { RateProfileContainer } from '../containers/rate.profiles.container.js';
+import { createRateProfileRoutes } from '../routes/rate.profiles.routes.js';
 import { LookupResolver } from '../lib/lookup-resolver.js';
 import { loadLookupMaps } from '../lib/lookup-maps.js';
 import { BertEmbedder } from '../lib/nlp/bert-embedder.js';
 import { PriorityEngineAnchorsDAO } from '../daos/children/ticket.priority.dao.js';
 import { AnalyticsContainer } from '../containers/analytics.container.js';
 import { createAnalyticsRoutes } from '../routes/analytics.routes.js';
+import { RATE_PROFILE_ENDPOINTS } from '../../shared/constants/endpoints.js';
 
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
@@ -125,6 +128,11 @@ export async function bootstrapApplication(
     adminContainer.rbacService,
     authContainer.orgMembersDAO
   );
+  const rateProfileContainer = new RateProfileContainer(
+    db,
+    adminContainer.rbacService,
+    lookupResolver
+  );
   const analyticsContainer = new AnalyticsContainer(db, adminContainer.rbacService);
 
   console.log('Registering routes...');
@@ -147,7 +155,10 @@ export async function bootstrapApplication(
     )
   );
   app.use('/api/orgs', createOrgRoutes(orgContainer.orgController, authContainer.authService));
-
+  app.use(
+    `/api${RATE_PROFILE_ENDPOINTS.BASE}`,
+    createRateProfileRoutes(rateProfileContainer.rateProfileController, authContainer.authService)
+  );
   app.use(
     '/api/analytics',
     createAnalyticsRoutes(

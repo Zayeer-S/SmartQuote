@@ -166,7 +166,9 @@ smartquote/
 │   │   │   │   ├── AdminTicketDetailPage.css
 │   │   │   │   ├── AdminTicketDetailPage.tsx
 │   │   │   │   ├── AdminTicketsPage.css
-│   │   │   │   └── AdminTicketsPage.tsx
+│   │   │   │   ├── AdminTicketsPage.tsx
+│   │   │   │   ├── RateProfileModal.css
+│   │   │   │   └── RateProfileModal.tsx
 │   │   │   ├── customer/
 │   │   │   │   ├── CustomerLayout.css
 │   │   │   │   ├── CustomerLayout.tsx
@@ -214,6 +216,7 @@ smartquote/
 │   │   │   ├── auth.controller.ts
 │   │   │   ├── org.controller.ts
 │   │   │   ├── quote.controller.ts
+│   │   │   ├── rate.profiles.controller.ts
 │   │   │   └── ticket.controller.ts
 │   │   ├── daos/                                   # Database persistence/access only - no validation, permissions, or workflow rules
 │   │   │   ├── base/
@@ -279,6 +282,7 @@ smartquote/
 │   │   │   ├── analytics.routes.ts
 │   │   │   ├── auth.routes.ts
 │   │   │   ├── org.routes.ts
+│   │   │   ├── rate.profiles.routes.ts
 │   │   │   └── ticket.routes.ts
 │   │   ├── services/                               # All business rules/workflows here; nothing else enforces domain behaviour. No HTTP here.
 │   │   │   ├── analytics/
@@ -320,9 +324,11 @@ smartquote/
 │   │   │       ├── ticket.priority.engine.types.ts
 │   │   │       └── ticket.service.types.ts
 │   │   └── validators/                             # Input shape validation only; must not access database or services.
+│   │       ├── analytics.validator.ts
 │   │       ├── auth.validator.ts
 │   │       ├── org.validator.ts
 │   │       ├── quote.validator.ts
+│   │       ├── rate.profile.validator.ts
 │   │       ├── ticket.validator.ts
 │   │       ├── user.validator.ts
 │   │       └── validation-utils.ts

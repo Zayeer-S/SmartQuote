@@ -53,6 +53,15 @@ export const QUOTE_ENDPOINTS = {
     `/${ticketId}/quotes/${quoteId}/revisions`,
 } as const;
 
+export const RATE_PROFILE_ENDPOINTS = {
+  BASE: '/rate-profiles',
+  LIST: '/',
+  CREATE: '/',
+  GET: (rateProfileId = ':rateProfileId') => `/${rateProfileId}`,
+  UPDATE: (rateProfileId = ':rateProfileId') => `/${rateProfileId}`,
+  DELETE: (rateProfileId = ':rateProfileId') => `/${rateProfileId}`,
+} as const;
+
 export const ANALYTICS_ENDPOINTS = {
   BASE: '/analytics',
   RESOLUTION_TIME: '/resolution-time',
