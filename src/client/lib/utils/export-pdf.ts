@@ -1,25 +1,16 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: Record<string, unknown>) => jsPDF;
-  }
-}
+const typeSafeAutoTable = autoTable as unknown as (
+  doc: jsPDF,
+  options: Record<string, unknown>
+) => void;
 
 export interface PdfSection {
   title: string;
   rows: Record<string, unknown>[];
 }
 
-/**
- * Generates a multi-section PDF analytics report and triggers a download.
- *
- * @param sections Array of titled data sections to include
- * @param reportTitle Title printed at the top of the PDF
- * @param filename Filename without extension
- * @param dateRange Human-readable date range string shown in the subtitle
- */
 export function exportToPdf(
   sections: PdfSection[],
   reportTitle: string,
@@ -27,10 +18,8 @@ export function exportToPdf(
   dateRange: string
 ): void {
   const doc = new jsPDF({ orientation: 'landscape' });
-
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // Header
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.text(reportTitle, pageWidth / 2, 18, { align: 'center' });
@@ -59,20 +48,17 @@ export function exportToPdf(
       })
     );
 
-    doc.autoTable({
+    typeSafeAutoTable(doc, {
       startY: yOffset,
       head: [headers],
       body: tableRows,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [30, 30, 30] },
       margin: { left: 14, right: 14 },
-      didDrawPage: (data: { cursor: { y: number } }) => {
-        yOffset = data.cursor.y + 10;
-      },
     });
 
-    const lastTable = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable;
-    yOffset = lastTable.finalY + 10;
+    const docWithTable = doc as unknown as { lastAutoTable: { finalY: number } };
+    yOffset = docWithTable.lastAutoTable.finalY + 10;
   }
 
   doc.save(`${filename}.pdf`);
