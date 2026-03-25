@@ -16,6 +16,7 @@ import type {
   ListTicketsResponse,
   TicketDetailResponse,
   TicketResponse,
+  TicketSummaryResponse,
 } from '../../shared/contracts/ticket-contracts.js';
 import type { UserId, TicketId } from '../database/types/ids.js';
 import type {
@@ -118,7 +119,7 @@ export class TicketController {
       );
 
       const response: ListTicketsResponse = {
-        tickets: tickets.map((t) => this.mapTicket(t)),
+        tickets: tickets.map((t) => this.mapTicketSummary(t)),
       };
       success(res, response, 200);
     } catch (err: unknown) {
@@ -261,6 +262,13 @@ export class TicketController {
       usersImpacted: ticket.users_impacted,
       createdAt: ticket.created_at.toISOString(),
       updatedAt: ticket.updated_at.toISOString(),
+    };
+  }
+
+  private mapTicketSummary(ticket: TicketWithDetails): TicketSummaryResponse {
+    return {
+      ...this.mapTicket(ticket),
+      organizationName: ticket.organization_name,
     };
   }
 

@@ -9,7 +9,7 @@ import {
   TICKET_STATUSES,
 } from '../../../shared/constants/lookup-values.js';
 import type { QuoteApprovalStatus } from '../../../shared/constants/lookup-values.js';
-import type { TicketDetailResponse } from '../../../shared/contracts/ticket-contracts.js';
+import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
 import type { QuoteResponse } from '../../../shared/contracts/quote-contracts.js';
 import './AdminQuotesPage.css';
 
@@ -25,7 +25,7 @@ const TICKETS_WITH_ACTIVE_QUOTES = [
 ];
 
 interface TicketQuoteRowProps {
-  ticket: TicketDetailResponse;
+  ticket: TicketSummaryResponse;
 }
 
 const TicketQuoteRow: React.FC<TicketQuoteRowProps> = ({ ticket }) => {

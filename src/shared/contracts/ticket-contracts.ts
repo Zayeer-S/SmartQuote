@@ -59,6 +59,10 @@ export interface TicketResponse {
   updatedAt: string;
 }
 
+export interface TicketSummaryResponse extends TicketResponse {
+  organizationName: string;
+}
+
 export interface AttachmentResponse {
   id: string;
   ticketId: string;
@@ -77,7 +81,7 @@ export interface TicketDetailResponse extends TicketResponse {
 }
 
 export interface ListTicketsResponse {
-  tickets: TicketResponse[];
+  tickets: TicketSummaryResponse[];
 }
 
 export interface AddCommentRequest {

@@ -2,11 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
-import type { TicketDetailResponse } from '../../../shared/contracts/ticket-contracts.js';
+import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
 import './AdminTicketCard.css';
 
 interface AdminTicketCardProps {
-  ticket: TicketDetailResponse;
+  ticket: TicketSummaryResponse;
 }
 
 const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
