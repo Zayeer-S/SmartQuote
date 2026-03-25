@@ -5,9 +5,11 @@ import { STORAGE_ERROR_MSGS, StorageError } from './storage.errors.js';
 
 export interface S3StorageConfig {
   region: string;
-  accessKeyId: string;
-  secretAccessKey: string;
   bucket: string;
+  /** Omit in Lambda - the execution role is used via the credential provider chain. */
+  accessKeyId?: string;
+  /** Omit in Lambda - the execution role is used via the credential provider chain. */
+  secretAccessKey?: string;
 }
 
 /**
@@ -24,10 +26,17 @@ export class S3StorageService implements StorageService {
     this.bucket = config.bucket;
     this.client = new S3Client({
       region: config.region,
-      credentials: {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-      },
+      // Only pass explicit credentials when both keys are present.
+      // Omitting this block lets the SDK fall back to the credential provider
+      // chain (execution role in Lambda, env vars or ~/.aws locally).
+      ...(config.accessKeyId && config.secretAccessKey
+        ? {
+            credentials: {
+              accessKeyId: config.accessKeyId,
+              secretAccessKey: config.secretAccessKey,
+            },
+          }
+        : {}),
     });
   }
 

@@ -53,11 +53,9 @@ export class TicketContainer {
     this.priorityRulesDAO = new TicketPriorityRulesDAO(db);
     this.priorityThresholdsDAO = new TicketPriorityThresholdsDAO(db);
 
-    const isS3 =
-      backEnv.AWS_REGION !== undefined &&
-      backEnv.AWS_ACCESS_KEY_ID !== undefined &&
-      backEnv.AWS_SECRET_ACCESS_KEY !== undefined &&
-      backEnv.AWS_S3_BUCKET !== undefined;
+    // S3 is active when region and bucket are configured. Explicit credentials
+    // are optional - Lambda uses its execution role via the provider chain.
+    const isS3 = backEnv.AWS_REGION !== undefined && backEnv.AWS_S3_BUCKET !== undefined;
 
     let storageTypeName: FileStorageType;
 
@@ -66,11 +64,14 @@ export class TicketContainer {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         region: backEnv.AWS_REGION!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        accessKeyId: backEnv.AWS_ACCESS_KEY_ID!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        secretAccessKey: backEnv.AWS_SECRET_ACCESS_KEY!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         bucket: backEnv.AWS_S3_BUCKET!,
+        // Passed only when explicitly set (local dev pointing at real S3). Omitted in Lambda so the execution role is used instead.
+        ...(backEnv.AWS_ACCESS_KEY_ID && backEnv.AWS_SECRET_ACCESS_KEY
+          ? {
+              accessKeyId: backEnv.AWS_ACCESS_KEY_ID,
+              secretAccessKey: backEnv.AWS_SECRET_ACCESS_KEY,
+            }
+          : {}),
       });
       storageTypeName = FILE_STORAGE_TYPES.S3;
     } else {
