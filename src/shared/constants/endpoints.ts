@@ -52,3 +52,10 @@ export const QUOTE_ENDPOINTS = {
   REVISIONS: (ticketId = ':ticketId', quoteId = ':quoteId') =>
     `/${ticketId}/quotes/${quoteId}/revisions`,
 } as const;
+
+export const ANALYTICS_ENDPOINTS = {
+  BASE: '/analytics',
+  RESOLUTION_TIME: '/resolution-time',
+  TICKET_VOLUME: '/ticket-volume',
+  QUOTE_ACCURACY: '/quote-accuracy',
+} as const;
