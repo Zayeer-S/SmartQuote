@@ -139,9 +139,14 @@ export class RateProfileController {
       businessImpact: this.lookup.businessImpactName(
         profile.business_impact_id as unknown as number
       ),
-      businessHoursRate: profile.business_hours_rate as unknown as number,
-      afterHoursRate: profile.after_hours_rate as unknown as number,
-      multiplier: profile.multiplier as unknown as number,
+
+      // Coerce types with Number() over assertion due to pg driver not casting to numbers
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      businessHoursRate: Number(profile.business_hours_rate),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      afterHoursRate: Number(profile.after_hours_rate),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      multiplier: Number(profile.multiplier),
       effectiveFrom: profile.effective_from.toISOString(),
       effectiveTo: profile.effective_to.toISOString(),
       isActive: profile.is_active,

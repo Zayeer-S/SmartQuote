@@ -221,12 +221,16 @@ export class QuoteService {
     const existing = await this.quotesDAO.getById(quoteId, options);
     if (!existing) throw new QuoteError(QUOTE_ERROR_MSGS.NOT_FOUND, 404);
 
-    const mergedMin = data.estimated_hours_minimum ?? existing.estimated_hours_minimum;
-    const mergedMax = data.estimated_hours_maximum ?? existing.estimated_hours_maximum;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+    const mergedMin = data.estimated_hours_minimum ?? Number(existing.estimated_hours_minimum);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+    const mergedMax = data.estimated_hours_maximum ?? Number(existing.estimated_hours_maximum);
     if (mergedMax < mergedMin) throw new QuoteError(QUOTE_ERROR_MSGS.MIN_MAX_HOURS, 422);
 
-    const hourly = data.hourly_rate ?? existing.hourly_rate;
-    const fixed = data.fixed_cost ?? existing.fixed_cost;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+    const hourly = data.hourly_rate ?? Number(existing.hourly_rate);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+    const fixed = data.fixed_cost ?? Number(existing.fixed_cost);
     const midHours = (mergedMin + mergedMax) / 2;
 
     const newQuoteData: InsertData<Quote> = {
@@ -494,8 +498,10 @@ export class QuoteService {
     const revisions: InsertData<QuoteDetailRevision>[] = [];
 
     for (const field of trackableFields) {
-      const oldVal = String(old[field as keyof Quote] ?? '');
-      const newVal = String(next[field] ?? '');
+      const oldRaw = old[field as keyof Quote];
+      const newRaw = next[field];
+      const oldVal = String(Number(oldRaw));
+      const newVal = String(Number(newRaw));
       if (oldVal === newVal) continue;
 
       revisions.push({
