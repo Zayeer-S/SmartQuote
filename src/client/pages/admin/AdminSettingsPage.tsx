@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { SMARTQUOTE_CONFIG_KEYS } from '../../../shared/constants/lookup-values.js';
 import type {
-  CreateRateProfileRequest,
   RateProfileResponse,
   UpdateRateProfileRequest,
 } from '../../../shared/contracts/rate-profile-contracts.js';
-import { useCreateRateProfile } from '../../hooks/rate-profiles/useCreateRateProfile.js';
 import { useListRateProfiles } from '../../hooks/rate-profiles/useListRateProfiles.js';
 import { useUpdateRateProfile } from '../../hooks/rate-profiles/useUpdateRateProfile.js';
 import { RateProfileModal } from './RateProfileModal.js';
 import './AdminSettingsPage.css';
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
 const RATE_PROFILE_COLUMNS = [
   'Ticket Type',
@@ -18,32 +20,13 @@ const RATE_PROFILE_COLUMNS = [
   'Business Hours (GBP/hr)',
   'After Hours (GBP/hr)',
   'Multiplier',
-  'Actions',
 ] as const;
 
-/**
- * Returns true if deactivating `target` would leave no active profile covering
- * the same ticketType + ticketSeverity + businessImpact combination.
- */
-function isLastActiveCoverageForCombo(
-  target: RateProfileResponse,
-  allProfiles: RateProfileResponse[]
-): boolean {
-  const coveringProfiles = allProfiles.filter(
-    (p) =>
-      p.ticketType === target.ticketType &&
-      p.ticketSeverity === target.ticketSeverity &&
-      p.businessImpact === target.businessImpact &&
-      p.isActive
-  );
-  // If only one active profile covers this combo and it is the target, deactivating breaks coverage
-  return coveringProfiles.length === 1 && coveringProfiles[0].id === target.id;
-}
+// ---------------------------------------------------------------------------
+// Modal state type
+// ---------------------------------------------------------------------------
 
-type ModalState =
-  | { open: false }
-  | { open: true; mode: 'create' }
-  | { open: true; mode: 'edit'; profile: RateProfileResponse };
+type ModalState = { open: false } | { open: true; profile: RateProfileResponse };
 
 // ---------------------------------------------------------------------------
 // Component
@@ -51,13 +34,9 @@ type ModalState =
 
 const AdminSettingsPage: React.FC = () => {
   const { data, loading, error, execute: fetchRateProfiles } = useListRateProfiles();
-  const { execute: createRateProfile, loading: creating } = useCreateRateProfile();
   const { execute: updateRateProfile, loading: updating } = useUpdateRateProfile();
 
   const [modal, setModal] = useState<ModalState>({ open: false });
-  const [toggleError, setToggleError] = useState<{ profileId: number; message: string } | null>(
-    null
-  );
 
   useEffect(() => {
     void fetchRateProfiles();
@@ -69,48 +48,18 @@ const AdminSettingsPage: React.FC = () => {
 
   // -- Handlers --
 
-  function openCreateModal() {
-    setToggleError(null);
-    setModal({ open: true, mode: 'create' });
-  }
-
   function openEditModal(profile: RateProfileResponse) {
-    setToggleError(null);
-    setModal({ open: true, mode: 'edit', profile });
+    setModal({ open: true, profile });
   }
 
   function closeModal() {
     setModal({ open: false });
   }
 
-  async function handleCreate(data: CreateRateProfileRequest): Promise<boolean> {
-    const succeeded = await createRateProfile(data);
-    if (succeeded) await fetchRateProfiles();
-    return succeeded;
-  }
-
   async function handleEdit(profileId: number, data: UpdateRateProfileRequest): Promise<boolean> {
     const succeeded = await updateRateProfile(profileId, data);
     if (succeeded) await fetchRateProfiles();
     return succeeded;
-  }
-
-  async function handleToggleActive(profile: RateProfileResponse): Promise<void> {
-    setToggleError(null);
-
-    // Safety guard: block deactivation if this is the last active coverage for the combo
-    if (profile.isActive && isLastActiveCoverageForCombo(profile, rateProfiles)) {
-      setToggleError({
-        profileId: profile.id,
-        message:
-          'Cannot deactivate: this is the only active rate profile for this ticket type / severity / impact combination. ' +
-          'Create an alternative profile first.',
-      });
-      return;
-    }
-
-    await updateRateProfile(profile.id, { isActive: !profile.isActive });
-    await fetchRateProfiles();
   }
 
   // ---------------------------------------------------------------------------
@@ -193,22 +142,12 @@ const AdminSettingsPage: React.FC = () => {
         aria-labelledby="rate-profiles-heading"
         data-testid="settings-rate-profiles"
       >
-        <div className="settings-section-header">
-          <h2 className="settings-section-heading" id="rate-profiles-heading">
-            Rate Profiles
-          </h2>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={openCreateModal}
-            data-testid="add-rate-profile-btn"
-          >
-            Add Rate Profile
-          </button>
-        </div>
+        <h2 className="settings-section-heading" id="rate-profiles-heading">
+          Rate Profiles
+        </h2>
         <p className="admin-page-description">
           Define hourly rates by ticket type and severity. Business hours and after-hours rates can
-          be set independently.
+          be set independently. Click a row to edit its rates.
         </p>
 
         <div className="card">
@@ -259,72 +198,34 @@ const AdminSettingsPage: React.FC = () => {
 
               {!loading &&
                 !error &&
-                rateProfiles.map((profile) => {
-                  const rowId = `rate-row-${String(profile.id)}`;
-                  const isToggling = updating;
-                  const rowToggleError =
-                    toggleError?.profileId === profile.id ? toggleError.message : null;
-
-                  return (
-                    <React.Fragment key={profile.id}>
-                      <tr data-testid={rowId} style={{ opacity: profile.isActive ? 1 : 0.5 }}>
-                        <td data-testid={`rate-type-${String(profile.id)}`}>
-                          {profile.ticketType}
-                        </td>
-                        <td data-testid={`rate-severity-${String(profile.id)}`}>
-                          {profile.ticketSeverity}
-                        </td>
-                        <td data-testid={`rate-impact-${String(profile.id)}`}>
-                          {profile.businessImpact}
-                        </td>
-                        <td data-testid={`rate-business-${String(profile.id)}`}>
-                          {profile.businessHoursRate.toFixed(2)}
-                        </td>
-                        <td data-testid={`rate-afterhours-${String(profile.id)}`}>
-                          {profile.afterHoursRate.toFixed(2)}
-                        </td>
-                        <td data-testid={`rate-multiplier-${String(profile.id)}`}>
-                          {profile.multiplier.toFixed(2)}x
-                        </td>
-                        <td>
-                          <div className="admin-table-actions">
-                            <button
-                              type="button"
-                              className="btn btn-ghost btn-sm"
-                              onClick={() => {
-                                openEditModal(profile);
-                              }}
-                              disabled={isToggling}
-                              data-testid={`rate-edit-${String(profile.id)}`}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-ghost btn-sm"
-                              onClick={() => void handleToggleActive(profile)}
-                              disabled={isToggling}
-                              data-testid={`rate-toggle-${String(profile.id)}`}
-                            >
-                              {profile.isActive ? 'Deactivate' : 'Activate'}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-
-                      {rowToggleError && (
-                        <tr data-testid={`rate-toggle-error-${String(profile.id)}`}>
-                          <td
-                            colSpan={RATE_PROFILE_COLUMNS.length}
-                            className="rate-profile-inline-error"
-                          >
-                            {rowToggleError}
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
+                rateProfiles.map((profile) => (
+                  <tr
+                    key={profile.id}
+                    data-testid={`rate-row-${String(profile.id)}`}
+                    className="rate-profile-row"
+                    onClick={() => {
+                      openEditModal(profile);
+                    }}
+                    style={{ opacity: profile.isActive ? 1 : 0.5 }}
+                  >
+                    <td data-testid={`rate-type-${String(profile.id)}`}>{profile.ticketType}</td>
+                    <td data-testid={`rate-severity-${String(profile.id)}`}>
+                      {profile.ticketSeverity}
+                    </td>
+                    <td data-testid={`rate-impact-${String(profile.id)}`}>
+                      {profile.businessImpact}
+                    </td>
+                    <td data-testid={`rate-business-${String(profile.id)}`}>
+                      {profile.businessHoursRate.toFixed(2)}
+                    </td>
+                    <td data-testid={`rate-afterhours-${String(profile.id)}`}>
+                      {profile.afterHoursRate.toFixed(2)}
+                    </td>
+                    <td data-testid={`rate-multiplier-${String(profile.id)}`}>
+                      {profile.multiplier.toFixed(2)}x
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -378,17 +279,8 @@ const AdminSettingsPage: React.FC = () => {
         </div>
       </section>
 
-      {/* -- Modals -- */}
-      {modal.open && modal.mode === 'create' && (
-        <RateProfileModal
-          mode="create"
-          onClose={closeModal}
-          onSubmit={handleCreate}
-          submitting={creating}
-        />
-      )}
-
-      {modal.open && modal.mode === 'edit' && (
+      {/* -- Edit modal -- */}
+      {modal.open && (
         <RateProfileModal
           mode="edit"
           profile={modal.profile}

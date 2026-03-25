@@ -20,10 +20,6 @@ function quotesBase(ticketId: string): string {
   return `${TICKETS_BASE}${QUOTE_ENDPOINTS.BASE(ticketId)}`;
 }
 
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
-
 let app: Express;
 let customer1Token: string;
 let customer2Token: string;
@@ -79,10 +75,6 @@ beforeAll(async () => {
   ticket4QuoteId = q4Quotes.find((q) => q.version === 2)!.id;
 });
 
-// ---------------------------------------------------------------------------
-// GET /tickets/:ticketId/quotes
-// ---------------------------------------------------------------------------
-
 describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.LIST()}`, () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).get(quotesBase(ticket1Id));
@@ -136,10 +128,6 @@ describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.LIST()}`, () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// GET /tickets/:ticketId/quotes/:quoteId
-// ---------------------------------------------------------------------------
-
 describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.GET()}`, () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).get(
@@ -189,10 +177,6 @@ describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.GET()}`, () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// POST /tickets/:ticketId/quotes/auto (generate)
-// ---------------------------------------------------------------------------
-
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE()}`, () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE(ticket1Id)}`);
@@ -230,10 +214,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE()}`, () => {
     expect(res.status).toBe(404);
   });
 });
-
-// ---------------------------------------------------------------------------
-// POST /tickets/:ticketId/quotes/manual (create manual)
-// ---------------------------------------------------------------------------
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL()}`, () => {
   const validManualQuote = {
@@ -308,10 +288,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL()}`, () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// PATCH /tickets/:ticketId/quotes/:quoteId (update)
-// ---------------------------------------------------------------------------
-
 describe(`PATCH ${TICKETS_BASE}${QUOTE_ENDPOINTS.UPDATE()}`, () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app)
@@ -362,10 +338,6 @@ describe(`PATCH ${TICKETS_BASE}${QUOTE_ENDPOINTS.UPDATE()}`, () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// POST /tickets/:ticketId/quotes/:quoteId/submit
-// ---------------------------------------------------------------------------
-
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT()}`, () => {
   // Create a fresh quote to submit so we don't collide with other tests
   let freshQuoteId: string;
@@ -411,10 +383,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT()}`, () => {
     });
   });
 });
-
-// ---------------------------------------------------------------------------
-// POST /tickets/:ticketId/quotes/:quoteId/approve
-// ---------------------------------------------------------------------------
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE()}`, () => {
   let pendingQuoteId: string;
@@ -475,10 +443,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE()}`, () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// POST /tickets/:ticketId/quotes/:quoteId/reject
-// ---------------------------------------------------------------------------
-
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT()}`, () => {
   let pendingQuoteId: string;
 
@@ -536,10 +500,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT()}`, () => {
     expect(res.body.data.comment).toBe('Needs more detail');
   });
 });
-
-// ---------------------------------------------------------------------------
-// GET /tickets/:ticketId/quotes/:quoteId/revisions
-// ---------------------------------------------------------------------------
 
 describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.REVISIONS()}`, () => {
   let updatedQuoteId: string;

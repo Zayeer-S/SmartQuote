@@ -14,17 +14,9 @@ import {
 const AUTH_BASE = `/api${AUTH_ENDPOINTS.BASE}`;
 const BASE = `/api${RATE_PROFILE_ENDPOINTS.BASE}`;
 
-// ---------------------------------------------------------------------------
-// Seeded credentials
-// ---------------------------------------------------------------------------
-
 const ADMIN = { email: 'admin@giacom.com', password: 'password' };
 const MANAGER = { email: 'manager@giacom.com', password: 'password' };
 const CUSTOMER = { email: 'customer1@demo.com', password: 'password' };
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 async function login(
   app: Express,
@@ -50,10 +42,6 @@ function validCreateBody(overrides = {}) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
-
 let app: Express;
 let adminToken: string;
 let managerToken: string;
@@ -67,10 +55,6 @@ beforeAll(async () => {
     login(app, CUSTOMER),
   ]);
 });
-
-// ---------------------------------------------------------------------------
-// GET /rate-profiles (list)
-// ---------------------------------------------------------------------------
 
 describe(`GET ${BASE}`, () => {
   it('returns 200 with profiles array for admin', async () => {
@@ -103,10 +87,6 @@ describe(`GET ${BASE}`, () => {
     expect(res.status).toBe(403);
   });
 });
-
-// ---------------------------------------------------------------------------
-// POST /rate-profiles (create)
-// ---------------------------------------------------------------------------
 
 describe(`POST ${BASE}`, () => {
   it('returns 201 with the created profile for admin', async () => {
@@ -201,10 +181,6 @@ describe(`POST ${BASE}`, () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// GET /rate-profiles/:id
-// ---------------------------------------------------------------------------
-
 describe(`GET ${BASE}/:rateProfileId`, () => {
   it('returns 200 with the profile for admin', async () => {
     const listRes = await request(app).get(BASE).set('Authorization', `Bearer ${adminToken}`);
@@ -232,10 +208,6 @@ describe(`GET ${BASE}/:rateProfileId`, () => {
     expect(res.status).toBe(401);
   });
 });
-
-// ---------------------------------------------------------------------------
-// PATCH /rate-profiles/:id
-// ---------------------------------------------------------------------------
 
 describe(`PATCH ${BASE}/:rateProfileId`, () => {
   it('returns 200 with updated fields for admin', async () => {
@@ -336,10 +308,6 @@ describe(`PATCH ${BASE}/:rateProfileId`, () => {
     expect(res.status).toBe(401);
   });
 });
-
-// ---------------------------------------------------------------------------
-// DELETE /rate-profiles/:id
-// ---------------------------------------------------------------------------
 
 describe(`DELETE ${BASE}/:rateProfileId`, () => {
   it('returns 204 and deactivates the profile for admin', async () => {

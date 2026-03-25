@@ -16,10 +16,6 @@ import type { TicketId, UserId } from '../../../src/server/database/types/ids';
 import { makeMockRateProfilesDAO } from './utils/mock.daos';
 import { makeMockRBACService } from './utils/mock.services';
 
-// ---------------------------------------------------------------------------
-// Mock factories
-// ---------------------------------------------------------------------------
-
 function makeMockQuotesDAO(): QuotesDAO {
   return {
     create: vi.fn(),
@@ -39,10 +35,6 @@ function makeMockRulesDAO(): QuoteCalculationRulesDAO {
     getAll: vi.fn(),
   } as unknown as QuoteCalculationRulesDAO;
 }
-
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
 
 const ACTOR_ID = 'user-1' as unknown as UserId;
 const TICKET_ID = 'ticket-1' as unknown as TicketId;
@@ -101,10 +93,6 @@ function clockAt(hour: number): () => Date {
     return d;
   };
 }
-
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
 
 describe('QuoteEngineService.generateQuote', () => {
   let quotesDAO: QuotesDAO;
