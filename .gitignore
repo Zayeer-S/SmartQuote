@@ -170,3 +170,4 @@ dist-db/
 tests/coverage/
 
 uploads
+infra/response.json
