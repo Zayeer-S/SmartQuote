@@ -10,31 +10,43 @@ import {
 } from '../validators/ticket.validator.js';
 import { success, error } from '../lib/respond.js';
 import type {
+  AttachmentResponse,
   CommentResponse,
   ListCommentsResponse,
   ListTicketsResponse,
   TicketDetailResponse,
   TicketResponse,
+  TicketSummaryResponse,
 } from '../../shared/contracts/ticket-contracts.js';
 import type { UserId, TicketId } from '../database/types/ids.js';
-import type { Ticket, TicketWithDetails, TicketComment } from '../database/types/tables.js';
+import type {
+  Ticket,
+  TicketAttachment,
+  TicketWithDetails,
+  TicketComment,
+} from '../database/types/tables.js';
 import type { OrganizationId } from '../database/types/ids.js';
 import type { TicketService } from '../services/ticket/ticket.service.js';
 import type { CommentService } from '../services/ticket/comment.service.js';
+import type { AttachmentService } from '../services/ticket/attachment.service.js';
+import type { IncomingFile } from '../services/storage/storage.service.types.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 
 export class TicketController {
   private ticketService: TicketService;
   private commentService: CommentService;
+  private attachmentService: AttachmentService;
   private lookup: LookupResolver;
 
   constructor(
     ticketService: TicketService,
     commentService: CommentService,
+    attachmentService: AttachmentService,
     lookup: LookupResolver
   ) {
     this.ticketService = ticketService;
     this.commentService = commentService;
+    this.attachmentService = attachmentService;
     this.lookup = lookup;
   }
 
@@ -42,6 +54,19 @@ export class TicketController {
     try {
       const actor = (req as AuthenticatedRequest).user;
       const body = validateOrThrow(createTicketSchema, req.body);
+
+      // multer populates req.files as Express.Multer.File[] for array fields.
+      // We map to IncomingFile so the service layer has no Express dependency.
+      const multerFiles = (req.files as Express.Multer.File[] | undefined) ?? [];
+      const files: IncomingFile[] = multerFiles.map((f) => ({
+        originalName: f.originalname,
+        mimeType: f.mimetype,
+        sizeBytes: f.size,
+        buffer: f.buffer,
+      }));
+
+      // Validate before opening the DB transaction
+      this.attachmentService.validateFiles(files);
 
       const ticket = await this.ticketService.createTicket(
         {
@@ -53,7 +78,8 @@ export class TicketController {
           deadline: new Date(body.deadline),
           users_impacted: body.usersImpacted,
         },
-        actor.id as UserId
+        actor.id as UserId,
+        files
       );
 
       success(res, this.mapTicket(ticket), 201);
@@ -70,7 +96,8 @@ export class TicketController {
         actor.id as UserId
       );
 
-      success(res, this.mapTicketDetail(ticket), 200);
+      const attachments = await this.attachmentService.listAttachments(ticket.id);
+      success(res, this.mapTicketDetail(ticket, attachments), 200);
     } catch (err: unknown) {
       handleError(res, err);
     }
@@ -92,7 +119,7 @@ export class TicketController {
       );
 
       const response: ListTicketsResponse = {
-        tickets: tickets.map((t) => this.mapTicketDetail(t)),
+        tickets: tickets.map((t) => this.mapTicketSummary(t)),
       };
       success(res, response, 200);
     } catch (err: unknown) {
@@ -238,10 +265,35 @@ export class TicketController {
     };
   }
 
-  private mapTicketDetail(ticket: TicketWithDetails): TicketDetailResponse {
+  private mapTicketSummary(ticket: TicketWithDetails): TicketSummaryResponse {
     return {
       ...this.mapTicket(ticket),
       organizationName: ticket.organization_name,
+    };
+  }
+
+  private mapTicketDetail(
+    ticket: TicketWithDetails,
+    attachments: TicketAttachment[]
+  ): TicketDetailResponse {
+    return {
+      ...this.mapTicket(ticket),
+      organizationName: ticket.organization_name,
+      attachments: attachments.map((a) => this.mapAttachment(a)),
+    };
+  }
+
+  private mapAttachment(attachment: TicketAttachment): AttachmentResponse {
+    return {
+      id: attachment.id as unknown as string,
+      ticketId: attachment.ticket_id as string,
+      uploadedByUserId: attachment.uploaded_by_user_id as string,
+      originalName: attachment.original_name,
+      storageKey: attachment.storage_key,
+      storageType: this.lookup.fileStorageTypeName(attachment.storage_type_id as unknown as number),
+      mimeType: attachment.mime_type,
+      sizeBytes: attachment.size_bytes,
+      createdAt: attachment.created_at.toISOString(),
     };
   }
 

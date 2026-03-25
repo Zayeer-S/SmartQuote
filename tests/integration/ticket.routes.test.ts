@@ -197,7 +197,7 @@ describe(`POST ${BASE}${TICKET_ENDPOINTS.CREATE}`, () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send(validTicket);
 
-    expect(res.status).toBe(201); // or 200 depending on your controller
+    expect(res.status).toBe(201);
     expect(res.body.data.organizationId).toBeNull();
     expect(res.body.success).toBe(true);
   });
@@ -209,6 +209,137 @@ describe(`POST ${BASE}${TICKET_ENDPOINTS.CREATE}`, () => {
       .send({ title: '' });
 
     expect(res.status).toBe(400);
+  });
+
+  it('returns 201 with a valid PDF attachment', async () => {
+    // Minimal valid 1-byte PDF buffer - content does not matter for the
+    // integration layer, only the MIME type and size are inspected
+    const pdfBuffer = Buffer.from('%PDF-1.4 test');
+
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .field('title', validTicket.title)
+      .field('description', validTicket.description)
+      .field('ticketType', validTicket.ticketType)
+      .field('ticketSeverity', validTicket.ticketSeverity)
+      .field('businessImpact', validTicket.businessImpact)
+      .field('deadline', validTicket.deadline)
+      .field('usersImpacted', String(validTicket.usersImpacted))
+      .attach('attachments', pdfBuffer, { filename: 'test.pdf', contentType: 'application/pdf' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data).toMatchObject({
+      title: validTicket.title,
+      creatorUserId: expect.any(String),
+    });
+  });
+
+  it('returns 400 when a file has a disallowed MIME type', async () => {
+    const txtBuffer = Buffer.from('hello world');
+
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .field('title', validTicket.title)
+      .field('description', validTicket.description)
+      .field('ticketType', validTicket.ticketType)
+      .field('ticketSeverity', validTicket.ticketSeverity)
+      .field('businessImpact', validTicket.businessImpact)
+      .field('deadline', validTicket.deadline)
+      .field('usersImpacted', String(validTicket.usersImpacted))
+      .attach('attachments', txtBuffer, { filename: 'notes.txt', contentType: 'text/plain' });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when a file exceeds 5MB', async () => {
+    // 5MB + 1 byte - large enough to trigger multer LIMIT_FILE_SIZE
+    const oversizedBuffer = Buffer.alloc(5 * 1024 * 1024 + 1);
+
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .field('title', validTicket.title)
+      .field('description', validTicket.description)
+      .field('ticketType', validTicket.ticketType)
+      .field('ticketSeverity', validTicket.ticketSeverity)
+      .field('businessImpact', validTicket.businessImpact)
+      .field('deadline', validTicket.deadline)
+      .field('usersImpacted', String(validTicket.usersImpacted))
+      .attach('attachments', oversizedBuffer, {
+        filename: 'big.pdf',
+        contentType: 'application/pdf',
+      });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when more than 5 files are attached', async () => {
+    const smallPdf = Buffer.from('%PDF-1.4 test');
+
+    let req = request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .field('title', validTicket.title)
+      .field('description', validTicket.description)
+      .field('ticketType', validTicket.ticketType)
+      .field('ticketSeverity', validTicket.ticketSeverity)
+      .field('businessImpact', validTicket.businessImpact)
+      .field('deadline', validTicket.deadline)
+      .field('usersImpacted', String(validTicket.usersImpacted));
+
+    // Attach 6 files - one over the MAX_COUNT of 5
+    for (let i = 0; i < 6; i++) {
+      req = req.attach('attachments', smallPdf, {
+        filename: `file-${String(i)}.pdf`,
+        contentType: 'application/pdf',
+      });
+    }
+
+    const res = await req;
+    expect(res.status).toBe(400);
+  });
+});
+
+describe(`GET ${BASE}${TICKET_ENDPOINTS.GET()} - attachments`, () => {
+  let createdTicketId: string;
+
+  beforeAll(async () => {
+    // Create a ticket with a PDF so we can assert on the attachments array
+    const pdfBuffer = Buffer.from('%PDF-1.4 test');
+    const deadline = new Date(Date.now() + 86400000 * 7).toISOString();
+
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .field('title', 'Attachment detail test ticket')
+      .field('description', 'For attachment response shape testing')
+      .field('ticketType', 'Support')
+      .field('ticketSeverity', 'Low')
+      .field('businessImpact', 'Minor')
+      .field('deadline', deadline)
+      .field('usersImpacted', '1')
+      .attach('attachments', pdfBuffer, { filename: 'report.pdf', contentType: 'application/pdf' });
+
+    createdTicketId = res.body.data.id as string;
+  });
+
+  it('includes an attachments array in the ticket detail response', async () => {
+    const res = await request(app)
+      .get(`${BASE}${TICKET_ENDPOINTS.GET(createdTicketId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body.data.attachments)).toBe(true);
+    expect(res.body.data.attachments).toHaveLength(1);
+    expect(res.body.data.attachments[0]).toMatchObject({
+      originalName: 'report.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: expect.any(Number),
+      storageKey: expect.any(String),
+      uploadedByUserId: expect.any(String),
+    });
   });
 });
 

@@ -24,7 +24,7 @@ export const createTicketSchema = z.object({
   ticketSeverity: z.enum(ALL_TICKET_SEVERITIES),
   businessImpact: z.enum(ALL_BUSINESS_IMPACTS),
   deadline: futureDate,
-  usersImpacted: z.number().int().min(1, 'At least 1 user must be impacted'),
+  usersImpacted: z.coerce.number().int().min(1, 'At least 1 user must be impacted'),
 });
 
 export type CreateTicketInput = z.infer<typeof createTicketSchema>;
@@ -41,7 +41,7 @@ export const updateTicketSchema = z
     ticketSeverity: z.enum(ALL_TICKET_SEVERITIES).optional(),
     businessImpact: z.enum(ALL_BUSINESS_IMPACTS).optional(),
     deadline: futureDate.optional(),
-    usersImpacted: z.number().int().min(1, 'At least 1 user must be impacted').optional(),
+    usersImpacted: z.coerce.number().int().min(1, 'At least 1 user must be impacted').optional(),
     ticketStatus: z.enum(ALL_TICKET_STATUSES).optional(),
     assignedToUserId: z.uuid('Assignee ID must be a valid UUID').nullable().optional(),
   })

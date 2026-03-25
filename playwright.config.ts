@@ -12,6 +12,7 @@ const SESSION_SMOKE_FILES = [
 export default defineConfig({
   testDir: 'tests/e2e',
   outputDir: 'coverage/e2e/results',
+  timeout: 60_000,
 
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

@@ -1,6 +1,7 @@
 import {
   BusinessImpact,
   CommentType,
+  FileStorageType,
   TicketPriority,
   TicketSeverity,
   TicketStatus,
@@ -16,6 +17,8 @@ export interface CreateTicketRequest {
   /** ISO 8601 date string */
   deadline: string;
   usersImpacted: number;
+  /** Optional file attachments - PDF, JPG, PNG only, max 5MB each, max 5 files */
+  attachments?: File[];
 }
 
 export interface UpdateTicketRequest {
@@ -56,12 +59,29 @@ export interface TicketResponse {
   updatedAt: string;
 }
 
-export interface TicketDetailResponse extends TicketResponse {
+export interface TicketSummaryResponse extends TicketResponse {
   organizationName: string;
 }
 
+export interface AttachmentResponse {
+  id: string;
+  ticketId: string;
+  uploadedByUserId: string;
+  originalName: string;
+  storageKey: string;
+  storageType: FileStorageType;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: string;
+}
+
+export interface TicketDetailResponse extends TicketResponse {
+  organizationName: string;
+  attachments: AttachmentResponse[];
+}
+
 export interface ListTicketsResponse {
-  tickets: TicketDetailResponse[];
+  tickets: TicketSummaryResponse[];
 }
 
 export interface AddCommentRequest {

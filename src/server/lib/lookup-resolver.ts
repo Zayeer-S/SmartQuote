@@ -6,6 +6,7 @@ import type {
   BusinessImpact,
   TicketPriority,
   CommentType,
+  FileStorageType,
   QuoteEffortLevel,
   QuoteConfidenceLevel,
   QuoteCreator,
@@ -18,6 +19,7 @@ import type {
   BusinessImpactId,
   TicketPriorityId,
   CommentTypeId,
+  FileStorageTypeId,
   QuoteEffortLevelId,
   QuoteConfidenceId,
   QuoteCreatorId,
@@ -53,6 +55,10 @@ export class LookupResolver {
 
   commentTypeId(name: CommentType): CommentTypeId {
     return this.nameToId(this.maps.commentTypes, name) as CommentTypeId;
+  }
+
+  fileStorageTypeId(name: FileStorageType): FileStorageTypeId {
+    return this.nameToId(this.maps.fileStorageTypes, name) as FileStorageTypeId;
   }
 
   quoteEffortLevelId(name: QuoteEffortLevel): QuoteEffortLevelId {
@@ -93,6 +99,10 @@ export class LookupResolver {
 
   commentTypeName(id: number): CommentType {
     return this.idToName(this.maps.commentTypes, id) as CommentType;
+  }
+
+  fileStorageTypeName(id: number): FileStorageType {
+    return this.idToName(this.maps.fileStorageTypes, id) as FileStorageType;
   }
 
   quoteEffortLevelName(id: number): QuoteEffortLevel {

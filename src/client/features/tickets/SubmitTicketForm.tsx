@@ -4,13 +4,12 @@ import {
   TICKET_TYPES,
   TICKET_SEVERITIES,
   BUSINESS_IMPACTS,
-  TICKET_PRIORITIES,
+  ATTACHMENT_CONFIG,
 } from '../../../shared/constants/lookup-values.js';
 import type {
   TicketType,
   TicketSeverity,
   BusinessImpact,
-  TicketPriority,
 } from '../../../shared/constants/lookup-values.js';
 import type { CreateTicketRequest } from '../../../shared/contracts/ticket-contracts.js';
 import './SubmitTicketForm.css';
@@ -25,9 +24,9 @@ interface FormState {
   ticketType: TicketType;
   ticketSeverity: TicketSeverity;
   businessImpact: BusinessImpact;
-  ticketPriority: TicketPriority;
   deadline: string;
   usersImpacted: string;
+  files: File[];
 }
 
 const TICKET_TYPE_OPTIONS: { value: TicketType; label: string }[] = [
@@ -56,9 +55,9 @@ const INITIAL_FORM_STATE: FormState = {
   ticketType: TICKET_TYPES.SUPPORT,
   ticketSeverity: TICKET_SEVERITIES.LOW,
   businessImpact: BUSINESS_IMPACTS.MINOR,
-  ticketPriority: TICKET_PRIORITIES.P4,
   deadline: '',
   usersImpacted: '',
+  files: [],
 };
 
 function validateForm(form: FormState): string | null {
@@ -70,6 +69,16 @@ function validateForm(form: FormState): string | null {
   if (form.deadline < today) return 'Deadline must be today or in the future.';
 
   if (!/^\d+$/.test(form.usersImpacted)) return 'Users impacted must be a whole number.';
+
+  if (form.files.length > ATTACHMENT_CONFIG.MAX_COUNT)
+    return `You can attach a maximum of ${String(ATTACHMENT_CONFIG.MAX_COUNT)} files.`;
+
+  for (const file of form.files) {
+    if (file.size > ATTACHMENT_CONFIG.MAX_SIZE_BYTES)
+      return `"${file.name}" exceeds the 5MB file size limit.`;
+    if (!(ATTACHMENT_CONFIG.ALLOWED_MIME_TYPES as readonly string[]).includes(file.type))
+      return `"${file.name}" is not an allowed file type. Please attach PDF, JPG, or PNG files only.`;
+  }
 
   return null;
 }
@@ -85,6 +94,11 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
     const { name, value } = e.target;
     if (name === 'usersImpacted' && value !== '' && !/^\d+$/.test(value)) return;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const selected = Array.from(e.target.files ?? []);
+    setForm((prev) => ({ ...prev, files: selected }));
   };
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
@@ -105,6 +119,7 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
       businessImpact: form.businessImpact,
       deadline: new Date(form.deadline).toISOString(),
       usersImpacted: parseInt(form.usersImpacted, 10),
+      attachments: form.files.length > 0 ? form.files : undefined,
     };
 
     await execute(payload);
@@ -270,6 +285,29 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
             data-testid="field-users-impacted"
           />
         </div>
+      </div>
+
+      <div className="field-group">
+        <label className="field-label" htmlFor="attachments">
+          Attachments{' '}
+          <span className="field-label-hint">(optional — PDF, JPG, PNG, max 5MB each)</span>
+        </label>
+        <input
+          id="attachments"
+          name="attachments"
+          type="file"
+          className="field-input"
+          accept=".pdf,.jpg,.jpeg,.png"
+          multiple
+          onChange={handleFileChange}
+          disabled={loading}
+          data-testid="field-attachments"
+        />
+        {form.files.length > 0 && (
+          <p className="field-hint" data-testid="attachment-count">
+            {String(form.files.length)} file{form.files.length !== 1 ? 's' : ''} selected
+          </p>
+        )}
       </div>
 
       {displayError && (

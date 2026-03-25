@@ -16,14 +16,34 @@ const base = TICKET_ENDPOINTS.BASE;
 
 export const ticketAPI = {
   /**
-   * Create a new ticket
-   * @param payload Ticket creation fields
+   * Create a new ticket, optionally with file attachments.
+   * Always sends as multipart/form-data to satisfy the multer middleware.
+   * Axios sets the correct Content-Type boundary automatically when given FormData.
+   *
+   * @param payload Ticket creation fields including optional attachments
    * @returns The created ticket
    */
   async createTicket(payload: CreateTicketRequest): Promise<TicketResponse> {
+    const form = new FormData();
+    form.append('title', payload.title);
+    form.append('description', payload.description);
+    form.append('ticketType', payload.ticketType);
+    form.append('ticketSeverity', payload.ticketSeverity);
+    form.append('businessImpact', payload.businessImpact);
+    form.append('deadline', payload.deadline);
+    form.append('usersImpacted', String(payload.usersImpacted));
+
+    if (payload.attachments) {
+      payload.attachments.forEach((file) => {
+        form.append('attachments', file);
+      });
+    }
+
     const response = await httpClient.post<ApiResponse<TicketResponse>>(
       base + TICKET_ENDPOINTS.CREATE,
-      payload
+      form,
+      // Let axios derive Content-Type from the FormData instance so the multipart boundary is set correctly. Overriding to undefined removes the default 'application/json' header set in http-client.ts.
+      { headers: { 'Content-Type': undefined } }
     );
     return extractData(response);
   },
