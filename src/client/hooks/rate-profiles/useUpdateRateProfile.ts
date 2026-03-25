@@ -12,7 +12,7 @@ interface UseUpdateRateProfileState {
 }
 
 interface UseUpdateRateProfileReturn extends UseUpdateRateProfileState {
-  execute: (rateProfileId: number, data: UpdateRateProfileRequest) => Promise<void>;
+  execute: (rateProfileId: number, data: UpdateRateProfileRequest) => Promise<boolean>;
 }
 
 export function useUpdateRateProfile(): UseUpdateRateProfileReturn {
@@ -22,13 +22,15 @@ export function useUpdateRateProfile(): UseUpdateRateProfileReturn {
     error: null,
   });
 
-  async function execute(rateProfileId: number, data: UpdateRateProfileRequest): Promise<void> {
+  async function execute(rateProfileId: number, data: UpdateRateProfileRequest): Promise<boolean> {
     setState({ data: null, loading: true, error: null });
     try {
       const updated = await rateProfileAPI.updateRateProfile(rateProfileId, data);
       setState({ data: updated, loading: false, error: null });
+      return true;
     } catch (err) {
       setState({ data: null, loading: false, error: (err as Error).message });
+      return false;
     }
   }
 

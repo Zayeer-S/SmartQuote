@@ -34,12 +34,24 @@
   padding: 6px 10px;
 }
 
+/* Inline error row rendered beneath a rate profile table row */
+.rate-profile-inline-error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error, #ef4444);
+  background-color: rgba(239, 68, 68, 0.06);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
 [data-theme='dark'] .settings-section {
   border-top-color: var(--color-gray-700);
 }
 
 [data-theme='dark'] .settings-section-heading {
   color: var(--color-gray-50);
+}
+
+[data-theme='dark'] .rate-profile-inline-error {
+  background-color: rgba(239, 68, 68, 0.1);
 }
 
 @media (max-width: 768px) {

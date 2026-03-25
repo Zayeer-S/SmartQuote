@@ -12,7 +12,7 @@ interface UseCreateRateProfileState {
 }
 
 interface UseCreateRateProfileReturn extends UseCreateRateProfileState {
-  execute: (data: CreateRateProfileRequest) => Promise<void>;
+  execute: (data: CreateRateProfileRequest) => Promise<boolean>;
 }
 
 export function useCreateRateProfile(): UseCreateRateProfileReturn {
@@ -22,13 +22,15 @@ export function useCreateRateProfile(): UseCreateRateProfileReturn {
     error: null,
   });
 
-  async function execute(data: CreateRateProfileRequest): Promise<void> {
+  async function execute(data: CreateRateProfileRequest): Promise<boolean> {
     setState({ data: null, loading: true, error: null });
     try {
       const created = await rateProfileAPI.createRateProfile(data);
       setState({ data: created, loading: false, error: null });
+      return true;
     } catch (err) {
       setState({ data: null, loading: false, error: (err as Error).message });
+      return false;
     }
   }
 
