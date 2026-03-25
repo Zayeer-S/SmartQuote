@@ -52,9 +52,18 @@ export const ticketAPI = {
    * List all tickets visible to the current user
    * @returns Array of tickets
    */
-  async listTickets(): Promise<ListTicketsResponse> {
+  async listTickets(params?: {
+    from?: string;
+    to?: string;
+    ticketStatus?: string;
+    organizationId?: string;
+    assigneeId?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<ListTicketsResponse> {
     const response = await httpClient.get<ApiResponse<ListTicketsResponse>>(
-      base + TICKET_ENDPOINTS.LIST
+      base + TICKET_ENDPOINTS.LIST,
+      { params }
     );
     return extractData(response);
   },
