@@ -66,12 +66,18 @@ const AdminAnalyticsPage: React.FC = () => {
 
   // Fetch all data when date range changes
   useEffect(() => {
-    void ticketsHook.execute({ from: dateRange.from, to: dateRange.to });
-    void resolutionHook.execute(dateRange.from, dateRange.to);
-    void volumeHook.execute(dateRange.from, dateRange.to);
-    void accuracyHook.execute(dateRange.from, dateRange.to);
+    const timer = setTimeout(() => {
+      void ticketsHook.execute({ from: dateRange.from, to: dateRange.to });
+      void resolutionHook.execute(dateRange.from, dateRange.to);
+      void volumeHook.execute(dateRange.from, dateRange.to);
+      void accuracyHook.execute(dateRange.from, dateRange.to);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRange]);
+  }, [dateRange.from, dateRange.to]);
 
   const tickets = ticketsHook.data?.tickets ?? [];
 

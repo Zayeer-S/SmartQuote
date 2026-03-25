@@ -20,12 +20,12 @@ export function useQuoteAccuracy(): UseQuoteAccuracyReturn {
   });
 
   async function execute(from: string, to: string): Promise<void> {
-    setState({ data: null, loading: true, error: null });
+    setState((prev) => ({ ...prev, loading: true, error: null }));
     try {
       const data = await analyticsAPI.getQuoteAccuracy(from, to);
       setState({ data, loading: false, error: null });
     } catch (err) {
-      setState({ data: null, loading: false, error: (err as Error).message });
+      setState((prev) => ({ ...prev, loading: false, error: (err as Error).message }));
     }
   }
 
