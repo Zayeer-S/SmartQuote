@@ -6,6 +6,7 @@ import type { UserId } from '../database/types/ids.js';
 import type { RateProfileId } from '../database/types/ids.js';
 import type { RateProfile } from '../database/types/tables.js';
 import type { RateProfileService } from '../services/rate-profiles/rate.profiles.service.js';
+import type { LookupResolver } from '../lib/lookup-resolver.js';
 import {
   createRateProfileSchema,
   updateRateProfileSchema,
@@ -14,12 +15,19 @@ import type {
   ListRateProfilesResponse,
   RateProfileResponse,
 } from '../../shared/contracts/rate-profile-contracts.js';
+import {
+  BusinessImpact,
+  TicketSeverity,
+  TicketType,
+} from '../../shared/constants/lookup-values.js';
 
 export class RateProfileController {
   private rateProfileService: RateProfileService;
+  private lookup: LookupResolver;
 
-  constructor(rateProfileService: RateProfileService) {
+  constructor(rateProfileService: RateProfileService, lookup: LookupResolver) {
     this.rateProfileService = rateProfileService;
+    this.lookup = lookup;
   }
 
   listRateProfiles = async (req: Request, res: Response): Promise<void> => {
@@ -29,7 +37,7 @@ export class RateProfileController {
       const profiles = await this.rateProfileService.listRateProfiles(actor.id as UserId);
 
       const response: ListRateProfilesResponse = {
-        rateProfiles: profiles.map(mapRateProfile),
+        rateProfiles: profiles.map((p) => this.mapRateProfile(p)),
       };
       success(res, response, 200);
     } catch (err: unknown) {
@@ -46,7 +54,7 @@ export class RateProfileController {
         actor.id as UserId
       );
 
-      success(res, mapRateProfile(profile), 200);
+      success(res, this.mapRateProfile(profile), 200);
     } catch (err: unknown) {
       handleError(res, err);
     }
@@ -59,9 +67,13 @@ export class RateProfileController {
 
       const profile = await this.rateProfileService.createRateProfile(
         {
-          ticket_type_id: body.ticketTypeId,
-          ticket_severity_id: body.ticketSeverityId,
-          business_impact_id: body.businessImpactId,
+          ticket_type_id: this.lookup.ticketTypeId(body.ticketType as TicketType) as number,
+          ticket_severity_id: this.lookup.ticketSeverityId(
+            body.ticketSeverity as TicketSeverity
+          ) as number,
+          business_impact_id: this.lookup.businessImpactId(
+            body.businessImpact as BusinessImpact
+          ) as number,
           business_hours_rate: body.businessHoursRate,
           after_hours_rate: body.afterHoursRate,
           multiplier: body.multiplier,
@@ -71,7 +83,7 @@ export class RateProfileController {
         actor.id as UserId
       );
 
-      success(res, mapRateProfile(profile), 201);
+      success(res, this.mapRateProfile(profile), 201);
     } catch (err: unknown) {
       handleError(res, err);
     }
@@ -96,7 +108,7 @@ export class RateProfileController {
         actor.id as UserId
       );
 
-      success(res, mapRateProfile(profile), 200);
+      success(res, this.mapRateProfile(profile), 200);
     } catch (err: unknown) {
       handleError(res, err);
     }
@@ -116,23 +128,27 @@ export class RateProfileController {
       handleError(res, err);
     }
   };
-}
 
-function mapRateProfile(profile: RateProfile): RateProfileResponse {
-  return {
-    id: profile.id as unknown as number,
-    ticketTypeId: profile.ticket_type_id as unknown as number,
-    ticketSeverityId: profile.ticket_severity_id as unknown as number,
-    businessImpactId: profile.business_impact_id as unknown as number,
-    businessHoursRate: profile.business_hours_rate as unknown as number,
-    afterHoursRate: profile.after_hours_rate as unknown as number,
-    multiplier: profile.multiplier as unknown as number,
-    effectiveFrom: profile.effective_from.toISOString(),
-    effectiveTo: profile.effective_to.toISOString(),
-    isActive: profile.is_active,
-    createdAt: profile.created_at.toISOString(),
-    updatedAt: profile.updated_at.toISOString(),
-  };
+  private mapRateProfile(profile: RateProfile): RateProfileResponse {
+    return {
+      id: profile.id as unknown as number,
+      ticketType: this.lookup.ticketTypeName(profile.ticket_type_id as unknown as number),
+      ticketSeverity: this.lookup.ticketSeverityName(
+        profile.ticket_severity_id as unknown as number
+      ),
+      businessImpact: this.lookup.businessImpactName(
+        profile.business_impact_id as unknown as number
+      ),
+      businessHoursRate: profile.business_hours_rate as unknown as number,
+      afterHoursRate: profile.after_hours_rate as unknown as number,
+      multiplier: profile.multiplier as unknown as number,
+      effectiveFrom: profile.effective_from.toISOString(),
+      effectiveTo: profile.effective_to.toISOString(),
+      isActive: profile.is_active,
+      createdAt: profile.created_at.toISOString(),
+      updatedAt: profile.updated_at.toISOString(),
+    };
+  }
 }
 
 function handleError(res: Response, err: unknown): void {

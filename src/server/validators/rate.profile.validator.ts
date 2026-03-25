@@ -1,4 +1,9 @@
 import { z } from 'zod';
+import {
+  ALL_TICKET_TYPES,
+  ALL_TICKET_SEVERITIES,
+  ALL_BUSINESS_IMPACTS,
+} from '../../shared/constants/lookup-values.js';
 
 const isoDateString = z.iso.datetime({ message: 'Must be a valid ISO 8601 date string' });
 
@@ -6,9 +11,9 @@ const positiveDecimal = z.number().nonnegative('Must be >= 0');
 
 export const createRateProfileSchema = z
   .object({
-    ticketTypeId: z.number().int().positive(),
-    ticketSeverityId: z.number().int().positive(),
-    businessImpactId: z.number().int().positive(),
+    ticketType: z.enum(ALL_TICKET_TYPES as [string, ...string[]]),
+    ticketSeverity: z.enum(ALL_TICKET_SEVERITIES as [string, ...string[]]),
+    businessImpact: z.enum(ALL_BUSINESS_IMPACTS as [string, ...string[]]),
     businessHoursRate: positiveDecimal,
     afterHoursRate: positiveDecimal,
     multiplier: z.number().positive('Multiplier must be > 0'),

@@ -1,8 +1,10 @@
+import { BusinessImpact, TicketSeverity, TicketType } from '../constants';
+
 export interface RateProfileResponse {
   id: number;
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
   businessHoursRate: number;
   afterHoursRate: number;
   multiplier: number;
@@ -18,9 +20,9 @@ export interface ListRateProfilesResponse {
 }
 
 export interface CreateRateProfileRequest {
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
   businessHoursRate: number;
   afterHoursRate: number;
   multiplier: number;
