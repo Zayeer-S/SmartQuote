@@ -32,14 +32,11 @@ jobs:
       - name: Type check server
         run: npm run type-check:server
 
-      - name: Build frontend
+      - name: Build all (client + server + db)
         run: npm run build:all
         env:
           VITE_APP_URL: https://smartquote.zayeer.dev
           VITE_FRONTEND_URL: https://smartquote.zayeer.dev
-
-      - name: Build database files
-        run: npm run build:db
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -66,7 +63,7 @@ jobs:
             --function-name smartquote-migrate \
             --region eu-west-2 \
             response.json
-          
+
           # Check if the Lambda actually succeeded (it might return 200 but have an error in the payload)
           if grep -q "FunctionError" response.json; then
             echo "Migration failed!"
