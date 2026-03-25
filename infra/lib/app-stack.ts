@@ -81,8 +81,6 @@ export class AppStack extends cdk.Stack {
         LOGIN_RATE_LIMIT_WINDOW_MINUTES: infraConfig.lambda.loginRateLimitWindowMinutes,
         DB_SECRET_ARN: databaseStack.dbSecret.secretArn,
         APP_SECRET_ARN: appSecret.secretArn,
-        // Storage - credentials are intentionally omitted; Lambda uses its execution role. AWS_REGION is needed by the S3 client constructor.
-        AWS_REGION: infraConfig.region,
         AWS_S3_BUCKET: infraConfig.attachments.bucketName,
       },
     });
@@ -90,7 +88,6 @@ export class AppStack extends cdk.Stack {
     databaseStack.dbSecret.grantRead(apiFunction);
     appSecret.grantRead(apiFunction);
 
-    // Import the pre-existing attachments bucket - CDK references it for IAM grants only. Ownership and lifecycle remain outside CDK.
     const attachmentsBucket = s3.Bucket.fromBucketName(
       this,
       'AttachmentsBucket',
