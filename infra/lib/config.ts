@@ -45,6 +45,10 @@ export const infraConfig = {
     assetsPath: 'dist',
   },
 
+  attachments: {
+    bucketName: 'smartquote-s3-bucket',
+  },
+
   cloudfront: {
     comment: 'SmartQuote CDN',
     defaultRootObject: 'index.html',
