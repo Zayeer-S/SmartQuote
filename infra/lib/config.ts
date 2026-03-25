@@ -27,7 +27,7 @@ export const infraConfig = {
     /** Path to server entry point, relative to repo root */
     entryPoint: 'src/server/bootstrap/lambda.handler.ts',
     handler: 'handler',
-    memoryMb: 512,
+    memoryMb: 1024,
     timeoutSeconds: 29, // API Gateway hard limit is 30s
     nodeEnv: 'production',
     // Non-secret config - injected directly as env vars, not stored in Secrets Manager

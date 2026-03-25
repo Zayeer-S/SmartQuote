@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { updatedAtTriggerSQL } from '../migration-utils';
+import { updatedAtTriggerSQL } from '../migration-utils.js';
 
 const TABLES = ['ticket_priority_rules', 'ticket_priority_thresholds', 'priority_engine_anchors'];
 

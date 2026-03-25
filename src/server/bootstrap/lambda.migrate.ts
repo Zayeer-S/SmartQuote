@@ -19,7 +19,7 @@ export const handler = async (): Promise<{ success: boolean; message: string }> 
     migrations: {
       directory: './migrations',
       tableName: 'knex_migrations',
-      loadExtensions: ['.js', '.mjs'],
+      loadExtensions: ['.js'],
     },
   });
 
@@ -27,6 +27,9 @@ export const handler = async (): Promise<{ success: boolean; message: string }> 
     console.log('Running migrations...');
 
     console.log('Migration files:', readdirSync('./migrations'));
+
+    console.log('Current Directory:', process.cwd());
+    console.log('Files in ./migrations:', readdirSync('./migrations'));
 
     const [batchNo, migrations] = (await db.migrate.latest()) as [number, string[]];
 

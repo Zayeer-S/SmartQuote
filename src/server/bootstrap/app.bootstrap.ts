@@ -33,6 +33,7 @@ export async function bootstrapApplication(
   const db = await initializeDatabase();
   const lookupResolver = new LookupResolver(await loadLookupMaps(db));
 
+  // TODO MOVE TO TICKET CONTROLLER
   let embedder: BertEmbedder | null = null;
   if (backEnv.AWS_REGION && backEnv.AWS_ACCESS_KEY_ID) {
     console.log('Initializing NLP embedder...');

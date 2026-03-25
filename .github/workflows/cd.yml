@@ -33,7 +33,7 @@ jobs:
         run: npm run type-check:server
 
       - name: Build frontend
-        run: npm run build:client
+        run: npm run build:all
         env:
           VITE_APP_URL: https://smartquote.zayeer.dev
           VITE_FRONTEND_URL: https://smartquote.zayeer.dev
@@ -59,3 +59,18 @@ jobs:
       - name: Deploy app stack
         working-directory: infra
         run: npx cdk deploy SmartQuoteAppStack --require-approval never
+
+      - name: Run Database Migrations
+        run: |
+          aws lambda invoke \
+            --function-name smartquote-migrate \
+            --region eu-west-2 \
+            response.json
+          
+          # Check if the Lambda actually succeeded (it might return 200 but have an error in the payload)
+          if grep -q "FunctionError" response.json; then
+            echo "Migration failed!"
+            cat response.json
+            exit 1
+          fi
+          cat response.json

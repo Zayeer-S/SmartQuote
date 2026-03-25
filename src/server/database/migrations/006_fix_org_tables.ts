@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { updatedAtTriggerSQL } from '../migration-utils';
+import { updatedAtTriggerSQL } from '../migration-utils.js';
 
 const TABLES = ['org_roles', 'org_role_permissions', 'organization_members'];
 

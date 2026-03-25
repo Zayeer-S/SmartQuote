@@ -11,7 +11,7 @@
     "build": "tsc -b && vite build",
     "build:server": "tsc --project tsconfig.server.json --noEmit",
     "build:client": "vite build",
-    "build:all": "npm run build:server && npm run build:client",
+    "build:all": "npm run build:server && npm run build:client && npm run build:db",
     "build:db": "tsc --project tsconfig.migrations.json",
     "preview": "vite preview",
     "start": "tsx src/server/bootstrap/server.ts",

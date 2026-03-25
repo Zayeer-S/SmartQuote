@@ -62,6 +62,10 @@ export class DatabaseStack extends cdk.Stack {
       securityGroups: [lambdaSecurityGroup],
     });
 
+    this.vpc.addInterfaceEndpoint('BedrockEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_RUNTIME,
+    });
+
     // Export Lambda SG so AppStack can attach it to the function
     new cdk.CfnOutput(this, 'LambdaSecurityGroupId', {
       value: lambdaSecurityGroup.securityGroupId,
