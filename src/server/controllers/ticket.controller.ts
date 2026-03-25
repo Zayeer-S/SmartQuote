@@ -4,8 +4,10 @@ import { validateOrThrow } from '../validators/validation-utils.js';
 import {
   addCommentSchema,
   assignTicketSchema,
+  confirmAttachmentSchema,
   createTicketSchema,
   listTicketsQuerySchema,
+  presignAttachmentSchema,
   updateTicketSchema,
 } from '../validators/ticket.validator.js';
 import { success, error } from '../lib/respond.js';
@@ -14,6 +16,7 @@ import type {
   CommentResponse,
   ListCommentsResponse,
   ListTicketsResponse,
+  PresignAttachmentResponse,
   TicketDetailResponse,
   TicketResponse,
   TicketSummaryResponse,
@@ -29,7 +32,6 @@ import type { OrganizationId } from '../database/types/ids.js';
 import type { TicketService } from '../services/ticket/ticket.service.js';
 import type { CommentService } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
-import type { IncomingFile } from '../services/storage/storage.service.types.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 
 export class TicketController {
@@ -55,19 +57,6 @@ export class TicketController {
       const actor = (req as AuthenticatedRequest).user;
       const body = validateOrThrow(createTicketSchema, req.body);
 
-      // multer populates req.files as Express.Multer.File[] for array fields.
-      // We map to IncomingFile so the service layer has no Express dependency.
-      const multerFiles = (req.files as Express.Multer.File[] | undefined) ?? [];
-      const files: IncomingFile[] = multerFiles.map((f) => ({
-        originalName: f.originalname,
-        mimeType: f.mimetype,
-        sizeBytes: f.size,
-        buffer: f.buffer,
-      }));
-
-      // Validate before opening the DB transaction
-      this.attachmentService.validateFiles(files);
-
       const ticket = await this.ticketService.createTicket(
         {
           title: body.title,
@@ -78,11 +67,67 @@ export class TicketController {
           deadline: new Date(body.deadline),
           users_impacted: body.usersImpacted,
         },
-        actor.id as UserId,
-        files
+        actor.id as UserId
       );
 
       success(res, this.mapTicket(ticket), 201);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
+  /**
+   * Generate a presigned S3 PUT URL for a single attachment.
+   * The browser should PUT the file directly to S3 using this URL, then call
+   * confirmAttachment with the returned storageKey.
+   */
+  presignAttachment = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const body = validateOrThrow(presignAttachmentSchema, req.body);
+      const ticketId = req.params.ticketId as TicketId;
+
+      const result = await this.attachmentService.presignUpload(
+        {
+          originalName: body.originalName,
+          mimeType: body.mimeType,
+          sizeBytes: body.sizeBytes,
+        },
+        ticketId
+      );
+
+      const response: PresignAttachmentResponse = {
+        storageKey: result.storageKey,
+        presignedUrl: result.presignedUrl,
+      };
+
+      success(res, response, 200);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
+  /**
+   * Register an attachment in the database after the browser has successfully
+   * PUT the file directly to S3.
+   */
+  confirmAttachment = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const actor = (req as AuthenticatedRequest).user;
+      const body = validateOrThrow(confirmAttachmentSchema, req.body);
+      const ticketId = req.params.ticketId as TicketId;
+
+      const attachment = await this.attachmentService.confirmUpload(
+        body.storageKey,
+        {
+          originalName: body.originalName,
+          mimeType: body.mimeType,
+          sizeBytes: body.sizeBytes,
+        },
+        ticketId,
+        actor.id as UserId
+      );
+
+      success(res, this.mapAttachment(attachment), 201);
     } catch (err: unknown) {
       handleError(res, err);
     }
@@ -325,6 +370,12 @@ function handleError(res: Response, err: unknown): void {
   if (err.name === 'ForbiddenError') {
     const e = err as Error & { statusCode: number };
     error(res, e.statusCode, e.message);
+    return;
+  }
+
+  if (err.name === 'StorageError') {
+    const e = err as Error & { statusCode?: number };
+    error(res, e.statusCode ?? 500, e.message);
     return;
   }
 

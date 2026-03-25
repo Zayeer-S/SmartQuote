@@ -68,13 +68,6 @@ export async function bootstrapApplication(
   );
 
   app.use((req, res, next) => {
-    // Skip all body parsing for multipart - multer handles it at the route level.
-    // Parsing the stream here would consume it before multer can read it.
-    if (req.headers['content-type']?.startsWith('multipart/form-data')) {
-      next();
-      return;
-    }
-
     if (req.body instanceof Buffer) {
       try {
         req.body = JSON.parse(req.body.toString('utf8')) as unknown;

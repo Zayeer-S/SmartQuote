@@ -1,21 +1,12 @@
 import { Router } from 'express';
-import multer from 'multer';
 import type { TicketController } from '../controllers/ticket.controller.js';
 import type { AuthService } from '../services/auth/auth.service.js';
 import type { RBACService } from '../services/rbac/rbac.service.js';
 import { createAuthMiddleware } from '../middleware/auth.middleware.js';
 import { requirePermission } from '../middleware/rbac.middleware.js';
-import { PERMISSIONS, ATTACHMENT_CONFIG } from '../../shared/constants/lookup-values.js';
+import { PERMISSIONS } from '../../shared/constants/lookup-values.js';
 import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../shared/constants';
 import type { QuoteController } from '../controllers/quote.controller.js';
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: ATTACHMENT_CONFIG.MAX_SIZE_BYTES,
-    files: ATTACHMENT_CONFIG.MAX_COUNT,
-  },
-});
 
 export function createTicketRoutes(
   ticketController: TicketController,
@@ -33,7 +24,6 @@ export function createTicketRoutes(
     TICKET_ENDPOINTS.CREATE,
     authenticate,
     can(PERMISSIONS.TICKETS_CREATE),
-    upload.array('attachments', ATTACHMENT_CONFIG.MAX_COUNT),
     ticketController.createTicket
   );
 
@@ -91,6 +81,20 @@ export function createTicketRoutes(
     authenticate,
     can(PERMISSIONS.TICKETS_READ_OWN, PERMISSIONS.TICKETS_READ_ALL),
     ticketController.addComment
+  );
+
+  router.post(
+    TICKET_ENDPOINTS.PRESIGN_ATTACHMENT(),
+    authenticate,
+    can(PERMISSIONS.TICKETS_CREATE),
+    ticketController.presignAttachment
+  );
+
+  router.post(
+    TICKET_ENDPOINTS.CONFIRM_ATTACHMENT(),
+    authenticate,
+    can(PERMISSIONS.TICKETS_CREATE),
+    ticketController.confirmAttachment
   );
 
   router.get(

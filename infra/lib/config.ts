@@ -47,6 +47,8 @@ export const infraConfig = {
 
   attachments: {
     bucketName: 'smartquote-s3-bucket',
+    /** Presigned upload URL TTL in seconds. Browser must PUT within this window. */
+    presignExpirySeconds: 300,
   },
 
   cloudfront: {

@@ -5,6 +5,7 @@ import {
   ALL_BUSINESS_IMPACTS,
   ALL_TICKET_STATUSES,
   ALL_COMMENT_TYPES,
+  ATTACHMENT_CONFIG,
 } from '../../shared/constants/';
 
 const futureDate = z.iso
@@ -81,3 +82,42 @@ export const addCommentSchema = z.object({
 });
 
 export type AddCommentInput = z.infer<typeof addCommentSchema>;
+
+export const presignAttachmentSchema = z.object({
+  originalName: z.string().min(1, 'File name is required').max(255, 'File name is too long'),
+  mimeType: z
+    .string()
+    .refine((val) => (ATTACHMENT_CONFIG.ALLOWED_MIME_TYPES as readonly string[]).includes(val), {
+      message: `File type not allowed. Permitted types: ${ATTACHMENT_CONFIG.ALLOWED_MIME_TYPES.join(', ')}`,
+    }),
+  sizeBytes: z
+    .number()
+    .int()
+    .min(1, 'File must not be empty')
+    .max(
+      ATTACHMENT_CONFIG.MAX_SIZE_BYTES,
+      `File exceeds the ${String(ATTACHMENT_CONFIG.MAX_SIZE_BYTES / (1024 * 1024))}MB size limit`
+    ),
+});
+
+export type PresignAttachmentInput = z.infer<typeof presignAttachmentSchema>;
+
+export const confirmAttachmentSchema = z.object({
+  storageKey: z.string().min(1, 'Storage key is required'),
+  originalName: z.string().min(1, 'File name is required').max(255, 'File name is too long'),
+  mimeType: z
+    .string()
+    .refine((val) => (ATTACHMENT_CONFIG.ALLOWED_MIME_TYPES as readonly string[]).includes(val), {
+      message: `File type not allowed. Permitted types: ${ATTACHMENT_CONFIG.ALLOWED_MIME_TYPES.join(', ')}`,
+    }),
+  sizeBytes: z
+    .number()
+    .int()
+    .min(1, 'File must not be empty')
+    .max(
+      ATTACHMENT_CONFIG.MAX_SIZE_BYTES,
+      `File exceeds the ${String(ATTACHMENT_CONFIG.MAX_SIZE_BYTES / (1024 * 1024))}MB size limit`
+    ),
+});
+
+export type ConfirmAttachmentInput = z.infer<typeof confirmAttachmentSchema>;

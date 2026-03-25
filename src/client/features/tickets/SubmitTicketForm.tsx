@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useCreateTicket } from '../../hooks/tickets/useCreateTicket.js';
+import { ticketAPI } from '../../lib/api/ticket.api.js';
 import {
   TICKET_TYPES,
   TICKET_SEVERITIES,
@@ -28,6 +29,8 @@ interface FormState {
   usersImpacted: string;
   files: File[];
 }
+
+type SubmitPhase = 'idle' | 'creating' | 'uploading' | 'confirming';
 
 const TICKET_TYPE_OPTIONS: { value: TicketType; label: string }[] = [
   { value: TICKET_TYPES.SUPPORT, label: TICKET_TYPES.SUPPORT },
@@ -60,6 +63,13 @@ const INITIAL_FORM_STATE: FormState = {
   files: [],
 };
 
+const PHASE_LABEL: Record<SubmitPhase, string> = {
+  idle: 'Submit Ticket',
+  creating: 'Submitting...',
+  uploading: 'Uploading files...',
+  confirming: 'Finalizing...',
+};
+
 function validateForm(form: FormState): string | null {
   if (!form.title.trim()) return 'Title is required.';
   if (!form.description.trim()) return 'Description is required.';
@@ -86,7 +96,11 @@ function validateForm(form: FormState): string | null {
 const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
   const [form, setForm] = useState<FormState>(INITIAL_FORM_STATE);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const { execute, loading, error, data } = useCreateTicket();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [phase, setPhase] = useState<SubmitPhase>('idle');
+  const { execute } = useCreateTicket();
+
+  const loading = phase !== 'idle';
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -104,6 +118,7 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setValidationError(null);
+    setSubmitError(null);
 
     const formError = validateForm(form);
     if (formError) {
@@ -111,28 +126,70 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
       return;
     }
 
-    const payload: CreateTicketRequest = {
-      title: form.title,
-      description: form.description,
-      ticketType: form.ticketType,
-      ticketSeverity: form.ticketSeverity,
-      businessImpact: form.businessImpact,
-      deadline: new Date(form.deadline).toISOString(),
-      usersImpacted: parseInt(form.usersImpacted, 10),
-      attachments: form.files.length > 0 ? form.files : undefined,
-    };
+    try {
+      setPhase('creating');
+      const payload: CreateTicketRequest = {
+        title: form.title,
+        description: form.description,
+        ticketType: form.ticketType,
+        ticketSeverity: form.ticketSeverity,
+        businessImpact: form.businessImpact,
+        deadline: new Date(form.deadline).toISOString(),
+        usersImpacted: parseInt(form.usersImpacted, 10),
+      };
 
-    await execute(payload);
+      const ticket = await execute(payload);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (!ticket) {
+        setPhase('idle');
+        return;
+      }
+
+      if (form.files.length > 0) {
+        for (const file of form.files) {
+          setPhase('uploading');
+          const { storageKey, presignedUrl } = await ticketAPI.presignAttachment(ticket.id, {
+            originalName: file.name,
+            mimeType: file.type,
+            sizeBytes: file.size,
+          });
+
+          const putResponse = await fetch(presignedUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': file.type,
+              'Content-Length': String(file.size),
+            },
+            body: file,
+          });
+
+          if (!putResponse.ok) {
+            throw new Error(
+              `Failed to upload "${file.name}" to storage (HTTP ${String(putResponse.status)}).`
+            );
+          }
+
+          setPhase('confirming');
+          await ticketAPI.confirmAttachment(ticket.id, {
+            storageKey,
+            originalName: file.name,
+            mimeType: file.type,
+            sizeBytes: file.size,
+          });
+        }
+      }
+
+      onSuccess();
+    } catch (err: unknown) {
+      setSubmitError(
+        err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      );
+      setPhase('idle');
+    }
   };
 
-  React.useEffect(() => {
-    if (data !== null) {
-      onSuccess();
-    }
-  }, [data, onSuccess]);
-
   const today = new Date().toISOString().split('T')[0];
-  const displayError = validationError ?? error;
+  const displayError = validationError ?? submitError;
 
   return (
     <form
@@ -290,7 +347,7 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
       <div className="field-group">
         <label className="field-label" htmlFor="attachments">
           Attachments{' '}
-          <span className="field-label-hint">(optional — PDF, JPG, PNG, max 5MB each)</span>
+          <span className="field-label-hint">(optional -- PDF, JPG, PNG, max 5MB each)</span>
         </label>
         <input
           id="attachments"
@@ -324,7 +381,7 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
           aria-busy={loading}
           data-testid="submit-ticket-btn"
         >
-          {loading ? 'Submitting...' : 'Submit Ticket'}
+          {PHASE_LABEL[phase]}
         </button>
       </div>
     </form>

@@ -82,6 +82,7 @@ export class AppStack extends cdk.Stack {
         DB_SECRET_ARN: databaseStack.dbSecret.secretArn,
         APP_SECRET_ARN: appSecret.secretArn,
         AWS_S3_BUCKET: infraConfig.attachments.bucketName,
+        ATTACHMENT_PRESIGN_EXPIRY_SECONDS: String(infraConfig.attachments.presignExpirySeconds),
       },
     });
 

@@ -23,6 +23,8 @@ export const TICKET_ENDPOINTS = {
   RESOLVE: (ticketId = ':ticketId') => `/${ticketId}/resolve`,
   LIST_COMMENTS: (ticketId = ':ticketId') => `/${ticketId}/comments`,
   ADD_COMMENT: (ticketId = ':ticketId') => `/${ticketId}/comments`,
+  PRESIGN_ATTACHMENT: (ticketId = ':ticketId') => `/${ticketId}/attachments/presign`,
+  CONFIRM_ATTACHMENT: (ticketId = ':ticketId') => `/${ticketId}/attachments/confirm`,
 } as const;
 
 export const ORG_ENDPOINTS = {

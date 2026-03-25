@@ -9,6 +9,18 @@ import { ATTACHMENT_CONFIG } from '../../../shared/constants/index.js';
 import type { FileStorageType } from '../../../shared/constants/lookup-values.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { StorageError } from '../storage/storage.errors.js';
+import { backEnv } from '../../config/env.backend.js';
+
+export interface PresignResult {
+  storageKey: string;
+  presignedUrl: string;
+}
+
+export interface AttachmentMeta {
+  originalName: string;
+  mimeType: string;
+  sizeBytes: number;
+}
 
 export class AttachmentService {
   private readonly attachmentsDAO: TicketAttachmentsDAO;
@@ -145,6 +157,87 @@ export class AttachmentService {
         );
       }
     }
+  }
+
+  /**
+   * Generate a presigned S3 PUT URL for a single file.
+   * Validates the file metadata and returns a storage key + presigned URL.
+   * Does NOT write anything to the database - that happens in confirmUpload
+   * after the browser has successfully PUT the file to S3.
+   *
+   * The storage key is namespaced under the ticket ID so cleanup is
+   * straightforward if the upload or confirm never arrives.
+   *
+   * @param meta     File metadata declared by the client
+   * @param ticketId Parent ticket ID
+   * @throws Error on validation failure
+   * @throws StorageError on signing failure
+   */
+  async presignUpload(meta: AttachmentMeta, ticketId: TicketId): Promise<PresignResult> {
+    this.validateFiles([meta as IncomingFile]);
+
+    const ext = meta.originalName.split('.').pop() ?? '';
+    const uuid = randomUUID();
+    // Match the same key format used by persistAttachmentRecords for consistency
+    const storageKey = `tickets/${ticketId}/${uuid}${ext ? `.${ext}` : ''}`;
+
+    const presignedUrl = await this.storageService.getPresignedUploadUrl(
+      storageKey,
+      meta.mimeType,
+      meta.sizeBytes,
+      backEnv.ATTACHMENT_PRESIGN_EXPIRY_SECONDS
+    );
+
+    return { storageKey, presignedUrl };
+  }
+
+  /**
+   * Register a successfully uploaded attachment in the database.
+   * Called after the browser has PUT the file directly to S3.
+   *
+   * The storageKey prefix is checked against the ticketId to prevent a user
+   * from confirming a key that was issued for a different ticket.
+   * File metadata is re-validated as defence in depth - the client cannot be
+   * trusted to echo back the same values it declared during presign.
+   *
+   * @param storageKey   Key returned by presignUpload
+   * @param meta         File metadata to persist
+   * @param ticketId     Parent ticket ID
+   * @param uploadedById User performing the upload
+   * @throws Error if the storageKey does not belong to this ticket
+   */
+  async confirmUpload(
+    storageKey: string,
+    meta: AttachmentMeta,
+    ticketId: TicketId,
+    uploadedById: UserId
+  ): Promise<TicketAttachment> {
+    const expectedPrefix = `tickets/${ticketId}/`;
+    if (!storageKey.startsWith(expectedPrefix)) {
+      throw new Error('Invalid storage key for this ticket.');
+    }
+
+    // Re-validate metadata - client cannot be trusted
+    this.validateFiles([meta as IncomingFile]);
+
+    const storageTypeId = this.lookup.fileStorageTypeId(this.storageTypeName);
+
+    const [attachment] = await this.attachmentsDAO.createMany(
+      [
+        {
+          uploaded_by_user_id: uploadedById,
+          ticket_id: ticketId,
+          storage_key: storageKey,
+          original_name: meta.originalName,
+          storage_type_id: storageTypeId,
+          size_bytes: meta.sizeBytes,
+          mime_type: meta.mimeType,
+        },
+      ],
+      {}
+    );
+
+    return attachment;
   }
 
   /**

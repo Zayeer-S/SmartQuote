@@ -1,10 +1,14 @@
 import type {
   AddCommentRequest,
   AssignTicketRequest,
+  AttachmentResponse,
   CommentResponse,
+  ConfirmAttachmentRequest,
   CreateTicketRequest,
   ListCommentsResponse,
   ListTicketsResponse,
+  PresignAttachmentRequest,
+  PresignAttachmentResponse,
   TicketDetailResponse,
   TicketResponse,
   UpdateTicketRequest,
@@ -16,34 +20,54 @@ const base = TICKET_ENDPOINTS.BASE;
 
 export const ticketAPI = {
   /**
-   * Create a new ticket, optionally with file attachments.
-   * Always sends as multipart/form-data to satisfy the multer middleware.
-   * Axios sets the correct Content-Type boundary automatically when given FormData.
+   * Create a new ticket. Sends as JSON - no binary data.
+   * Attachments are uploaded separately via presignAttachment / confirmAttachment.
    *
-   * @param payload Ticket creation fields including optional attachments
+   * @param payload Ticket creation fields
    * @returns The created ticket
    */
   async createTicket(payload: CreateTicketRequest): Promise<TicketResponse> {
-    const form = new FormData();
-    form.append('title', payload.title);
-    form.append('description', payload.description);
-    form.append('ticketType', payload.ticketType);
-    form.append('ticketSeverity', payload.ticketSeverity);
-    form.append('businessImpact', payload.businessImpact);
-    form.append('deadline', payload.deadline);
-    form.append('usersImpacted', String(payload.usersImpacted));
-
-    if (payload.attachments) {
-      payload.attachments.forEach((file) => {
-        form.append('attachments', file);
-      });
-    }
-
     const response = await httpClient.post<ApiResponse<TicketResponse>>(
       base + TICKET_ENDPOINTS.CREATE,
-      form,
-      // Let axios derive Content-Type from the FormData instance so the multipart boundary is set correctly. Overriding to undefined removes the default 'application/json' header set in http-client.ts.
-      { headers: { 'Content-Type': undefined } }
+      payload
+    );
+    return extractData(response);
+  },
+
+  /**
+   * Request a presigned S3 PUT URL for a single attachment.
+   * The browser should PUT the file directly to the returned presignedUrl,
+   * then call confirmAttachment with the returned storageKey.
+   *
+   * @param ticketId Parent ticket ID
+   * @param payload  File metadata
+   * @returns storageKey and presignedUrl
+   */
+  async presignAttachment(
+    ticketId: string,
+    payload: PresignAttachmentRequest
+  ): Promise<PresignAttachmentResponse> {
+    const response = await httpClient.post<ApiResponse<PresignAttachmentResponse>>(
+      base + TICKET_ENDPOINTS.PRESIGN_ATTACHMENT(ticketId),
+      payload
+    );
+    return extractData(response);
+  },
+
+  /**
+   * Register an attachment in the database after a successful direct-to-S3 PUT.
+   *
+   * @param ticketId  Parent ticket ID
+   * @param payload   storageKey plus file metadata
+   * @returns The created attachment record
+   */
+  async confirmAttachment(
+    ticketId: string,
+    payload: ConfirmAttachmentRequest
+  ): Promise<AttachmentResponse> {
+    const response = await httpClient.post<ApiResponse<AttachmentResponse>>(
+      base + TICKET_ENDPOINTS.CONFIRM_ATTACHMENT(ticketId),
+      payload
     );
     return extractData(response);
   },
