@@ -85,13 +85,14 @@ export class S3StorageService implements StorageService {
   /**
    * Generate a presigned PUT URL for direct browser-to-S3 uploads.
    *
-   * The command is locked to the exact ContentType and ContentLength so S3
-   * will reject any PUT that deviates from what was authorized. The browser
-   * must send matching Content-Type and Content-Length headers on the PUT.
+   * ContentLength is intentionally excluded from the command. Browsers treat
+   * Content-Length as a forbidden header and strip it silently from fetch
+   * requests, which would cause a SignatureDoesNotMatch error because it
+   * would appear in SignedHeaders but be absent from the actual PUT.
    *
-   * @param storageKey      S3 object key to write to
-   * @param mimeType        Content-Type the browser PUT must declare
-   * @param sizeBytes       Content-Length the browser PUT must declare
+   * @param storageKey       S3 object key to write to
+   * @param mimeType         Content-Type the browser PUT must declare
+   * @param sizeBytes        Accepted to satisfy the interface; not used in signing
    * @param expiresInSeconds TTL for the presigned URL
    */
   async getPresignedUploadUrl(
@@ -100,12 +101,12 @@ export class S3StorageService implements StorageService {
     sizeBytes: number,
     expiresInSeconds: number
   ): Promise<string> {
+    void sizeBytes;
     try {
       const command = new PutObjectCommand({
         Bucket: this.bucket,
         Key: storageKey,
         ContentType: mimeType,
-        ContentLength: sizeBytes,
       });
 
       return await getSignedUrl(this.client, command, { expiresIn: expiresInSeconds });
