@@ -26,6 +26,9 @@ jobs:
         with:
           node-version: "22"
 
+      - name: Type check client
+        run: npm run type-check:client
+
       - name: Type check server
         run: npm run type-check:server
 
