@@ -1,4 +1,5 @@
 import { loadSecrets } from './secrets.js';
+import { readdirSync } from 'fs';
 
 export const handler = async (): Promise<{ success: boolean; message: string }> => {
   await loadSecrets();
@@ -18,12 +19,15 @@ export const handler = async (): Promise<{ success: boolean; message: string }> 
     migrations: {
       directory: './migrations',
       tableName: 'knex_migrations',
-      loadExtensions: ['.js'],
+      loadExtensions: ['.js', '.mjs'],
     },
   });
 
   try {
     console.log('Running migrations...');
+
+    console.log('Migration files:', readdirSync('./migrations'));
+
     const [batchNo, migrations] = (await db.migrate.latest()) as [number, string[]];
 
     if (migrations.length === 0) {
