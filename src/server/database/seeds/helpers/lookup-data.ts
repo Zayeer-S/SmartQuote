@@ -135,13 +135,12 @@ export const ANALYTICS_SCHEMAS_SEED_DATA: AnalyticsSchemaRow[] = [
     is_active: true,
   },
   {
-    name: ANALYTICS_SCHEMA_NAMES.USER_ACTIVITY,
-    description: 'Tracks user activity and engagement metrics',
+    name: ANALYTICS_SCHEMA_NAMES.TICKET_VOLUME,
+    description: 'Tracks ticket volume and statuses',
     schema_definition: {
-      user_id: 'uuid',
-      activity_type: 'string',
-      entity_type: 'string',
-      entity_id: 'uuid',
+      ticket_id: 'uuid',
+      ticket_statuses_id: 'integer',
+      created_at: 'timestamp',
       timestamp: 'timestamp',
       metadata: 'jsonb',
     },

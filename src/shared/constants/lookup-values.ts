@@ -187,7 +187,7 @@ export type QuoteConfidenceLevel =
 export const ANALYTICS_SCHEMA_NAMES = {
   TICKET_RESOLUTION_TIME: 'ticket_resolution_time',
   QUOTE_ACCURACY: 'quote_accuracy',
-  USER_ACTIVITY: 'user_activity',
+  TICKET_VOLUME: 'ticket_volume',
 } as const;
 
 export type AnalyticsSchemaName =

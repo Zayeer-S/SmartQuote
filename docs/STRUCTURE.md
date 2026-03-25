@@ -221,7 +221,11 @@ smartquote/
 │   │   │   │   ├── 001_create_lookup_tables.ts
 │   │   │   │   ├── 002_create_main_tables.ts
 │   │   │   │   ├── 003_create_link_tables.ts
-│   │   │   │   └── 004_create_update_triggers.ts
+│   │   │   │   ├── 004_create_update_triggers.ts
+│   │   │   │   ├── 005_create_priority_engine_tables.ts
+│   │   │   │   ├── 006_fix_org_tables.ts
+│   │   │   │   ├── 007_alter_ticket_attachments.ts
+│   │   │   │   └── 008_add_resolved_at_to_tickets.ts
 │   │   │   ├── seeds/
 │   │   │   │   ├── 001_insert_seed_data.ts
 │   │   │   │   └── helpers
@@ -303,13 +307,17 @@ smartquote/
 │   ├── e2e/
 │   │   ├── global.setup.ts
 │   │   ├── constants/
+│   │   │   ├── comment.smoke.data.ts
 │   │   │   ├── e2e.paths.ts
 │   │   │   └── test.user.credentials.ts
 │   │   ├── flows/
 │   │   ├── setup/
+│   │   │   ├── admin.setup.ts
 │   │   │   └── customer.setup.ts
 │   │   ├── smoke/
+│   │   │   ├── admin.comment.smoke.test.ts
 │   │   │   ├── auth.smoke.test.ts
+│   │   │   ├── customer.comment.smoke.test.ts
 │   │   │   └── ticket.smoke.test.ts
 │   │   └── utils/
 │   │       └── login.utils.ts

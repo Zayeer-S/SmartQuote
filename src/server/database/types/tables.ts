@@ -103,6 +103,7 @@ export interface Ticket extends BaseAuditRows, DeletableRow {
   id: TicketId;
   creator_user_id: UserId;
   resolved_by_user_id: UserId | null;
+  resolved_at: Date | null;
   assigned_to_user_id: UserId | null;
   organization_id: OrganizationId | null;
   title: string;
