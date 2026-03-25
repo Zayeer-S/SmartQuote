@@ -1,35 +1,36 @@
-import React from 'react';
-import {
-  SMARTQUOTE_CONFIG_KEYS,
-  TICKET_TYPES,
-  TICKET_SEVERITIES,
-} from '../../../shared/constants/lookup-values.js';
+import React, { useEffect } from 'react';
+import { SMARTQUOTE_CONFIG_KEYS } from '../../../shared/constants/lookup-values.js';
+import { useListRateProfiles } from '../../hooks/rate-profiles/useListRateProfiles.js';
 import './AdminSettingsPage.css';
 
 const RATE_PROFILE_COLUMNS = [
   'Ticket Type',
   'Severity',
+  'Business Impact',
   'Business Hours (£/hr)',
   'After Hours (£/hr)',
+  'Multiplier',
   'Actions',
 ] as const;
 
-const STUB_RATE_PROFILES = Object.values(TICKET_TYPES).flatMap((type) =>
-  Object.values(TICKET_SEVERITIES).map((severity) => ({
-    id: `rate-${type}-${severity}`,
-    ticketType: type,
-    severity,
-  }))
-);
-
 const AdminSettingsPage: React.FC = () => {
+  const { data, loading, error, execute: fetchRateProfiles } = useListRateProfiles();
+
+  useEffect(() => {
+    void fetchRateProfiles();
+    // Infinite loop if you add dependency fetchRateProfiles
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const rateProfiles = data?.rateProfiles ?? [];
+
   return (
     <div className="admin-page" data-testid="admin-settings-page">
       <div className="page-header">
         <h1 className="page-title">Settings</h1>
       </div>
 
-      {/* ── System Config ── */}
+      {/* -- System Config -- */}
       <section
         className="settings-section"
         aria-labelledby="system-config-heading"
@@ -93,7 +94,7 @@ const AdminSettingsPage: React.FC = () => {
         </form>
       </section>
 
-      {/* ── Rate Profiles ── */}
+      {/* -- Rate Profiles -- */}
       <section
         className="settings-section"
         aria-labelledby="rate-profiles-heading"
@@ -133,62 +134,107 @@ const AdminSettingsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {STUB_RATE_PROFILES.map((profile) => (
-                <tr key={profile.id} data-testid={`rate-row-${profile.id}`}>
-                  <td data-testid={`rate-type-${profile.id}`}>{profile.ticketType}</td>
-                  <td data-testid={`rate-severity-${profile.id}`}>{profile.severity}</td>
-                  <td>
-                    <input
-                      className="field-input settings-rate-input"
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      placeholder="0.00"
-                      disabled
-                      aria-label={`Business hours rate for ${profile.ticketType} ${profile.severity}`}
-                      data-testid={`rate-business-${profile.id}`}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="field-input settings-rate-input"
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      placeholder="0.00"
-                      disabled
-                      aria-label={`After hours rate for ${profile.ticketType} ${profile.severity}`}
-                      data-testid={`rate-afterhours-${profile.id}`}
-                    />
-                  </td>
-                  <td>
-                    <div className="admin-table-actions">
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm"
-                        disabled
-                        data-testid={`rate-edit-${profile.id}`}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm"
-                        disabled
-                        data-testid={`rate-delete-${profile.id}`}
-                      >
-                        Delete
-                      </button>
+              {loading && (
+                <tr data-testid="rate-profiles-loading-row">
+                  <td colSpan={RATE_PROFILE_COLUMNS.length}>
+                    <div className="empty-state">
+                      <p className="empty-state-message">Loading rate profiles...</p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              )}
+
+              {!loading && error && (
+                <tr data-testid="rate-profiles-error-row">
+                  <td colSpan={RATE_PROFILE_COLUMNS.length}>
+                    <div className="empty-state">
+                      <p className="empty-state-message">Failed to load rate profiles: {error}</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {!loading && !error && rateProfiles.length === 0 && (
+                <tr data-testid="rate-profiles-empty-row">
+                  <td colSpan={RATE_PROFILE_COLUMNS.length}>
+                    <div className="empty-state">
+                      <p className="empty-state-message">No rate profiles configured.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {!loading &&
+                !error &&
+                rateProfiles.map((profile) => {
+                  const rowId = `rate-row-${String(profile.id)}`;
+                  return (
+                    <tr
+                      key={profile.id}
+                      data-testid={rowId}
+                      style={{ opacity: profile.isActive ? 1 : 0.5 }}
+                    >
+                      <td data-testid={`rate-type-${String(profile.id)}`}>{profile.ticketType}</td>
+                      <td data-testid={`rate-severity-${String(profile.id)}`}>
+                        {profile.ticketSeverity}
+                      </td>
+                      <td data-testid={`rate-impact-${String(profile.id)}`}>
+                        {profile.businessImpact}
+                      </td>
+                      <td>
+                        <input
+                          className="field-input settings-rate-input"
+                          type="text"
+                          inputMode="decimal"
+                          defaultValue={profile.businessHoursRate.toFixed(2)}
+                          disabled
+                          aria-label={`Business hours rate for ${profile.ticketType} ${profile.ticketSeverity}`}
+                          data-testid={`rate-business-${String(profile.id)}`}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className="field-input settings-rate-input"
+                          type="text"
+                          inputMode="decimal"
+                          defaultValue={profile.afterHoursRate.toFixed(2)}
+                          disabled
+                          aria-label={`After hours rate for ${profile.ticketType} ${profile.ticketSeverity}`}
+                          data-testid={`rate-afterhours-${String(profile.id)}`}
+                        />
+                      </td>
+                      <td data-testid={`rate-multiplier-${String(profile.id)}`}>
+                        {profile.multiplier.toFixed(2)}x
+                      </td>
+                      <td>
+                        <div className="admin-table-actions">
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            disabled
+                            data-testid={`rate-edit-${String(profile.id)}`}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            disabled
+                            data-testid={`rate-delete-${String(profile.id)}`}
+                          >
+                            {profile.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
       </section>
 
-      {/* ── User Management ── */}
+      {/* -- User Management -- */}
       <section
         className="settings-section"
         aria-labelledby="user-management-heading"
