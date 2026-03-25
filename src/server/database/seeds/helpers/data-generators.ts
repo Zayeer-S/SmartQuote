@@ -202,6 +202,7 @@ export async function generateTickets(
         business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
         ticket_status_id: lookupIds.statuses[TICKET_STATUSES.RESOLVED],
         ticket_priority_id: lookupIds.priorities[TICKET_PRIORITIES.P1],
+        resolved_at: now,
         deadline: now,
         users_impacted: 1,
       },

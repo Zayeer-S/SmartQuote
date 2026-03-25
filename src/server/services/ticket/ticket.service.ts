@@ -93,6 +93,7 @@ export class TicketService {
           ticket_priority_id: ticketPriorityId,
           assigned_to_user_id: null,
           resolved_by_user_id: null,
+          resolved_at: null,
           deleted_at: null,
         } satisfies InsertData<Ticket>,
         ctx
@@ -296,6 +297,7 @@ export class TicketService {
       { id: ticketId },
       {
         resolved_by_user_id: actorId,
+        resolved_at: new Date(),
         ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.RESOLVED),
       },
       options

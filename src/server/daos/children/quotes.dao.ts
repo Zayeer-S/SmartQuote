@@ -4,6 +4,7 @@ import { LOOKUP_TABLES, MAIN_TABLES } from '../../database/config/table-names.js
 import type { Quote, QuoteWithApproval } from '../../database/types/tables.js';
 import type { QuoteId, TicketId } from '../../database/types/ids.js';
 import type { GetManyOptions, QueryOptions } from '../base/types.js';
+import { AnalyticsQuoteAccuracyRow } from '../../database/types/sanitized.types.js';
 
 export class QuotesDAO extends DeletableDAO<Quote, QuoteId> {
   constructor(db: Knex) {
@@ -124,5 +125,28 @@ export class QuotesDAO extends DeletableDAO<Quote, QuoteId> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const results = await query;
     return results as QuoteWithApproval[];
+  }
+
+  async findAnalyticsQuoteAccuracy(from: Date, to: Date): Promise<AnalyticsQuoteAccuracyRow[]> {
+    const q = MAIN_TABLES.QUOTES;
+
+    const results = await this.db(q)
+      .select(
+        `${q}.id as quoteId`,
+        `${q}.ticket_id as ticketId`,
+        `${q}.estimated_cost as estimatedCost`,
+        `${q}.final_cost as finalCost`,
+        this.db.raw(`(${q}.final_cost - ${q}.estimated_cost) AS variance`),
+        this.db.raw(
+          `GREATEST(0, (1 - ABS(${q}.final_cost - ${q}.estimated_cost) / NULLIF(${q}.estimated_cost, 0)) * 100) AS "accuracyPercentage"`
+        ),
+        `${q}.created_at as createdAt`
+      )
+      .whereNotNull(`${q}.final_cost`)
+      .whereNull(`${q}.deleted_at`)
+      .whereBetween(`${q}.created_at`, [from, to])
+      .orderBy(`${q}.created_at`, 'asc');
+
+    return results as AnalyticsQuoteAccuracyRow[];
   }
 }

@@ -19,6 +19,8 @@ import { LookupResolver } from '../lib/lookup-resolver.js';
 import { loadLookupMaps } from '../lib/lookup-maps.js';
 import { BertEmbedder } from '../lib/nlp/bert-embedder.js';
 import { PriorityEngineAnchorsDAO } from '../daos/children/ticket.priority.dao.js';
+import { AnalyticsContainer } from '../containers/analytics.container.js';
+import { createAnalyticsRoutes } from '../routes/analytics.routes.js';
 
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
@@ -123,6 +125,7 @@ export async function bootstrapApplication(
     adminContainer.rbacService,
     authContainer.orgMembersDAO
   );
+  const analyticsContainer = new AnalyticsContainer(db, adminContainer.rbacService);
 
   console.log('Registering routes...');
   app.use('/api/auth', createAuthRoutes(authContainer.authController, authContainer.authService));
@@ -144,6 +147,15 @@ export async function bootstrapApplication(
     )
   );
   app.use('/api/orgs', createOrgRoutes(orgContainer.orgController, authContainer.authService));
+
+  app.use(
+    '/api/analytics',
+    createAnalyticsRoutes(
+      analyticsContainer.analyticsController,
+      authContainer.authService,
+      adminContainer.rbacService
+    )
+  );
 
   app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });

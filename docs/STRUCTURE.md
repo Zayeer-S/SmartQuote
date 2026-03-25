@@ -6,8 +6,8 @@ smartquote/
 │   │       └── setup/
 │   └── workflows/
 │       ├── cd.yml
-│       ├── ci-unit-integaration.yml
-│       └── ci-e2e.yml
+│       ├── ci-e2e.yml
+│       └── ci-unit-integaration.yml
 │
 ├── .husky/
 │   └── pre-commit/                                 # Lint-staged
@@ -29,14 +29,13 @@ smartquote/
 │   ├── client/
 │   │   ├── main.tsx
 │   │   ├── components/                             # Pure reusable UI elements; must not know about APIs, auths, or domain concepts
-│   │   │   ├── auth/
-│   │   │   │   └── LoginIcons.tsx
-│   │   │   └── ProtectedRoute.tsx
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   └── auth/
+│   │   │       └── LoginIcons.tsx
 │   │   ├── config/                                 # Environment and config values only; no runtime logic
 │   │   │   ├── index.ts
-│   │   │   ├── env.frontend.ts
+│   │   │   └── env.frontend.ts
 │   │   ├── constants/
-│   │   │   ├── index.ts
 │   │   │   └── client.routes.ts
 │   │   ├── context/
 │   │   │   ├── auth/
@@ -46,14 +45,18 @@ smartquote/
 │   │   │   │   ├── sidebar.context.types.ts
 │   │   │   │   └── SidebarContext.ts
 │   │   │   └── theme/
-│   │   │       ├── index.ts
+│   │   │       ├── index.ts # TODO REMOVE
 │   │   │       ├── theme.context.types.ts
 │   │   │       └── ThemeContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
 │   │   │   ├── dashboard/
+│   │   │   │   ├── DateRangeFilter.tsx
+│   │   │   │   ├── QuoteAccuracyChart.tsx
+│   │   │   │   ├── ResolutionTimeChart.tsx
 │   │   │   │   ├── StatsOverview.css
 │   │   │   │   ├── StatsOverview.tsx
-│   │   │   │   └── TicketStatusChart.tsx
+│   │   │   │   ├── TicketStatusChart.tsx
+│   │   │   │   └── TicketVolumeChart.tsx
 │   │   │   └── tickets/
 │   │   │       ├── AdminQuotePanel.css
 │   │   │       ├── AdminQuotePanel.tsx
@@ -88,14 +91,28 @@ smartquote/
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules. All context hooks
 │   │   │   ├── useLogin.ts
 │   │   │   ├── useTicketFilters.ts
+│   │   │   ├── analytics/
+│   │   │   │   ├── useQuoteAccuracy.ts
+│   │   │   │   ├── useResolutionTime.ts
+│   │   │   │   └── useTicketVolume.ts
 │   │   │   ├── auth/
 │   │   │   │   ├── useQuotePermissions.ts
 │   │   │   │   ├── useTicketPermissions.ts
 │   │   │   │   └── useUserPermissions.ts
-│   │   │   ├── context/                            # All context hook
+│   │   │   ├── context/                                 All context hooks
 │   │   │   │   ├── useAuth.ts
 │   │   │   │   ├── useSidebar.ts
 │   │   │   │   └── useTheme.ts
+│   │   │   ├── org/
+│   │   │   │   ├── useAddOrgMembers.ts
+│   │   │   │   ├── useCreateOrg.ts
+│   │   │   │   ├── useDeleteOrg.ts
+│   │   │   │   ├── useGetMyOrg.ts
+│   │   │   │   ├── useGetOrg.ts
+│   │   │   │   ├── useListOrgMembers.ts
+│   │   │   │   ├── useListOrgs.ts
+│   │   │   │   ├── useRemoveOrgMember.ts
+│   │   │   │   └── useUpdateOrg.ts
 │   │   │   ├── quotes/ 
 │   │   │   │   ├── useApproveQuote.ts
 │   │   │   │   ├── useCreateManualQuote.ts
@@ -119,15 +136,19 @@ smartquote/
 │   │   ├── lib/
 │   │   │   ├── api/                                # Only place that knows endpoints in client
 │   │   │   │   ├── admin.api.ts
+│   │   │   │   ├── analytics.api.ts
 │   │   │   │   ├── auth.api.ts
 │   │   │   │   ├── http-client.ts
+│   │   │   │   ├── org.api.ts
 │   │   │   │   ├── quote.api.ts
 │   │   │   │   └── ticket.api.ts
 │   │   │   ├── storage/                            # Browser persistence tokens
 │   │   │   │   ├── keys.ts
 │   │   │   │   └── tokenStorage.ts
 │   │   │   └── utils/                              # Generic helpers only; if it knows about e.g. tickets, it doesn't belong here
-│   │   │       └── badge-utils.ts                  # Make lookup maps for XTicketCard and XTicketDetail files
+│   │   │       ├── badge-utils.ts                  # Make lookup maps for XTicketCard and XTicketDetail files
+│   │   │       ├── export-csv.ts
+│   │   │       └── export-pdf.ts
 │   │   ├── pages/                                  # Route level composition (no logic, only assemble features)
 │   │   │   ├── admin/
 │   │   │   │   ├── AdminAnalyticsPage.css
@@ -182,17 +203,19 @@ smartquote/
 │   │   │   └── redis-config.ts
 │   │   ├── containers/                             # Construct controllers by injecting dependencies; no business behaviour
 │   │   │   ├── admin.container.ts
+│   │   │   ├── analytics.container.ts
 │   │   │   ├── auth.container.ts
+│   │   │   ├── org.container.ts
 │   │   │   ├── quote.container.ts
 │   │   │   └── ticket.container.ts
 │   │   ├── controllers/
 │   │   │   ├── admin.controller.ts
+│   │   │   ├── analytics.controller.ts
 │   │   │   ├── auth.controller.ts
+│   │   │   ├── org.controller.ts
 │   │   │   ├── quote.controller.ts
 │   │   │   └── ticket.controller.ts
 │   │   ├── daos/                                   # Database persistence/access only - no validation, permissions, or workflow rules
-│   │   │   ├── index.ts
-│   │   │   ├── dao.factory.ts
 │   │   │   ├── base/
 │   │   │   │   ├── activatable.dao.ts
 │   │   │   │   ├── base.dao.ts
@@ -201,6 +224,7 @@ smartquote/
 │   │   │   │   ├── lookup.table.dao.ts
 │   │   │   │   └── types.ts
 │   │   │   └── children/
+│   │   │       ├── organizations.domain.dao.ts
 │   │   │       ├── permissions.dao.ts
 │   │   │       ├── quote.approvals.dao.ts
 │   │   │       ├── quote.calculation.rules.dao.ts
@@ -216,12 +240,17 @@ smartquote/
 │   │   │       └── users.dao.ts
 │   │   ├── database/                               # Connection, migrations, and schema definitions only.
 │   │   │   ├── connection.ts
+│   │   │   ├── migration-utils.ts
 │   │   │   ├── config/table-names.ts
 │   │   │   ├── migrations/
 │   │   │   │   ├── 001_create_lookup_tables.ts
 │   │   │   │   ├── 002_create_main_tables.ts
 │   │   │   │   ├── 003_create_link_tables.ts
-│   │   │   │   └── 004_create_update_triggers.ts
+│   │   │   │   ├── 004_create_update_triggers.ts
+│   │   │   │   ├── 005_create_priority_engine_tables.ts
+│   │   │   │   ├── 006_fix_org_tables.ts
+│   │   │   │   ├── 007_alter_ticket_attachments.ts
+│   │   │   │   └── 008_add_resolved_at_to_tickets.ts
 │   │   │   ├── seeds/
 │   │   │   │   ├── 001_insert_seed_data.ts
 │   │   │   │   └── helpers
@@ -247,9 +276,14 @@ smartquote/
 │   │   │   └── rbac.middleware.ts
 │   │   ├── routes/                                 # Map URLs to controllers only - no logic allowed.
 │   │   │   ├── admin.routes.ts
+│   │   │   ├── analytics.routes.ts
 │   │   │   ├── auth.routes.ts
+│   │   │   ├── org.routes.ts
 │   │   │   └── ticket.routes.ts
 │   │   ├── services/                               # All business rules/workflows here; nothing else enforces domain behaviour. No HTTP here.
+│   │   │   ├── analytics/
+│   │   │   │   ├── analytics.errors.ts
+│   │   │   │   └── analytics.service.ts
 │   │   │   ├── auth/
 │   │   │   │   ├── auth.config.types.ts
 │   │   │   │   ├── auth.errors.ts
@@ -272,6 +306,12 @@ smartquote/
 │   │   │   ├── rbac/
 │   │   │   │   ├── org.rbac.service.ts             # Local/Org RBAC
 │   │   │   │   └── rbac.service.ts                 # System RBAC
+│   │   │   ├── storage/
+│   │   │   │   ├── local.storage.service.ts
+│   │   │   │   ├── s3.storage.service.ts
+│   │   │   │   ├── storage.errors.ts
+│   │   │   │   ├── storage.service.ts
+│   │   │   │   └── storage.service.types.ts
 │   │   │   └── ticket/
 │   │   │       ├── comment.service.ts
 │   │   │       ├── ticket.errors.ts
@@ -293,6 +333,7 @@ smartquote/
 │       │   ├── endpoints.ts
 │       │   └── lookup-values.ts
 │       └── contracts/                              # Define all DTO types here so frontend/backend share to prevent drift
+│           ├── analytics-contracts.ts
 │           ├── auth-contracts.ts
 │           ├── org-contracts.ts
 │           ├── quote-contracts.ts
@@ -303,13 +344,17 @@ smartquote/
 │   ├── e2e/
 │   │   ├── global.setup.ts
 │   │   ├── constants/
+│   │   │   ├── comment.smoke.data.ts
 │   │   │   ├── e2e.paths.ts
 │   │   │   └── test.user.credentials.ts
 │   │   ├── flows/
 │   │   ├── setup/
+│   │   │   ├── admin.setup.ts
 │   │   │   └── customer.setup.ts
 │   │   ├── smoke/
+│   │   │   ├── admin.comment.smoke.test.ts
 │   │   │   ├── auth.smoke.test.ts
+│   │   │   ├── customer.comment.smoke.test.ts
 │   │   │   └── ticket.smoke.test.ts
 │   │   └── utils/
 │   │       └── login.utils.ts
