@@ -1,10 +1,10 @@
-import type { AuthConfig, AuthRateLimitConfig, PasswordConfig } from '../services/auth/index';
-import { backEnv } from './env.backend';
+import type { AuthConfig, AuthRateLimitConfig, PasswordConfig } from '../services/auth/index.js';
+import { backEnv } from './env.backend.js';
 
 export const passwordConfig: PasswordConfig = {
   saltRounds: backEnv.BCRYPT_SALT_ROUNDS,
   minLength: 8,
-  maxLength: 8,
+  maxLength: 128,
   requireSpecialChar: true,
   requireNumber: true,
   requireUppercase: true,
@@ -21,6 +21,7 @@ export const authRateLimitConfig: AuthRateLimitConfig = {
     windowMs: 15 * 60 * 1000,
     maxAttempts: 100,
   },
+  disabled: backEnv.NODE_ENV === 'test',
 };
 
 export const authConfig: AuthConfig = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '../../hooks/contexts/useTheme';
+import { useTheme } from '../../hooks/contexts/useTheme.js';
 import './CustomerSettingsPage.css';
 
 const SettingsPage: React.FC = () => {

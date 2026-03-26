@@ -1,15 +1,15 @@
 import type { Knex } from 'knex';
 import {
   AUTH_ROLES,
+  ORG_ROLES,
   PERMISSIONS,
   TICKET_TYPES,
   TICKET_SEVERITIES,
   BUSINESS_IMPACTS,
   TICKET_PRIORITIES,
   QUOTE_EFFORT_LEVELS,
-} from '../../../shared/constants';
+} from '../../../shared/constants/index.js';
 import {
-  getDevPasswordHash,
   buildAllLookupIdMaps,
   generateOrganizations,
   generateUsers,
@@ -17,6 +17,7 @@ import {
   generateQuoteApprovals,
   generateQuotes,
   ROLES_SEED_DATA,
+  ORG_ROLES_SEED_DATA,
   PERMISSIONS_SEED_DATA,
   NOTIFICATION_TYPES_SEED_DATA,
   NOTIFICATION_TOKEN_TYPES_SEED_DATA,
@@ -33,7 +34,14 @@ import {
   QUOTE_CONFIDENCE_LEVELS_SEED_DATA,
   ANALYTICS_SCHEMAS_SEED_DATA,
   SMARTQUOTE_CONFIGS_SEED_DATA,
-} from './helpers';
+  generatePriorityEngineRules,
+  generatePriorityEngineAnchors,
+} from './helpers/index.js';
+
+// Pre-computed bcrypt hash of 'password' with 12 salt rounds.
+// Avoids importing bcrypt (native addon) into the seed Lambda bundle.
+// Re-generate if rounds change: node -e "require('bcrypt').hash('password',12).then(console.log)"
+const DEV_PASSWORD_HASH = '$2b$12$Q9dPRKBx8iHKZn7kMzhyOOrCzQs6RLYoecbB5YGDcECpvuf8URGcC';
 
 export async function seed(knex: Knex): Promise<void> {
   console.log('Truncating existing tables');
@@ -44,18 +52,19 @@ export async function seed(knex: Knex): Promise<void> {
     'quote_effort_level_ranges',
     'resource_utilizations',
     'sessions',
-    'sla_policies',
     'organization_members',
     'ticket_attachments',
     'ticket_comments',
     'quote_detail_revisions',
     'user_notification_preferences',
     'role_permissions',
+    'org_role_permissions',
     // Main
     'analytics',
     'quote_calculation_rules',
     'rate_profiles',
     'quotes',
+    'sla_policies',
     'quote_approvals',
     'tickets',
     'users',
@@ -78,16 +87,26 @@ export async function seed(knex: Knex): Promise<void> {
     'organizations',
     'permissions',
     'notification_types',
+    'org_roles',
     'roles',
+    // 005:
+    'priority_engine_anchors',
+    'ticket_priority_thresholds',
+    'ticket_priority_rules',
+    // 006:
+    'org_roles',
+    'org_role_permissions',
   ];
 
-  for (const table of truncateTables) {
-    await knex(table).del();
-  }
+  await knex.raw(
+    `TRUNCATE TABLE ${truncateTables.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`
+  );
 
   console.log('Starting seeding');
 
   await knex('roles').insert(ROLES_SEED_DATA);
+
+  await knex('org_roles').insert(ORG_ROLES_SEED_DATA);
 
   await knex('permissions').insert(PERMISSIONS_SEED_DATA);
 
@@ -123,15 +142,12 @@ export async function seed(knex: Knex): Promise<void> {
 
   const lookupIds = await buildAllLookupIdMaps(knex);
 
-  const passwordHash = await getDevPasswordHash();
+  const passwordHash = DEV_PASSWORD_HASH;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { customer1Id, customer2Id, supportAgentId, managerId, adminId } = await generateUsers(
+  const { customer1Id, customer2Id, customer3Id, supportAgentId, managerId } = await generateUsers(
     knex,
     {
       passwordHash,
-      org1Id,
-      org2Id,
       roleIdMap: lookupIds.roles,
     }
   );
@@ -172,148 +188,302 @@ export async function seed(knex: Knex): Promise<void> {
     },
   });
 
-  // Generate rate profiles (representative combinations)
-  await knex('rate_profiles').insert([
-    // Critical Business Impact across all severities
+  const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+  const effectiveFrom = new Date();
+  const effectiveTo = new Date(Date.now() + ONE_YEAR_MS);
+
+  const rateProfileRows = [
+    // SUPPORT
+    // LOW severity
     {
-      name: 'Critical Impact - Low Severity',
       ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
       ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.LOW],
-      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
-      base_hourly_rate: 100,
-      multiplier: 1.5,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // +1 year
-    },
-    {
-      name: 'Critical Impact - Medium Severity',
-      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
-      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
-      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
-      base_hourly_rate: 110,
-      multiplier: 1.75,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
-    {
-      name: 'Critical Impact - High Severity',
-      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
-      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
-      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
-      base_hourly_rate: 120,
-      multiplier: 2.0,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
-    {
-      name: 'Critical Impact - Critical Severity',
-      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
-      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
-      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
-      base_hourly_rate: 150,
-      multiplier: 2.5,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
-
-    // Critical Severity across all business impacts
-    {
-      name: 'Critical Severity - Minor Impact',
-      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
-      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
       business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MINOR],
-      base_hourly_rate: 120,
-      multiplier: 1.8,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
-    {
-      name: 'Critical Severity - Moderate Impact',
-      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
-      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
-      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
-      base_hourly_rate: 130,
-      multiplier: 2.0,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
-    {
-      name: 'Critical Severity - Major Impact',
-      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
-      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
-      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
-      base_hourly_rate: 140,
-      multiplier: 2.25,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
-
-    // Common medium scenarios
-    {
-      name: 'Medium Severity - Moderate Impact',
-      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
-      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
-      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
-      base_hourly_rate: 90,
-      multiplier: 1.25,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
-    {
-      name: 'Medium Severity - Major Impact',
-      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
-      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
-      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
-      base_hourly_rate: 100,
-      multiplier: 1.5,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-    },
-
-    // Enhancement-specific rates
-    {
-      name: 'Enhancement - Low Priority',
-      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
-      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.LOW],
-      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MINOR],
-      base_hourly_rate: 75,
+      business_hours_rate: 70,
+      after_hours_rate: 105,
       multiplier: 1.0,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
     },
     {
-      name: 'Enhancement - Medium Priority',
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.LOW],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
+      business_hours_rate: 75,
+      after_hours_rate: 112.5,
+      multiplier: 1.0,
+    },
+    // MEDIUM severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MINOR],
+      business_hours_rate: 80,
+      after_hours_rate: 120,
+      multiplier: 1.0,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
+      business_hours_rate: 85,
+      after_hours_rate: 127.5,
+      multiplier: 1.25,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
+      business_hours_rate: 95,
+      after_hours_rate: 142.5,
+      multiplier: 1.5,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
+      business_hours_rate: 105,
+      after_hours_rate: 157.5,
+      multiplier: 1.75,
+    },
+    // HIGH severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
+      business_hours_rate: 100,
+      after_hours_rate: 150,
+      multiplier: 1.25,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
+      business_hours_rate: 115,
+      after_hours_rate: 172.5,
+      multiplier: 1.75,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
+      business_hours_rate: 125,
+      after_hours_rate: 187.5,
+      multiplier: 2.0,
+    },
+    // CRITICAL severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
+      business_hours_rate: 135,
+      after_hours_rate: 202.5,
+      multiplier: 2.0,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.SUPPORT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
+      business_hours_rate: 150,
+      after_hours_rate: 225,
+      multiplier: 2.5,
+    },
+
+    // INCIDENT
+    // LOW severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.LOW],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MINOR],
+      business_hours_rate: 75,
+      after_hours_rate: 112.5,
+      multiplier: 1.0,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.LOW],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
+      business_hours_rate: 80,
+      after_hours_rate: 120,
+      multiplier: 1.0,
+    },
+    // MEDIUM severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MINOR],
+      business_hours_rate: 85,
+      after_hours_rate: 127.5,
+      multiplier: 1.0,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
+      business_hours_rate: 90,
+      after_hours_rate: 135,
+      multiplier: 1.25,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
+      business_hours_rate: 100,
+      after_hours_rate: 150,
+      multiplier: 1.5,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
+      business_hours_rate: 110,
+      after_hours_rate: 165,
+      multiplier: 1.75,
+    },
+    // HIGH severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
+      business_hours_rate: 110,
+      after_hours_rate: 165,
+      multiplier: 1.25,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
+      business_hours_rate: 120,
+      after_hours_rate: 180,
+      multiplier: 1.75,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
+      business_hours_rate: 135,
+      after_hours_rate: 202.5,
+      multiplier: 2.0,
+    },
+    // CRITICAL severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
+      business_hours_rate: 140,
+      after_hours_rate: 210,
+      multiplier: 2.0,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.INCIDENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
+      business_hours_rate: 155,
+      after_hours_rate: 232.5,
+      multiplier: 2.5,
+    },
+
+    // ENHANCEMENT
+    // LOW severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.LOW],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MINOR],
+      business_hours_rate: 65,
+      after_hours_rate: 97.5,
+      multiplier: 1.0,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.LOW],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
+      business_hours_rate: 70,
+      after_hours_rate: 105,
+      multiplier: 1.0,
+    },
+    // MEDIUM severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MINOR],
+      business_hours_rate: 75,
+      after_hours_rate: 112.5,
+      multiplier: 1.0,
+    },
+    {
       ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
       ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
       business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
-      base_hourly_rate: 85,
+      business_hours_rate: 80,
+      after_hours_rate: 120,
       multiplier: 1.1,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
     },
     {
-      name: 'Enhancement - High Priority',
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
+      business_hours_rate: 90,
+      after_hours_rate: 135,
+      multiplier: 1.3,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.MEDIUM],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
+      business_hours_rate: 100,
+      after_hours_rate: 150,
+      multiplier: 1.5,
+    },
+    // HIGH severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MODERATE],
+      business_hours_rate: 95,
+      after_hours_rate: 142.5,
+      multiplier: 1.25,
+    },
+    {
       ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
       ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
       business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
-      base_hourly_rate: 95,
-      multiplier: 1.3,
-      is_active: true,
-      effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      business_hours_rate: 105,
+      after_hours_rate: 157.5,
+      multiplier: 1.5,
     },
-  ]);
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.HIGH],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
+      business_hours_rate: 115,
+      after_hours_rate: 172.5,
+      multiplier: 1.75,
+    },
+    // CRITICAL severity
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.MAJOR],
+      business_hours_rate: 120,
+      after_hours_rate: 180,
+      multiplier: 1.75,
+    },
+    {
+      ticket_type_id: lookupIds.ticketTypes[TICKET_TYPES.ENHANCEMENT],
+      ticket_severity_id: lookupIds.ticketSeverities[TICKET_SEVERITIES.CRITICAL],
+      business_impact_id: lookupIds.businessImpacts[BUSINESS_IMPACTS.CRITICAL],
+      business_hours_rate: 135,
+      after_hours_rate: 202.5,
+      multiplier: 2.0,
+    },
+  ];
+
+  await knex('rate_profiles').insert(
+    rateProfileRows.map((row) => ({
+      ...row,
+      is_active: true,
+      effective_from: effectiveFrom,
+      effective_to: effectiveTo,
+    }))
+  );
 
   // Generate quote calculation rules
   await knex('quote_calculation_rules').insert([
@@ -469,7 +639,15 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
+      permission_id: lookupIds.permissions[PERMISSIONS.TICKETS_DELETE_OWN],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
       permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_READ_OWN],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
+      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_REJECT],
     },
 
     // SUPPORT AGENT permissions
@@ -497,8 +675,28 @@ export async function seed(knex: Knex): Promise<void> {
       role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
       permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_UPDATE],
     },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.USERS_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.USERS_UPDATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.ANALYTICS_READ],
+    },
 
-    // MANAGER permissions (all Support Agent perms + approval)
+    // MANAGER permissions
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
       permission_id: lookupIds.permissions[PERMISSIONS.TICKETS_READ_ALL],
@@ -541,7 +739,59 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.USERS_UPDATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.USERS_DELETE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_CREATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_UPDATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_DELETE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_CREATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_UPDATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_DELETE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ANALYTICS_EXPORT],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
       permission_id: lookupIds.permissions[PERMISSIONS.ANALYTICS_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.CONFIG_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.CONFIG_UPDATE],
     },
 
     // ADMIN permissions (all permissions)
@@ -551,17 +801,41 @@ export async function seed(knex: Knex): Promise<void> {
     })),
   ]);
 
-  // Organization Members - map customers to their orgs
+  // Org Role Permissions
+  await knex('org_role_permissions').insert([
+    // MEMBER: can view members of their own org
+    {
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORG_VIEW_MEMBERS],
+    },
+
+    // MANAGER: can view and manage members of their own org
+    {
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORG_VIEW_MEMBERS],
+    },
+    {
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORG_MANAGE_MEMBERS],
+    },
+  ]);
+
+  // Organization Members - map customers to their orgs with org roles
   await knex('organization_members').insert([
     {
       organization_id: org1Id,
       user_id: customer1Id,
-      role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
     },
     {
       organization_id: org2Id,
       user_id: customer2Id,
-      role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
+    },
+    {
+      organization_id: org2Id,
+      user_id: customer3Id,
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
     },
   ]);
 
@@ -638,54 +912,77 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Demo Corporation - Standard SLA',
       user_id: null,
       organization_id: org1Id,
-      contract: {
-        hourly_rate: 120,
-        response_times: {
-          critical: '1 hour',
-          high: '4 hours',
-          medium: '1 business day',
-          low: '3 business days',
-        },
-        resolution_times: {
-          critical: '4 hours',
-          high: '1 business day',
-          medium: '3 business days',
-          low: '5 business days',
-        },
-      },
+      is_active: true,
+      contract: JSON.stringify({
+        severityTargets: [
+          {
+            severity: TICKET_SEVERITIES.CRITICAL,
+            responseTimeHours: 1,
+            resolutionTimeHours: 4,
+          },
+          {
+            severity: TICKET_SEVERITIES.HIGH,
+            responseTimeHours: 4,
+            resolutionTimeHours: 8,
+          },
+          {
+            severity: TICKET_SEVERITIES.MEDIUM,
+            responseTimeHours: 8,
+            resolutionTimeHours: 24,
+          },
+          {
+            severity: TICKET_SEVERITIES.LOW,
+            responseTimeHours: 24,
+            resolutionTimeHours: 72,
+          },
+        ],
+      }),
       effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      effective_to: new Date(Date.now() + ONE_YEAR_MS),
     },
     {
       name: 'Test Industries Ltd - Premium SLA',
       user_id: null,
       organization_id: org2Id,
-      contract: {
-        hourly_rate: 150,
-        response_times: {
-          critical: '30 minutes',
-          high: '2 hours',
-          medium: '4 hours',
-          low: '1 business day',
-        },
-        resolution_times: {
-          critical: '2 hours',
-          high: '4 hours',
-          medium: '1 business day',
-          low: '3 business days',
-        },
-      },
+      is_active: true,
+      contract: JSON.stringify({
+        severityTargets: [
+          {
+            severity: TICKET_SEVERITIES.CRITICAL,
+            responseTimeHours: 0.5,
+            resolutionTimeHours: 2,
+          },
+          {
+            severity: TICKET_SEVERITIES.HIGH,
+            responseTimeHours: 2,
+            resolutionTimeHours: 4,
+          },
+          {
+            severity: TICKET_SEVERITIES.MEDIUM,
+            responseTimeHours: 4,
+            resolutionTimeHours: 8,
+          },
+          {
+            severity: TICKET_SEVERITIES.LOW,
+            responseTimeHours: 8,
+            resolutionTimeHours: 24,
+          },
+        ],
+      }),
       effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      effective_to: new Date(Date.now() + ONE_YEAR_MS),
     },
   ]);
 
   await knex('smartquote_configs').insert(SMARTQUOTE_CONFIGS_SEED_DATA);
 
+  await generatePriorityEngineRules(knex, lookupIds.ticketPriorities);
+  await generatePriorityEngineAnchors(knex);
+
   console.log('\nSeeding complete');
   console.log('Summary:');
   console.log('\t- 2 Organizations');
-  console.log('\t- 5 Users (all password: "password")');
+  console.log('\t- 7 Users (all password: "password")');
   console.log('\t- 4 Tickets');
   console.log('\t- 6 Quotes (including version history)');
   console.log('\t- 12 Rate Profiles');
@@ -693,9 +990,11 @@ export async function seed(knex: Knex): Promise<void> {
   console.log('\t- 2 SLA Policies');
   console.log('\t- All lookup tables populated\n');
   console.log('Test User Logins:');
-  console.log('\t - customer1@demo.com - Customer at Demo Corporation');
-  console.log('\t - customer2@demo.com - Customer at Test Industries Ltd');
-  console.log('\t - agent@giacom.com - Support Agent');
-  console.log('\t - manager@giacom.com - Manager');
-  console.log('\t - admin@giacom.com - Admin\n');
+  console.log(`\t - c1@demo.com - Customer at Demo Corporation`);
+  console.log(`\t - c2@demo.com - Customer at Test Industries Ltd`);
+  console.log(`\t - c3@demo.com - Customer at Test Industries Ltd`);
+  console.log(`\t - c4@demo.com - No organization`);
+  console.log(`\t - agent@giacom.com - Support Agent`);
+  console.log(`\t - manager@giacom.com - Manager`);
+  console.log(`\t - admin@giacom.com - Admin\n`);
 }

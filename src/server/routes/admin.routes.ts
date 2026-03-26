@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import type { AdminController } from '../controllers/admin.controller';
-import type { AuthService } from '../services/auth/auth.service';
-import type { RBACService } from '../services/rbac/rbac.service';
-import { createAuthMiddleware } from '../middleware/auth.middleware';
-import { requirePermission } from '../middleware/rbac.middleware';
+import type { AdminController } from '../controllers/admin.controller.js';
+import type { AuthService } from '../services/auth/auth.service.js';
+import type { RBACService } from '../services/rbac/rbac.service.js';
+import { createAuthMiddleware } from '../middleware/auth.middleware.js';
+import { requirePermission } from '../middleware/rbac.middleware.js';
 import { ADMIN_ENDPOINTS, PERMISSIONS } from '../../shared/constants';
 
 export function createAdminRoutes(

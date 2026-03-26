@@ -1,36 +1,44 @@
-import type { QuotesDAO } from '../../daos/children/quotes.dao';
-import type { TicketsDAO } from '../../daos/children/tickets.dao';
-import type { UsersDAO } from '../../daos/children/users.dao';
-import type { RBACService } from '../rbac/rbac.service';
+import type { QuotesDAO } from '../../daos/children/quotes.dao.js';
+import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
+import type { UsersDAO } from '../../daos/children/users.dao.js';
+import type { RBACService } from '../rbac/rbac.service.js';
 import type {
   Quote,
   QuoteApproval,
   QuoteDetailRevision,
   QuoteWithApproval,
-} from '../../database/types/tables';
+} from '../../database/types/tables.js';
 import type {
+  OrganizationId,
   QuoteApprovalId,
-  QuoteApprovalStatusId,
-  QuoteConfidenceId,
-  QuoteEffortLevelId,
   QuoteId,
   TicketId,
   UserId,
-} from '../../database/types/ids';
-import type { InsertData, TransactionContext } from '../../daos/base/types';
-import { PERMISSIONS } from '../../../shared/constants/lookup-values';
-import type { QuoteApprovalsDAO } from '../../daos/children/quote.approvals.dao';
-import type { QuoteDetailRevisionsDAO } from '../../daos/children/quote.detail.revisions.dao';
-import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket.errors';
-import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors';
+} from '../../database/types/ids.js';
+import type { InsertData, TransactionContext } from '../../daos/base/types.js';
+import {
+  PERMISSIONS,
+  QUOTE_APPROVAL_STATUSES,
+  QUOTE_CREATORS,
+} from '../../../shared/constants/lookup-values.js';
+import type {
+  QuoteConfidenceLevel,
+  QuoteEffortLevel,
+} from '../../../shared/constants/lookup-values.js';
+import type { QuoteApprovalsDAO } from '../../daos/children/quote.approvals.dao.js';
+import type { QuoteDetailRevisionsDAO } from '../../daos/children/quote.detail.revisions.dao.js';
+import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket.errors.js';
+import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
+import type { LookupResolver } from '../../lib/lookup-resolver.js';
+import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
 
 export interface CreateManualQuoteData {
   estimated_hours_minimum: number;
   estimated_hours_maximum: number;
   hourly_rate: number;
   fixed_cost: number;
-  quote_effort_level_id: QuoteEffortLevelId;
-  quote_confidence_level_id: QuoteConfidenceId | null;
+  quote_effort_level: QuoteEffortLevel;
+  quote_confidence_level: QuoteConfidenceLevel | null;
 }
 
 export interface UpdateQuoteData {
@@ -38,8 +46,8 @@ export interface UpdateQuoteData {
   estimated_hours_maximum?: number;
   hourly_rate?: number;
   fixed_cost?: number;
-  quote_effort_level_id?: QuoteEffortLevelId;
-  quote_confidence_level_id?: QuoteConfidenceId | null;
+  quote_effort_level?: QuoteEffortLevel;
+  quote_confidence_level?: QuoteConfidenceLevel | null;
 }
 
 export class QuoteService {
@@ -48,7 +56,9 @@ export class QuoteService {
   private quoteDetailRevisionsDAO: QuoteDetailRevisionsDAO;
   private ticketsDAO: TicketsDAO;
   private usersDAO: UsersDAO;
+  private orgMembersDAO: OrganizationMembersDAO;
   private rbacService: RBACService;
+  private lookup: LookupResolver;
 
   constructor(
     quotesDAO: QuotesDAO,
@@ -56,14 +66,18 @@ export class QuoteService {
     quoteDetailRevisionsDAO: QuoteDetailRevisionsDAO,
     ticketsDAO: TicketsDAO,
     usersDAO: UsersDAO,
-    rbacService: RBACService
+    orgMembersDAO: OrganizationMembersDAO,
+    rbacService: RBACService,
+    lookup: LookupResolver
   ) {
     this.quotesDAO = quotesDAO;
     this.quoteApprovalsDAO = quoteApprovalsDAO;
     this.quoteDetailRevisionsDAO = quoteDetailRevisionsDAO;
     this.ticketsDAO = ticketsDAO;
     this.usersDAO = usersDAO;
+    this.orgMembersDAO = orgMembersDAO;
     this.rbacService = rbacService;
+    this.lookup = lookup;
   }
 
   /**
@@ -104,13 +118,13 @@ export class QuoteService {
     ticketId: TicketId,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<Quote[]> {
+  ): Promise<QuoteWithApproval[]> {
     const ticket = await this.ticketsDAO.getById(ticketId, options);
     if (!ticket) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
 
     await this.assertTicketVisibility(ticket, actorId, options);
 
-    return this.quotesDAO.findByTicket(ticketId, options);
+    return this.quotesDAO.findManyWithApproval(ticketId, options);
   }
 
   /**
@@ -163,12 +177,13 @@ export class QuoteService {
         estimated_cost: estimatedCost,
         fixed_cost: data.fixed_cost,
         final_cost: null,
-        quote_confidence_level_id: data.quote_confidence_level_id ?? null,
+        quote_confidence_level_id: data.quote_confidence_level
+          ? this.lookup.quoteConfidenceLevelId(data.quote_confidence_level)
+          : null,
         quote_approval_id: null,
-        // MANUAL creator (id=1), P3 priority (id=3) - defaults until engine runs
-        quote_creator_id: 1 as unknown as Quote['quote_creator_id'],
+        quote_creator_id: this.lookup.quoteCreatorId(QUOTE_CREATORS.MANUAL),
         suggested_ticket_priority_id: ticket.ticket_priority_id,
-        quote_effort_level_id: data.quote_effort_level_id,
+        quote_effort_level_id: this.lookup.quoteEffortLevelId(data.quote_effort_level),
         deleted_at: null,
       } satisfies InsertData<Quote>,
       options
@@ -206,13 +221,16 @@ export class QuoteService {
     const existing = await this.quotesDAO.getById(quoteId, options);
     if (!existing) throw new QuoteError(QUOTE_ERROR_MSGS.NOT_FOUND, 404);
 
-    const mergedMin = data.estimated_hours_minimum ?? existing.estimated_hours_minimum;
-    const mergedMax = data.estimated_hours_maximum ?? existing.estimated_hours_maximum;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+    const mergedMin = data.estimated_hours_minimum ?? Number(existing.estimated_hours_minimum);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+    const mergedMax = data.estimated_hours_maximum ?? Number(existing.estimated_hours_maximum);
     if (mergedMax < mergedMin) throw new QuoteError(QUOTE_ERROR_MSGS.MIN_MAX_HOURS, 422);
 
-    // Build the new version's data by merging changes onto the existing quote
-    const hourly = data.hourly_rate ?? existing.hourly_rate;
-    const fixed = data.fixed_cost ?? existing.fixed_cost;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+    const hourly = data.hourly_rate ?? Number(existing.hourly_rate);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+    const fixed = data.fixed_cost ?? Number(existing.fixed_cost);
     const midHours = (mergedMin + mergedMax) / 2;
 
     const newQuoteData: InsertData<Quote> = {
@@ -226,13 +244,17 @@ export class QuoteService {
       fixed_cost: fixed,
       final_cost: existing.final_cost,
       quote_confidence_level_id:
-        data.quote_confidence_level_id !== undefined
-          ? data.quote_confidence_level_id
+        data.quote_confidence_level !== undefined
+          ? data.quote_confidence_level
+            ? this.lookup.quoteConfidenceLevelId(data.quote_confidence_level)
+            : null
           : existing.quote_confidence_level_id,
-      quote_approval_id: null, // new version starts without an approval
+      quote_approval_id: null,
       quote_creator_id: existing.quote_creator_id,
       suggested_ticket_priority_id: existing.suggested_ticket_priority_id,
-      quote_effort_level_id: data.quote_effort_level_id ?? existing.quote_effort_level_id,
+      quote_effort_level_id: data.quote_effort_level
+        ? this.lookup.quoteEffortLevelId(data.quote_effort_level)
+        : existing.quote_effort_level_id,
       deleted_at: null,
     };
 
@@ -292,7 +314,7 @@ export class QuoteService {
       {
         approved_by_user_id: actorId,
         user_role: actorWithRole.role?.name ?? 'unknown',
-        approval_status_id: 1 as unknown as QuoteApprovalStatusId,
+        approval_status_id: this.lookup.quoteApprovalStatusId(QUOTE_APPROVAL_STATUSES.PENDING),
         comment: null,
         approved_at: null,
       } satisfies InsertData<QuoteApproval>,
@@ -340,18 +362,20 @@ export class QuoteService {
     const approval = await this.quoteApprovalsDAO.getById(quote.quote_approval_id, options);
     if (!approval) throw new QuoteError(QUOTE_ERROR_MSGS.NOT_PENDING, 422);
 
-    // PENDING = 1, APPROVED = 2
-    if ((approval.approval_status_id as unknown as number) === 2) {
+    const approvedId = this.lookup.quoteApprovalStatusId(QUOTE_APPROVAL_STATUSES.APPROVED);
+    const pendingId = this.lookup.quoteApprovalStatusId(QUOTE_APPROVAL_STATUSES.PENDING);
+
+    if ((approval.approval_status_id as unknown as number) === (approvedId as unknown as number)) {
       throw new QuoteError(QUOTE_ERROR_MSGS.ALREADY_APPROVED, 422);
     }
-    if ((approval.approval_status_id as unknown as number) !== 1) {
+    if ((approval.approval_status_id as unknown as number) !== (pendingId as unknown as number)) {
       throw new QuoteError(QUOTE_ERROR_MSGS.NOT_PENDING, 422);
     }
 
     await this.quoteApprovalsDAO.update(
       { id: quote.quote_approval_id },
       {
-        approval_status_id: 2 as unknown as QuoteApprovalStatusId,
+        approval_status_id: approvedId,
         approved_at: new Date(),
         comment,
       },
@@ -395,16 +419,15 @@ export class QuoteService {
     const approval = await this.quoteApprovalsDAO.getById(quote.quote_approval_id, options);
     if (!approval) throw new QuoteError(QUOTE_ERROR_MSGS.NOT_PENDING, 422);
 
-    // Only PENDING (id=1) quotes may be rejected
-    if ((approval.approval_status_id as unknown as number) !== 1) {
+    const pendingId = this.lookup.quoteApprovalStatusId(QUOTE_APPROVAL_STATUSES.PENDING);
+    if ((approval.approval_status_id as unknown as number) !== (pendingId as unknown as number)) {
       throw new QuoteError(QUOTE_ERROR_MSGS.NOT_PENDING, 422);
     }
 
-    // REJECTED = 3
     await this.quoteApprovalsDAO.update(
       { id: quote.quote_approval_id },
       {
-        approval_status_id: 3 as unknown as QuoteApprovalStatusId,
+        approval_status_id: this.lookup.quoteApprovalStatusId(QUOTE_APPROVAL_STATUSES.REJECTED),
         comment,
         approved_at: new Date(),
       },
@@ -438,8 +461,6 @@ export class QuoteService {
     return this.quoteDetailRevisionsDAO.findByQuote(quoteId, options);
   }
 
-  // ─── Private Helpers ───────────────────────────────────────────────────────
-
   /** Determine the next version number for a ticket's quotes */
   private async resolveNextVersion(
     ticketId: TicketId,
@@ -457,7 +478,7 @@ export class QuoteService {
    * the old and new quote snapshots.
    */
   private async writeRevisions(
-    oldQuoteId: QuoteId,
+    _oldQuoteId: QuoteId,
     newQuoteId: QuoteId,
     old: Quote,
     next: InsertData<Quote>,
@@ -477,8 +498,10 @@ export class QuoteService {
     const revisions: InsertData<QuoteDetailRevision>[] = [];
 
     for (const field of trackableFields) {
-      const oldVal = String(old[field as keyof Quote] ?? '');
-      const newVal = String(next[field] ?? '');
+      const oldRaw = old[field as keyof Quote];
+      const newRaw = next[field];
+      const oldVal = String(Number(oldRaw));
+      const newVal = String(Number(newRaw));
       if (oldVal === newVal) continue;
 
       revisions.push({
@@ -520,9 +543,24 @@ export class QuoteService {
     if (canReadAll) return;
 
     const actor = await this.usersDAO.getById(actorId, options);
+    if (!actor) throw new ForbiddenError(QUOTE_ERROR_MSGS.USER_NOT_FOUND);
+
     const t = ticket as { organization_id: unknown };
-    if (actor?.organization_id !== t.organization_id) {
+
+    const orgId = await this.getOrgId(actor.id);
+
+    if (orgId !== t.organization_id) {
       throw new ForbiddenError(QUOTE_ERROR_MSGS.FORBIDDEN);
     }
+  }
+
+  private async getOrgId(actorId: UserId): Promise<OrganizationId | null> {
+    const orgMemberships = await this.orgMembersDAO.findByUser(actorId);
+
+    if (orgMemberships && orgMemberships.length > 0) {
+      return orgMemberships[0].organization_id;
+    }
+
+    return null;
   }
 }

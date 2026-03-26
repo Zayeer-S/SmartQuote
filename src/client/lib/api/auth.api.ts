@@ -6,9 +6,9 @@ import type {
   LoginRequest,
   LoginResponse,
   LogoutResponse,
-} from '../../../shared/contracts/auth-contracts';
-import { AUTH_ENDPOINTS } from '../../../shared/constants/endpoints';
-import { extractData, httpClient, type ApiResponse } from './http-client';
+} from '../../../shared/contracts/auth-contracts.js';
+import { AUTH_ENDPOINTS } from '../../../shared/constants/endpoints.js';
+import { extractData, httpClient, type ApiResponse } from './http-client.js';
 
 const base = AUTH_ENDPOINTS.BASE;
 

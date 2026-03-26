@@ -1,5 +1,5 @@
 import z from 'zod';
-import { passwordConfig } from '../config/auth-config';
+import { passwordConfig } from '../config/auth-config.js';
 
 export function buildPasswordSchema() {
   let schema = z
@@ -18,7 +18,7 @@ export function buildPasswordSchema() {
     schema = schema.regex(/[a-z]/, 'Password must contain at least one lowercase character');
 
   if (passwordConfig.requireUppercase)
-    schema = schema.regex(/[A-Z]/, 'Password must contain at leaast one uppercase character');
+    schema = schema.regex(/[A-Z]/, 'Password must contain at least one uppercase character');
 
   if (passwordConfig.requireNumber)
     schema = schema.regex(/[0-9]/, `Password must contain at least one number`);

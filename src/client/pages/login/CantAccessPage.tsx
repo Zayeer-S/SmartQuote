@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CLIENT_ROUTES } from '../../constants/client.routes';
+import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import './CantAccessPage.css';
 
 const CantAccessPage: React.FC = () => {

@@ -2,14 +2,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import type { Request, Response } from 'express';
-import type { AuthService } from '../services/auth/auth.service';
-import type { RBACService } from '../services/rbac/rbac.service';
-import { validateOrThrow } from '../validators/validation-utils';
-import { changePasswordSchema, loginSchema } from '../validators/auth.validator';
-import type { ChangePasswordRequest, LoginRequest } from '../../shared/contracts/auth-contracts';
-import { success, error } from '../lib/respond';
-import type { AuthenticatedRequest } from '../middleware/auth.middleware';
-import type { UserId } from '../database/types/ids';
+import type { AuthService } from '../services/auth/auth.service.js';
+import type { RBACService } from '../services/rbac/rbac.service.js';
+import { validateOrThrow } from '../validators/validation-utils.js';
+import { changePasswordSchema, loginSchema } from '../validators/auth.validator.js';
+import type { ChangePasswordRequest, LoginRequest } from '../../shared/contracts/auth-contracts.js';
+import { success, error } from '../lib/respond.js';
+import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
+import type { UserId } from '../database/types/ids.js';
 
 export class AuthController {
   private authService: AuthService;

@@ -1,1 +1,1 @@
-export * from './env.frontend';
+export * from './env.frontend.js';

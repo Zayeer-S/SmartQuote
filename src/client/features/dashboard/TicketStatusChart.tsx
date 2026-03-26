@@ -4,7 +4,7 @@ import type { TicketDetailResponse } from '../../../shared/contracts/ticket-cont
 import { TICKET_STATUSES } from '../../../shared/constants/lookup-values';
 
 interface TicketStatusChartProps {
-  tickets: TicketDetailResponse[];
+  tickets: TicketResponse[];
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -20,7 +20,7 @@ const FALLBACK_COLOR = '#94a3b8';
 
 const TicketStatusChart: React.FC<TicketStatusChartProps> = ({ tickets }) => {
   const counts = tickets.reduce<Record<string, number>>((acc, ticket) => {
-    const status = ticket.ticketStatusName;
+    const status = ticket.ticketStatus;
     acc[status] = (acc[status] ?? 0) + 1;
     return acc;
   }, {});

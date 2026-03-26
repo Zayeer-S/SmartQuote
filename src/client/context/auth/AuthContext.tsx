@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { tokenStorage } from '../../lib/storage/tokenStorage';
-import { authAPI } from '../../lib/api/auth.api';
+import { tokenStorage } from '../../lib/storage/tokenStorage.js';
+import { authAPI } from '../../lib/api/auth.api.js';
 import {
   AuthContext,
   type AuthContextValue,
   type AuthProviderProps,
   type AuthState,
-} from './auth.context.types';
+} from './auth.context.types.js';
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthState['user']>(null);

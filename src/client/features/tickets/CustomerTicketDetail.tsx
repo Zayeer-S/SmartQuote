@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { useGetTicket } from '../../hooks/tickets/useGetTicket';
-import { useListQuotes } from '../../hooks/quotes/useListQuote';
-import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils';
-import QuotePanel from './QuotePanel';
-import TicketTimeline from './TicketTimeline';
+import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
+import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
+import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
+import QuotePanel from './QuotePanel.js';
+import TicketTimeline from './TicketTimeline.js';
+import CommentThread from './CommentThread.js';
+import AttachmentList from './AttachmentList.js';
 import './CustomerTicketDetail.css';
 
 interface CustomerTicketDetailProps {
@@ -74,14 +76,11 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
             {t.title}
           </h1>
           <div className="ticket-detail-badges">
-            <span className={getStatusBadgeClass(t.ticketStatusName)} data-testid="ticket-status">
-              {t.ticketStatusName}
+            <span className={getStatusBadgeClass(t.ticketStatus)} data-testid="ticket-status">
+              {t.ticketStatus}
             </span>
-            <span
-              className={getPriorityBadgeClass(t.ticketPriorityName)}
-              data-testid="ticket-priority"
-            >
-              {t.ticketPriorityName}
+            <span className={getPriorityBadgeClass(t.ticketPriority)} data-testid="ticket-priority">
+              {t.ticketPriority}
             </span>
           </div>
         </div>
@@ -102,15 +101,15 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
         <dl className="ticket-detail-dl">
           <div>
             <dt>Type</dt>
-            <dd data-testid="ticket-type">{t.ticketTypeName}</dd>
+            <dd data-testid="ticket-type">{t.ticketType}</dd>
           </div>
           <div>
             <dt>Severity</dt>
-            <dd data-testid="ticket-severity">{t.ticketSeverityName}</dd>
+            <dd data-testid="ticket-severity">{t.ticketSeverity}</dd>
           </div>
           <div>
             <dt>Business Impact</dt>
-            <dd data-testid="ticket-business-impact">{t.businessImpactName}</dd>
+            <dd data-testid="ticket-business-impact">{t.businessImpact}</dd>
           </div>
           <div>
             <dt>Users Impacted</dt>
@@ -131,6 +130,16 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
         </dl>
       </section>
 
+      <section
+        className="card card-padded ticket-detail-section"
+        aria-labelledby="attachments-section-heading"
+      >
+        <h2 className="ticket-detail-section-title" id="attachments-section-heading">
+          Attachments
+        </h2>
+        <AttachmentList ticketId={ticketId} attachments={t.attachments} />
+      </section>
+
       <section className="ticket-detail-section" aria-labelledby="quote-section-heading">
         <h2 className="ticket-detail-section-title" id="quote-section-heading">
           Quote
@@ -145,6 +154,10 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
       </section>
 
       <TicketTimeline ticketId={ticketId} />
+
+      <section className="ticket-detail-section">
+        <CommentThread ticketId={ticketId} />
+      </section>
     </div>
   );
 };

@@ -1,22 +1,27 @@
 import type {
   AddCommentRequest,
   AssignTicketRequest,
+  AttachmentResponse,
+  AttachmentUrlResponse,
   CommentResponse,
   CreateTicketRequest,
   ListCommentsResponse,
+  ListSimilarTicketsResponse,
   ListTicketsResponse,
   TicketDetailResponse,
   TicketResponse,
   UpdateTicketRequest,
-} from '../../../shared/contracts/ticket-contracts';
-import { TICKET_ENDPOINTS } from '../../../shared/constants/endpoints';
-import { extractData, httpClient, type ApiResponse } from './http-client';
+} from '../../../shared/contracts/ticket-contracts.js';
+import { TICKET_ENDPOINTS } from '../../../shared/constants/endpoints.js';
+import { extractData, httpClient, type ApiResponse } from './http-client.js';
 
 const base = TICKET_ENDPOINTS.BASE;
 
 export const ticketAPI = {
   /**
-   * Create a new ticket
+   * Create a new ticket. Sends as JSON - no binary data.
+   * Attachments are uploaded separately via presignAttachment / confirmAttachment.
+   *
    * @param payload Ticket creation fields
    * @returns The created ticket
    */
@@ -28,13 +33,36 @@ export const ticketAPI = {
     return extractData(response);
   },
 
+  async uploadAttachment(ticketId: string, file: File): Promise<AttachmentResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await httpClient.post<ApiResponse<AttachmentResponse>>(
+      base + TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId),
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
+    return extractData(response);
+  },
+
   /**
    * List all tickets visible to the current user
    * @returns Array of tickets
    */
-  async listTickets(): Promise<ListTicketsResponse> {
+  async listTickets(params?: {
+    from?: string;
+    to?: string;
+    ticketStatus?: string;
+    organizationId?: string;
+    assigneeId?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<ListTicketsResponse> {
     const response = await httpClient.get<ApiResponse<ListTicketsResponse>>(
-      base + TICKET_ENDPOINTS.LIST
+      base + TICKET_ENDPOINTS.LIST,
+      { params }
     );
     return extractData(response);
   },
@@ -115,6 +143,19 @@ export const ticketAPI = {
   },
 
   /**
+   * Get a short-lived presigned URL for viewing or downloading an attachment.
+   * @param ticketId Owner ticket ID
+   * @param attachmentId Attachment to resolve
+   * @returns Presigned URL valid for the server-configured TTL
+   */
+  async getAttachmentUrl(ticketId: string, attachmentId: string): Promise<AttachmentUrlResponse> {
+    const response = await httpClient.get<ApiResponse<AttachmentUrlResponse>>(
+      base + TICKET_ENDPOINTS.GET_ATTACHMENT_URL(ticketId, attachmentId)
+    );
+    return extractData(response);
+  },
+
+  /**
    * Add a comment to a ticket
    * @param ticketId Target ticket ID
    * @param payload Comment text and type
@@ -124,6 +165,24 @@ export const ticketAPI = {
     const response = await httpClient.post<ApiResponse<CommentResponse>>(
       base + TICKET_ENDPOINTS.ADD_COMMENT(ticketId),
       payload
+    );
+    return extractData(response);
+  },
+
+  /**
+   * Fetch the top similar resolved tickets for a given ticket (admin only).
+   * Results are ranked by semantic similarity of the ticket description,
+   * filtered to the same type/severity/impact bucket.
+   *
+   * Returns an empty array when no embedder is available (non-production)
+   * or when no resolved tickets exist in the same bucket yet.
+   *
+   * @param ticketId Target ticket ID
+   * @returns Ranked list of similar tickets with their approved quotes
+   */
+  async getSimilarTickets(ticketId: string): Promise<ListSimilarTicketsResponse> {
+    const response = await httpClient.get<ApiResponse<ListSimilarTicketsResponse>>(
+      base + TICKET_ENDPOINTS.SIMILAR(ticketId)
     );
     return extractData(response);
   },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CLIENT_ROUTES } from '../../constants/client.routes';
-import AdminTicketDetail from '../../features/tickets/AdminTicketDetail';
+import { CLIENT_ROUTES } from '../../constants/client.routes.js';
+import AdminTicketDetail from '../../features/tickets/AdminTicketDetail.js';
 import './AdminTicketDetailPage.css';
 
 const AdminTicketDetailPage: React.FC = () => {

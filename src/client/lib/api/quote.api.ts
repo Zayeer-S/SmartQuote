@@ -8,9 +8,9 @@ import type {
   QuoteWithApprovalResponse,
   RejectQuoteRequest,
   UpdateQuoteRequest,
-} from '../../../shared/contracts/quote-contracts';
-import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../../shared/constants/endpoints';
-import { extractData, httpClient, type ApiResponse } from './http-client';
+} from '../../../shared/contracts/quote-contracts.js';
+import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../../shared/constants/endpoints.js';
+import { extractData, httpClient, type ApiResponse } from './http-client.js';
 
 const ticketBase = TICKET_ENDPOINTS.BASE;
 

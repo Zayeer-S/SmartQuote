@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo } from 'react';
-import { useListTickets } from '../../hooks/tickets/useListTicket';
-import { useTicketFilters } from '../../hooks/useTicketFilters';
-import AdminTicketCard from './AdminTicketCard';
-import TicketFilters from './TicketFilters';
-import TicketPagination from './TicketPagination';
+import { useListTickets } from '../../hooks/tickets/useListTicket.js';
+import { useTicketFilters } from '../../hooks/useTicketFilters.js';
+import AdminTicketCard from './AdminTicketCard.js';
+import TicketFilters from './TicketFilters.js';
+import TicketPagination from './TicketPagination.js';
 import './AdminTicketList.css';
 
 /**
@@ -25,8 +25,8 @@ const AdminTicketList: React.FC = () => {
       const aAssigned = a.assignedToUserId !== null ? 0 : 1;
       const bAssigned = b.assignedToUserId !== null ? 0 : 1;
       if (aAssigned !== bAssigned) return aAssigned - bAssigned;
-      const aPriority = PRIORITY_ORDER[a.ticketPriorityName] ?? 99;
-      const bPriority = PRIORITY_ORDER[b.ticketPriorityName] ?? 99;
+      const aPriority = PRIORITY_ORDER[a.ticketPriority] ?? 99;
+      const bPriority = PRIORITY_ORDER[b.ticketPriority] ?? 99;
       return aPriority - bPriority;
     });
   }, [data]);

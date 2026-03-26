@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useListTickets } from '../../hooks/tickets/useListTicket';
-import { useAuth } from '../../hooks/contexts/useAuth';
-import { CLIENT_ROUTES } from '../../constants/client.routes';
-import StatsOverview from '../../features/dashboard/StatsOverview';
-import TicketStatusChart from '../../features/dashboard/TicketStatusChart';
-import CustomerTicketCard from '../../features/tickets/CustomerTicketCard';
+import { useListTickets } from '../../hooks/tickets/useListTicket.js';
+import { useAuth } from '../../hooks/contexts/useAuth.js';
+import { CLIENT_ROUTES } from '../../constants/client.routes.js';
+import StatsOverview from '../../features/dashboard/StatsOverview.js';
+import TicketStatusChart from '../../features/dashboard/TicketStatusChart.js';
+import CustomerTicketCard from '../../features/tickets/CustomerTicketCard.js';
 import './DashboardPage.css';
 
 const RECENT_TICKET_COUNT = 5;

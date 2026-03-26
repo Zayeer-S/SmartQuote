@@ -1,5 +1,5 @@
 import React from 'react';
-import AdminTicketList from '../../features/tickets/AdminTicketList';
+import AdminTicketList from '../../features/tickets/AdminTicketList.js';
 import './AdminTicketsPage.css';
 
 const AdminTicketsPage: React.FC = () => {

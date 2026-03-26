@@ -1,5 +1,5 @@
-import { PERMISSIONS } from '../../../shared/constants/lookup-values';
-import { useAuth } from '../contexts/useAuth';
+import { PERMISSIONS } from '../../../shared/constants/lookup-values.js';
+import { useAuth } from '../contexts/useAuth.js';
 
 /**
  * Hook that provides user management permissions

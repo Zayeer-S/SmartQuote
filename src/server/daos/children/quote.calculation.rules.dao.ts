@@ -1,8 +1,8 @@
 import type { Knex } from 'knex';
-import { BaseDAO } from '../base/base.dao';
-import { MAIN_TABLES } from '../../database/config/table-names';
-import type { QuoteCalculationRule } from '../../database/types/tables';
-import type { QuoteCalculationRuleId } from '../../database/types/ids';
+import { BaseDAO } from '../base/base.dao.js';
+import { MAIN_TABLES } from '../../database/config/table-names.js';
+import type { QuoteCalculationRule } from '../../database/types/tables.js';
+import type { QuoteCalculationRuleId } from '../../database/types/ids.js';
 
 export class QuoteCalculationRulesDAO extends BaseDAO<
   QuoteCalculationRule,

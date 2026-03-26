@@ -6,7 +6,6 @@ export interface CreateUserRequest {
   phoneNumber: string;
   password: string;
   roleId: number;
-  organizationId?: string;
 }
 
 export interface CreateUserResponse {
@@ -20,7 +19,6 @@ export interface CreateUserResponse {
     id: number;
     name: string;
   };
-  organizationId: string | null;
   createdAt: string;
 }
 
@@ -36,7 +34,7 @@ export interface UserListItem {
     id: number;
     name: string;
   };
-  organizationId: string | null;
+  organizationId: string[] | null;
   createdAt: string;
 }
 

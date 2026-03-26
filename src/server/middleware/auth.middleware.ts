@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { GetCurrentUserResponse } from '../../shared/contracts/auth-contracts';
-import type { AuthService } from '../services/auth/auth.service';
-import { error } from '../lib/respond';
+import type { GetCurrentUserResponse } from '../../shared/contracts/auth-contracts.js';
+import type { AuthService } from '../services/auth/auth.service.js';
+import { error } from '../lib/respond.js';
 
 export interface AuthenticatedRequest extends Request {
   user: GetCurrentUserResponse;

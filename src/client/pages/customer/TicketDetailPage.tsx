@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CLIENT_ROUTES } from '../../constants/client.routes';
-import CustomerTicketDetail from '../../features/tickets/CustomerTicketDetail';
+import { CLIENT_ROUTES } from '../../constants/client.routes.js';
+import CustomerTicketDetail from '../../features/tickets/CustomerTicketDetail.js';
 
 const TicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();

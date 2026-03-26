@@ -60,6 +60,7 @@ export async function buildUuidLookupIdMap(knex: Knex, tableName: string): Promi
 export async function buildAllLookupIdMaps(knex: Knex) {
   const [
     roles,
+    orgRoles,
     permissions,
     notificationTypes,
     notificationTokenTypes,
@@ -76,6 +77,7 @@ export async function buildAllLookupIdMaps(knex: Knex) {
     quoteConfidenceLevels,
   ] = await Promise.all([
     buildLookupIdMap(knex, 'roles'),
+    buildLookupIdMap(knex, 'org_roles'),
     buildLookupIdMap(knex, 'permissions'),
     buildLookupIdMap(knex, 'notification_types'),
     buildLookupIdMap(knex, 'notification_token_types'),
@@ -94,6 +96,7 @@ export async function buildAllLookupIdMaps(knex: Knex) {
 
   return {
     roles,
+    orgRoles,
     permissions,
     notificationTypes,
     notificationTokenTypes,

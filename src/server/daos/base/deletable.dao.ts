@@ -1,4 +1,4 @@
-import { BaseDAO } from './base.dao';
+import { BaseDAO } from './base.dao.js';
 import type {
   DeleteOptions,
   PrimaryKey,
@@ -7,7 +7,7 @@ import type {
   TableConfig,
   UpdateOptions,
   Where,
-} from './types';
+} from './types.js';
 import type { Knex } from 'knex';
 
 export abstract class DeletableDAO<

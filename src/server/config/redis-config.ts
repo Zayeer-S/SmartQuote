@@ -1,5 +1,5 @@
 import type { RedisClientOptions } from 'redis';
-import { backEnv } from './env.backend';
+import { backEnv } from './env.backend.js';
 
 const baseConfig: RedisClientOptions = {
   socket: {

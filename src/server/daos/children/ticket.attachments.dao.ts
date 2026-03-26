@@ -1,9 +1,9 @@
 import type { Knex } from 'knex';
-import { BaseDAO } from '../base/base.dao';
-import { LINK_TABLES } from '../../database/config/table-names';
-import type { TicketAttachment } from '../../database/types/tables';
-import type { TicketAttachmentId, TicketId } from '../../database/types/ids';
-import type { GetManyOptions } from '../base/types';
+import { BaseDAO } from '../base/base.dao.js';
+import { LINK_TABLES } from '../../database/config/table-names.js';
+import type { TicketAttachment } from '../../database/types/tables.js';
+import type { TicketAttachmentId, TicketId } from '../../database/types/ids.js';
+import type { GetManyOptions } from '../base/types.js';
 
 export class TicketAttachmentsDAO extends BaseDAO<TicketAttachment, TicketAttachmentId> {
   constructor(db: Knex) {
@@ -32,5 +32,30 @@ export class TicketAttachmentsDAO extends BaseDAO<TicketAttachment, TicketAttach
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const results = await query;
     return results as TicketAttachment[];
+  }
+
+  /**
+   * Delete an attachment record by its storage key.
+   * Used by AttachmentService to clean up DB records when a post-commit
+   * storage upload fails.
+   *
+   * @param storageKey The provider-agnostic storage key
+   */
+  async deleteByStorageKey(storageKey: string): Promise<void> {
+    await this.getQuery().where({ storage_key: storageKey }).delete();
+  }
+
+  /**
+   * Count existing attachments for a ticket.
+   * Used by AttachmentService to enforce MAX_COUNT before accepting a new upload.
+   *
+   * @param ticketId Ticket ID
+   * @returns Number of existing attachment records
+   */
+  async countByTicket(ticketId: TicketId): Promise<number> {
+    const [{ count }] = (await this.getQuery()
+      .where({ ticket_id: ticketId })
+      .count('id as count')) as [{ count: string | number }];
+    return Number(count);
   }
 }

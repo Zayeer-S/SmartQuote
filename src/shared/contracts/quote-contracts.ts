@@ -1,10 +1,18 @@
+import {
+  QuoteApprovalStatus,
+  QuoteConfidenceLevel,
+  QuoteCreator,
+  QuoteEffortLevel,
+  TicketPriority,
+} from '../constants';
+
 export interface CreateManualQuoteRequest {
   estimatedHoursMinimum: number;
   estimatedHoursMaximum: number;
   hourlyRate: number;
   fixedCost: number;
-  quoteEffortLevelId: number;
-  quoteConfidenceLevelId: number | null;
+  quoteEffortLevel: QuoteEffortLevel;
+  quoteConfidenceLevel: QuoteConfidenceLevel | null;
 }
 
 export interface UpdateQuoteRequest {
@@ -12,9 +20,9 @@ export interface UpdateQuoteRequest {
   estimatedHoursMaximum?: number;
   hourlyRate?: number;
   fixedCost?: number;
-  quoteEffortLevelId?: number;
-  quoteConfidenceLevelId?: number | null;
-  /** Mandatory reason for the change — used to populate quote_detail_revisions */
+  quoteEffortLevel?: QuoteEffortLevel;
+  quoteConfidenceLevel?: QuoteConfidenceLevel | null;
+  /** Mandatory reason for the change -- used to populate quote_detail_revisions */
   reason: string;
 }
 
@@ -37,31 +45,31 @@ export interface QuoteResponse {
   estimatedCost: number;
   fixedCost: number;
   finalCost: number | null;
-  quoteConfidenceLevelId: number | null;
+  quoteConfidenceLevel: QuoteConfidenceLevel | null;
   quoteApprovalId: number | null;
-  suggestedTicketPriorityId: number;
-  quoteEffortLevelId: number;
-  quoteCreatorId: number;
+  suggestedTicketPriority: TicketPriority;
+  quoteEffortLevel: QuoteEffortLevel;
+  quoteCreator: QuoteCreator;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface QuoteWithApprovalResponse extends QuoteResponse {
-  approvalStatusName: string | null;
+  approvalStatus: QuoteApprovalStatus | null;
   approvalComment: string | null;
   approvedAt: string | null;
   approvedByUserId: string | null;
 }
 
 export interface ListQuotesResponse {
-  quotes: QuoteResponse[];
+  quotes: QuoteWithApprovalResponse[];
 }
 
 export interface QuoteApprovalResponse {
   id: number;
   approvedByUserId: string;
   userRole: string;
-  approvalStatusId: number;
+  approvalStatus: QuoteApprovalStatus;
   comment: string | null;
   approvedAt: string | null;
   createdAt: string;

@@ -1,6 +1,6 @@
 import React from 'react';
-import { TICKET_STATUSES, TICKET_TYPES } from '../../../shared/constants/lookup-values';
-import type { StatusFilter, TypeFilter } from '../../hooks/useTicketFilters';
+import { TICKET_STATUSES, TICKET_TYPES } from '../../../shared/constants/lookup-values.js';
+import type { StatusFilter, TypeFilter } from '../../hooks/useTicketFilters.js';
 import './TicketFilters.css';
 
 const STATUS_OPTIONS = Object.values(TICKET_STATUSES);

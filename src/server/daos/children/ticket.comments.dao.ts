@@ -1,9 +1,9 @@
 import type { Knex } from 'knex';
-import type { CommentTypeId, TicketCommentId, TicketId } from '../../database/types/ids';
-import type { TicketComment } from '../../database/types/tables';
-import { LINK_TABLES } from '../../database/config/table-names';
-import { BaseDAO } from '../base/base.dao';
-import type { GetManyOptions } from '../base/types';
+import type { CommentTypeId, TicketCommentId, TicketId } from '../../database/types/ids.js';
+import type { TicketComment } from '../../database/types/tables.js';
+import { LINK_TABLES } from '../../database/config/table-names.js';
+import { BaseDAO } from '../base/base.dao.js';
+import type { GetManyOptions } from '../base/types.js';
 
 export class TicketCommentsDAO extends BaseDAO<TicketComment, TicketCommentId> {
   constructor(db: Knex) {
@@ -16,6 +16,7 @@ export class TicketCommentsDAO extends BaseDAO<TicketComment, TicketCommentId> {
     );
   }
 
+  // TODO ADD FILE UPLOADS
   /**
    * Find all comments for a ticket, ordered oldest first
    *

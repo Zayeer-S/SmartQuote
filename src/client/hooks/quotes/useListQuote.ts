@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { ListQuotesResponse } from '../../../shared/contracts/quote-contracts';
-import { quoteAPI } from '../../lib/api/quote.api';
+import type { ListQuotesResponse } from '../../../shared/contracts/quote-contracts.js';
+import { quoteAPI } from '../../lib/api/quote.api.js';
 
 interface UseListQuotesState {
   data: ListQuotesResponse | null;

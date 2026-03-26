@@ -1,16 +1,19 @@
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { AuthError, PasswordValidationError } from '../services/auth/auth.errors';
-import { formatValidationError } from '../validators/validation-utils';
-import { error } from '../lib/respond';
-import { ForbiddenError, TicketError } from '../services/ticket/ticket.errors';
+import { AuthError, PasswordValidationError } from '../services/auth/auth.errors.js';
+import { formatValidationError } from '../validators/validation-utils.js';
+import { error } from '../lib/respond.js';
+import { ForbiddenError, TicketError } from '../services/ticket/ticket.errors.js';
 
 /**
  * Global Error Handling Middleware
  * Catches all errors and formats them consistently
  * Must be registered last in middleware chain
  */
-export function errorHandler(err: Error, req: Request, res: Response): void {
+
+// Let _next stay unused - Express silently skips error middleware that doesn't have exactly four parameters
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction): void {
   console.error('Error:', {
     name: err.name,
     message: err.message,
@@ -46,6 +49,11 @@ export function errorHandler(err: Error, req: Request, res: Response): void {
 
   if (err.name === 'UnauthorizedError') {
     error(res, 401, 'Invalid or expired token');
+    return;
+  }
+
+  if (err.name === 'ValidationError') {
+    error(res, 400, err.message);
     return;
   }
 

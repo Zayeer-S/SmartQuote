@@ -1,15 +1,20 @@
-export interface LookupItem {
-  id: number;
-  name: string;
-}
+import type {
+  BusinessImpact,
+  CommentType,
+  FileStorageType,
+  TicketPriority,
+  TicketSeverity,
+  TicketStatus,
+  TicketType,
+} from '../constants/index.js';
+import type { SlaStatusResponse } from './sla-contracts.js';
 
 export interface CreateTicketRequest {
   title: string;
   description: string;
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
-  ticketPriorityId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
   /** ISO 8601 date string */
   deadline: string;
   usersImpacted: number;
@@ -18,20 +23,24 @@ export interface CreateTicketRequest {
 export interface UpdateTicketRequest {
   title?: string;
   description?: string;
-  ticketTypeId?: number;
-  ticketSeverityId?: number;
-  businessImpactId?: number;
+  ticketType?: TicketType;
+  ticketSeverity?: TicketSeverity;
+  businessImpact?: BusinessImpact;
   /** ISO 8601 date string */
   deadline?: string;
   usersImpacted?: number;
   /** Admin-only, stripped for customers */
-  ticketStatusId?: number;
+  ticketStatus?: TicketStatus;
   /** Admin-only, stripped for customers */
   assignedToUserId?: string | null;
 }
 
 export interface AssignTicketRequest {
   assigneeId: string;
+}
+
+export interface UploadAttachmentResponse {
+  attachment: AttachmentResponse;
 }
 
 export interface TicketResponse {
@@ -42,33 +51,49 @@ export interface TicketResponse {
   creatorUserId: string;
   assignedToUserId: string | null;
   resolvedByUserId: string | null;
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
-  ticketStatusId: number;
-  ticketPriorityId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
+  ticketStatus: TicketStatus;
+  ticketPriority: TicketPriority;
   deadline: string;
   usersImpacted: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface TicketDetailResponse extends TicketResponse {
-  ticketTypeName: string;
-  ticketSeverityName: string;
-  businessImpactName: string;
-  ticketStatusName: string;
-  ticketPriorityName: string;
+export interface TicketSummaryResponse extends TicketResponse {
   organizationName: string;
+  /** Null when the ticket's org/user has no active SLA policy */
+  slaStatus: SlaStatusResponse | null;
+}
+
+export interface AttachmentResponse {
+  id: string;
+  ticketId: string;
+  uploadedByUserId: string;
+  originalName: string;
+  storageKey: string;
+  storageType: FileStorageType;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: string;
+}
+
+export interface TicketDetailResponse extends TicketResponse {
+  organizationName: string;
+  attachments: AttachmentResponse[];
+  /** Null when the ticket's org/user has no active SLA policy */
+  slaStatus: SlaStatusResponse | null;
 }
 
 export interface ListTicketsResponse {
-  tickets: TicketDetailResponse[];
+  tickets: TicketSummaryResponse[];
 }
 
 export interface AddCommentRequest {
   commentText: string;
-  commentTypeId: number;
+  commentType: CommentType;
 }
 
 export interface CommentResponse {
@@ -76,11 +101,39 @@ export interface CommentResponse {
   ticketId: string;
   userId: string;
   commentText: string;
-  commentTypeId: number;
+  commentType: CommentType;
   createdAt: string;
   updatedAt: string;
 }
 
+export interface AttachmentUrlResponse {
+  url: string;
+}
+
 export interface ListCommentsResponse {
   comments: CommentResponse[];
+}
+
+export interface SimilarQuoteResponse {
+  id: string;
+  version: number;
+  estimatedHoursMinimum: number;
+  estimatedHoursMaximum: number;
+  estimatedResolutionTime: number;
+  estimatedCost: number;
+  finalCost: number | null;
+  approvalStatus: string | null;
+  createdAt: string;
+}
+
+export interface SimilarTicketResponse {
+  ticket: TicketResponse;
+  /** Most recent approved quote for this ticket, or null if none exists */
+  quote: SimilarQuoteResponse | null;
+  /** Cosine similarity score (0-1), most similar first */
+  similarityScore: number;
+}
+
+export interface ListSimilarTicketsResponse {
+  similarTickets: SimilarTicketResponse[];
 }

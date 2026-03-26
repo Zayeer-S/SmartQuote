@@ -1,5 +1,5 @@
 import { knex, type Knex } from 'knex';
-import { backEnv, getDatabaseConfig } from '../config/index';
+import { backEnv, getDatabaseConfig } from '../config/index.js';
 
 let instance: Knex | null = null;
 

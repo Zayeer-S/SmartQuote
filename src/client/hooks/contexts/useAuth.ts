@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { AuthContext, type AuthContextValue } from '../../context/auth/auth.context.types';
+import { AuthContext, type AuthContextValue } from '../../context/auth/auth.context.types.js';
 
 /**
  * Hook to access auth context

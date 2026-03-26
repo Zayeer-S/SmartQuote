@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/contexts/useAuth';
-import { CLIENT_ROUTES } from '../../constants/client.routes';
+import { useAuth } from '../../hooks/contexts/useAuth.js';
+import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import './AdminLayout.css';
 
 const AdminLayout: React.FC = () => {

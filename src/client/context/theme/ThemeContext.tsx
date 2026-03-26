@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ThemeContext, type Theme } from './theme.context.types';
-import { KEYS } from '../../lib/storage/keys';
+import { ThemeContext, type Theme } from './theme.context.types.js';
+import { KEYS } from '../../lib/storage/keys.js';
 
 const getSystemTheme = (): Theme =>
   window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';

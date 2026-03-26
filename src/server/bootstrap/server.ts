@@ -1,6 +1,6 @@
-import { backEnv } from '../config';
-import { bootstrapApplication } from './app.bootstrap';
-import { closeDatabase } from './database.bootstrap';
+import { backEnv } from '../config/env.backend.js';
+import { bootstrapApplication } from './app.bootstrap.js';
+import { closeDatabase } from './database.bootstrap.js';
 
 async function startServer() {
   try {

@@ -3,7 +3,7 @@ import {
   SidebarContext,
   type SidebarContextValue,
   type SidebarProviderProps,
-} from './sidebar.context.types';
+} from './sidebar.context.types.js';
 
 export const SidebarProvider: React.FC<SidebarProviderProps> = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);

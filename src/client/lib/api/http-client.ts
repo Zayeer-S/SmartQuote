@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
-import { tokenStorage } from '../storage/tokenStorage';
+import { tokenStorage } from '../storage/tokenStorage.js';
 
 export const httpClient: AxiosInstance = axios.create({
   baseURL: '/api',
@@ -19,9 +19,9 @@ httpClient.interceptors.response.use(
   (response) => response,
   (err: unknown) => {
     if (axios.isAxiosError(err)) {
-      const apiError = (err.response?.data as ApiResponse<unknown>).error;
-      if (apiError) {
-        return Promise.reject(new Error(apiError));
+      const data = err.response?.data as ApiResponse<unknown> | undefined;
+      if (data?.error) {
+        return Promise.reject(new Error(data.error));
       }
     }
     // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { quoteAPI } from '../../lib/api/quote.api';
+import { quoteAPI } from '../../lib/api/quote.api.js';
 import type {
   ApproveQuoteRequest,
   QuoteApprovalResponse,
-} from '../../../shared/contracts/quote-contracts';
+} from '../../../shared/contracts/quote-contracts.js';
 
 interface UseApproveQuoteState {
   data: QuoteApprovalResponse | null;

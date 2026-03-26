@@ -1,85 +1,131 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import { PERMISSIONS } from '../../../shared/constants';
-import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types';
-import type { TicketsDAO } from '../../daos/children/tickets.dao';
-import type { UsersDAO } from '../../daos/children/users.dao';
+import { PERMISSIONS, TICKET_STATUSES } from '../../../shared/constants';
+import type { Knex } from 'knex';
+import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types.js';
+import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
+import type { UsersDAO } from '../../daos/children/users.dao.js';
+import type { OrganizationId, TicketId, UserId } from '../../database/types/ids.js';
+import type { Ticket, TicketWithDetails } from '../../database/types/tables.js';
+import type { RBACService } from '../rbac/rbac.service.js';
+import type { LookupResolver } from '../../lib/lookup-resolver.js';
+import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from './ticket.errors.js';
 import type {
-  BusinessImpactId,
-  TicketId,
-  TicketSeverityId,
-  TicketStatusId,
-  TicketTypeId,
-  UserId,
-} from '../../database/types/ids';
-import type { Ticket, TicketWithDetails } from '../../database/types/tables';
-import type { RBACService } from '../rbac/rbac.service';
-import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from './ticket.errors';
-import type { CreateTicketData, ListTicketsFilters, UpdateTicketData } from './ticket.types';
+  CreateTicketData,
+  ListTicketsFilters,
+  UpdateTicketData,
+} from './ticket.service.types.js';
+import type { TicketPriorityEngine } from './ticket.priority.engine.js';
+import type { AttachmentService } from './attachment.service.js';
+import type { IncomingFile } from '../storage/storage.service.types.js';
+import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
+import type { TicketSimilarityService } from './ticket.similarity.service.js';
 
 export class TicketService {
+  private db: Knex;
   private ticketsDAO: TicketsDAO;
   private usersDAO: UsersDAO;
+  private orgMembersDAO: OrganizationMembersDAO;
   private rbacService: RBACService;
+  private lookup: LookupResolver;
+  private priorityEngine: TicketPriorityEngine;
+  private attachmentService: AttachmentService;
+  private similarityService: TicketSimilarityService;
 
-  constructor(ticketsDAO: TicketsDAO, usersDAO: UsersDAO, rbacService: RBACService) {
+  constructor(
+    db: Knex,
+    ticketsDAO: TicketsDAO,
+    usersDAO: UsersDAO,
+    orgMembersDAO: OrganizationMembersDAO,
+    rbacService: RBACService,
+    lookup: LookupResolver,
+    priorityEngine: TicketPriorityEngine,
+    attachmentService: AttachmentService,
+    similarityService: TicketSimilarityService
+  ) {
+    this.db = db;
     this.ticketsDAO = ticketsDAO;
     this.usersDAO = usersDAO;
+    this.orgMembersDAO = orgMembersDAO;
     this.rbacService = rbacService;
+    this.lookup = lookup;
+    this.priorityEngine = priorityEngine;
+    this.attachmentService = attachmentService;
+    this.similarityService = similarityService;
   }
 
   /**
-   * Create a new ticket.
-   * Organization is sourced from the actor's own organization_id.
-   * Initial status is OPEN. Priority defaults to P3 — overridden later by the quote engine.
-   *
    * @param data Ticket fields supplied by the user
    * @param actorId ID of the user creating the ticket
-   * @param options Optional transaction context
+   * @param files Optional pre-validated files from the multipart request
    * @returns Created ticket
    * @throws TicketError if actor has no organization
    */
   async createTicket(
     data: CreateTicketData,
     actorId: UserId,
-    options?: TransactionContext
+    files: IncomingFile[] = []
   ): Promise<Ticket> {
-    const canCreate = await this.rbacService.hasPermission(
-      actorId,
-      PERMISSIONS.TICKETS_CREATE,
-      options
-    );
+    const canCreate = await this.rbacService.hasPermission(actorId, PERMISSIONS.TICKETS_CREATE);
     if (!canCreate) throw new ForbiddenError(TICKET_ERROR_MSGS.FORBIDDEN);
 
-    const actor = await this.usersDAO.getById(actorId, options);
+    const actor = await this.usersDAO.getById(actorId);
     if (!actor) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
-    if (!actor.organization_id)
-      throw new TicketError(`Actor does not belong to an organization`, 422);
 
-    return this.ticketsDAO.create(
-      {
-        ...data,
-        creator_user_id: actorId,
-        organization_id: actor.organization_id,
-        ticket_type_id: data.ticket_type_id as TicketTypeId,
-        ticket_severity_id: data.ticket_severity_id as TicketSeverityId,
-        business_impact_id: data.business_impact_id as BusinessImpactId,
-        // Status OPEN (id=1). Priority P3 (id=3). Both are seeded lookup values —
-        // the quote engine will update priority after generating a quote.
-        // Using literal seed IDs here is intentional: these are fixed bootstrap values.
-        ticket_status_id: 1 as unknown as Ticket['ticket_status_id'],
-        ticket_priority_id: 3 as unknown as Ticket['ticket_priority_id'],
-        assigned_to_user_id: null,
-        resolved_by_user_id: null,
-        deleted_at: null,
-      } satisfies InsertData<Ticket>,
-      options
-    );
+    const orgId = await this.getOrgId(actor.id);
+
+    const ticketPriorityId = await this.priorityEngine.calculatePriority({
+      ticketSeverity: this.lookup.ticketSeverityName(data.ticket_severity_id as unknown as number),
+      businessImpact: this.lookup.businessImpactName(data.business_impact_id as unknown as number),
+      usersImpacted: data.users_impacted,
+      deadline: data.deadline,
+      description: data.description,
+    });
+
+    // Step 1: open an explicit transaction so the ticket row and attachment
+    // records are committed atomically. Storage writes happen AFTER commit
+    // since storage is not transactional.
+    let ticket!: Ticket;
+
+    const pendingUploads = await this.db.transaction(async (trx) => {
+      const ctx: TransactionContext = { trx };
+
+      ticket = await this.ticketsDAO.create(
+        {
+          ...data,
+          creator_user_id: actorId,
+          organization_id: orgId,
+          ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.OPEN),
+          ticket_priority_id: ticketPriorityId,
+          assigned_to_user_id: null,
+          resolved_by_user_id: null,
+          resolved_at: null,
+          deleted_at: null,
+        } satisfies InsertData<Ticket>,
+        ctx
+      );
+
+      // Step 2: persist attachment DB records inside the same transaction.
+      // If this fails, the whole transaction rolls back and nothing is written
+      // to storage (uploads haven't happened yet).
+      return this.attachmentService.persistAttachmentRecords(files, ticket.id, actorId, ctx);
+    });
+
+    // Step 3: upload files to storage now that the transaction has committed.
+    // Failures are handled per-file inside uploadAttachments() - the ticket
+    // itself is never rolled back at this point.
+    if (pendingUploads.length > 0) {
+      await this.attachmentService.uploadAttachments(pendingUploads);
+    }
+
+    // Step 4: compute and store the embedding for this ticket's description.
+    // Runs after the transaction has committed -- a failure here must never
+    // affect the ticket creation result. similarityService no-ops when the
+    // embedder is unavailable.
+    void this.similarityService.computeAndStoreEmbedding(ticket.id, ticket.description);
+
+    return ticket;
   }
 
   /**
-   * Get a single ticket with full lookup details joined.
-   * Customers may only access tickets in their own organisation.
-   *
    * @param ticketId Ticket to retrieve
    * @param actorId Actor requesting the ticket
    * @param options Optional transaction context
@@ -101,10 +147,6 @@ export class TicketService {
   }
 
   /**
-   * List tickets with optional filters.
-   * Customers are always scoped to their own organisation regardless of filters.
-   * Agents and admins may filter freely.
-   *
    * @param filters Optional filters: organizationId, statusId, assigneeId
    * @param actorId Actor requesting the list
    * @param options Optional query and transaction options
@@ -124,26 +166,25 @@ export class TicketService {
     if (canReadAll) {
       const criteria: Partial<Ticket> = {};
       if (filters.organizationId) criteria.organization_id = filters.organizationId;
-      if (filters.statusId) criteria.ticket_status_id = filters.statusId as TicketStatusId;
+      if (filters.ticketStatus)
+        criteria.ticket_status_id = this.lookup.ticketStatusId(filters.ticketStatus);
       if (filters.assigneeId) criteria.assigned_to_user_id = filters.assigneeId;
       return this.ticketsDAO.findManyWithDetails(criteria, options);
     }
 
     const actor = await this.usersDAO.getById(actorId, options);
-    if (!actor?.organization_id) return [];
+    if (!actor) return [];
 
-    const criteria: Partial<Ticket> = { organization_id: actor.organization_id };
-    if (filters.statusId) criteria.ticket_status_id = filters.statusId as TicketStatusId;
+    const orgId = await this.getOrgId(actor.id);
+
+    const criteria: Partial<Ticket> = { organization_id: orgId };
+    if (filters.ticketStatus)
+      criteria.ticket_status_id = this.lookup.ticketStatusId(filters.ticketStatus);
 
     return this.ticketsDAO.findManyWithDetails(criteria, options);
   }
 
   /**
-   * Update a ticket.
-   * Customers may only update their own tickets while status is OPEN,
-   * and may not touch agent-only fields (status, assignee).
-   * Agents may update any ticket and any field.
-   *
    * @param ticketId Ticket to update
    * @param data Fields to update
    * @param actorId Actor performing the update
@@ -183,11 +224,10 @@ export class TicketService {
 
     await this.assertVisibility(ticket, actorId, options);
 
-    // Customers can only edit OPEN tickets (status id=1)
-    if ((ticket.ticket_status_id as unknown as number) !== 1)
+    const openStatusId = this.lookup.ticketStatusId(TICKET_STATUSES.OPEN);
+    if ((ticket.ticket_status_id as unknown as number) !== (openStatusId as unknown as number))
       throw new TicketError(TICKET_ERROR_MSGS.CANNOT_UPDATE, 422);
 
-    // Strip agent-only fields from customer updates
     const { ticket_status_id, assigned_to_user_id, ...customerFields } = data;
     void ticket_status_id;
     void assigned_to_user_id;
@@ -199,9 +239,6 @@ export class TicketService {
   }
 
   /**
-   * Assign a ticket to a user. Sets status to ASSIGNED.
-   * Requires TICKETS_ASSIGN permission.
-   *
    * @param ticketId Ticket to assign
    * @param assigneeId User to assign to
    * @param actorId Actor performing the assignment
@@ -233,7 +270,7 @@ export class TicketService {
       { id: ticketId },
       {
         assigned_to_user_id: assigneeId,
-        ticket_status_id: 2 as unknown as Ticket['ticket_status_id'],
+        ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.ASSIGNED),
       },
       options
     );
@@ -244,9 +281,6 @@ export class TicketService {
   }
 
   /**
-   * Resolve a ticket. Sets status to RESOLVED and records the resolver.
-   * Requires TICKETS_UPDATE_ALL permission.
-   *
    * @param ticketId Ticket to resolve
    * @param actorId Actor resolving the ticket
    * @param options Optional transaction context
@@ -273,7 +307,8 @@ export class TicketService {
       { id: ticketId },
       {
         resolved_by_user_id: actorId,
-        ticket_status_id: 4 as unknown as Ticket['ticket_status_id'],
+        resolved_at: new Date(),
+        ticket_status_id: this.lookup.ticketStatusId(TICKET_STATUSES.RESOLVED),
       },
       options
     );
@@ -284,8 +319,6 @@ export class TicketService {
   }
 
   /**
-   * Soft-delete a ticket.
-   *
    * @param ticketId Ticket to delete
    * @param actorId Actor performing the deletion
    * @param options Optional transaction context
@@ -324,7 +357,20 @@ export class TicketService {
     if (canReadAll) return;
 
     const actor = await this.usersDAO.getById(actorId, options);
-    if (actor?.organization_id !== ticket.organization_id)
-      throw new ForbiddenError(TICKET_ERROR_MSGS.FORBIDDEN);
+    if (!actor) throw new ForbiddenError(TICKET_ERROR_MSGS.ASSIGNEE_NOT_FOUND);
+
+    const orgId = await this.getOrgId(actor.id);
+
+    if (orgId !== ticket.organization_id) throw new ForbiddenError(TICKET_ERROR_MSGS.FORBIDDEN);
+  }
+
+  private async getOrgId(actorId: UserId): Promise<OrganizationId | null> {
+    const orgMemberships = await this.orgMembersDAO.findByUser(actorId);
+
+    if (orgMemberships && orgMemberships.length > 0) {
+      return orgMemberships[0].organization_id;
+    }
+
+    return null;
   }
 }

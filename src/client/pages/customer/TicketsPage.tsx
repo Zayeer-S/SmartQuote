@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CLIENT_ROUTES } from '../../constants/client.routes';
-import TicketList from '../../features/tickets/TicketList';
+import { CLIENT_ROUTES } from '../../constants/client.routes.js';
+import TicketList from '../../features/tickets/TicketList.js';
 
 const TicketsPage: React.FC = () => {
   return (

@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useListTickets } from '../../hooks/tickets/useListTicket';
-import { CLIENT_ROUTES } from '../../constants/client.routes';
-import { useTicketFilters } from '../../hooks/useTicketFilters';
-import CustomerTicketCard from './CustomerTicketCard';
-import TicketFilters from './TicketFilters';
-import TicketPagination from './TicketPagination';
+import { useListTickets } from '../../hooks/tickets/useListTicket.js';
+import { CLIENT_ROUTES } from '../../constants/client.routes.js';
+import { useTicketFilters } from '../../hooks/useTicketFilters.js';
+import CustomerTicketCard from './CustomerTicketCard.js';
+import TicketFilters from './TicketFilters.js';
+import TicketPagination from './TicketPagination.js';
 import './TicketList.css';
 
 const TicketList: React.FC = () => {

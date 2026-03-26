@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { useCreateTicket } from '../../hooks/tickets/useCreateTicket';
+import { useCreateTicket } from '../../hooks/tickets/useCreateTicket.js';
+import { ticketAPI } from '../../lib/api/ticket.api.js';
 import {
   TICKET_TYPES,
   TICKET_SEVERITIES,
   BUSINESS_IMPACTS,
-  TICKET_PRIORITIES,
-  LOOKUP_IDS,
-} from '../../../shared/constants/lookup-values';
-import type { CreateTicketRequest } from '../../../shared/contracts/ticket-contracts';
+  ATTACHMENT_CONFIG,
+} from '../../../shared/constants/lookup-values.js';
+import type {
+  TicketType,
+  TicketSeverity,
+  BusinessImpact,
+} from '../../../shared/constants/lookup-values.js';
+import type { CreateTicketRequest } from '../../../shared/contracts/ticket-contracts.js';
 import './SubmitTicketForm.css';
 
 interface SubmitTicketFormProps {
@@ -17,94 +22,146 @@ interface SubmitTicketFormProps {
 interface FormState {
   title: string;
   description: string;
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
-  ticketPriorityId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
   deadline: string;
   usersImpacted: string;
+  files: File[];
 }
 
-const TICKET_TYPE_OPTIONS = [
-  { id: LOOKUP_IDS.TICKET_TYPE.SUPPORT, label: TICKET_TYPES.SUPPORT },
-  { id: LOOKUP_IDS.TICKET_TYPE.INCIDENT, label: TICKET_TYPES.INCIDENT },
-  { id: LOOKUP_IDS.TICKET_TYPE.ENHANCEMENT, label: TICKET_TYPES.ENHANCEMENT },
-] as const;
+type SubmitPhase = 'idle' | 'creating' | 'uploading';
 
-const TICKET_SEVERITY_OPTIONS = [
-  { id: LOOKUP_IDS.TICKET_SEVERITY.LOW, label: TICKET_SEVERITIES.LOW },
-  { id: LOOKUP_IDS.TICKET_SEVERITY.MEDIUM, label: TICKET_SEVERITIES.MEDIUM },
-  { id: LOOKUP_IDS.TICKET_SEVERITY.HIGH, label: TICKET_SEVERITIES.HIGH },
-  { id: LOOKUP_IDS.TICKET_SEVERITY.CRITICAL, label: TICKET_SEVERITIES.CRITICAL },
-] as const;
+const TICKET_TYPE_OPTIONS: { value: TicketType; label: string }[] = [
+  { value: TICKET_TYPES.SUPPORT, label: TICKET_TYPES.SUPPORT },
+  { value: TICKET_TYPES.INCIDENT, label: TICKET_TYPES.INCIDENT },
+  { value: TICKET_TYPES.ENHANCEMENT, label: TICKET_TYPES.ENHANCEMENT },
+];
 
-const BUSINESS_IMPACT_OPTIONS = [
-  { id: LOOKUP_IDS.BUSINESS_IMPACT.MINOR, label: BUSINESS_IMPACTS.MINOR },
-  { id: LOOKUP_IDS.BUSINESS_IMPACT.MODERATE, label: BUSINESS_IMPACTS.MODERATE },
-  { id: LOOKUP_IDS.BUSINESS_IMPACT.MAJOR, label: BUSINESS_IMPACTS.MAJOR },
-  { id: LOOKUP_IDS.BUSINESS_IMPACT.CRITICAL, label: BUSINESS_IMPACTS.CRITICAL },
-] as const;
+const TICKET_SEVERITY_OPTIONS: { value: TicketSeverity; label: string }[] = [
+  { value: TICKET_SEVERITIES.LOW, label: TICKET_SEVERITIES.LOW },
+  { value: TICKET_SEVERITIES.MEDIUM, label: TICKET_SEVERITIES.MEDIUM },
+  { value: TICKET_SEVERITIES.HIGH, label: TICKET_SEVERITIES.HIGH },
+  { value: TICKET_SEVERITIES.CRITICAL, label: TICKET_SEVERITIES.CRITICAL },
+];
 
-const TICKET_PRIORITY_OPTIONS = [
-  { id: LOOKUP_IDS.TICKET_PRIORITY.P1, label: TICKET_PRIORITIES.P1 },
-  { id: LOOKUP_IDS.TICKET_PRIORITY.P2, label: TICKET_PRIORITIES.P2 },
-  { id: LOOKUP_IDS.TICKET_PRIORITY.P3, label: TICKET_PRIORITIES.P3 },
-  { id: LOOKUP_IDS.TICKET_PRIORITY.P4, label: TICKET_PRIORITIES.P4 },
-] as const;
+const BUSINESS_IMPACT_OPTIONS: { value: BusinessImpact; label: string }[] = [
+  { value: BUSINESS_IMPACTS.MINOR, label: BUSINESS_IMPACTS.MINOR },
+  { value: BUSINESS_IMPACTS.MODERATE, label: BUSINESS_IMPACTS.MODERATE },
+  { value: BUSINESS_IMPACTS.MAJOR, label: BUSINESS_IMPACTS.MAJOR },
+  { value: BUSINESS_IMPACTS.CRITICAL, label: BUSINESS_IMPACTS.CRITICAL },
+];
 
 const INITIAL_FORM_STATE: FormState = {
   title: '',
   description: '',
-  ticketTypeId: LOOKUP_IDS.TICKET_TYPE.SUPPORT,
-  ticketSeverityId: LOOKUP_IDS.TICKET_SEVERITY.LOW,
-  businessImpactId: LOOKUP_IDS.BUSINESS_IMPACT.MINOR,
-  ticketPriorityId: LOOKUP_IDS.TICKET_PRIORITY.P4,
+  ticketType: TICKET_TYPES.SUPPORT,
+  ticketSeverity: TICKET_SEVERITIES.LOW,
+  businessImpact: BUSINESS_IMPACTS.MINOR,
   deadline: '',
   usersImpacted: '',
+  files: [],
 };
+
+const PHASE_LABEL: Record<SubmitPhase, string> = {
+  idle: 'Submit Ticket',
+  creating: 'Submitting...',
+  uploading: 'Uploading files...',
+};
+
+function validateForm(form: FormState): string | null {
+  if (!form.title.trim()) return 'Title is required.';
+  if (!form.description.trim()) return 'Description is required.';
+  if (!form.deadline) return 'Deadline is required.';
+
+  const today = new Date().toISOString().split('T')[0];
+  if (form.deadline < today) return 'Deadline must be today or in the future.';
+
+  if (!/^\d+$/.test(form.usersImpacted)) return 'Users impacted must be a whole number.';
+
+  if (form.files.length > ATTACHMENT_CONFIG.MAX_COUNT)
+    return `You can attach a maximum of ${String(ATTACHMENT_CONFIG.MAX_COUNT)} files.`;
+
+  for (const file of form.files) {
+    if (file.size > ATTACHMENT_CONFIG.MAX_SIZE_BYTES)
+      return `"${file.name}" exceeds the 5MB file size limit.`;
+    if (!(ATTACHMENT_CONFIG.ALLOWED_MIME_TYPES as readonly string[]).includes(file.type))
+      return `"${file.name}" is not an allowed file type. Please attach PDF, JPG, or PNG files only.`;
+  }
+
+  return null;
+}
 
 const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
   const [form, setForm] = useState<FormState>(INITIAL_FORM_STATE);
-  const { execute, loading, error, data } = useCreateTicket();
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [phase, setPhase] = useState<SubmitPhase>('idle');
+  const { execute } = useCreateTicket();
+
+  const loading = phase !== 'idle';
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ): void => {
     const { name, value } = e.target;
+    if (name === 'usersImpacted' && value !== '' && !/^\d+$/.test(value)) return;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectNumber = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setForm((prev) => ({ ...prev, [e.target.name]: Number(e.target.value) }));
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const selected = Array.from(e.target.files ?? []);
+    setForm((prev) => ({ ...prev, files: selected }));
   };
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
+    setValidationError(null);
+    setSubmitError(null);
 
-    const usersImpacted = parseInt(form.usersImpacted, 10);
-    if (isNaN(usersImpacted) || usersImpacted < 0) return;
+    const formError = validateForm(form);
+    if (formError) {
+      setValidationError(formError);
+      return;
+    }
 
-    const payload: CreateTicketRequest = {
-      title: form.title,
-      description: form.description,
-      ticketTypeId: form.ticketTypeId,
-      ticketSeverityId: form.ticketSeverityId,
-      businessImpactId: form.businessImpactId,
-      ticketPriorityId: form.ticketPriorityId,
-      deadline: new Date(form.deadline).toISOString(),
-      usersImpacted,
-    };
+    try {
+      setPhase('creating');
+      const payload: CreateTicketRequest = {
+        title: form.title,
+        description: form.description,
+        ticketType: form.ticketType,
+        ticketSeverity: form.ticketSeverity,
+        businessImpact: form.businessImpact,
+        deadline: new Date(form.deadline).toISOString(),
+        usersImpacted: parseInt(form.usersImpacted, 10),
+      };
 
-    await execute(payload);
+      const ticket = await execute(payload);
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (!ticket) {
+        setPhase('idle');
+        return;
+      }
+
+      if (form.files.length > 0) {
+        setPhase('uploading');
+        for (const file of form.files) {
+          await ticketAPI.uploadAttachment(ticket.id, file);
+        }
+      }
+
+      onSuccess();
+    } catch (err: unknown) {
+      setSubmitError(
+        err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+      );
+      setPhase('idle');
+    }
   };
 
-  React.useEffect(() => {
-    if (data !== null) {
-      onSuccess();
-    }
-  }, [data, onSuccess]);
-
   const today = new Date().toISOString().split('T')[0];
+  const displayError = validationError ?? submitError;
 
   return (
     <form
@@ -154,21 +211,21 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
 
       <div className="submit-ticket-form-grid">
         <div className="field-group">
-          <label className="field-label" htmlFor="ticketTypeId">
+          <label className="field-label" htmlFor="ticketType">
             Ticket Type
           </label>
           <select
-            id="ticketTypeId"
-            name="ticketTypeId"
+            id="ticketType"
+            name="ticketType"
             className="field-select"
-            value={form.ticketTypeId}
-            onChange={handleSelectNumber}
+            value={form.ticketType}
+            onChange={handleChange}
             required
             disabled={loading}
             data-testid="field-ticket-type"
           >
             {TICKET_TYPE_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>
+              <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
             ))}
@@ -176,21 +233,21 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
         </div>
 
         <div className="field-group">
-          <label className="field-label" htmlFor="ticketSeverityId">
+          <label className="field-label" htmlFor="ticketSeverity">
             Severity
           </label>
           <select
-            id="ticketSeverityId"
-            name="ticketSeverityId"
+            id="ticketSeverity"
+            name="ticketSeverity"
             className="field-select"
-            value={form.ticketSeverityId}
-            onChange={handleSelectNumber}
+            value={form.ticketSeverity}
+            onChange={handleChange}
             required
             disabled={loading}
             data-testid="field-severity"
           >
             {TICKET_SEVERITY_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>
+              <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
             ))}
@@ -198,43 +255,21 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
         </div>
 
         <div className="field-group">
-          <label className="field-label" htmlFor="businessImpactId">
+          <label className="field-label" htmlFor="businessImpact">
             Business Impact
           </label>
           <select
-            id="businessImpactId"
-            name="businessImpactId"
+            id="businessImpact"
+            name="businessImpact"
             className="field-select"
-            value={form.businessImpactId}
-            onChange={handleSelectNumber}
+            value={form.businessImpact}
+            onChange={handleChange}
             required
             disabled={loading}
             data-testid="field-business-impact"
           >
             {BUSINESS_IMPACT_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="field-group">
-          <label className="field-label" htmlFor="ticketPriorityId">
-            Priority
-          </label>
-          <select
-            id="ticketPriorityId"
-            name="ticketPriorityId"
-            className="field-select"
-            value={form.ticketPriorityId}
-            onChange={handleSelectNumber}
-            required
-            disabled={loading}
-            data-testid="field-priority"
-          >
-            {TICKET_PRIORITY_OPTIONS.map((opt) => (
-              <option key={opt.id} value={opt.id}>
+              <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
             ))}
@@ -267,9 +302,9 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
           <input
             id="usersImpacted"
             name="usersImpacted"
-            type="number"
+            type="text"
+            inputMode="numeric"
             className="field-input"
-            min={0}
             value={form.usersImpacted}
             onChange={handleChange}
             placeholder="Number of users affected"
@@ -281,9 +316,32 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
         </div>
       </div>
 
-      {error && (
+      <div className="field-group">
+        <label className="field-label" htmlFor="attachments">
+          Attachments{' '}
+          <span className="field-label-hint">(optional -- PDF, JPG, PNG, max 5MB each)</span>
+        </label>
+        <input
+          id="attachments"
+          name="attachments"
+          type="file"
+          className="field-input"
+          accept=".pdf,.jpg,.jpeg,.png"
+          multiple
+          onChange={handleFileChange}
+          disabled={loading}
+          data-testid="field-attachments"
+        />
+        {form.files.length > 0 && (
+          <p className="field-hint" data-testid="attachment-count">
+            {String(form.files.length)} file{form.files.length !== 1 ? 's' : ''} selected
+          </p>
+        )}
+      </div>
+
+      {displayError && (
         <p className="feedback-error" role="alert" data-testid="submit-error">
-          {error}
+          {displayError}
         </p>
       )}
 
@@ -295,7 +353,7 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
           aria-busy={loading}
           data-testid="submit-ticket-btn"
         >
-          {loading ? 'Submitting...' : 'Submit Ticket'}
+          {PHASE_LABEL[phase]}
         </button>
       </div>
     </form>

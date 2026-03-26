@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CLIENT_ROUTES } from '../../constants/client.routes';
-import { useListQuotes } from '../../hooks/quotes/useListQuote';
-import { useGetTicket } from '../../hooks/tickets/useGetTicket';
-import { getStatusBadgeClass } from '../../lib/utils/badge-utils';
-import AdminQuotePanel from '../../features/tickets/AdminQuotePanel';
-import CommentThread from '../../features/tickets/CommentThread';
+import { CLIENT_ROUTES } from '../../constants/client.routes.js';
+import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
+import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
+import { getStatusBadgeClass } from '../../lib/utils/badge-utils.js';
+import AdminQuotePanel from '../../features/tickets/AdminQuotePanel.js';
+import CommentThread from '../../features/tickets/CommentThread.js';
 import './AdminQuoteDetailPage.css';
 
 const AdminQuoteDetailPage: React.FC = () => {
@@ -94,10 +94,10 @@ const AdminQuoteDetailPage: React.FC = () => {
         <h1 className="admin-quote-detail-title">{ticket.data.title}</h1>
         <div className="admin-quote-detail-meta">
           <span
-            className={getStatusBadgeClass(ticket.data.ticketStatusName)}
+            className={getStatusBadgeClass(ticket.data.ticketStatus)}
             data-testid="quote-detail-ticket-status"
           >
-            {ticket.data.ticketStatusName}
+            {ticket.data.ticketStatus}
           </span>
           <span className="admin-quote-detail-org" data-testid="quote-detail-ticket-org">
             {ticket.data.organizationName}

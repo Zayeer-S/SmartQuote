@@ -1,19 +1,25 @@
-import { PERMISSIONS } from '../../../shared/constants';
-import type { InsertData, TransactionContext } from '../../daos/base/types';
-import type { QuoteCalculationRulesDAO } from '../../daos/children/quote.calculation.rules.dao';
-import type { QuotesDAO } from '../../daos/children/quotes.dao';
-import type { RateProfilesDAO } from '../../daos/children/rate.profiles.dao';
-import type { TicketsDAO } from '../../daos/children/tickets.dao';
-import type { TicketId, UserId } from '../../database/types/ids';
-import type { Quote, QuoteCalculationRule, RateProfile, Ticket } from '../../database/types/tables';
-import type { RBACService } from '../rbac/rbac.service';
-import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket.errors';
-import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors';
+import { BUSINESS_HOURS, PERMISSIONS, QUOTE_CREATORS } from '../../../shared/constants';
+import type { InsertData, TransactionContext } from '../../daos/base/types.js';
+import type { QuoteCalculationRulesDAO } from '../../daos/children/quote.calculation.rules.dao.js';
+import type { QuotesDAO } from '../../daos/children/quotes.dao.js';
+import type { RateProfilesDAO } from '../../daos/children/rate.profiles.dao.js';
+import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
+import type { TicketId, UserId } from '../../database/types/ids.js';
+import type {
+  Quote,
+  QuoteCalculationRule,
+  RateProfile,
+  Ticket,
+} from '../../database/types/tables.js';
+import type { RBACService } from '../rbac/rbac.service.js';
+import type { LookupResolver } from '../../lib/lookup-resolver.js';
+import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket.errors.js';
+import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
 
 export interface ComputeQuoteInput {
   ticket: Ticket;
   rule: QuoteCalculationRule;
-  profile: RateProfile;
+  hourlyRate: number;
   effortHoursMin: number;
   effortHoursMax: number;
 }
@@ -29,23 +35,24 @@ export interface ComputeQuoteResult {
 }
 
 /**
- * Pure function: derives quote figures from a ticket, matched rule, and rate profile.
+ * Pure function: derives quote figures from a ticket, matched rule, and resolved hourly rate.
  * Contains no I/O and is fully unit-testable in isolation.
  *
+ * The caller is responsible for resolving which rate to pass in (business_hours_rate vs
+ * after_hours_rate) before calling this function -- computeQuote has no clock awareness.
+ *
  * Calculation logic:
- *   adjusted_min  = effortHoursMin  × urgency_multiplier
- *   adjusted_max  = effortHoursMax  × urgency_multiplier
- *   mid_hours     = (adjusted_min + adjusted_max) / 2
- *   hourly_rate   = base_hourly_rate × multiplier
- *   estimated_cost = mid_hours × hourly_rate
+ *   adjusted_min   = effortHoursMin x urgency_multiplier
+ *   adjusted_max   = effortHoursMax x urgency_multiplier
+ *   mid_hours      = (adjusted_min + adjusted_max) / 2
+ *   estimated_cost = mid_hours x hourlyRate
  */
 export function computeQuote(input: ComputeQuoteInput): ComputeQuoteResult {
-  const { rule, profile, effortHoursMin, effortHoursMax } = input;
+  const { rule, hourlyRate, effortHoursMin, effortHoursMax } = input;
 
   const adjustedMin = effortHoursMin * rule.urgency_multiplier;
   const adjustedMax = effortHoursMax * rule.urgency_multiplier;
   const midHours = (adjustedMin + adjustedMax) / 2;
-  const hourlyRate = profile.base_hourly_rate * profile.multiplier;
 
   return {
     estimated_hours_minimum: adjustedMin,
@@ -58,7 +65,17 @@ export function computeQuote(input: ComputeQuoteInput): ComputeQuoteResult {
   };
 }
 
-// ─── Service ──────────────────────────────────────────────────────────────────
+/**
+ * Returns true if the given date falls within business hours.
+ * Business hours are defined by BUSINESS_HOURS.START_HOUR (inclusive)
+ * and BUSINESS_HOURS.END_HOUR (exclusive), local server time.
+ *
+ * Exported for unit testing.
+ */
+export function isBusinessHours(date: Date): boolean {
+  const hour = date.getHours();
+  return hour >= BUSINESS_HOURS.START_HOUR && hour < BUSINESS_HOURS.END_HOUR;
+}
 
 export class QuoteEngineService {
   private quotesDAO: QuotesDAO;
@@ -66,19 +83,25 @@ export class QuoteEngineService {
   private rateProfilesDAO: RateProfilesDAO;
   private quoteCalculationRulesDAO: QuoteCalculationRulesDAO;
   private rbacService: RBACService;
+  private lookup: LookupResolver;
+  private clock: () => Date;
 
   constructor(
     quotesDAO: QuotesDAO,
     ticketsDAO: TicketsDAO,
     rateProfilesDAO: RateProfilesDAO,
     quoteCalculationRulesDAO: QuoteCalculationRulesDAO,
-    rbacService: RBACService
+    rbacService: RBACService,
+    lookup: LookupResolver,
+    clock: () => Date = () => new Date()
   ) {
     this.quotesDAO = quotesDAO;
     this.ticketsDAO = ticketsDAO;
     this.rateProfilesDAO = rateProfilesDAO;
     this.quoteCalculationRulesDAO = quoteCalculationRulesDAO;
     this.rbacService = rbacService;
+    this.lookup = lookup;
+    this.clock = clock;
   }
 
   /**
@@ -89,10 +112,11 @@ export class QuoteEngineService {
    *     matching ticket_severity_id, business_impact_id, and users_impacted range).
    *  2. Resolve the active RateProfile matching ticket_type_id, ticket_severity_id,
    *     business_impact_id, and effective date range covering now.
-   *  3. Resolve the effort hour range from the rule's suggested effort level.
-   *  4. Delegate calculation to the pure `computeQuote` function.
-   *  5. Persist as an AUTOMATED quote at version = latest + 1.
-   *  6. Update the ticket's priority to the suggested priority from the rule.
+   *  3. Select business_hours_rate or after_hours_rate based on current time.
+   *  4. Resolve the effort hour range from the rule's suggested effort level.
+   *  5. Delegate calculation to the pure `computeQuote` function.
+   *  6. Persist as an AUTOMATED quote at version = latest + 1.
+   *  7. Update the ticket's priority to the suggested priority from the rule.
    *
    * @param ticketId Ticket to generate a quote for
    * @param actorId Actor triggering generation (must have QUOTES_CREATE)
@@ -117,15 +141,22 @@ export class QuoteEngineService {
     const ticket = await this.ticketsDAO.getById(ticketId, options);
     if (!ticket) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
 
+    const now = this.clock();
+
     const rule = await this.resolveCalculationRule(ticket, options);
-    const profile = await this.resolveRateProfile(ticket, options);
+    const profile = await this.resolveRateProfile(ticket, now, options);
+    const hourlyRate = isBusinessHours(now)
+      ? (profile.business_hours_rate as unknown as number)
+      : (profile.after_hours_rate as unknown as number);
+
     const { effortHoursMin, effortHoursMax } = await this.resolveEffortHours(rule, options);
 
-    const computed = computeQuote({ ticket, rule, profile, effortHoursMin, effortHoursMax });
+    const computed = computeQuote({ ticket, rule, hourlyRate, effortHoursMin, effortHoursMax });
 
     const nextVersion = await this.resolveNextVersion(ticketId, options);
 
-    // AUTOMATED creator (id=2)
+    // TODO: rule.quote_effort_level_id should be used here once QuoteCalculationRule
+    // carries that field - currently the rule only has suggested_ticket_priority_id.
     const newQuote = await this.quotesDAO.create(
       {
         ticket_id: ticketId,
@@ -139,7 +170,7 @@ export class QuoteEngineService {
         final_cost: null,
         quote_confidence_level_id: null,
         quote_approval_id: null,
-        quote_creator_id: 2 as unknown as Quote['quote_creator_id'],
+        quote_creator_id: this.lookup.quoteCreatorId(QUOTE_CREATORS.AUTOMATED),
         suggested_ticket_priority_id:
           computed.suggested_ticket_priority_id as unknown as Quote['suggested_ticket_priority_id'],
         quote_effort_level_id:
@@ -149,7 +180,6 @@ export class QuoteEngineService {
       options
     );
 
-    // Update the ticket's priority to match the engine's recommendation
     await this.ticketsDAO.update(
       { id: ticketId },
       {
@@ -162,12 +192,10 @@ export class QuoteEngineService {
     return newQuote;
   }
 
-  // ─── Private Helpers ───────────────────────────────────────────────────────
-
   /**
    * Find the highest-priority active calculation rule that matches the ticket's
    * severity, business impact, and users_impacted range.
-   * Rules are ordered by priority_order ASC — lowest number wins.
+   * Rules are ordered by priority_order ASC -- lowest number wins.
    */
   private async resolveCalculationRule(
     ticket: Ticket,
@@ -193,26 +221,27 @@ export class QuoteEngineService {
   }
 
   /**
-   * Find the active rate profile that matches the ticket's type, severity,
-   * and business impact where today falls within its effective date range.
+   * Find the active rate profile matching the ticket's type, severity, and business
+   * impact where the given date falls within the effective date range.
+   *
+   * Uses RateProfilesDAO.findActive to pre-filter by is_active and effective date
+   * range at the DB level rather than loading all profiles into memory.
    */
   private async resolveRateProfile(
     ticket: Ticket,
+    asOf: Date,
     options?: TransactionContext
   ): Promise<RateProfile> {
-    const now = new Date();
-    const allProfiles = await this.rateProfilesDAO.getAll(options);
+    const activeProfiles = await this.rateProfilesDAO.findActive(asOf, options);
 
-    const matched = allProfiles.find(
+    const matched = activeProfiles.find(
       (profile) =>
         (profile.ticket_type_id as unknown as number) ===
           (ticket.ticket_type_id as unknown as number) &&
         (profile.ticket_severity_id as unknown as number) ===
           (ticket.ticket_severity_id as unknown as number) &&
         (profile.business_impact_id as unknown as number) ===
-          (ticket.business_impact_id as unknown as number) &&
-        profile.effective_from <= now &&
-        profile.effective_to >= now
+          (ticket.business_impact_id as unknown as number)
     );
 
     if (!matched) throw new QuoteError(QUOTE_ERROR_MSGS.NO_ACTIVE_RATE_PROFILE, 422);
@@ -221,29 +250,23 @@ export class QuoteEngineService {
 
   /**
    * Resolve the effort hour range for the matched rule's effort level.
-   * Queries quote_effort_level_ranges for the active range linked to
-   * the rule's suggested effort level.
    *
    * Note: QuoteEffortLevelRangesDAO is not injected here to avoid expanding
-   * the dependency surface — the range is resolved via a raw query on the
+   * the dependency surface -- the range is resolved via a raw query on the
    * rateProfilesDAO's db instance. If this grows in complexity, extract a
    * dedicated EffortLevelRangesDAO and inject it.
    */
   // eslint-disable-next-line @typescript-eslint/require-await
   private async resolveEffortHours(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    rule: QuoteCalculationRule,
+    _rule: QuoteCalculationRule,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    options?: TransactionContext
+    _options?: TransactionContext
   ): Promise<{ effortHoursMin: number; effortHoursMax: number }> {
-    // Fall back to a sensible default range if no effort level range is seeded.
-    // The quote engine should not fail hard on missing configuration, it should bruh bruh
-    // produce a quote with a visible indicator that defaults were used.
     // TODO: inject QuoteEffortLevelRangesDAO and query properly when seed data is in place.
     return { effortHoursMin: 1, effortHoursMax: 8 };
   }
 
-  /** Determine the next version number for a ticket's quotes */
   private async resolveNextVersion(
     ticketId: TicketId,
     options?: TransactionContext

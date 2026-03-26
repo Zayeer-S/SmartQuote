@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../hooks/contexts/useAuth';
-import { CLIENT_ROUTES } from '../constants/client.routes';
+import { useAuth } from '../hooks/contexts/useAuth.js';
+import { CLIENT_ROUTES } from '../constants/client.routes.js';
 
 interface Props {
   allowedRoles?: string[];

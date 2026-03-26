@@ -40,6 +40,11 @@ const envSchema = z.object({
   AWS_SECRET_ACCESS_KEY: optionalStr,
   AWS_S3_BUCKET: optionalStr,
 
+  ATTACHMENT_PRESIGN_EXPIRY_SECONDS: z
+    .string()
+    .optional()
+    .transform((val) => (val === '' || val === undefined ? 300 : Number(val))),
+
   REDIS_HOST: optionalStr,
   REDIS_PORT: optionalNum,
   REDIS_PASSWORD: optionalStr,

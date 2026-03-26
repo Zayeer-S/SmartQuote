@@ -15,4 +15,5 @@ export const QUOTE_ERROR_MSGS = {
   ALREADY_APPROVED: 'Quote has already been approved',
   NOT_PENDING: 'Quote is not in a pending approval state',
   MIN_MAX_HOURS: 'Estimated maximum hours must be greater than or equal to minimum hours',
+  USER_NOT_FOUND: 'No user found for this quote',
 } as const;

@@ -1,9 +1,9 @@
 import type { Knex } from 'knex';
-import { BaseDAO } from '../base/base.dao';
-import { MAIN_TABLES } from '../../database/config/table-names';
-import type { QuoteApproval } from '../../database/types/tables';
-import type { QuoteApprovalId, QuoteApprovalStatusId } from '../../database/types/ids';
-import type { GetManyOptions } from '../base/types';
+import { BaseDAO } from '../base/base.dao.js';
+import { MAIN_TABLES } from '../../database/config/table-names.js';
+import type { QuoteApproval } from '../../database/types/tables.js';
+import type { QuoteApprovalId, QuoteApprovalStatusId } from '../../database/types/ids.js';
+import type { GetManyOptions } from '../base/types.js';
 
 export class QuoteApprovalsDAO extends BaseDAO<QuoteApproval, QuoteApprovalId> {
   constructor(db: Knex) {

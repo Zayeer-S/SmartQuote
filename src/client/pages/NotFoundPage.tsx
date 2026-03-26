@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { CLIENT_ROUTES } from '../constants/client.routes';
+import { CLIENT_ROUTES } from '../constants/client.routes.js';
 import './NotFoundPage.css';
 
 const NotFoundPage: React.FC = () => {

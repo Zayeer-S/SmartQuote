@@ -1,6 +1,6 @@
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import z from 'zod';
-import { buildPasswordSchema } from './validation-utils';
+import { buildPasswordSchema } from './validation-utils.js';
 
 const phoneNumberSchema = z
   .string()
@@ -28,7 +28,6 @@ export const createUserSchema = z.object({
   phoneNumber: phoneNumberSchema,
   password: buildPasswordSchema(),
   roleId: z.number().int().positive('Role ID must be a positive integer'),
-  organizationId: z.uuid('Organization ID must be a valid UUID').optional(),
 });
 
 export type CreateUserInput = z.infer<typeof createUserSchema>;
@@ -49,7 +48,6 @@ export const listUsersQuerySchema = z.object({
     .optional()
     .transform((val) => (val ? parseInt(val, 10) : undefined))
     .pipe(z.number().int().positive().optional()),
-  organizationId: z.uuid().optional(),
 });
 
 export type ListUsersQueryInput = z.infer<typeof listUsersQuerySchema>;

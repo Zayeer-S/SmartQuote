@@ -1,43 +1,42 @@
 import React, { useEffect, useState } from 'react';
-import { useListComments } from '../../hooks/tickets/useListComments';
-import { useAddComment } from '../../hooks/tickets/useAddComment';
-import { COMMENT_TYPES, LOOKUP_IDS } from '../../../shared/constants/lookup-values';
-import type { CommentType } from '../../../shared/constants/lookup-values';
+import { useListComments } from '../../hooks/tickets/useListComments.js';
+import { useAddComment } from '../../hooks/tickets/useAddComment.js';
+import { useTicketPermissions } from '../../hooks/auth/useTicketPermissions.js';
+import { COMMENT_TYPES } from '../../../shared/constants/lookup-values.js';
+import type { CommentType } from '../../../shared/constants/lookup-values.js';
 import './CommentThread.css';
 
 interface CommentThreadProps {
   ticketId: string;
 }
 
-const COMMENT_TYPE_OPTIONS: { id: number; label: CommentType }[] = [
-  { id: LOOKUP_IDS.COMMENT_TYPE.EXTERNAL, label: COMMENT_TYPES.EXTERNAL },
-  { id: LOOKUP_IDS.COMMENT_TYPE.INTERNAL, label: COMMENT_TYPES.INTERNAL },
-];
-
-const COMMENT_TYPE_ID_TO_NAME: Record<number, string> = {
-  [LOOKUP_IDS.COMMENT_TYPE.INTERNAL]: COMMENT_TYPES.INTERNAL,
-  [LOOKUP_IDS.COMMENT_TYPE.EXTERNAL]: COMMENT_TYPES.EXTERNAL,
-  [LOOKUP_IDS.COMMENT_TYPE.SYSTEM]: COMMENT_TYPES.SYSTEM,
+const COMMENT_TYPE_CLASS: Record<CommentType, string> = {
+  [COMMENT_TYPES.INTERNAL]: 'comment-item comment-item--internal',
+  [COMMENT_TYPES.EXTERNAL]: 'comment-item comment-item--external',
+  [COMMENT_TYPES.SYSTEM]: 'comment-item comment-item--system',
 };
 
-const COMMENT_TYPE_CLASS: Record<number, string> = {
-  [LOOKUP_IDS.COMMENT_TYPE.INTERNAL]: 'comment-item comment-item--internal',
-  [LOOKUP_IDS.COMMENT_TYPE.EXTERNAL]: 'comment-item comment-item--external',
-  [LOOKUP_IDS.COMMENT_TYPE.SYSTEM]: 'comment-item comment-item--system',
-};
-
-const COMMENT_TYPE_BADGE_CLASS: Record<number, string> = {
-  [LOOKUP_IDS.COMMENT_TYPE.INTERNAL]: 'badge comment-type-badge comment-type-badge--internal',
-  [LOOKUP_IDS.COMMENT_TYPE.EXTERNAL]: 'badge comment-type-badge comment-type-badge--external',
-  [LOOKUP_IDS.COMMENT_TYPE.SYSTEM]: 'badge comment-type-badge comment-type-badge--system',
+const COMMENT_TYPE_BADGE_CLASS: Record<CommentType, string> = {
+  [COMMENT_TYPES.INTERNAL]: 'badge comment-type-badge comment-type-badge--internal',
+  [COMMENT_TYPES.EXTERNAL]: 'badge comment-type-badge comment-type-badge--external',
+  [COMMENT_TYPES.SYSTEM]: 'badge comment-type-badge comment-type-badge--system',
 };
 
 const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
   const list = useListComments();
   const add = useAddComment();
+  const { canUpdateAll } = useTicketPermissions();
 
   const [commentText, setCommentText] = useState('');
-  const [commentTypeId, setCommentTypeId] = useState<number>(LOOKUP_IDS.COMMENT_TYPE.EXTERNAL);
+  const [commentType, setCommentType] = useState<CommentType>(COMMENT_TYPES.EXTERNAL);
+
+  // Reset type selection to EXTERNAL if the user loses the canUpdateAll permission
+  // (e.g. session change) while INTERNAL is selected
+  useEffect(() => {
+    if (!canUpdateAll && commentType === COMMENT_TYPES.INTERNAL) {
+      setCommentType(COMMENT_TYPES.EXTERNAL);
+    }
+  }, [canUpdateAll, commentType]);
 
   useEffect(() => {
     void list.execute(ticketId);
@@ -47,7 +46,7 @@ const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!commentText.trim()) return;
-    void add.execute(ticketId, { commentText, commentTypeId }).then(() => {
+    void add.execute(ticketId, { commentText, commentType }).then(() => {
       setCommentText('');
       void list.execute(ticketId);
     });
@@ -86,10 +85,11 @@ const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
       {comments.length > 0 && (
         <ol className="comment-list" role="list" data-testid="comments-list">
           {comments.map((comment) => {
-            const typeName = COMMENT_TYPE_ID_TO_NAME[comment.commentTypeId] ?? 'Unknown';
-            const itemClass = COMMENT_TYPE_CLASS[comment.commentTypeId] ?? 'comment-item';
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            const itemClass = COMMENT_TYPE_CLASS[comment.commentType] ?? 'comment-item';
             const badgeClass =
-              COMMENT_TYPE_BADGE_CLASS[comment.commentTypeId] ?? 'badge badge-neutral';
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              COMMENT_TYPE_BADGE_CLASS[comment.commentType] ?? 'badge badge-neutral';
 
             const formattedDate = new Date(comment.createdAt).toLocaleDateString('en-GB', {
               day: 'numeric',
@@ -107,7 +107,7 @@ const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
               >
                 <div className="comment-meta">
                   <span className={badgeClass} data-testid={`comment-type-${String(comment.id)}`}>
-                    {typeName}
+                    {comment.commentType}
                   </span>
                   <span className="comment-user" data-testid={`comment-user-${String(comment.id)}`}>
                     {comment.userId}
@@ -125,7 +125,6 @@ const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
         </ol>
       )}
 
-      {/* ── Reply form ── */}
       <form
         className="add-comment-form"
         onSubmit={handleSubmit}
@@ -133,27 +132,26 @@ const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
         data-testid="add-comment-form"
       >
         <div className="add-comment-form-controls">
-          <div className="field-group add-comment-type-field">
-            <label className="field-label" htmlFor="comment-type">
-              Type
-            </label>
-            <select
-              className="field-select"
-              id="comment-type"
-              value={commentTypeId}
-              onChange={(e) => {
-                setCommentTypeId(Number(e.target.value));
-              }}
-              disabled={add.loading}
-              data-testid="comment-type-select"
-            >
-              {COMMENT_TYPE_OPTIONS.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {canUpdateAll && (
+            <div className="field-group add-comment-type-field">
+              <label className="field-label" htmlFor="comment-type">
+                Type
+              </label>
+              <select
+                className="field-select"
+                id="comment-type"
+                value={commentType}
+                onChange={(e) => {
+                  setCommentType(e.target.value as CommentType);
+                }}
+                disabled={add.loading}
+                data-testid="comment-type-select"
+              >
+                <option value={COMMENT_TYPES.EXTERNAL}>{COMMENT_TYPES.EXTERNAL}</option>
+                <option value={COMMENT_TYPES.INTERNAL}>{COMMENT_TYPES.INTERNAL}</option>
+              </select>
+            </div>
+          )}
 
           <div className="field-group add-comment-text-field">
             <label className="field-label" htmlFor="comment-text">
@@ -167,9 +165,11 @@ const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
                 setCommentText(e.target.value);
               }}
               placeholder={
-                commentTypeId === LOOKUP_IDS.COMMENT_TYPE.INTERNAL
+                commentType === COMMENT_TYPES.INTERNAL
                   ? 'Internal note (not visible to customer)...'
-                  : 'Reply to customer...'
+                  : canUpdateAll
+                    ? 'Reply to customer'
+                    : 'Reply to Giacom'
               }
               required
               disabled={add.loading}

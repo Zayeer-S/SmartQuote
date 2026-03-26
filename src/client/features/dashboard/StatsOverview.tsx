@@ -1,10 +1,10 @@
 import React from 'react';
-import type { TicketDetailResponse } from '../../../shared/contracts/ticket-contracts';
-import { TICKET_STATUSES } from '../../../shared/constants/lookup-values';
+import type { TicketResponse } from '../../../shared/contracts/ticket-contracts.js';
+import { TICKET_STATUSES } from '../../../shared/constants/lookup-values.js';
 import './StatsOverview.css';
 
 interface StatsOverviewProps {
-  tickets: TicketDetailResponse[];
+  tickets: TicketResponse[];
 }
 
 interface StatCardProps {
@@ -30,8 +30,8 @@ const OPEN_STATUSES: string[] = [
 
 const StatsOverview: React.FC<StatsOverviewProps> = ({ tickets }) => {
   const total = tickets.length;
-  const open = tickets.filter((t) => OPEN_STATUSES.includes(t.ticketStatusName)).length;
-  const resolved = tickets.filter((t) => t.ticketStatusName === TICKET_STATUSES.RESOLVED).length;
+  const open = tickets.filter((t) => OPEN_STATUSES.includes(t.ticketStatus)).length;
+  const resolved = tickets.filter((t) => t.ticketStatus === TICKET_STATUSES.RESOLVED).length;
 
   return (
     <div

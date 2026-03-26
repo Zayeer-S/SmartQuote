@@ -1,2 +1,2 @@
-export { ThemeProvider } from './ThemeContext';
-export type { Theme, ThemeContextValue } from './theme.context.types';
+export { ThemeProvider } from './ThemeContext.js';
+export type { Theme, ThemeContextValue } from './theme.context.types.js';

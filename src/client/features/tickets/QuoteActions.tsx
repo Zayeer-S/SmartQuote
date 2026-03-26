@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useApproveQuote } from '../../hooks/quotes/useApproveQuote';
-import { useRejectQuote } from '../../hooks/quotes/useRejectQuote';
-import { QUOTE_APPROVAL_STATUSES } from '../../../shared/constants/lookup-values';
-import type { QuoteApprovalStatus } from '../../../shared/constants/lookup-values';
+import { useApproveQuote } from '../../hooks/quotes/useApproveQuote.js';
+import { useRejectQuote } from '../../hooks/quotes/useRejectQuote.js';
+import { QUOTE_APPROVAL_STATUSES } from '../../../shared/constants/lookup-values.js';
+import type { QuoteApprovalStatus } from '../../../shared/constants/lookup-values.js';
 import './QuoteActions.css';
 
 interface QuoteActionsProps {

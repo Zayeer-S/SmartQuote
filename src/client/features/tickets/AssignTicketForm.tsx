@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAssignTicket } from '../../hooks/tickets/useAssignTicket';
+import { useAssignTicket } from '../../hooks/tickets/useAssignTicket.js';
 import './AssignTicketForm.css';
 
 interface AssignTicketFormProps {

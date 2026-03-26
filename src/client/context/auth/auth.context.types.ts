@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import type { GetCurrentUserResponse } from '../../../shared/contracts/auth-contracts';
+import type { GetCurrentUserResponse } from '../../../shared/contracts/auth-contracts.js';
 
 export interface AuthContextValue extends AuthState {
   hasPermission: (permission: string) => boolean;

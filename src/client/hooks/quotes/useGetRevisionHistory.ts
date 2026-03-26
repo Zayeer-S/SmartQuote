@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { quoteAPI } from '../../lib/api/quote.api';
-import type { ListRevisionsResponse } from '../../../shared/contracts/quote-contracts';
+import { quoteAPI } from '../../lib/api/quote.api.js';
+import type { ListRevisionsResponse } from '../../../shared/contracts/quote-contracts.js';
 
 interface UseGetRevisionHistoryState {
   data: ListRevisionsResponse | null;

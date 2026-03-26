@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { RBACService } from '../services/rbac/rbac.service';
-import type { RoleId, UserId } from '../database/types/ids';
-import { error } from '../lib/respond';
-import { isAuthenticatedRequest } from './auth.middleware';
+import type { RBACService } from '../services/rbac/rbac.service.js';
+import type { RoleId, UserId } from '../database/types/ids.js';
+import { error } from '../lib/respond.js';
+import { isAuthenticatedRequest } from './auth.middleware.js';
 import type { PermissionName } from '../../shared/constants';
 
 /**

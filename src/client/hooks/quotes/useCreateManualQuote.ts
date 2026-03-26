@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { quoteAPI } from '../../lib/api/quote.api';
+import { quoteAPI } from '../../lib/api/quote.api.js';
 import type {
   CreateManualQuoteRequest,
   QuoteResponse,
-} from '../../../shared/contracts/quote-contracts';
+} from '../../../shared/contracts/quote-contracts.js';
 
 interface UseCreateManualQuoteState {
   data: QuoteResponse | null;

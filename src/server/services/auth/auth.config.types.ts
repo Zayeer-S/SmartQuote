@@ -8,7 +8,8 @@ export interface AuthRateLimitConfig {
   api: {
     windowMs: number;
     maxAttempts: number;
-  }
+  };
+  disabled: boolean;
 }
 
 export interface AuthConfig {
@@ -19,7 +20,7 @@ export interface AuthConfig {
   /** How often to clean up expired sessions (in minutes) */
   cleanupIntervalMinutes: number;
   /** Session token length in bytes (before base64 encoding) */
-  tokenBytes: number
+  tokenBytes: number;
 }
 
 export interface PasswordConfig {

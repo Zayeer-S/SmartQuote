@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ticketAPI } from '../../lib/api/ticket.api';
+import { ticketAPI } from '../../lib/api/ticket.api.js';
 
 interface UseDeleteTicketState {
   loading: boolean;

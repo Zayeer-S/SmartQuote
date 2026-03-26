@@ -1,4 +1,4 @@
-import { KEYS } from './keys';
+import { KEYS } from './keys.js';
 
 const key = KEYS.sessionToken;
 
