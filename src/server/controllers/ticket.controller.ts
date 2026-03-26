@@ -1,4 +1,3 @@
-import 'multer';
 import type { Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
 import { validateOrThrow } from '../validators/validation-utils.js';
@@ -31,7 +30,12 @@ import type { TicketService } from '../services/ticket/ticket.service.js';
 import type { CommentService } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
-import { IncomingFile } from '../services/storage/storage.service.types.js';
+import type { IncomingFile } from '../services/storage/storage.service.types.js';
+
+/** Shape attached to req by the parseAttachment middleware in ticket.routes.ts */
+interface RequestWithIncomingFile extends Request {
+  incomingFile?: IncomingFile;
+}
 
 export class TicketController {
   private ticketService: TicketService;
@@ -79,22 +83,15 @@ export class TicketController {
     try {
       const actor = (req as AuthenticatedRequest).user;
       const ticketId = req.params.ticketId as TicketId;
-      const file = (req as Request & { file?: Express.Multer.File }).file;
+      const file = (req as RequestWithIncomingFile).incomingFile;
 
       if (!file) {
         error(res, 400, 'No file provided');
         return;
       }
 
-      const incomingFile: IncomingFile = {
-        buffer: file.buffer,
-        originalName: file.originalname,
-        mimeType: file.mimetype,
-        sizeBytes: file.size,
-      };
-
       const attachment = await this.attachmentService.uploadAttachment(
-        incomingFile,
+        file,
         ticketId,
         actor.id as UserId
       );

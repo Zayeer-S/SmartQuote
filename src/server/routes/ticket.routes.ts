@@ -1,14 +1,15 @@
-import 'multer';
-import { Router } from 'express';
+import busboy from 'busboy';
+import type { IncomingFile } from '../services/storage/storage.service.types.js';
+import { Router, RequestHandler } from 'express';
+import { Readable } from 'stream';
 import type { TicketController } from '../controllers/ticket.controller.js';
 import type { AuthService } from '../services/auth/auth.service.js';
 import type { RBACService } from '../services/rbac/rbac.service.js';
 import { createAuthMiddleware } from '../middleware/auth.middleware.js';
 import { requirePermission } from '../middleware/rbac.middleware.js';
-import { ATTACHMENT_CONFIG, PERMISSIONS } from '../../shared/constants/lookup-values.js';
+import { PERMISSIONS } from '../../shared/constants/lookup-values.js';
 import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../shared/constants';
 import type { QuoteController } from '../controllers/quote.controller.js';
-import multer from 'multer';
 
 export function createTicketRoutes(
   ticketController: TicketController,
@@ -22,20 +23,50 @@ export function createTicketRoutes(
   const can = (...perms: Parameters<typeof requirePermission>[1][]) =>
     requirePermission(rbacService, ...perms);
 
-  const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-      fileSize: ATTACHMENT_CONFIG.MAX_SIZE_BYTES,
-      files: 1,
-    },
-    fileFilter: (_req, file, cb) => {
-      if ((ATTACHMENT_CONFIG.ALLOWED_MIME_TYPES as readonly string[]).includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new Error(`File type not allowed: ${file.mimetype}`));
-      }
-    },
-  });
+  function parseMultipartFile(req: Request): Promise<IncomingFile> {
+    return new Promise((resolve, reject) => {
+      const body = req.body as unknown as Buffer;
+      const bb = busboy({ headers: req.headers as unknown as Record<string, string> });
+      let resolved = false;
+
+      bb.on('file', (_field, stream, info) => {
+        const chunks: Buffer[] = [];
+        stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+        stream.on('end', () => {
+          resolved = true;
+          resolve({
+            buffer: Buffer.concat(chunks),
+            originalName: info.filename,
+            mimeType: info.mimeType,
+            sizeBytes: Buffer.concat(chunks).byteLength,
+          });
+        });
+        stream.on('error', reject);
+      });
+
+      bb.on('finish', () => {
+        if (!resolved) reject(new Error('No file found in request'));
+      });
+      bb.on('error', reject);
+
+      const readable = Readable.from(body);
+
+      readable.pipe(bb);
+    });
+  }
+
+  const parseAttachment: RequestHandler = (req, _res, next) => {
+    if (!(req.body instanceof Buffer)) {
+      next(new Error('Expected binary body'));
+      return;
+    }
+    parseMultipartFile(req as unknown as Request)
+      .then((file) => {
+        (req as unknown as Request & { incomingFile: IncomingFile }).incomingFile = file;
+        next();
+      })
+      .catch(next);
+  };
 
   router.post(
     TICKET_ENDPOINTS.CREATE,
@@ -104,7 +135,7 @@ export function createTicketRoutes(
     TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(),
     authenticate,
     can(PERMISSIONS.TICKETS_CREATE),
-    upload.single('file'),
+    parseAttachment,
     ticketController.uploadAttachment
   );
 
