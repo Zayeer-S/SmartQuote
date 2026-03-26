@@ -2,11 +2,14 @@ import type { Knex } from 'knex';
 import { TicketsDAO } from '../daos/children/tickets.dao.js';
 import { TicketCommentsDAO } from '../daos/children/ticket.comments.dao.js';
 import { TicketAttachmentsDAO } from '../daos/children/ticket.attachments.dao.js';
+import { TicketEmbeddingsDAO } from '../daos/children/ticket.embeddings.dao.js';
 import { UsersDAO } from '../daos/children/users.dao.js';
+import { QuotesDAO } from '../daos/children/quotes.dao.js';
 import { TicketService } from '../services/ticket/ticket.service.js';
 import { CommentService } from '../services/ticket/comment.service.js';
 import { AttachmentService } from '../services/ticket/attachment.service.js';
 import { TicketPriorityEngine } from '../services/ticket/ticket.priority.engine.js';
+import { TicketSimilarityService } from '../services/ticket/ticket.similarity.service.js';
 import { TicketController } from '../controllers/ticket.controller.js';
 import { RBACService } from '../services/rbac/rbac.service.js';
 import { LookupResolver } from '../lib/lookup-resolver.js';
@@ -28,13 +31,16 @@ export class TicketContainer {
   public readonly ticketsDAO: TicketsDAO;
   public readonly ticketCommentsDAO: TicketCommentsDAO;
   public readonly ticketAttachmentsDAO: TicketAttachmentsDAO;
+  public readonly ticketEmbeddingsDAO: TicketEmbeddingsDAO;
   public readonly usersDAO: UsersDAO;
+  public readonly quotesDAO: QuotesDAO;
   public readonly priorityRulesDAO: TicketPriorityRulesDAO;
   public readonly priorityThresholdsDAO: TicketPriorityThresholdsDAO;
 
   public readonly storageService: StorageService;
   public readonly priorityEngine: TicketPriorityEngine;
   public readonly attachmentService: AttachmentService;
+  public readonly similarityService: TicketSimilarityService;
   public readonly ticketService: TicketService;
   public readonly commentService: CommentService;
 
@@ -51,7 +57,9 @@ export class TicketContainer {
     this.ticketsDAO = new TicketsDAO(db);
     this.ticketCommentsDAO = new TicketCommentsDAO(db);
     this.ticketAttachmentsDAO = new TicketAttachmentsDAO(db);
+    this.ticketEmbeddingsDAO = new TicketEmbeddingsDAO(db);
     this.usersDAO = new UsersDAO(db);
+    this.quotesDAO = new QuotesDAO(db);
     this.priorityRulesDAO = new TicketPriorityRulesDAO(db);
     this.priorityThresholdsDAO = new TicketPriorityThresholdsDAO(db);
 
@@ -97,6 +105,13 @@ export class TicketContainer {
       storageTypeName
     );
 
+    this.similarityService = new TicketSimilarityService(
+      this.ticketsDAO,
+      this.quotesDAO,
+      this.ticketEmbeddingsDAO,
+      embedder
+    );
+
     this.ticketService = new TicketService(
       db,
       this.ticketsDAO,
@@ -105,7 +120,8 @@ export class TicketContainer {
       rbacService,
       lookupResolver,
       this.priorityEngine,
-      this.attachmentService
+      this.attachmentService,
+      this.similarityService
     );
 
     this.commentService = new CommentService(
@@ -120,6 +136,7 @@ export class TicketContainer {
       this.commentService,
       this.attachmentService,
       slaService,
+      this.similarityService,
       lookupResolver
     );
   }
