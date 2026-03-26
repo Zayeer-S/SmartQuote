@@ -2,6 +2,7 @@ import type {
   AddCommentRequest,
   AssignTicketRequest,
   AttachmentResponse,
+  AttachmentUrlResponse,
   CommentResponse,
   CreateTicketRequest,
   ListCommentsResponse,
@@ -136,6 +137,19 @@ export const ticketAPI = {
   async listComments(ticketId: string): Promise<ListCommentsResponse> {
     const response = await httpClient.get<ApiResponse<ListCommentsResponse>>(
       base + TICKET_ENDPOINTS.LIST_COMMENTS(ticketId)
+    );
+    return extractData(response);
+  },
+
+  /**
+   * Get a short-lived presigned URL for viewing or downloading an attachment.
+   * @param ticketId Owner ticket ID
+   * @param attachmentId Attachment to resolve
+   * @returns Presigned URL valid for the server-configured TTL
+   */
+  async getAttachmentUrl(ticketId: string, attachmentId: string): Promise<AttachmentUrlResponse> {
+    const response = await httpClient.get<ApiResponse<AttachmentUrlResponse>>(
+      base + TICKET_ENDPOINTS.GET_ATTACHMENT_URL(ticketId, attachmentId)
     );
     return extractData(response);
   },

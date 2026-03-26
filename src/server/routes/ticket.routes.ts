@@ -204,6 +204,13 @@ export function createTicketRoutes(
     ticketController.addComment
   );
 
+  router.get(
+    TICKET_ENDPOINTS.GET_ATTACHMENT_URL(),
+    authenticate,
+    can(PERMISSIONS.TICKETS_READ_OWN, PERMISSIONS.TICKETS_READ_ALL),
+    ticketController.getAttachmentUrl
+  );
+
   router.post(
     TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(),
     authenticate,

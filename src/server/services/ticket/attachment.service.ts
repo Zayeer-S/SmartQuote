@@ -214,6 +214,25 @@ export class AttachmentService {
 
     return attachment;
   }
+  /**
+   * Fetch a single attachment record and generate a presigned URL for it.
+   *
+   * @param attachmentId Attachment ID to resolve
+   * @param expirySeconds TTL for the presigned URL
+   * @returns Presigned URL string
+   * @throws TicketError(404) if the attachment does not exist
+   */
+  async getAttachmentUrl(attachmentId: string, expirySeconds: number) {
+    const attachment = await this.attachmentsDAO.getById(attachmentId as never);
+    if (!attachment) {
+      const err = new Error(`Attachment not found: ${attachmentId}`);
+      err.name = 'TicketError';
+      (err as Error & { statusCode: number }).statusCode = 404;
+      throw err;
+    }
+
+    return await this.storageService.getSignedUrl(attachment.storage_key, expirySeconds);
+  }
 }
 
 /** Internal descriptor linking an incoming file to its pre-computed storage key. */

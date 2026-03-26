@@ -31,6 +31,7 @@ import type { CommentService } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 import type { IncomingFile } from '../services/storage/storage.service.types.js';
+import { backEnv } from '../config/env.backend.js';
 
 /** Shape attached to req by the parseAttachment middleware in ticket.routes.ts */
 interface RequestWithIncomingFile extends Request {
@@ -231,6 +232,19 @@ export class TicketController {
       );
 
       success(res, this.mapComment(comment), 201);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
+  getAttachmentUrl = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { attachmentId } = req.params;
+      const url = await this.attachmentService.getAttachmentUrl(
+        attachmentId as string,
+        backEnv.ATTACHMENT_PRESIGN_EXPIRY_SECONDS
+      );
+      success(res, { url }, 200);
     } catch (err: unknown) {
       handleError(res, err);
     }

@@ -24,6 +24,8 @@ export const TICKET_ENDPOINTS = {
   LIST_COMMENTS: (ticketId = ':ticketId') => `/${ticketId}/comments`,
   ADD_COMMENT: (ticketId = ':ticketId') => `/${ticketId}/comments`,
   UPLOAD_ATTACHMENT: (ticketId = ':ticketId') => `/${ticketId}/attachments`,
+  GET_ATTACHMENT_URL: (ticketId = ':ticketId', attachmentId = ':attachmentId') =>
+    `/${ticketId}/attachments/${attachmentId}/url`,
 } as const;
 
 export const ORG_ENDPOINTS = {

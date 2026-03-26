@@ -5,6 +5,7 @@ import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badg
 import QuotePanel from './QuotePanel.js';
 import TicketTimeline from './TicketTimeline.js';
 import CommentThread from './CommentThread.js';
+import AttachmentList from './AttachmentList.js';
 import './CustomerTicketDetail.css';
 
 interface CustomerTicketDetailProps {
@@ -127,6 +128,16 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
             <dd data-testid="ticket-created">{formattedCreated}</dd>
           </div>
         </dl>
+      </section>
+
+      <section
+        className="card card-padded ticket-detail-section"
+        aria-labelledby="attachments-section-heading"
+      >
+        <h2 className="ticket-detail-section-title" id="attachments-section-heading">
+          Attachments
+        </h2>
+        <AttachmentList ticketId={ticketId} attachments={t.attachments} />
       </section>
 
       <section className="ticket-detail-section" aria-labelledby="quote-section-heading">

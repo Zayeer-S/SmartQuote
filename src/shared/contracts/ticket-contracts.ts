@@ -101,6 +101,10 @@ export interface CommentResponse {
   updatedAt: string;
 }
 
+export interface AttachmentUrlResponse {
+  url: string;
+}
+
 export interface ListCommentsResponse {
   comments: CommentResponse[];
 }
