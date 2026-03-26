@@ -8,10 +8,11 @@ import type {
 import type { UsersDAO } from '../../daos/children/users.dao.js';
 import type { RolesDAO } from '../../daos/children/roles.dao.js';
 import type { OrganizationId, SlaPolicyId, UserId } from '../../database/types/ids.js';
-import type { SlaPolicy, User } from '../../database/types/tables.js';
+import type { SlaPolicy, Ticket, User } from '../../database/types/tables.js';
 import type { RBACService } from '../rbac/rbac.service.js';
 import { SlaError, SlaForbiddenError, SLA_ERROR_MSGS } from './sla.errors.js';
 import type { CreateSlaPolicyData, UpdateSlaPolicyData } from './sla.service.types.js';
+import type { SlaContract, SlaStatusResponse } from '../../../shared/contracts/sla-contracts.js';
 
 export interface SlaPolicyWithDisplayName extends SlaPolicy {
   scopeDisplayName: string;
@@ -39,6 +40,166 @@ export class SlaService {
     this.usersDAO = usersDAO;
     this.rolesDAO = rolesDAO;
     this.rbacService = rbacService;
+  }
+
+  /**
+   * Resolve the SLA status for a single ticket.
+   *
+   * Lookup order:
+   *   1. If the ticket has an organization_id, find an active policy for that org.
+   *   2. Otherwise, find an active user-scoped policy for the ticket creator.
+   *
+   * Breach is deadline-driven per client guidance -- the estimated_resolution_time
+   * represents dev effort spread over time, not a countdown. The deadline field is
+   * the correct signal for breach alerting.
+   *
+   * Returns null when no active policy covers this ticket.
+   *
+   * @param ticket Ticket row (must include organization_id, creator_user_id,
+   *               ticket_severity_id resolved to a name, and deadline)
+   * @param ticketSeverityName Resolved severity name for contract lookup
+   * @param options Optional transaction context
+   */
+  async resolveForTicket(
+    ticket: Ticket,
+    ticketSeverityName: string,
+    options?: TransactionContext
+  ): Promise<SlaStatusResponse | null> {
+    const policy = await this.findPolicyForTicket(ticket, options);
+    if (!policy) return null;
+
+    const contract = policy.contract as SlaContract;
+    const allSeverityTargets = contract.severityTargets;
+
+    const matchedTarget = allSeverityTargets.find((t) => t.severity === ticketSeverityName) ?? null;
+
+    const now = new Date();
+    const deadlineMs = ticket.deadline.getTime();
+    const hoursUntilDeadline = (deadlineMs - now.getTime()) / (1000 * 60 * 60);
+
+    return {
+      policyName: policy.name,
+      severityTarget: matchedTarget
+        ? {
+            responseTimeHours: matchedTarget.responseTimeHours,
+            resolutionTimeHours: matchedTarget.resolutionTimeHours,
+          }
+        : null,
+      allSeverityTargets,
+      deadlineBreached: hoursUntilDeadline < 0,
+      hoursUntilDeadline,
+    };
+  }
+
+  /**
+   * Resolve SLA status for a batch of tickets in O(unique orgs + unique users)
+   * queries rather than one query per ticket.
+   *
+   * Returns a Map keyed by ticket ID (as string). Tickets with no matching
+   * policy are absent from the map (callers should treat missing keys as null).
+   *
+   * @param tickets Array of tickets with their resolved severity names
+   * @param options Optional transaction context
+   */
+  async resolveForTickets(
+    tickets: { ticket: Ticket; ticketSeverityName: string }[],
+    options?: TransactionContext
+  ): Promise<Map<string, SlaStatusResponse>> {
+    if (tickets.length === 0) return new Map();
+
+    // Collect distinct org IDs and creator user IDs
+    const orgIds = [
+      ...new Set(
+        tickets
+          .filter((e) => e.ticket.organization_id !== null)
+          .map((e) => e.ticket.organization_id as string)
+      ),
+    ];
+
+    const creatorIds = [
+      ...new Set(
+        tickets
+          .filter((e) => e.ticket.organization_id === null)
+          .map((e) => e.ticket.creator_user_id as string)
+      ),
+    ];
+
+    // Fetch all relevant policies in two queries
+    const [orgPolicies, userPolicies] = await Promise.all([
+      orgIds.length > 0
+        ? Promise.all(
+            orgIds.map((id) => this.slaPoliciesDAO.findByOrg(id as OrganizationId, options))
+          ).then((arrays) => arrays.flat())
+        : Promise.resolve([]),
+      creatorIds.length > 0
+        ? Promise.all(
+            creatorIds.map((id) => this.slaPoliciesDAO.findByUser(id as UserId, options))
+          ).then((arrays) => arrays.flat())
+        : Promise.resolve([]),
+    ]);
+
+    // Build lookup maps: orgId -> first active policy, userId -> first active policy
+    const now = new Date();
+    const orgPolicyMap = new Map<string, SlaPolicy>();
+    for (const p of orgPolicies) {
+      if (
+        p.is_active &&
+        p.effective_from <= now &&
+        p.effective_to >= now &&
+        p.organization_id !== null &&
+        !orgPolicyMap.has(p.organization_id as string)
+      ) {
+        orgPolicyMap.set(p.organization_id as string, p);
+      }
+    }
+
+    const userPolicyMap = new Map<string, SlaPolicy>();
+    for (const p of userPolicies) {
+      if (
+        p.is_active &&
+        p.effective_from <= now &&
+        p.effective_to >= now &&
+        p.user_id !== null &&
+        !userPolicyMap.has(p.user_id as string)
+      ) {
+        userPolicyMap.set(p.user_id as string, p);
+      }
+    }
+
+    // Compute SLA status per ticket
+    const result = new Map<string, SlaStatusResponse>();
+
+    for (const { ticket, ticketSeverityName } of tickets) {
+      const policy =
+        ticket.organization_id !== null
+          ? (orgPolicyMap.get(ticket.organization_id as string) ?? null)
+          : (userPolicyMap.get(ticket.creator_user_id as string) ?? null);
+
+      if (!policy) continue;
+
+      const contract = policy.contract as SlaContract;
+      const allSeverityTargets = contract.severityTargets;
+      const matchedTarget =
+        allSeverityTargets.find((t) => t.severity === ticketSeverityName) ?? null;
+
+      const deadlineMs = ticket.deadline.getTime();
+      const hoursUntilDeadline = (deadlineMs - now.getTime()) / (1000 * 60 * 60);
+
+      result.set(ticket.id as string, {
+        policyName: policy.name,
+        severityTarget: matchedTarget
+          ? {
+              responseTimeHours: matchedTarget.responseTimeHours,
+              resolutionTimeHours: matchedTarget.resolutionTimeHours,
+            }
+          : null,
+        allSeverityTargets,
+        deadlineBreached: hoursUntilDeadline < 0,
+        hoursUntilDeadline,
+      });
+    }
+
+    return result;
   }
 
   /**
@@ -234,6 +395,30 @@ export class SlaService {
   }
 
   /**
+   * Find the first active SLA policy covering a ticket.
+   * Prefers org-scoped lookup; falls back to user-scoped when no org is set.
+   */
+  private async findPolicyForTicket(
+    ticket: Ticket,
+    options?: TransactionContext
+  ): Promise<SlaPolicy | null> {
+    const now = new Date();
+
+    if (ticket.organization_id !== null) {
+      const policies = await this.slaPoliciesDAO.findByOrg(ticket.organization_id, options);
+      return (
+        policies.find((p) => p.is_active && p.effective_from <= now && p.effective_to >= now) ??
+        null
+      );
+    }
+
+    const policies = await this.slaPoliciesDAO.findByUser(ticket.creator_user_id, options);
+    return (
+      policies.find((p) => p.is_active && p.effective_from <= now && p.effective_to >= now) ?? null
+    );
+  }
+
+  /**
    * Attach a scopeDisplayName to a single policy.
    */
   private async attachDisplayName(
@@ -248,10 +433,8 @@ export class SlaService {
 
   /**
    * Batch-resolve display names for a list of policies.
-   *
-   * Collects all distinct org IDs and user IDs referenced by the list,
-   * fetches them in two parallel queries, then maps back -- O(1) queries
-   * regardless of list length.
+   * Collects all distinct org IDs and user IDs, fetches in two parallel
+   * queries, then maps back -- O(1) queries regardless of list length.
    */
   private async attachDisplayNames(
     policies: SlaPolicy[],
@@ -313,7 +496,6 @@ export class SlaService {
 
   /**
    * Assert that a User row carries the Customer system role.
-   * Resolves role name via RolesDAO to avoid hardcoding the integer role ID.
    */
   private async assertIsCustomer(user: User): Promise<void> {
     const role = await this.rolesDAO.getById(user.role_id);
@@ -324,8 +506,6 @@ export class SlaService {
 
   /**
    * Assert that the actor can read the given policy.
-   * Staff always pass via SLA_POLICIES_READ permission.
-   * Customers must own the policy (user_id match) or be a member of the scoped org.
    */
   private async assertReadAccess(
     policy: SlaPolicy,
@@ -355,7 +535,6 @@ export class SlaService {
 
   /**
    * Return the SLA policies visible to a customer.
-   * Checks org membership first; falls back to user-scoped lookup.
    */
   private async getCustomerPolicies(
     actorId: UserId,

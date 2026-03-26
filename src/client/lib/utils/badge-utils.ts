@@ -30,3 +30,11 @@ export function getPriorityBadgeClass(priority: string): string {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   return PRIORITY_BADGE_CLASS[priority as TicketPriority] ?? 'badge badge-neutral';
 }
+
+/**
+ * Returns the CSS class for the SLA breach badge on ticket cards.
+ * Only call this when slaStatus is non-null.
+ */
+export function getSlaBadgeClass(deadlineBreached: boolean): string {
+  return deadlineBreached ? 'badge badge-sla-breached' : 'badge badge-sla-ok';
+}

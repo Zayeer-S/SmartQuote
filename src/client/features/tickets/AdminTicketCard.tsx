@@ -1,7 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
-import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
+import {
+  getStatusBadgeClass,
+  getPriorityBadgeClass,
+  getSlaBadgeClass,
+} from '../../lib/utils/badge-utils.js';
 import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
 import './AdminTicketCard.css';
 
@@ -17,6 +21,7 @@ const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
   });
 
   const isAssigned = ticket.assignedToUserId !== null;
+  const sla = ticket.slaStatus;
 
   return (
     <article className="admin-ticket-card" data-testid={`admin-ticket-card-${ticket.id}`}>
@@ -37,6 +42,15 @@ const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
           >
             {isAssigned ? 'Assigned' : 'Unassigned'}
           </span>
+          {sla !== null && (
+            <span
+              className={getSlaBadgeClass(sla.deadlineBreached)}
+              data-testid="ticket-sla-badge"
+              title={sla.policyName}
+            >
+              {sla.deadlineBreached ? 'SLA Breached' : 'SLA OK'}
+            </span>
+          )}
         </div>
       </div>
 

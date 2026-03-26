@@ -1,4 +1,4 @@
-import {
+import type {
   BusinessImpact,
   CommentType,
   FileStorageType,
@@ -6,7 +6,8 @@ import {
   TicketSeverity,
   TicketStatus,
   TicketType,
-} from '../constants';
+} from '../constants/index.js';
+import type { SlaStatusResponse } from './sla-contracts.js';
 
 export interface CreateTicketRequest {
   title: string;
@@ -63,6 +64,8 @@ export interface TicketResponse {
 
 export interface TicketSummaryResponse extends TicketResponse {
   organizationName: string;
+  /** Null when the ticket's org/user has no active SLA policy */
+  slaStatus: SlaStatusResponse | null;
 }
 
 export interface AttachmentResponse {
@@ -80,6 +83,8 @@ export interface AttachmentResponse {
 export interface TicketDetailResponse extends TicketResponse {
   organizationName: string;
   attachments: AttachmentResponse[];
+  /** Null when the ticket's org/user has no active SLA policy */
+  slaStatus: SlaStatusResponse | null;
 }
 
 export interface ListTicketsResponse {

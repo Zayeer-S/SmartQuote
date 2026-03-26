@@ -14,6 +14,26 @@ export interface SlaContract {
   severityTargets: SlaSeverityTarget[];
 }
 
+/**
+ * SLA status computed for a specific ticket.
+ * Breach is deadline-driven -- deadlineBreached = ticket.deadline < now.
+ * severityTarget is the contract row matching the ticket's severity, or null
+ * if the active policy has no entry for that severity.
+ */
+export interface SlaStatusResponse {
+  policyName: string;
+  severityTarget: {
+    responseTimeHours: number;
+    resolutionTimeHours: number;
+  } | null;
+  /** All severity targets from the policy, shown in full on the detail view */
+  allSeverityTargets: SlaSeverityTarget[];
+  /** True when ticket.deadline is in the past */
+  deadlineBreached: boolean;
+  /** Hours between now and the deadline. Negative when already breached. */
+  hoursUntilDeadline: number;
+}
+
 export interface CreateSlaPolicyRequest {
   name: string;
   /** Provide one of userId or organizationId -- never both */

@@ -18,6 +18,7 @@ import type {
   TicketResponse,
   TicketSummaryResponse,
 } from '../../shared/contracts/ticket-contracts.js';
+import type { SlaStatusResponse } from '../../shared/contracts/sla-contracts.js';
 import type { UserId, TicketId } from '../database/types/ids.js';
 import type {
   Ticket,
@@ -29,6 +30,7 @@ import type { OrganizationId } from '../database/types/ids.js';
 import type { TicketService } from '../services/ticket/ticket.service.js';
 import type { CommentService } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
+import type { SlaService } from '../services/sla/sla.service.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 import type { IncomingFile } from '../services/storage/storage.service.types.js';
 import { backEnv } from '../config/env.backend.js';
@@ -42,17 +44,20 @@ export class TicketController {
   private ticketService: TicketService;
   private commentService: CommentService;
   private attachmentService: AttachmentService;
+  private slaService: SlaService;
   private lookup: LookupResolver;
 
   constructor(
     ticketService: TicketService,
     commentService: CommentService,
     attachmentService: AttachmentService,
+    slaService: SlaService,
     lookup: LookupResolver
   ) {
     this.ticketService = ticketService;
     this.commentService = commentService;
     this.attachmentService = attachmentService;
+    this.slaService = slaService;
     this.lookup = lookup;
   }
 
@@ -111,8 +116,15 @@ export class TicketController {
         actor.id as UserId
       );
 
-      const attachments = await this.attachmentService.listAttachments(ticket.id);
-      success(res, this.mapTicketDetail(ticket, attachments), 200);
+      const [attachments, slaStatus] = await Promise.all([
+        this.attachmentService.listAttachments(ticket.id),
+        this.slaService.resolveForTicket(
+          ticket,
+          this.lookup.ticketSeverityName(ticket.ticket_severity_id as unknown as number)
+        ),
+      ]);
+
+      success(res, this.mapTicketDetail(ticket, attachments, slaStatus), 200);
     } catch (err: unknown) {
       handleError(res, err);
     }
@@ -133,8 +145,20 @@ export class TicketController {
         { limit: query.limit, offset: query.offset }
       );
 
+      // Batch-resolve SLA status for all tickets in two queries total
+      const slaStatusMap = await this.slaService.resolveForTickets(
+        tickets.map((t) => ({
+          ticket: t,
+          ticketSeverityName: this.lookup.ticketSeverityName(
+            t.ticket_severity_id as unknown as number
+          ),
+        }))
+      );
+
       const response: ListTicketsResponse = {
-        tickets: tickets.map((t) => this.mapTicketSummary(t)),
+        tickets: tickets.map((t) =>
+          this.mapTicketSummary(t, slaStatusMap.get(t.id as string) ?? null)
+        ),
       };
       success(res, response, 200);
     } catch (err: unknown) {
@@ -293,21 +317,27 @@ export class TicketController {
     };
   }
 
-  private mapTicketSummary(ticket: TicketWithDetails): TicketSummaryResponse {
+  private mapTicketSummary(
+    ticket: TicketWithDetails,
+    slaStatus: SlaStatusResponse | null
+  ): TicketSummaryResponse {
     return {
       ...this.mapTicket(ticket),
       organizationName: ticket.organization_name,
+      slaStatus,
     };
   }
 
   private mapTicketDetail(
     ticket: TicketWithDetails,
-    attachments: TicketAttachment[]
+    attachments: TicketAttachment[],
+    slaStatus: SlaStatusResponse | null
   ): TicketDetailResponse {
     return {
       ...this.mapTicket(ticket),
       organizationName: ticket.organization_name,
       attachments: attachments.map((a) => this.mapAttachment(a)),
+      slaStatus,
     };
   }
 

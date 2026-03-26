@@ -115,12 +115,18 @@ export async function bootstrapApplication(
     authContainer.authService,
     authContainer.orgMembersDAO
   );
+  const slaContainer = new SlaContainer(
+    db,
+    adminContainer.rbacService,
+    authContainer.orgMembersDAO
+  );
   const ticketContainer = new TicketContainer(
     db,
     adminContainer.rbacService,
     authContainer.orgMembersDAO,
     lookupResolver,
-    embedder
+    embedder,
+    slaContainer.slaService
   );
   const quoteContainer = new QuoteContainer(
     db,
@@ -139,11 +145,6 @@ export async function bootstrapApplication(
     lookupResolver
   );
   const analyticsContainer = new AnalyticsContainer(db, adminContainer.rbacService);
-  const slaContainer = new SlaContainer(
-    db,
-    adminContainer.rbacService,
-    authContainer.orgMembersDAO
-  );
 
   console.log('Registering routes...');
   app.use('/api/auth', createAuthRoutes(authContainer.authController, authContainer.authService));
