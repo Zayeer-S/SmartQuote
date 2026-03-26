@@ -49,6 +49,13 @@ smartquote/
 │   │   │       ├── theme.context.types.ts
 │   │   │       └── ThemeContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
+│   │   │   ├── admin/
+│   │   │   │   ├── quotes/
+│   │   │   │   ├── settings/
+│   │   │   │   ├── sla/
+│   │   │   │   └── tickets/
+│   │   │   │       ├── SimilarTicketsPanel.tsx
+│   │   │   │       └── SimilarTicketsPanel.css
 │   │   │   ├── dashboard/
 │   │   │   │   ├── DateRangeFilter.tsx
 │   │   │   │   ├── QuoteAccuracyChart.tsx
@@ -57,7 +64,7 @@ smartquote/
 │   │   │   │   ├── StatsOverview.tsx
 │   │   │   │   ├── TicketStatusChart.tsx
 │   │   │   │   └── TicketVolumeChart.tsx
-│   │   │   └── tickets/
+│   │   │   └── tickets/                            # TODO MOVE ADMIN FILES TO ADMIN FEATURES
 │   │   │       ├── AdminQuotePanel.css
 │   │   │       ├── AdminQuotePanel.tsx
 │   │   │       ├── AdminTicketCard.css
@@ -138,6 +145,8 @@ smartquote/
 │   │   │       ├── useAssignTicket.ts
 │   │   │       ├── useCreateTicket.ts
 │   │   │       ├── useDeleteTicket.ts
+│   │   │       ├── useGetAttachmentUrl.ts
+│   │   │       ├── useGetSimilarTicket.ts
 │   │   │       ├── useGetTicket.ts
 │   │   │       ├── useListComments.ts
 │   │   │       ├── useListTicket.ts
@@ -343,7 +352,9 @@ smartquote/
 │   │   │       ├── ticket.service.ts
 │   │   │       ├── ticket.priority.engine.ts
 │   │   │       ├── ticket.priority.engine.types.ts
-│   │   │       └── ticket.service.types.ts
+│   │   │       ├── ticket.service.types.ts
+│   │   │       ├── ticket.similarity.service.ts
+│   │   │       └── ticket.similarity.service.types.ts
 │   │   └── validators/                             # Input shape validation only; must not access database or services.
 │   │       ├── analytics.validator.ts
 │   │       ├── auth.validator.ts
@@ -371,12 +382,13 @@ smartquote/
 │           └── user-contracts.ts
 │
 ├── tests/
+│   ├── constants/
+│   │   └── test.user.credentials.ts
 │   ├── e2e/
 │   │   ├── global.setup.ts
 │   │   ├── constants/
 │   │   │   ├── comment.smoke.data.ts
-│   │   │   ├── e2e.paths.ts
-│   │   │   └── test.user.credentials.ts
+│   │   │   └── e2e.paths.ts
 │   │   ├── setup/
 │   │   │   ├── admin.setup.ts
 │   │   │   └── customer.setup.ts
@@ -385,6 +397,7 @@ smartquote/
 │   │   │   ├── auth.smoke.test.ts
 │   │   │   ├── customer.comment.smoke.test.ts
 │   │   │   ├── rate.profile.smoke.test.ts
+│   │   │   ├── sla.smoke.test.ts
 │   │   │   └── ticket.smoke.test.ts
 │   │   └── utils/
 │   │       └── login.utils.ts
@@ -401,6 +414,7 @@ smartquote/
 │   │   ├── auth.routes.test.ts
 │   │   ├── quote.routes.test.ts
 │   │   ├── rate.profiles.routes.test.ts
+│   │   ├── sla.routes.test.ts
 │   │   └── ticket.routes.test.ts
 │   ├── unit/
 │   │   └── server/

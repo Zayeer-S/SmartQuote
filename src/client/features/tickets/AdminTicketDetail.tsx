@@ -13,6 +13,7 @@ import AssignTicketForm from './AssignTicketForm.js';
 import AdminQuotePanel from './AdminQuotePanel.js';
 import CommentThread from './CommentThread.js';
 import AttachmentList from './AttachmentList.js';
+import SimilarTicketsPanel from '../admin/tickets/SimilarTicketsPanel.js';
 import './AdminTicketDetail.css';
 
 interface AdminTicketDetailProps {
@@ -182,7 +183,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
 
   return (
     <div className="admin-ticket-detail" data-testid="admin-ticket-detail">
-      {/* ── Header ── */}
+      {/* -- Header -- */}
       <div className="admin-ticket-detail-header">
         <h1 className="admin-ticket-detail-title" data-testid="ticket-title">
           {t.title}
@@ -206,7 +207,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
         </div>
       </div>
 
-      {/* ── Details ── */}
+      {/* -- Details -- */}
       <section className="admin-detail-section" aria-labelledby="ticket-info-heading">
         <h2 className="admin-detail-section-heading" id="ticket-info-heading">
           Details
@@ -254,10 +255,10 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
         </dl>
       </section>
 
-      {/* ── SLA ── */}
+      {/* -- SLA -- */}
       {t.slaStatus !== null && <SlaSection slaStatus={t.slaStatus} />}
 
-      {/* ── Assignment ── */}
+      {/* -- Assignment -- */}
       {canAssign && (
         <section className="admin-detail-section" aria-labelledby="assign-heading">
           <h2 className="admin-detail-section-heading" id="assign-heading">
@@ -296,7 +297,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
         </section>
       )}
 
-      {/* ── Actions ── */}
+      {/* -- Actions -- */}
       {!isResolved && (
         <section className="admin-detail-section" aria-labelledby="resolve-heading">
           <h2 className="admin-detail-section-heading" id="resolve-heading">
@@ -341,6 +342,9 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
           }}
         />
       </section>
+
+      {/* -- Similar Tickets -- */}
+      <SimilarTicketsPanel ticketId={ticketId} />
 
       <section className="admin-detail-section">
         <CommentThread ticketId={ticketId} />
