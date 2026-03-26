@@ -13,7 +13,10 @@ import type {
   AttachmentResponse,
   CommentResponse,
   ListCommentsResponse,
+  ListSimilarTicketsResponse,
   ListTicketsResponse,
+  SimilarQuoteResponse,
+  SimilarTicketResponse,
   TicketDetailResponse,
   TicketResponse,
   TicketSummaryResponse,
@@ -31,8 +34,11 @@ import type { TicketService } from '../services/ticket/ticket.service.js';
 import type { CommentService } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
 import type { SlaService } from '../services/sla/sla.service.js';
+import type { TicketSimilarityService } from '../services/ticket/ticket.similarity.service.js';
+import type { SimilarTicketResult } from '../services/ticket/ticket.similarity.service.types.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 import type { IncomingFile } from '../services/storage/storage.service.types.js';
+import type { QuoteWithApproval } from '../database/types/tables.js';
 import { backEnv } from '../config/env.backend.js';
 
 /** Shape attached to req by the parseAttachment middleware in ticket.routes.ts */
@@ -45,6 +51,7 @@ export class TicketController {
   private commentService: CommentService;
   private attachmentService: AttachmentService;
   private slaService: SlaService;
+  private similarityService: TicketSimilarityService;
   private lookup: LookupResolver;
 
   constructor(
@@ -52,12 +59,14 @@ export class TicketController {
     commentService: CommentService,
     attachmentService: AttachmentService,
     slaService: SlaService,
+    similarityService: TicketSimilarityService,
     lookup: LookupResolver
   ) {
     this.ticketService = ticketService;
     this.commentService = commentService;
     this.attachmentService = attachmentService;
     this.slaService = slaService;
+    this.similarityService = similarityService;
     this.lookup = lookup;
   }
 
@@ -290,6 +299,20 @@ export class TicketController {
     }
   };
 
+  getSimilarTickets = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const ticketId = req.params.ticketId as TicketId;
+      const results = await this.similarityService.findSimilar(ticketId);
+
+      const response: ListSimilarTicketsResponse = {
+        similarTickets: results.map((r) => this.mapSimilarTicketResult(r)),
+      };
+      success(res, response, 200);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
   private mapTicket(ticket: Ticket): TicketResponse {
     return {
       id: ticket.id as string,
@@ -364,6 +387,28 @@ export class TicketController {
       commentType: this.lookup.commentTypeName(comment.comment_type_id as unknown as number),
       createdAt: comment.created_at.toISOString(),
       updatedAt: comment.updated_at.toISOString(),
+    };
+  }
+
+  private mapSimilarQuote(quote: QuoteWithApproval): SimilarQuoteResponse {
+    return {
+      id: quote.id as unknown as string,
+      version: quote.version,
+      estimatedHoursMinimum: quote.estimated_hours_minimum,
+      estimatedHoursMaximum: quote.estimated_hours_maximum,
+      estimatedResolutionTime: quote.estimated_resolution_time,
+      estimatedCost: quote.estimated_cost,
+      finalCost: quote.final_cost,
+      approvalStatus: quote.approval_status_name,
+      createdAt: quote.created_at.toISOString(),
+    };
+  }
+
+  private mapSimilarTicketResult(result: SimilarTicketResult): SimilarTicketResponse {
+    return {
+      ticket: this.mapTicket(result.ticket),
+      quote: result.quote ? this.mapSimilarQuote(result.quote) : null,
+      similarityScore: result.similarityScore,
     };
   }
 }

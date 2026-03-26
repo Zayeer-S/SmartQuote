@@ -45,11 +45,12 @@ export const LINK_TABLES = {
   NOTIFICATION_TOKENS: 'notification_tokens',
 } as const;
 
-export const TICKET_PRIORITY_ENGINE_TABLES = {
+export const ENGINE_TABLES = {
   TICKET_PRIORITY_RULES: 'ticket_priority_rules',
   TICKET_PRIORITY_THRESHOLDS: 'ticket_priority_thresholds',
   PRIORITY_ENGINE_ANCHORS: 'priority_engine_anchors',
-};
+  TICKET_EMBEDDINGS: 'ticket_embeddings',
+} as const;
 
 export const CONFIG_TABLES = {
   SMARTQUOTE_CONFIGS: 'smartquote_configs',

@@ -5,6 +5,7 @@ import type { Quote, QuoteWithApproval } from '../../database/types/tables.js';
 import type { QuoteId, TicketId } from '../../database/types/ids.js';
 import type { GetManyOptions, QueryOptions } from '../base/types.js';
 import { AnalyticsQuoteAccuracyRow } from '../../database/types/sanitized.types.js';
+import { QUOTE_APPROVAL_STATUSES } from '../../../shared/constants/lookup-values.js';
 
 export class QuotesDAO extends DeletableDAO<Quote, QuoteId> {
   constructor(db: Knex) {
@@ -125,6 +126,58 @@ export class QuotesDAO extends DeletableDAO<Quote, QuoteId> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const results = await query;
     return results as QuoteWithApproval[];
+  }
+
+  /**
+   * For each ticket ID in the supplied set, return the highest-version approved
+   * quote with its approval record joined in.
+   * Ticket IDs with no approved quote are simply absent from the result map.
+   *
+   * Used by TicketSimilarityService to surface the outcome quote alongside
+   * each similar historical ticket.
+   *
+   * @param ticketIds Set of ticket IDs to look up
+   * @returns Map of ticketId -> QuoteWithApproval
+   */
+  async findLatestApprovedForTickets(
+    ticketIds: TicketId[]
+  ): Promise<Map<string, QuoteWithApproval>> {
+    if (ticketIds.length === 0) return new Map();
+
+    const q = MAIN_TABLES.QUOTES;
+    const approvals = MAIN_TABLES.QUOTE_APPROVALS;
+    const statuses = LOOKUP_TABLES.QUOTE_APPROVAL_STATUSES;
+
+    // Rank quotes per ticket by version descending, then pick rank = 1.
+    // This avoids a correlated subquery and works correctly even if a ticket
+    // has multiple approved quote versions.
+    const results = await this.db
+      .with('ranked', (qb) => {
+        qb.from(q)
+          .select(
+            `${q}.*`,
+            `${statuses}.name as approval_status_name`,
+            `${approvals}.comment as approval_comment`,
+            `${approvals}.approved_at as approved_at`,
+            `${approvals}.approved_by_user_id as approved_by_user_id`,
+            this.db.raw(
+              `ROW_NUMBER() OVER (PARTITION BY ${q}.ticket_id ORDER BY ${q}.version DESC) AS rn`
+            )
+          )
+          .leftJoin(approvals, `${q}.quote_approval_id`, `${approvals}.id`)
+          .leftJoin(statuses, `${approvals}.approval_status_id`, `${statuses}.id`)
+          .whereIn(`${q}.ticket_id`, ticketIds)
+          .whereNull(`${q}.deleted_at`)
+          .where(`${statuses}.name`, QUOTE_APPROVAL_STATUSES.APPROVED);
+      })
+      .from('ranked')
+      .where('rn', 1);
+
+    const map = new Map<string, QuoteWithApproval>();
+    for (const row of results as QuoteWithApproval[]) {
+      map.set(row.ticket_id as string, row);
+    }
+    return map;
   }
 
   async findAnalyticsQuoteAccuracy(from: Date, to: Date): Promise<AnalyticsQuoteAccuracyRow[]> {

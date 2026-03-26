@@ -21,6 +21,7 @@ export const TICKET_ENDPOINTS = {
   DELETE: (ticketId = ':ticketId') => `/${ticketId}`,
   ASSIGN: (ticketId = ':ticketId') => `/${ticketId}/assign`,
   RESOLVE: (ticketId = ':ticketId') => `/${ticketId}/resolve`,
+  SIMILAR: (ticketId = ':ticketId') => `/${ticketId}/similar`,
   LIST_COMMENTS: (ticketId = ':ticketId') => `/${ticketId}/comments`,
   ADD_COMMENT: (ticketId = ':ticketId') => `/${ticketId}/comments`,
   UPLOAD_ATTACHMENT: (ticketId = ':ticketId') => `/${ticketId}/attachments`,

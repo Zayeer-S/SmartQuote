@@ -17,6 +17,7 @@ import type { TicketPriorityEngine } from './ticket.priority.engine.js';
 import type { AttachmentService } from './attachment.service.js';
 import type { IncomingFile } from '../storage/storage.service.types.js';
 import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
+import type { TicketSimilarityService } from './ticket.similarity.service.js';
 
 export class TicketService {
   private db: Knex;
@@ -27,6 +28,7 @@ export class TicketService {
   private lookup: LookupResolver;
   private priorityEngine: TicketPriorityEngine;
   private attachmentService: AttachmentService;
+  private similarityService: TicketSimilarityService;
 
   constructor(
     db: Knex,
@@ -36,7 +38,8 @@ export class TicketService {
     rbacService: RBACService,
     lookup: LookupResolver,
     priorityEngine: TicketPriorityEngine,
-    attachmentService: AttachmentService
+    attachmentService: AttachmentService,
+    similarityService: TicketSimilarityService
   ) {
     this.db = db;
     this.ticketsDAO = ticketsDAO;
@@ -46,6 +49,7 @@ export class TicketService {
     this.lookup = lookup;
     this.priorityEngine = priorityEngine;
     this.attachmentService = attachmentService;
+    this.similarityService = similarityService;
   }
 
   /**
@@ -111,6 +115,12 @@ export class TicketService {
     if (pendingUploads.length > 0) {
       await this.attachmentService.uploadAttachments(pendingUploads);
     }
+
+    // Step 4: compute and store the embedding for this ticket's description.
+    // Runs after the transaction has committed -- a failure here must never
+    // affect the ticket creation result. similarityService no-ops when the
+    // embedder is unavailable.
+    void this.similarityService.computeAndStoreEmbedding(ticket.id, ticket.description);
 
     return ticket;
   }

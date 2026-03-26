@@ -51,3 +51,4 @@ export type NotificationTokenId = IntegerId<'NotificationToken'>;
 export type TicketPriorityRuleId = IntegerId<'TicketPriorityRule'>;
 export type TicketPriorityThresholdId = IntegerId<'TicketPriorityThreshold'>;
 export type PriorityEngineAnchorsId = IntegerId<'PriorityEngineAnchors'>;
+export type TicketEmbeddingId = IntegerId<'TicketEmbedding'>;

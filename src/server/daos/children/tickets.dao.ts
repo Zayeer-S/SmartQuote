@@ -1,5 +1,13 @@
 import type { Knex } from 'knex';
-import type { OrganizationId, TicketId, TicketStatusId, UserId } from '../../database/types/ids.js';
+import type {
+  BusinessImpactId,
+  OrganizationId,
+  TicketId,
+  TicketSeverityId,
+  TicketStatusId,
+  TicketTypeId,
+  UserId,
+} from '../../database/types/ids.js';
 import { DeletableDAO } from '../base/deletable.dao.js';
 import { LOOKUP_TABLES, MAIN_TABLES } from '../../database/config/table-names.js';
 import type { GetManyOptions, QueryOptions } from '../base/types.js';
@@ -104,7 +112,38 @@ export class TicketsDAO extends DeletableDAO<Ticket, TicketId> {
     return results as TicketWithDetails[];
   }
 
-  // Add to TicketsDAO class:
+  /**
+   * Find all resolved, non-deleted tickets in the given (type, severity, impact)
+   * bucket, excluding the query ticket itself.
+   * Used by TicketSimilarityService as the candidate pool for embedding comparison.
+   *
+   * Only tickets with a stored resolved_at are returned -- these are the ones
+   * with a meaningful outcome to compare against.
+   *
+   * @param ticketTypeId Ticket type to match
+   * @param ticketSeverityId Severity to match
+   * @param businessImpactId Business impact to match
+   * @param excludeTicketId The query ticket -- must be excluded from its own results
+   * @returns Array of matching TicketWithDetails
+   */
+  async findResolvedByBucket(
+    ticketTypeId: TicketTypeId,
+    ticketSeverityId: TicketSeverityId,
+    businessImpactId: BusinessImpactId,
+    excludeTicketId: TicketId
+  ): Promise<TicketWithDetails[]> {
+    const t = MAIN_TABLES.TICKETS;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const results = await this.buildDetailsQuery()
+      .where(`${t}.ticket_type_id`, ticketTypeId)
+      .where(`${t}.ticket_severity_id`, ticketSeverityId)
+      .where(`${t}.business_impact_id`, businessImpactId)
+      .whereNotNull(`${t}.resolved_at`)
+      .whereNot(`${t}.id`, excludeTicketId);
+
+    return results as TicketWithDetails[];
+  }
 
   /**
    * Return all resolved tickets in the given date range with their resolution
@@ -166,7 +205,7 @@ export class TicketsDAO extends DeletableDAO<Ticket, TicketId> {
 
   /**
    * Shared query builder for detail joins.
-   * Single source of the join logic — both findWithDetails and
+   * Single source of the join logic -- both findWithDetails and
    * findManyWithDetails build on this so they can never drift apart.
    */
   private buildDetailsQuery(options?: QueryOptions): Knex.QueryBuilder {

@@ -190,6 +190,15 @@ export function createTicketRoutes(
     ticketController.resolveTicket
   );
 
+  // Admin-only: requires read-all permission since similarity results expose
+  // tickets across all organizations.
+  router.get(
+    TICKET_ENDPOINTS.SIMILAR(),
+    authenticate,
+    can(PERMISSIONS.TICKETS_READ_ALL),
+    ticketController.getSimilarTickets
+  );
+
   router.get(
     TICKET_ENDPOINTS.LIST_COMMENTS(),
     authenticate,
