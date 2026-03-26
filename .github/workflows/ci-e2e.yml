@@ -1,0 +1,78 @@
+name: ci-e2e
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: smartquote_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      PORT: "3000"
+      HOST: localhost
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_NAME: smartquote_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      SESSION_SECRET: ci-test-session-secret-at-least-32-characters-long
+      SESSION_EXPIRY_HOURS: "168"
+      BCRYPT_SALT_ROUNDS: "10"
+      MAX_LOGIN_ATTEMPTS: "5"
+      LOGIN_RATE_LIMIT_WINDOW_MINUTES: "15"
+      JWT_SECRET: ci-test-jwt-secret-at-least-32-characters-long
+      CORS_ORIGIN: http://localhost:5173
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: "22"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ]; then
+            npx playwright install-deps
+          else
+            npx playwright install --with-deps
+          fi
+
+      - name: Run Smoke tests
+        run: npm run test:e2e:smoke

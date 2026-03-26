@@ -1,0 +1,103 @@
+.ticket-timeline {
+  margin-top: var(--spacing-xl);
+}
+
+.ticket-timeline-title {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.ticket-timeline-list {
+  list-style: none;
+  position: relative;
+  padding-left: 28px;
+}
+
+.ticket-timeline-list::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 6px;
+  bottom: 6px;
+  width: 1.5px;
+  background-color: var(--color-border-primary);
+}
+
+.ticket-timeline-item {
+  position: relative;
+  padding-bottom: var(--spacing-lg);
+}
+
+.ticket-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.ticket-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -23px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-primary);
+  border: 2px solid var(--color-border-secondary);
+  z-index: 1;
+}
+
+.ticket-timeline-item--system::before {
+  border-color: var(--color-primary-400);
+  background-color: var(--color-primary-50);
+}
+
+.ticket-timeline-item-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.ticket-timeline-item-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.ticket-timeline-item-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+.ticket-timeline-empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+[data-theme='dark'] .ticket-timeline-list::before {
+  background-color: var(--color-gray-700);
+}
+
+[data-theme='dark'] .ticket-timeline-item::before {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-gray-600);
+}
+
+[data-theme='dark'] .ticket-timeline-item--system::before {
+  border-color: var(--color-primary-500);
+  background-color: #1e1b4b;
+}
+
+[data-theme='dark'] .ticket-timeline-item-text {
+  color: var(--color-gray-300);
+}
+
+[data-theme='dark'] .ticket-timeline-item-time {
+  color: var(--color-gray-500);
+}

@@ -1,15 +1,19 @@
-export interface LookupItem {
-  id: number;
-  name: string;
-}
+import {
+  BusinessImpact,
+  CommentType,
+  FileStorageType,
+  TicketPriority,
+  TicketSeverity,
+  TicketStatus,
+  TicketType,
+} from '../constants';
 
 export interface CreateTicketRequest {
   title: string;
   description: string;
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
-  ticketPriorityId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
   /** ISO 8601 date string */
   deadline: string;
   usersImpacted: number;
@@ -18,20 +22,24 @@ export interface CreateTicketRequest {
 export interface UpdateTicketRequest {
   title?: string;
   description?: string;
-  ticketTypeId?: number;
-  ticketSeverityId?: number;
-  businessImpactId?: number;
+  ticketType?: TicketType;
+  ticketSeverity?: TicketSeverity;
+  businessImpact?: BusinessImpact;
   /** ISO 8601 date string */
   deadline?: string;
   usersImpacted?: number;
   /** Admin-only, stripped for customers */
-  ticketStatusId?: number;
+  ticketStatus?: TicketStatus;
   /** Admin-only, stripped for customers */
   assignedToUserId?: string | null;
 }
 
 export interface AssignTicketRequest {
   assigneeId: string;
+}
+
+export interface UploadAttachmentResponse {
+  attachment: AttachmentResponse;
 }
 
 export interface TicketResponse {
@@ -42,33 +50,45 @@ export interface TicketResponse {
   creatorUserId: string;
   assignedToUserId: string | null;
   resolvedByUserId: string | null;
-  ticketTypeId: number;
-  ticketSeverityId: number;
-  businessImpactId: number;
-  ticketStatusId: number;
-  ticketPriorityId: number;
+  ticketType: TicketType;
+  ticketSeverity: TicketSeverity;
+  businessImpact: BusinessImpact;
+  ticketStatus: TicketStatus;
+  ticketPriority: TicketPriority;
   deadline: string;
   usersImpacted: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface TicketDetailResponse extends TicketResponse {
-  ticketTypeName: string;
-  ticketSeverityName: string;
-  businessImpactName: string;
-  ticketStatusName: string;
-  ticketPriorityName: string;
+export interface TicketSummaryResponse extends TicketResponse {
   organizationName: string;
 }
 
+export interface AttachmentResponse {
+  id: string;
+  ticketId: string;
+  uploadedByUserId: string;
+  originalName: string;
+  storageKey: string;
+  storageType: FileStorageType;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: string;
+}
+
+export interface TicketDetailResponse extends TicketResponse {
+  organizationName: string;
+  attachments: AttachmentResponse[];
+}
+
 export interface ListTicketsResponse {
-  tickets: TicketResponse[];
+  tickets: TicketSummaryResponse[];
 }
 
 export interface AddCommentRequest {
   commentText: string;
-  commentTypeId: number;
+  commentType: CommentType;
 }
 
 export interface CommentResponse {
@@ -76,9 +96,13 @@ export interface CommentResponse {
   ticketId: string;
   userId: string;
   commentText: string;
-  commentTypeId: number;
+  commentType: CommentType;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AttachmentUrlResponse {
+  url: string;
 }
 
 export interface ListCommentsResponse {

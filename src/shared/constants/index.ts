@@ -1,2 +1,2 @@
-export * from './lookup-values';
-export * from './endpoints';
+export * from './lookup-values.js';
+export * from './endpoints.js';

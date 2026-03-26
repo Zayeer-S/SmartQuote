@@ -1,4 +1,3 @@
-export * from './password.helper';
-export * from './lookup-data';
-export * from './lookup-id-maps';
-export * from './data-generators';
+export * from './lookup-data.js';
+export * from './lookup-id-maps.js';
+export * from './data-generators.js';

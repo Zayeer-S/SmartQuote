@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ticketAPI } from '../../lib/api/ticket.api';
-import type { ListCommentsResponse } from '../../../shared/contracts/ticket-contracts';
+import { ticketAPI } from '../../lib/api/ticket.api.js';
+import type { ListCommentsResponse } from '../../../shared/contracts/ticket-contracts.js';
 
 interface UseListCommentsState {
   data: ListCommentsResponse | null;

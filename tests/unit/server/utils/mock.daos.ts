@@ -1,0 +1,45 @@
+import { vi } from 'vitest';
+import { UsersDAO } from '../../../../src/server/daos/children/users.dao';
+import { SessionsDAO } from '../../../../src/server/daos/children/sessions.dao';
+import { OrganizationMembersDAO } from '../../../../src/server/daos/children/organizations.domain.dao';
+import { RateProfilesDAO } from '../../../../src/server/daos/children/rate.profiles.dao';
+
+export function makeMockUsersDAO(): UsersDAO {
+  return {
+    findByEmail: vi.fn(),
+    findWithRole: vi.fn(),
+    getById: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  } as unknown as UsersDAO;
+}
+
+export function makeMockSessionsDAO(): SessionsDAO {
+  return {
+    create: vi.fn(),
+    findByToken: vi.fn(),
+    update: vi.fn(),
+    deleteToken: vi.fn(),
+    deleteAllForUser: vi.fn(),
+    deleteExpired: vi.fn(),
+  } as unknown as SessionsDAO;
+}
+
+export function makeMockOrganizationMembersDAO(): OrganizationMembersDAO {
+  return {
+    findByUser: vi.fn(),
+    findByOrganization: vi.fn(),
+    findMembership: vi.fn(),
+    isMember: vi.fn(),
+  } as unknown as OrganizationMembersDAO;
+}
+
+export function makeMockRateProfilesDAO(): RateProfilesDAO {
+  return {
+    getAll: vi.fn(),
+    getById: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    findActive: vi.fn(),
+  } as unknown as RateProfilesDAO;
+}

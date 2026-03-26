@@ -1,13 +1,35 @@
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
-import { frontEnv } from '../../config/env.frontend';
+import { tokenStorage } from '../storage/tokenStorage.js';
 
 export const httpClient: AxiosInstance = axios.create({
-  baseURL: frontEnv.VITE_APP_URL + '/api',
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 10000,
 });
 
-/** Helper type for API responses. Matches respond.ts from backend*/
+httpClient.interceptors.request.use((config) => {
+  const token = tokenStorage.get();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+httpClient.interceptors.response.use(
+  (response) => response,
+  (err: unknown) => {
+    if (axios.isAxiosError(err)) {
+      const data = err.response?.data as ApiResponse<unknown> | undefined;
+      if (data?.error) {
+        return Promise.reject(new Error(data.error));
+      }
+    }
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+    return Promise.reject(err);
+  }
+);
+
+/** Helper type for API responses. Matches respond.ts from backend */
 export interface ApiResponse<T> {
   success: boolean;
   data: T | null;

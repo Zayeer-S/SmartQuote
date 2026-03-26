@@ -163,3 +163,14 @@ sketch
 
 # loc counter
 .VSCodeCounter
+
+dist-db/
+
+.playwright
+tests/coverage/
+
+uploads
+
+infra/response.json
+infra/migrate.json
+infra/seed.json

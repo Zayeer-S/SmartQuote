@@ -1,9 +1,9 @@
 import type { Knex } from 'knex';
-import type { Session } from '../../database/types/tables';
-import type { SessionId, UserId } from '../../database/types/ids';
-import { BaseDAO } from '../base/base.dao';
-import { LINK_TABLES } from '../../database/config/table-names';
-import type { QueryOptions } from '../base/types';
+import type { Session } from '../../database/types/tables.js';
+import type { SessionId, UserId } from '../../database/types/ids.js';
+import { BaseDAO } from '../base/base.dao.js';
+import { LINK_TABLES } from '../../database/config/table-names.js';
+import type { QueryOptions } from '../base/types.js';
 
 export class SessionsDAO extends BaseDAO<Session, SessionId> {
   constructor(db: Knex) {

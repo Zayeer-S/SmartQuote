@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.server.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "dist-db",
+    "rootDir": "src",
+    "noEmit": false,
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": [
+    "src/server/database/migrations/**/*",
+    "src/server/database/seeds/**/*",
+    "src/server/database/migration-utils.ts",
+    "src/shared/**/*"
+  ]
+}

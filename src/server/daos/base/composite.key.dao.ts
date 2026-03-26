@@ -9,7 +9,7 @@ import type {
   CompositeKeyTableConfig,
   UpdateOptions,
   DeleteOptions,
-} from './types';
+} from './types.js';
 
 export abstract class CompositeKeyDAO<T extends CompositeKeyEntity> implements ICompositeKeyDAO<T> {
   protected db: Knex;

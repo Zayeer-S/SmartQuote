@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import rateLimit, { type Store } from 'express-rate-limit';
+import rateLimit, { Store } from 'express-rate-limit';
+import { type NextFunction, type Request, type Response } from 'express';
 import RedisStore from 'rate-limit-redis';
 import { createClient } from 'redis';
 import { backEnv } from '../config/env.backend.js';
-import { authRateLimitConfig } from '../config/auth-config';
+import { authRateLimitConfig } from '../config/auth-config.js';
 
 const redisEnvPresent =
   backEnv.REDIS_HOST !== undefined &&
@@ -53,10 +54,15 @@ function makeStore(prefix: string): Store | undefined {
   });
 }
 
-/**
- * Login Rate Limiter
- */
-export const loginRateLimiter = rateLimit({
+function makeRateLimiter(options: Parameters<typeof rateLimit>[0]) {
+  if (authRateLimitConfig.disabled)
+    return (_req: Request, _res: Response, next: NextFunction) => {
+      next();
+    };
+  return rateLimit(options);
+}
+
+export const loginRateLimiter = makeRateLimiter({
   store: makeStore('rate_limit:login:'),
   windowMs: authRateLimitConfig.login.windowMs,
   max: authRateLimitConfig.login.maxAttempts,
@@ -71,7 +77,7 @@ export const loginRateLimiter = rateLimit({
   skipFailedRequests: false,
 });
 
-export const apiRateLimiter = rateLimit({
+export const apiRateLimiter = makeRateLimiter({
   store: makeStore('rate_limit:api:'),
   windowMs: authRateLimitConfig.api.windowMs,
   max: authRateLimitConfig.api.maxAttempts,

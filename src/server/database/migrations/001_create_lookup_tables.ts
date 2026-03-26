@@ -8,8 +8,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -20,8 +20,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -32,8 +32,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -44,8 +44,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -56,8 +56,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -68,8 +68,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -80,8 +80,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -92,8 +92,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -104,8 +104,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -116,8 +116,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -128,8 +128,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -140,8 +140,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -152,8 +152,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -164,8 +164,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -176,8 +176,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 255).notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
 
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -189,8 +189,8 @@ export async function up(knex: Knex): Promise<void> {
     table.text('description').nullable();
     table.jsonb('schema_definition').notNullable();
     table.boolean('is_active').notNullable().defaultTo(true);
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -201,8 +201,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name', 50).notNullable().unique();
     table.string('description', 255).nullable();
     table.boolean('is_active').notNullable().defaultTo(true);
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
 
     table.index(['is_active']);
     table.index(['name']);
@@ -212,8 +212,8 @@ export async function up(knex: Knex): Promise<void> {
     table.string('key', 100).primary().comment("e.g. 'hours_per_day'");
     table.string('value', 255).notNullable();
     table.text('description').nullable();
-    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now());
-    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('updated_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
   });
 }
 

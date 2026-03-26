@@ -1,4 +1,4 @@
-import { KEYS } from './keys';
+import { KEYS } from './keys.js';
 
 const key = KEYS.sessionToken;
 
@@ -15,5 +15,9 @@ export const tokenStorage = {
   clear(): void {
     localStorage.removeItem(key);
     sessionStorage.removeItem(key);
+  },
+
+  exists(): boolean {
+    return tokenStorage.get() !== null;
   },
 };

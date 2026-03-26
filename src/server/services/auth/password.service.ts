@@ -1,6 +1,6 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import type { PasswordConfig } from './auth.config.types';
+import type { PasswordConfig } from './auth.config.types.js';
 
 export class PasswordService {
   private readonly config: PasswordConfig;
@@ -43,13 +43,13 @@ export class PasswordService {
       errors.push(`Password must be at least ${String(this.config.minLength)} characters`);
 
     if (password.length > this.config.maxLength)
-      errors.push(`Password must be at least ${String(this.config.maxLength)} characters`);
+      errors.push(`Password must be not longer than ${String(this.config.maxLength)} characters`);
 
     if (this.config.requireUppercase && !/[A-Z]/.test(password))
       errors.push(`Password must have at least one uppercase character`);
 
     if (this.config.requireLowercase && !/[a-z]/.test(password))
-      errors.push(`Password must have at least one uppercase character`);
+      errors.push(`Password must have at least one lowercase character`);
 
     if (this.config.requireNumber && !/[0-9]/.test(password))
       errors.push(`Password must have at least one number`);

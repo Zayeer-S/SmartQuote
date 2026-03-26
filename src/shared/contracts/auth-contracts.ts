@@ -51,3 +51,7 @@ export interface ChangePasswordRequest {
 export interface ChangePasswordResponse {
   message: string;
 }
+
+export interface GetCurrentUserPermissionsResponse {
+  permissions: string[];
+}

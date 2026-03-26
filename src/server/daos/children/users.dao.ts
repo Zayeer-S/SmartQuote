@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { Knex } from 'knex';
-import type { User } from '../../database/types/tables';
-import type { UserId, RoleId } from '../../database/types/ids';
-import { DeletableDAO } from '../base/deletable.dao';
-import { MAIN_TABLES, LOOKUP_TABLES } from '../../database/config/table-names';
-import type { QueryOptions } from '../base/types';
+import type { User } from '../../database/types/tables.js';
+import type { UserId, RoleId } from '../../database/types/ids.js';
+import { DeletableDAO } from '../base/deletable.dao.js';
+import { MAIN_TABLES, LOOKUP_TABLES } from '../../database/config/table-names.js';
+import type { QueryOptions } from '../base/types.js';
 
 export class UsersDAO extends DeletableDAO<User, UserId> {
   constructor(db: Knex) {

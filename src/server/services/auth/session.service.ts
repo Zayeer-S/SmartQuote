@@ -1,9 +1,9 @@
 import crypto from 'crypto';
-import type { TransactionContext } from '../../daos/base/types';
-import type { UserId } from '../../database/types/ids';
-import type { Session } from '../../database/types/tables';
-import type { AuthConfig } from './auth.config.types';
-import type { SessionsDAO } from '../../daos/children/sessions.dao';
+import type { TransactionContext } from '../../daos/base/types.js';
+import type { UserId } from '../../database/types/ids.js';
+import type { Session } from '../../database/types/tables.js';
+import type { AuthConfig } from './auth.config.types.js';
+import type { SessionsDAO } from '../../daos/children/sessions.dao.js';
 
 export class SessionService {
   private readonly config: AuthConfig;

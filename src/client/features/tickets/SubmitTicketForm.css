@@ -1,0 +1,58 @@
+.submit-ticket-form {
+  max-width: 640px;
+}
+
+.submit-ticket-form-header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.submit-ticket-form-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--spacing-xs);
+}
+
+.submit-ticket-form-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.submit-ticket-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 var(--spacing-lg);
+}
+
+.submit-ticket-form-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border-primary);
+}
+
+[data-theme='dark'] .submit-ticket-form-title {
+  color: var(--color-gray-50);
+}
+
+[data-theme='dark'] .submit-ticket-form-actions {
+  border-top-color: var(--color-gray-700);
+}
+
+@media (max-width: 540px) {
+  .submit-ticket-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .submit-ticket-form-actions {
+    flex-direction: column;
+  }
+
+  .submit-ticket-form-actions .btn {
+    width: 100%;
+  }
+}

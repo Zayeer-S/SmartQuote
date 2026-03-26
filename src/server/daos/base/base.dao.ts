@@ -11,7 +11,7 @@ import type {
   SoftDeletableEntity,
   TableConfig,
   UpdateOptions,
-} from './types';
+} from './types.js';
 
 export abstract class BaseDAO<
   T extends BaseEntity<ID>,

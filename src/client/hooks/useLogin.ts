@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import type { LoginRequest } from '../../shared/contracts/auth-contracts';
+import type { LoginRequest } from '../../shared/contracts/auth-contracts.js';
 import { useState } from 'react';
-import { authAPI } from '../lib/api/auth.api';
-import { tokenStorage } from '../lib/storage/tokenStorage';
+import { authAPI } from '../lib/api/auth.api.js';
+import { tokenStorage } from '../lib/storage/tokenStorage.js';
+import { useAuth } from './contexts/useAuth.js';
 import { AUTH_ROLES } from '../../shared/constants';
-import { CLIENT_ROUTES } from '../constants/client.routes';
+import { CLIENT_ROUTES } from '../constants/client.routes.js';
 
 interface UseLoginReturn {
   login: (credentials: LoginRequest, rememberMe: boolean) => Promise<void>;
@@ -14,6 +15,7 @@ interface UseLoginReturn {
 
 export function useLogin(): UseLoginReturn {
   const navigate = useNavigate();
+  const { refetch } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,10 +26,13 @@ export function useLogin(): UseLoginReturn {
     try {
       const response = await authAPI.login(credentials);
       tokenStorage.save(response.token, rememberMe);
+
+      await refetch();
+
       const destination =
-        response.user.role.name.toLowerCase() === AUTH_ROLES.CUSTOMER
-          ? CLIENT_ROUTES.CUSTOMER
-          : CLIENT_ROUTES.ADMIN;
+        response.user.role.name === AUTH_ROLES.CUSTOMER
+          ? CLIENT_ROUTES.CUSTOMER.ROOT
+          : CLIENT_ROUTES.ADMIN.ROOT;
 
       await navigate(destination, { replace: true });
     } catch (err) {

@@ -1,0 +1,293 @@
+.analytics-section {
+  padding: var(--spacing-xl) 0;
+  border-top: 1px solid var(--color-border-primary);
+}
+
+.analytics-section-heading {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--spacing-lg);
+}
+
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  border: 2px dashed var(--color-border-secondary);
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-tertiary);
+}
+
+.chart-placeholder-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+/* --- Header actions --- */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.analytics-header-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.export-btn {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.export-btn:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border-secondary);
+}
+
+/* --- Date range filter --- */
+
+.date-range-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.date-range-presets {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.date-range-preset-btn {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    background 0.15s;
+}
+
+.date-range-preset-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.date-range-preset-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+
+.date-range-custom {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.date-range-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.date-range-input {
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+/* --- Charts row grid --- */
+
+.analytics-charts-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .analytics-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Pie panel --- */
+
+.analytics-pie-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.chart-panel-heading {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+/* --- Carousel panel --- */
+
+.analytics-carousel-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  background: var(--color-bg-secondary);
+  min-height: 260px;
+}
+
+.carousel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.carousel-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-primary);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.carousel-arrow:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border-secondary);
+}
+
+.carousel-indicator {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  min-width: 36px;
+  text-align: center;
+}
+
+.carousel-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* --- Chart internals --- */
+
+.chart-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.chart-summary-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.chart-summary-text strong {
+  color: var(--color-text-primary);
+}
+
+.chart-loading-text,
+.chart-empty-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+  margin: 0;
+}
+
+/* --- Dark mode --- */
+
+[data-theme='dark'] .analytics-section {
+  border-top-color: var(--color-gray-700);
+}
+
+[data-theme='dark'] .analytics-section-heading {
+  color: var(--color-gray-400);
+}
+
+[data-theme='dark'] .chart-placeholder {
+  border-color: var(--color-gray-600);
+  background-color: var(--color-gray-800);
+}
+
+[data-theme='dark'] .analytics-carousel-panel {
+  border-color: var(--color-gray-700);
+  background: var(--color-gray-800);
+}
+
+[data-theme='dark'] .carousel-arrow {
+  border-color: var(--color-gray-600);
+  background: var(--color-gray-700);
+}
+
+[data-theme='dark'] .carousel-arrow:hover {
+  background: var(--color-gray-600);
+  border-color: var(--color-gray-500);
+}
+
+[data-theme='dark'] .export-btn {
+  border-color: var(--color-gray-600);
+  background: var(--color-gray-800);
+}
+
+[data-theme='dark'] .export-btn:hover {
+  background: var(--color-gray-700);
+  border-color: var(--color-gray-500);
+}
+
+[data-theme='dark'] .date-range-preset-btn {
+  border-color: var(--color-gray-600);
+  background: var(--color-gray-800);
+}
+
+[data-theme='dark'] .date-range-input {
+  border-color: var(--color-gray-600);
+  background: var(--color-gray-800);
+}

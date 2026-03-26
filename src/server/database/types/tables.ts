@@ -1,4 +1,5 @@
 import type {
+  AnalyticsId,
   AnalyticsSchemaId,
   BusinessImpactId,
   CommentTypeId,
@@ -6,10 +7,13 @@ import type {
   NotificationTokenId,
   NotificationTokenTypeId,
   NotificationTypeId,
+  OrgRoleId,
   OrganizationId,
   PermissionId,
+  PriorityEngineAnchorsId,
   QuoteApprovalId,
   QuoteApprovalStatusId,
+  QuoteCalculationRuleId,
   QuoteConfidenceId,
   QuoteCreatorId,
   QuoteDetailRevisionId,
@@ -23,6 +27,8 @@ import type {
   TicketCommentId,
   TicketId,
   TicketPriorityId,
+  TicketPriorityRuleId,
+  TicketPriorityThresholdId,
   TicketSeverityId,
   TicketStatusId,
   TicketTypeId,
@@ -37,10 +43,6 @@ export type Decimal = number;
 
 /** Jsonb type in database. Unknown type in TypeScript. */
 export type JsonB = unknown;
-
-interface IntegerId {
-  id: number;
-}
 
 export interface BaseAuditRows {
   created_at: Date;
@@ -59,68 +61,31 @@ interface NameRow {
   name: string;
 }
 
-export interface BaseLookupTable extends NameRow, ActivatableRow, BaseAuditRows {}
+export type BaseLookupTable<T> = { id: T } & NameRow & ActivatableRow & BaseAuditRows;
 
-// ─── Lookup Tables ────────────────────────────────────────────────────────────
+export type Role = BaseLookupTable<RoleId>;
+export type NotificationType = BaseLookupTable<NotificationTypeId>;
+export type Permission = BaseLookupTable<PermissionId>;
+export type FileStorageType = BaseLookupTable<FileStorageTypeId>;
+export type TicketType = BaseLookupTable<TicketTypeId>;
+export type TicketSeverity = BaseLookupTable<TicketSeverityId>;
+export type TicketPriority = BaseLookupTable<TicketPriorityId>;
+export type BusinessImpact = BaseLookupTable<BusinessImpactId>;
+export type TicketStatus = BaseLookupTable<TicketStatusId>;
+export type CommentType = BaseLookupTable<CommentTypeId>;
+export type QuoteEffortLevel = BaseLookupTable<QuoteEffortLevelId>;
+export type QuoteCreator = BaseLookupTable<QuoteCreatorId>;
+export type QuoteApprovalStatus = BaseLookupTable<QuoteApprovalStatusId>;
+export type QuoteConfidenceLevel = BaseLookupTable<QuoteConfidenceId>;
+export type NotificationTokenType = BaseLookupTable<NotificationTokenTypeId>;
+export type OrgRole = BaseLookupTable<OrgRoleId>;
+export type Organization = BaseLookupTable<OrganizationId>;
 
-export interface Role extends BaseLookupTable {
-  id: RoleId;
-}
-export interface NotificationType extends BaseLookupTable {
-  id: NotificationTypeId;
-}
-export interface Permission extends BaseLookupTable {
-  id: PermissionId;
-}
-export interface FileStorageType extends BaseLookupTable {
-  id: FileStorageTypeId;
-}
-export interface TicketType extends BaseLookupTable {
-  id: TicketTypeId;
-}
-export interface TicketSeverity extends BaseLookupTable {
-  id: TicketSeverityId;
-}
-export interface TicketPriority extends BaseLookupTable {
-  id: TicketPriorityId;
-}
-export interface BusinessImpact extends BaseLookupTable {
-  id: BusinessImpactId;
-}
-export interface TicketStatus extends BaseLookupTable {
-  id: TicketStatusId;
-}
-export interface CommentType extends BaseLookupTable {
-  id: CommentTypeId;
-}
-export interface QuoteEffortLevel extends BaseLookupTable {
-  id: QuoteEffortLevelId;
-}
-export interface QuoteCreator extends BaseLookupTable {
-  id: QuoteCreatorId;
-}
-export interface QuoteApprovalStatus extends BaseLookupTable {
-  id: QuoteApprovalStatusId;
-}
-export interface QuoteConfidenceLevel extends BaseLookupTable {
-  id: QuoteConfidenceId;
-}
-export interface NotificationTokenType extends BaseLookupTable {
-  id: NotificationTokenTypeId;
-}
-
-export interface AnalyticsSchema extends IntegerId, NameRow, ActivatableRow, BaseAuditRows {
+export interface AnalyticsSchema extends NameRow, ActivatableRow, BaseAuditRows {
+  id: AnalyticsSchemaId;
   description: string | null;
   schema_definition: JsonB;
 }
-
-// ─── Organizations ────────────────────────────────────────────────────────────
-
-export interface Organization extends NameRow, ActivatableRow, BaseAuditRows {
-  id: OrganizationId;
-}
-
-// ─── Main Tables ──────────────────────────────────────────────────────────────
 
 export interface User extends BaseAuditRows, DeletableRow {
   id: UserId;
@@ -132,15 +97,15 @@ export interface User extends BaseAuditRows, DeletableRow {
   email_verified: boolean;
   phone_number: string;
   role_id: RoleId;
-  organization_id: OrganizationId | null;
 }
 
 export interface Ticket extends BaseAuditRows, DeletableRow {
   id: TicketId;
   creator_user_id: UserId;
   resolved_by_user_id: UserId | null;
+  resolved_at: Date | null;
   assigned_to_user_id: UserId | null;
-  organization_id: OrganizationId;
+  organization_id: OrganizationId | null;
   title: string;
   description: string;
   ticket_type_id: TicketTypeId;
@@ -199,18 +164,18 @@ export interface QuoteWithApproval extends Quote {
 
 export interface RateProfile extends BaseAuditRows, ActivatableRow {
   id: RateProfileId;
-  name: string;
   ticket_type_id: TicketTypeId;
   ticket_severity_id: TicketSeverityId;
   business_impact_id: BusinessImpactId;
-  base_hourly_rate: Decimal;
+  business_hours_rate: Decimal;
+  after_hours_rate: Decimal;
   multiplier: Decimal;
   effective_from: Date;
   effective_to: Date;
 }
 
 export interface QuoteCalculationRule extends BaseAuditRows, ActivatableRow {
-  id: number;
+  id: QuoteCalculationRuleId;
   name: string;
   ticket_severity_id: TicketSeverityId;
   business_impact_id: BusinessImpactId;
@@ -222,7 +187,7 @@ export interface QuoteCalculationRule extends BaseAuditRows, ActivatableRow {
 }
 
 export interface Analytics extends BaseAuditRows, ActivatableRow {
-  id: number;
+  id: AnalyticsId;
   schema_id: AnalyticsSchemaId;
   type: string;
   entity_id: UUID;
@@ -233,6 +198,17 @@ export interface Analytics extends BaseAuditRows, ActivatableRow {
 export interface RolePermission extends BaseAuditRows {
   role_id: RoleId;
   permission_id: PermissionId;
+}
+
+export interface OrgRolePermission extends BaseAuditRows {
+  org_role_id: OrgRoleId;
+  permission_id: PermissionId;
+}
+
+export interface OrganizationMember extends BaseAuditRows {
+  organization_id: OrganizationId;
+  user_id: UserId;
+  org_role_id: OrgRoleId;
 }
 
 export interface UserNotificationPreference extends BaseAuditRows {
@@ -262,17 +238,11 @@ export interface TicketAttachment extends BaseAuditRows {
   id: TicketAttachmentId;
   uploaded_by_user_id: UserId;
   ticket_id: TicketId;
-  name: string;
+  storage_key: string;
+  original_name: string;
   storage_type_id: FileStorageTypeId;
   size_bytes: number;
   mime_type: string;
-}
-
-export interface OrganizationMember extends BaseAuditRows {
-  id: number;
-  organization_id: OrganizationId;
-  user_id: UserId;
-  role_id: RoleId;
 }
 
 export interface SlaPolicy extends BaseAuditRows {
@@ -300,4 +270,27 @@ export interface NotificationToken extends BaseAuditRows {
   token: string;
   expires_at: Date;
   last_activity: Date;
+}
+
+export interface TicketPriorityRule extends BaseAuditRows, ActivatableRow {
+  id: TicketPriorityRuleId;
+  dimension: string;
+  value_name: string;
+  points: number;
+}
+
+export interface TicketPriorityThreshold extends BaseAuditRows, ActivatableRow {
+  id: TicketPriorityThresholdId;
+  ticket_priority_id: TicketPriorityId;
+  /** Inclusive */
+  min_score: number;
+  /** Inclusive */
+  max_score: number;
+}
+
+export interface PriorityEngineAnchor extends BaseAuditRows, ActivatableRow {
+  id: PriorityEngineAnchorsId;
+  label: string;
+  description_text: string;
+  urgency_score: number;
 }

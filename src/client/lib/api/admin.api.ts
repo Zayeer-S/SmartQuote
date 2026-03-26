@@ -2,8 +2,8 @@ import type {
   CreateUserRequest,
   CreateUserResponse,
   ListUsersResponse,
-} from '../../../shared/contracts/user-contracts';
-import { extractData, httpClient, type ApiResponse } from './http-client';
+} from '../../../shared/contracts/user-contracts.js';
+import { extractData, httpClient, type ApiResponse } from './http-client.js';
 
 export const adminAPI = {
   /**
