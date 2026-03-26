@@ -69,6 +69,10 @@ export async function bootstrapApplication(
 
   app.use((req, res, next) => {
     if (req.body instanceof Buffer) {
+      if (req.headers['content-type']?.startsWith('multipart/form-data')) {
+        next();
+        return;
+      }
       try {
         req.body = JSON.parse(req.body.toString('utf8')) as unknown;
       } catch {
