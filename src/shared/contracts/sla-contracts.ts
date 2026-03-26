@@ -55,6 +55,8 @@ export interface UpdateSlaPolicyRequest {
 export interface SlaPolicyResponse {
   id: number;
   name: string;
+  organizationId: string | null;
+  userId: string | null;
   /**
    * Human-readable label for the scope target.
    * Org-scoped:  the organization name

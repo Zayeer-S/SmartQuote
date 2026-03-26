@@ -1,7 +1,7 @@
 import { test as setup, request } from '@playwright/test';
 import fs from 'fs';
 import { login } from '../utils/login.utils';
-import { USERS } from '../constants/test.user.credentials';
+import { USERS } from '../../constants/test.user.credentials';
 import { SESSION_PATHS, SMOKE_DATA_PATHS } from '../constants/e2e.paths';
 import type { LoginResponse } from '../../../src/shared/contracts/auth-contracts';
 import type { TicketResponse } from '../../../src/shared/contracts/ticket-contracts';
@@ -16,7 +16,7 @@ setup('create comment smoke ticket and authenticate admin', async ({ page }) => 
   const ctx = await request.newContext({ baseURL: API_BASE });
 
   const loginRes = await ctx.post('api/auth/login', {
-    data: { email: USERS.CUSTOMER1.EMAIL, password: USERS.CUSTOMER1.PASSWORD },
+    data: { email: USERS.CUSTOMER1_DIFF_ORG.EMAIL, password: USERS.CUSTOMER1_DIFF_ORG.PASSWORD },
   });
   const loginBody = (await loginRes.json()) as { data: LoginResponse };
 

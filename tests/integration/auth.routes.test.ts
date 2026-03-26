@@ -5,12 +5,13 @@ import request from 'supertest';
 import type { Express } from 'express';
 import { bootstrapApplication } from '../../src/server/bootstrap/app.bootstrap';
 import { AUTH_ENDPOINTS } from '../../src/shared/constants/endpoints';
+import { USERS } from '../constants/test.user.credentials';
 
 const BASE = `/api${AUTH_ENDPOINTS.BASE}`;
 
 const SEEDED_USER = {
-  email: 'admin@giacom.com',
-  password: 'password',
+  email: USERS.ADMIN.EMAIL,
+  password: USERS.ADMIN.PASSWORD,
 };
 
 const INVALID_CREDENTIALS = {

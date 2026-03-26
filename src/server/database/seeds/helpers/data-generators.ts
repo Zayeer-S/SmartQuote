@@ -52,6 +52,8 @@ export async function generateUsers(
 ): Promise<{
   customer1Id: string;
   customer2Id: string;
+  customer3Id: string;
+  customer4Id: string;
   supportAgentId: string;
   managerId: string;
   adminId: string;
@@ -62,7 +64,7 @@ export async function generateUsers(
       {
         first_name: 'Joe',
         last_name: 'Bloggs',
-        email: 'customer1@demo.com',
+        email: 'c1@demo.com',
         password: passwordHash,
         phone_number: '+44 11 1111 0001',
         role_id: roleIdMap[AUTH_ROLES.CUSTOMER],
@@ -72,7 +74,27 @@ export async function generateUsers(
       {
         first_name: 'John',
         last_name: 'Smith',
-        email: 'customer2@demo.com',
+        email: 'c2@demo.com',
+        password: passwordHash,
+        phone_number: '+44 11 1111 0002',
+        role_id: roleIdMap[AUTH_ROLES.CUSTOMER],
+        email_verified: true,
+      },
+      // Customer 3 - belongs to org2
+      {
+        first_name: 'Amy',
+        last_name: 'Smith',
+        email: 'c3@demo.com',
+        password: passwordHash,
+        phone_number: '+44 11 1111 0002',
+        role_id: roleIdMap[AUTH_ROLES.CUSTOMER],
+        email_verified: true,
+      },
+      // Customer 4 - belongs to no org
+      {
+        first_name: 'Mohammed',
+        last_name: 'Ahmad',
+        email: 'c4@demo.com',
         password: passwordHash,
         phone_number: '+44 11 1111 0002',
         role_id: roleIdMap[AUTH_ROLES.CUSTOMER],
@@ -114,9 +136,11 @@ export async function generateUsers(
   return {
     customer1Id: users[0].id,
     customer2Id: users[1].id,
-    supportAgentId: users[2].id,
-    managerId: users[3].id,
-    adminId: users[4].id,
+    customer3Id: users[2].id,
+    customer4Id: users[3].id,
+    supportAgentId: users[4].id,
+    managerId: users[5].id,
+    adminId: users[6].id,
   };
 }
 

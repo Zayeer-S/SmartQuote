@@ -1,8 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../utils/login.utils';
+import { USERS } from '../../constants/test.user.credentials';
 
-const CUSTOMER = { email: 'customer1@demo.com', password: 'password' };
-const ADMIN = { email: 'admin@giacom.com', password: 'password' };
+const CUSTOMER = {
+  email: USERS.CUSTOMER1_DIFF_ORG.EMAIL,
+  password: USERS.CUSTOMER1_DIFF_ORG.PASSWORD,
+};
+const ADMIN = { email: USERS.ADMIN.EMAIL, password: USERS.ADMIN.PASSWORD };
 
 test.describe('Unauthenticated access', () => {
   test('visiting /admin redirects to /login', async ({ page }) => {

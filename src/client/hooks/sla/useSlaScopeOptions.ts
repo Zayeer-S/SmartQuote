@@ -31,16 +31,22 @@ export function useSlaScopeOptions(): UseSlaScopeOptionsReturn {
   const fetch = useCallback(async (): Promise<void> => {
     setState({ orgs: [], customerUsers: [], loading: true, error: null });
     try {
-      const [orgsRes, usersRes] = await Promise.all([
+      const [orgsRes, usersRes] = await Promise.allSettled([
         orgAPI.listOrgs(),
         adminAPI.listUsers({ limit: 500 }),
       ]);
 
       setState({
-        orgs: orgsRes.organizations,
-        customerUsers: usersRes.users.filter((u) => u.role.name === AUTH_ROLES.CUSTOMER),
+        orgs: orgsRes.status === 'fulfilled' ? orgsRes.value.organizations : [],
+        customerUsers:
+          usersRes.status === 'fulfilled'
+            ? usersRes.value.users.filter((u) => u.role.name === AUTH_ROLES.CUSTOMER)
+            : [],
         loading: false,
-        error: null,
+        error:
+          orgsRes.status === 'rejected' || usersRes.status === 'rejected'
+            ? 'Failed to load some scope options'
+            : null,
       });
     } catch (err) {
       setState({
