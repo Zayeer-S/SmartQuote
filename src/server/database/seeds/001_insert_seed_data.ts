@@ -52,7 +52,6 @@ export async function seed(knex: Knex): Promise<void> {
     'quote_effort_level_ranges',
     'resource_utilizations',
     'sessions',
-    'sla_policies',
     'organization_members',
     'ticket_attachments',
     'ticket_comments',
@@ -65,6 +64,7 @@ export async function seed(knex: Knex): Promise<void> {
     'quote_calculation_rules',
     'rate_profiles',
     'quotes',
+    'sla_policies',
     'quote_approvals',
     'tickets',
     'users',
@@ -840,45 +840,65 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Demo Corporation - Standard SLA',
       user_id: null,
       organization_id: org1Id,
-      contract: {
-        hourly_rate: 120,
-        response_times: {
-          critical: '1 hour',
-          high: '4 hours',
-          medium: '1 business day',
-          low: '3 business days',
-        },
-        resolution_times: {
-          critical: '4 hours',
-          high: '1 business day',
-          medium: '3 business days',
-          low: '5 business days',
-        },
-      },
+      is_active: true,
+      contract: JSON.stringify({
+        severityTargets: [
+          {
+            severity: TICKET_SEVERITIES.CRITICAL,
+            responseTimeHours: 1,
+            resolutionTimeHours: 4,
+          },
+          {
+            severity: TICKET_SEVERITIES.HIGH,
+            responseTimeHours: 4,
+            resolutionTimeHours: 8,
+          },
+          {
+            severity: TICKET_SEVERITIES.MEDIUM,
+            responseTimeHours: 8,
+            resolutionTimeHours: 24,
+          },
+          {
+            severity: TICKET_SEVERITIES.LOW,
+            responseTimeHours: 24,
+            resolutionTimeHours: 72,
+          },
+        ],
+      }),
       effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      effective_to: new Date(Date.now() + ONE_YEAR_MS),
     },
     {
       name: 'Test Industries Ltd - Premium SLA',
       user_id: null,
       organization_id: org2Id,
-      contract: {
-        hourly_rate: 150,
-        response_times: {
-          critical: '30 minutes',
-          high: '2 hours',
-          medium: '4 hours',
-          low: '1 business day',
-        },
-        resolution_times: {
-          critical: '2 hours',
-          high: '4 hours',
-          medium: '1 business day',
-          low: '3 business days',
-        },
-      },
+      is_active: true,
+      contract: JSON.stringify({
+        severityTargets: [
+          {
+            severity: TICKET_SEVERITIES.CRITICAL,
+            responseTimeHours: 0.5,
+            resolutionTimeHours: 2,
+          },
+          {
+            severity: TICKET_SEVERITIES.HIGH,
+            responseTimeHours: 2,
+            resolutionTimeHours: 4,
+          },
+          {
+            severity: TICKET_SEVERITIES.MEDIUM,
+            responseTimeHours: 4,
+            resolutionTimeHours: 8,
+          },
+          {
+            severity: TICKET_SEVERITIES.LOW,
+            responseTimeHours: 8,
+            resolutionTimeHours: 24,
+          },
+        ],
+      }),
       effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      effective_to: new Date(Date.now() + ONE_YEAR_MS),
     },
   ]);
 
