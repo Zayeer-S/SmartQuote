@@ -22,6 +22,7 @@ import { S3StorageService } from '../services/storage/s3.storage.service.js';
 import { FILE_STORAGE_TYPES } from '../../shared/constants/index.js';
 import type { FileStorageType } from '../../shared/constants/lookup-values.js';
 import { backEnv } from '../config/env.backend.js';
+import type { SlaService } from '../services/sla/sla.service.js';
 
 export class TicketContainer {
   public readonly ticketsDAO: TicketsDAO;
@@ -44,7 +45,8 @@ export class TicketContainer {
     rbacService: RBACService,
     orgMembersDAO: OrganizationMembersDAO,
     lookupResolver: LookupResolver,
-    embedder: BertEmbedder | null
+    embedder: BertEmbedder | null,
+    slaService: SlaService
   ) {
     this.ticketsDAO = new TicketsDAO(db);
     this.ticketCommentsDAO = new TicketCommentsDAO(db);
@@ -53,9 +55,6 @@ export class TicketContainer {
     this.priorityRulesDAO = new TicketPriorityRulesDAO(db);
     this.priorityThresholdsDAO = new TicketPriorityThresholdsDAO(db);
 
-    // S3 is active when the bucket name is configured. AWS_REGION is always
-    // available in Lambda as a reserved runtime variable - it does not go
-    // through backEnv since CDK cannot set it explicitly.
     const awsRegion = backEnv.AWS_REGION ?? process.env.AWS_REGION;
     const isS3 = awsRegion !== undefined && backEnv.AWS_S3_BUCKET !== undefined;
 
@@ -120,6 +119,7 @@ export class TicketContainer {
       this.ticketService,
       this.commentService,
       this.attachmentService,
+      slaService,
       lookupResolver
     );
   }

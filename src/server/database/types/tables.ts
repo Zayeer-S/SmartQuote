@@ -245,7 +245,7 @@ export interface TicketAttachment extends BaseAuditRows {
   mime_type: string;
 }
 
-export interface SlaPolicy extends BaseAuditRows {
+export interface SlaPolicy extends BaseAuditRows, ActivatableRow {
   id: SlaPolicyId;
   name: string;
   user_id: UserId | null;

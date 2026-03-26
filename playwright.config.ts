@@ -8,6 +8,7 @@ const SESSION_SMOKE_FILES = [
   '**/smoke/admin.comment.smoke.test.ts',
   '**/smoke/customer.comment.smoke.test.ts',
   '**/smoke/rate.profile.smoke.test.ts',
+  '**/smoke/sla.smoke.test.ts',
 ];
 
 export default defineConfig({
@@ -69,7 +70,11 @@ export default defineConfig({
     // chromium-customer so the internal comment exists for the visibility test.
     {
       name: 'chromium-admin',
-      testMatch: ['**/smoke/admin.comment.smoke.test.ts', '**/smoke/rate.profile.smoke.test.ts'],
+      testMatch: [
+        '**/smoke/admin.comment.smoke.test.ts',
+        '**/smoke/rate.profile.smoke.test.ts',
+        '**/smoke/sla.smoke.test.ts',
+      ],
       dependencies: ['admin-setup'],
       use: {
         ...devices['Desktop Chrome'],

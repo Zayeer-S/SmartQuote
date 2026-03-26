@@ -33,6 +33,18 @@
   color: #92400e;
 }
 
+/* SLA badge variants */
+.badge-sla-breached {
+  background-color: var(--color-error-light, #fee2e2);
+  color: #991b1b;
+  font-weight: var(--font-weight-semibold);
+}
+
+.badge-sla-ok {
+  background-color: var(--color-success-light, #dcfce7);
+  color: #166534;
+}
+
 .admin-ticket-card-title {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
@@ -85,4 +97,14 @@
 [data-theme='dark'] .admin-ticket-card-badge-unassigned {
   background-color: #451a03;
   color: #fcd34d;
+}
+
+[data-theme='dark'] .badge-sla-breached {
+  background-color: #450a0a;
+  color: #fca5a5;
+}
+
+[data-theme='dark'] .badge-sla-ok {
+  background-color: #052e16;
+  color: #86efac;
 }

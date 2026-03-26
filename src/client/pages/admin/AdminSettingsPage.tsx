@@ -9,10 +9,6 @@ import { useUpdateRateProfile } from '../../hooks/rate-profiles/useUpdateRatePro
 import { RateProfileModal } from './RateProfileModal.js';
 import './AdminSettingsPage.css';
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
 const RATE_PROFILE_COLUMNS = [
   'Ticket Type',
   'Severity',
@@ -22,15 +18,7 @@ const RATE_PROFILE_COLUMNS = [
   'Multiplier',
 ] as const;
 
-// ---------------------------------------------------------------------------
-// Modal state type
-// ---------------------------------------------------------------------------
-
 type ModalState = { open: false } | { open: true; profile: RateProfileResponse };
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 
 const AdminSettingsPage: React.FC = () => {
   const { data, loading, error, execute: fetchRateProfiles } = useListRateProfiles();
@@ -61,10 +49,6 @@ const AdminSettingsPage: React.FC = () => {
     if (succeeded) await fetchRateProfiles();
     return succeeded;
   }
-
-  // ---------------------------------------------------------------------------
-  // Render
-  // ---------------------------------------------------------------------------
 
   return (
     <div className="admin-page" data-testid="admin-settings-page">

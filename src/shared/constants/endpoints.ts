@@ -71,3 +71,12 @@ export const ANALYTICS_ENDPOINTS = {
   TICKET_VOLUME: '/ticket-volume',
   QUOTE_ACCURACY: '/quote-accuracy',
 } as const;
+
+export const SLA_ENDPOINTS = {
+  BASE: '/sla-policies',
+  LIST: '/',
+  CREATE: '/',
+  GET: (slaPolicyId = ':slaPolicyId') => `/${slaPolicyId}`,
+  UPDATE: (slaPolicyId = ':slaPolicyId') => `/${slaPolicyId}`,
+  DELETE: (slaPolicyId = ':slaPolicyId') => `/${slaPolicyId}`,
+} as const;

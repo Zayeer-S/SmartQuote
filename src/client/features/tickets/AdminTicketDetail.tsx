@@ -3,7 +3,12 @@ import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 import { useResolveTicket } from '../../hooks/tickets/useResolveTicket.js';
 import { useTicketPermissions } from '../../hooks/auth/useTicketPermissions.js';
-import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
+import {
+  getStatusBadgeClass,
+  getPriorityBadgeClass,
+  getSlaBadgeClass,
+} from '../../lib/utils/badge-utils.js';
+import type { SlaStatusResponse } from '../../../shared/contracts/sla-contracts.js';
 import AssignTicketForm from './AssignTicketForm.js';
 import AdminQuotePanel from './AdminQuotePanel.js';
 import CommentThread from './CommentThread.js';
@@ -12,6 +17,93 @@ import './AdminTicketDetail.css';
 
 interface AdminTicketDetailProps {
   ticketId: string;
+}
+
+interface SlaSectionProps {
+  slaStatus: SlaStatusResponse;
+}
+
+const SlaSection: React.FC<SlaSectionProps> = ({ slaStatus }) => {
+  return (
+    <section
+      className="admin-detail-section"
+      aria-labelledby="sla-section-heading"
+      data-testid="sla-section"
+    >
+      <h2 className="admin-detail-section-heading" id="sla-section-heading">
+        SLA
+      </h2>
+
+      <div className="sla-detail-header">
+        <span className="sla-detail-policy-name" data-testid="sla-policy-name">
+          {slaStatus.policyName}
+        </span>
+        <span
+          className={getSlaBadgeClass(slaStatus.deadlineBreached)}
+          data-testid="sla-breach-badge"
+        >
+          {slaStatus.deadlineBreached ? 'Deadline Breached' : 'Within Deadline'}
+        </span>
+      </div>
+
+      {slaStatus.severityTarget !== null && (
+        <dl className="admin-detail-dl sla-detail-current-target">
+          <div className="admin-detail-dl-row">
+            <dt>Response Target</dt>
+            <dd data-testid="sla-response-target">
+              {formatHours(slaStatus.severityTarget.responseTimeHours)}
+            </dd>
+          </div>
+          <div className="admin-detail-dl-row">
+            <dt>Resolution Target</dt>
+            <dd data-testid="sla-resolution-target">
+              {formatHours(slaStatus.severityTarget.resolutionTimeHours)}
+            </dd>
+          </div>
+        </dl>
+      )}
+
+      <table
+        className="admin-table sla-detail-targets-table"
+        aria-label="SLA targets by severity"
+        data-testid="sla-targets-table"
+      >
+        <thead>
+          <tr>
+            <th scope="col">Severity</th>
+            <th scope="col">Response Target</th>
+            <th scope="col">Resolution Target</th>
+          </tr>
+        </thead>
+        <tbody>
+          {slaStatus.allSeverityTargets.map((target) => (
+            <tr
+              key={target.severity}
+              data-testid={`sla-target-row-${target.severity.toLowerCase()}`}
+            >
+              <td>{target.severity}</td>
+              <td>{formatHours(target.responseTimeHours)}</td>
+              <td>{formatHours(target.resolutionTimeHours)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+};
+
+/** Format a decimal hour value into a human-readable string. */
+function formatHours(hours: number): string {
+  if (hours < 1) {
+    return `${String(Math.round(hours * 60))} min`;
+  }
+  if (hours % 1 === 0) {
+    return `${String(hours)} hr${hours === 1 ? '' : 's'}`;
+  }
+  // e.g. 1.5 -> "1 hr 30 min"
+  const wholeHours = Math.floor(hours);
+  const minutes = Math.round((hours - wholeHours) * 60);
+  return `${String(wholeHours)} hr ${String(minutes)} min`;
 }
 
 const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
@@ -102,6 +194,15 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
           <span className={getPriorityBadgeClass(t.ticketPriority)} data-testid="ticket-priority">
             {t.ticketPriority}
           </span>
+          {t.slaStatus !== null && (
+            <span
+              className={getSlaBadgeClass(t.slaStatus.deadlineBreached)}
+              data-testid="ticket-sla-badge-header"
+              title={t.slaStatus.policyName}
+            >
+              {t.slaStatus.deadlineBreached ? 'SLA Breached' : 'SLA OK'}
+            </span>
+          )}
         </div>
       </div>
 
@@ -152,6 +253,9 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
           </div>
         </dl>
       </section>
+
+      {/* ── SLA ── */}
+      {t.slaStatus !== null && <SlaSection slaStatus={t.slaStatus} />}
 
       {/* ── Assignment ── */}
       {canAssign && (

@@ -40,7 +40,9 @@ export const updateTicketSchema = z
     ticketType: z.enum(ALL_TICKET_TYPES).optional(),
     ticketSeverity: z.enum(ALL_TICKET_SEVERITIES).optional(),
     businessImpact: z.enum(ALL_BUSINESS_IMPACTS).optional(),
-    deadline: futureDate.optional(),
+    deadline: z.iso
+      .datetime({ message: 'Deadline must be a valid ISO 8601 datetime string' })
+      .optional(),
     usersImpacted: z.coerce.number().int().min(1, 'At least 1 user must be impacted').optional(),
     ticketStatus: z.enum(ALL_TICKET_STATUSES).optional(),
     assignedToUserId: z.uuid('Assignee ID must be a valid UUID').nullable().optional(),

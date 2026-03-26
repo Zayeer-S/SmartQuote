@@ -95,6 +95,32 @@
   flex-wrap: wrap;
 }
 
+/* ── SLA section ── */
+
+.sla-detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.sla-detail-policy-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.sla-detail-current-target {
+  margin-bottom: var(--spacing-lg);
+}
+
+.sla-detail-targets-table {
+  width: 100%;
+  margin-top: var(--spacing-sm);
+}
+
+/* ── Dark mode ── */
+
 [data-theme='dark'] .admin-ticket-detail-title {
   color: var(--color-gray-50);
 }
@@ -116,6 +142,10 @@
 }
 
 [data-theme='dark'] .admin-detail-dl dd {
+  color: var(--color-gray-100);
+}
+
+[data-theme='dark'] .sla-detail-policy-name {
   color: var(--color-gray-100);
 }
 

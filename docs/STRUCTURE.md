@@ -123,6 +123,16 @@ smartquote/
 │   │   │   │   ├── useRejectQuote.ts
 │   │   │   │   ├── useSubmitForApproval.ts
 │   │   │   │   └── useUpdateForQuote.ts
+│   │   │   ├── rate-profiles/ 
+│   │   │   │   ├── useCreateRateProfile.ts
+│   │   │   │   ├── useDeleteRateProfile.ts
+│   │   │   │   ├── useListRateProfile.ts
+│   │   │   │   └── useUpdateRateProfile.ts
+│   │   │   ├── sla/ 
+│   │   │   │   ├── useCreateSlaPolicy.ts
+│   │   │   │   ├── useDeleteSlaPolicy.ts
+│   │   │   │   ├── useListSlaPolicy.ts
+│   │   │   │   └── useUpdateSlaPolicy.ts
 │   │   │   └── tickets/
 │   │   │       ├── useAddComment.ts
 │   │   │       ├── useAssignTicket.ts
@@ -141,6 +151,8 @@ smartquote/
 │   │   │   │   ├── http-client.ts
 │   │   │   │   ├── org.api.ts
 │   │   │   │   ├── quote.api.ts
+│   │   │   │   ├── rate.profile.api.ts
+│   │   │   │   ├── sla.api.ts
 │   │   │   │   └── ticket.api.ts
 │   │   │   ├── storage/                            # Browser persistence tokens
 │   │   │   │   ├── keys.ts
@@ -209,6 +221,7 @@ smartquote/
 │   │   │   ├── auth.container.ts
 │   │   │   ├── org.container.ts
 │   │   │   ├── quote.container.ts
+│   │   │   ├── sla.container.ts
 │   │   │   └── ticket.container.ts
 │   │   ├── controllers/
 │   │   │   ├── admin.controller.ts
@@ -217,6 +230,7 @@ smartquote/
 │   │   │   ├── org.controller.ts
 │   │   │   ├── quote.controller.ts
 │   │   │   ├── rate.profiles.controller.ts
+│   │   │   ├── sla.controller.ts
 │   │   │   └── ticket.controller.ts
 │   │   ├── daos/                                   # Database persistence/access only - no validation, permissions, or workflow rules
 │   │   │   ├── base/
@@ -236,6 +250,7 @@ smartquote/
 │   │   │       ├── rate.profiles.dao.ts
 │   │   │       ├── roles.dao.ts
 │   │   │       ├── sessions.dao.ts
+│   │   │       ├── sla.policies.dao.ts
 │   │   │       ├── ticket.attachments.dao.ts
 │   │   │       ├── ticket.comments.dao.ts
 │   │   │       ├── ticket.priority.dao.ts
@@ -253,7 +268,9 @@ smartquote/
 │   │   │   │   ├── 005_create_priority_engine_tables.ts
 │   │   │   │   ├── 006_fix_org_tables.ts
 │   │   │   │   ├── 007_alter_ticket_attachments.ts
-│   │   │   │   └── 008_add_resolved_at_to_tickets.ts
+│   │   │   │   ├── 008_add_resolved_at_to_tickets.ts
+│   │   │   │   ├── 009_alter_rate_profiles_table.ts
+│   │   │   │   └── 010_alter_sla_policies_table.ts
 │   │   │   ├── seeds/
 │   │   │   │   ├── 001_insert_seed_data.ts
 │   │   │   │   └── helpers
@@ -310,6 +327,10 @@ smartquote/
 │   │   │   ├── rbac/
 │   │   │   │   ├── org.rbac.service.ts             # Local/Org RBAC
 │   │   │   │   └── rbac.service.ts                 # System RBAC
+│   │   │   ├── sla/
+│   │   │   │   ├── sla.errors.ts
+│   │   │   │   ├── sla.service.ts
+│   │   │   │   └── sla.service.types.ts
 │   │   │   ├── storage/
 │   │   │   │   ├── local.storage.service.ts
 │   │   │   │   ├── s3.storage.service.ts
@@ -329,6 +350,7 @@ smartquote/
 │   │       ├── org.validator.ts
 │   │       ├── quote.validator.ts
 │   │       ├── rate.profile.validator.ts
+│   │       ├── sla.validator.ts
 │   │       ├── ticket.validator.ts
 │   │       ├── user.validator.ts
 │   │       └── validation-utils.ts
@@ -343,6 +365,8 @@ smartquote/
 │           ├── auth-contracts.ts
 │           ├── org-contracts.ts
 │           ├── quote-contracts.ts
+│           ├── rate-profile-contracts.ts
+│           ├── sla-contracts.ts
 │           ├── ticket-contracts.ts
 │           └── user-contracts.ts
 │
