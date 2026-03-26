@@ -4,13 +4,15 @@ import type {
   SlaPolicyResponse,
   SlaSeverityTarget,
 } from '../../../shared/contracts/sla-contracts.js';
+import type { OrgResponse } from '../../../shared/contracts/org-contracts.js';
+import type { UserListItem } from '../../../shared/contracts/user-contracts.js';
+import { useListSlaPolicies } from '../../hooks/sla/useListSlaPolicy.js';
+import { useCreateSlaPolicy } from '../../hooks/sla/useCreateSlaPolicy.js';
+import { useUpdateSlaPolicy } from '../../hooks/sla/useUpdateSlaPolicy.js';
+import { useDeleteSlaPolicy } from '../../hooks/sla/useDeleteSlaPolicy.js';
 import './AdminSLAPoliciesPage.css';
-import { useListSlaPolicies } from '../../hooks/sla/useListSlaPolicies.js';
-import { useCreateSlaPolicy } from '../../hooks/sla/useCreateSlaPolicies.js';
-import { useUpdateSlaPolicy } from '../../hooks/sla/useUpdateSlaPolicies.js';
-import { useDeleteSlaPolicy } from '../../hooks/sla/useDeleteSlaPolicies.js';
+import { useSlaScopeOptions } from '../../hooks/sla/useSlaScopeOptions.js';
 
-// All severity levels in display order
 const ALL_SEVERITIES = [
   TICKET_SEVERITIES.CRITICAL,
   TICKET_SEVERITIES.HIGH,
@@ -26,9 +28,8 @@ interface SeverityTargetDraft {
 
 interface PolicyFormState {
   name: string;
-  organizationId: string;
-  userId: string;
   scopeType: 'org' | 'user';
+  scopeId: string; // org UUID or user UUID -- resolved from dropdown selection
   effectiveFrom: string;
   effectiveTo: string;
   severityTargets: SeverityTargetDraft[];
@@ -45,58 +46,26 @@ function buildDefaultTargets(): SeverityTargetDraft[] {
 function buildDefaultForm(): PolicyFormState {
   return {
     name: '',
-    organizationId: '',
-    userId: '',
     scopeType: 'org',
+    scopeId: '',
     effectiveFrom: '',
     effectiveTo: '',
     severityTargets: buildDefaultTargets(),
   };
 }
 
-function formFromPolicy(policy: SlaPolicyResponse): PolicyFormState {
-  const existingTargets = policy.contract.severityTargets;
-
-  const severityTargets = ALL_SEVERITIES.map((severity) => {
-    const match = existingTargets.find((t) => t.severity === severity);
-    return {
-      severity,
-      responseTimeHours: match ? String(match.responseTimeHours) : '',
-      resolutionTimeHours: match ? String(match.resolutionTimeHours) : '',
-    };
-  });
-
-  return {
-    name: policy.name,
-    organizationId: policy.organizationId ?? '',
-    userId: policy.userId ?? '',
-    scopeType: policy.organizationId !== null ? 'org' : 'user',
-    effectiveFrom: policy.effectiveFrom.slice(0, 16), // trim to datetime-local format
-    effectiveTo: policy.effectiveTo.slice(0, 16),
-    severityTargets,
-  };
-}
-
 function validateForm(form: PolicyFormState): string | null {
   if (!form.name.trim()) return 'Name is required.';
-
-  if (form.scopeType === 'org' && !form.organizationId.trim()) {
-    return 'Organization ID is required for org-scoped policies.';
-  }
-  if (form.scopeType === 'user' && !form.userId.trim()) {
-    return 'User ID is required for user-scoped policies.';
-  }
-
+  if (!form.scopeId)
+    return `Please select ${form.scopeType === 'org' ? 'an organization' : 'a user'}.`;
   if (!form.effectiveFrom) return 'Effective from date is required.';
   if (!form.effectiveTo) return 'Effective to date is required.';
   if (new Date(form.effectiveTo) < new Date(form.effectiveFrom)) {
     return 'Effective to must be on or after effective from.';
   }
-
   for (const target of form.severityTargets) {
     const response = Number(target.responseTimeHours);
     const resolution = Number(target.resolutionTimeHours);
-
     if (!target.responseTimeHours || isNaN(response) || response <= 0) {
       return `Response time for ${target.severity} must be a positive number.`;
     }
@@ -107,7 +76,6 @@ function validateForm(form: PolicyFormState): string | null {
       return `Resolution time for ${target.severity} must be >= response time.`;
     }
   }
-
   return null;
 }
 
@@ -119,28 +87,35 @@ function buildSeverityTargets(drafts: SeverityTargetDraft[]): SlaSeverityTarget[
   }));
 }
 
-interface PolicyModalProps {
-  mode: 'create' | 'edit';
-  initial: PolicyFormState;
+interface CreateModalProps {
+  orgs: OrgResponse[];
+  customerUsers: UserListItem[];
+  loadingScopes: boolean;
   submitting: boolean;
   submitError: string | null;
   onSubmit: (form: PolicyFormState) => void;
   onClose: () => void;
 }
 
-function PolicyModal({
-  mode,
-  initial,
+function CreateModal({
+  orgs,
+  customerUsers,
+  loadingScopes,
   submitting,
   submitError,
   onSubmit,
   onClose,
-}: PolicyModalProps): React.ReactElement {
-  const [form, setForm] = useState<PolicyFormState>(initial);
+}: CreateModalProps): React.ReactElement {
+  const [form, setForm] = useState<PolicyFormState>(buildDefaultForm());
   const [validationError, setValidationError] = useState<string | null>(null);
 
   function setField<K extends keyof PolicyFormState>(key: K, value: PolicyFormState[K]): void {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleScopeTypeChange(scopeType: 'org' | 'user'): void {
+    // Reset scopeId when switching scope type to avoid stale selection
+    setForm((prev) => ({ ...prev, scopeType, scopeId: '' }));
   }
 
   function setTargetField(
@@ -170,9 +145,7 @@ function PolicyModal({
   return (
     <div className="sla-modal-overlay" role="dialog" aria-modal="true">
       <div className="sla-modal">
-        <h2 className="sla-modal-title">
-          {mode === 'create' ? 'Add SLA Policy' : 'Edit SLA Policy'}
-        </h2>
+        <h2 className="sla-modal-title">Add SLA Policy</h2>
 
         <div className="sla-form-field">
           <label htmlFor="sla-name">Name</label>
@@ -188,54 +161,66 @@ function PolicyModal({
           />
         </div>
 
-        {mode === 'create' && (
-          <div className="sla-form-field">
-            <label htmlFor="sla-scope-type">Scope</label>
-            <select
-              id="sla-scope-type"
-              value={form.scopeType}
-              onChange={(e) => {
-                setField('scopeType', e.target.value as 'org' | 'user');
-              }}
-              data-testid="sla-form-scope-type"
-            >
-              <option value="org">Organization</option>
-              <option value="user">Individual User</option>
-            </select>
-          </div>
-        )}
+        <div className="sla-form-field">
+          <label htmlFor="sla-scope-type">Scope</label>
+          <select
+            id="sla-scope-type"
+            value={form.scopeType}
+            onChange={(e) => {
+              handleScopeTypeChange(e.target.value as 'org' | 'user');
+            }}
+            data-testid="sla-form-scope-type"
+          >
+            <option value="org">Organization</option>
+            <option value="user">Individual Customer</option>
+          </select>
+        </div>
 
-        {form.scopeType === 'org' ? (
-          <div className="sla-form-field">
-            <label htmlFor="sla-org-id">Organization ID</label>
-            <input
-              id="sla-org-id"
-              type="text"
-              value={form.organizationId}
-              onChange={(e) => {
-                setField('organizationId', e.target.value);
-              }}
-              placeholder="UUID"
-              disabled={mode === 'edit'}
-              data-testid="sla-form-org-id"
-            />
-          </div>
-        ) : (
-          <div className="sla-form-field">
-            <label htmlFor="sla-user-id">User ID</label>
-            <input
-              id="sla-user-id"
-              type="text"
-              value={form.userId}
-              onChange={(e) => {
-                setField('userId', e.target.value);
-              }}
-              placeholder="UUID"
-              disabled={mode === 'edit'}
-              data-testid="sla-form-user-id"
-            />
-          </div>
-        )}
+        <div className="sla-form-field">
+          {form.scopeType === 'org' ? (
+            <>
+              <label htmlFor="sla-scope-id">Organization</label>
+              <select
+                id="sla-scope-id"
+                value={form.scopeId}
+                onChange={(e) => {
+                  setField('scopeId', e.target.value);
+                }}
+                disabled={loadingScopes}
+                data-testid="sla-form-scope-select"
+              >
+                <option value="">
+                  {loadingScopes ? 'Loading...' : '-- Select organization --'}
+                </option>
+                {orgs.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          ) : (
+            <>
+              <label htmlFor="sla-scope-id">Customer</label>
+              <select
+                id="sla-scope-id"
+                value={form.scopeId}
+                onChange={(e) => {
+                  setField('scopeId', e.target.value);
+                }}
+                disabled={loadingScopes}
+                data-testid="sla-form-scope-select"
+              >
+                <option value="">{loadingScopes ? 'Loading...' : '-- Select customer --'}</option>
+                {customerUsers.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.firstName} {user.lastName} ({user.email})
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+        </div>
 
         <div className="sla-form-field">
           <label htmlFor="sla-effective-from">Effective From</label>
@@ -318,10 +303,197 @@ function PolicyModal({
             type="button"
             className="btn btn-primary btn-sm"
             onClick={handleSubmit}
+            disabled={submitting || loadingScopes}
+            data-testid="sla-form-submit"
+          >
+            {submitting ? 'Saving...' : 'Create'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface EditModalProps {
+  policy: SlaPolicyResponse;
+  submitting: boolean;
+  submitError: string | null;
+  onSubmit: (data: {
+    name: string;
+    effectiveFrom: string;
+    effectiveTo: string;
+    severityTargets: SeverityTargetDraft[];
+  }) => void;
+  onClose: () => void;
+}
+
+function EditModal({
+  policy,
+  submitting,
+  submitError,
+  onSubmit,
+  onClose,
+}: EditModalProps): React.ReactElement {
+  const existingTargets = policy.contract.severityTargets;
+
+  const [name, setName] = useState(policy.name);
+  const [effectiveFrom, setEffectiveFrom] = useState(policy.effectiveFrom.slice(0, 16));
+  const [effectiveTo, setEffectiveTo] = useState(policy.effectiveTo.slice(0, 16));
+  const [severityTargets, setSeverityTargets] = useState<SeverityTargetDraft[]>(
+    ALL_SEVERITIES.map((severity) => {
+      const match = existingTargets.find((t) => t.severity === severity);
+      return {
+        severity,
+        responseTimeHours: match ? String(match.responseTimeHours) : '',
+        resolutionTimeHours: match ? String(match.resolutionTimeHours) : '',
+      };
+    })
+  );
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  function setTargetField(
+    index: number,
+    key: 'responseTimeHours' | 'resolutionTimeHours',
+    value: string
+  ): void {
+    setSeverityTargets((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [key]: value };
+      return updated;
+    });
+  }
+
+  function handleSubmit(): void {
+    // Reuse the same validation logic via a temporary form shape
+    const mockForm: PolicyFormState = {
+      name,
+      scopeType: 'org',
+      scopeId: 'skip-scope-validation',
+      effectiveFrom,
+      effectiveTo,
+      severityTargets,
+    };
+    const err = validateForm(mockForm);
+    if (err) {
+      setValidationError(err);
+      return;
+    }
+    setValidationError(null);
+    onSubmit({ name, effectiveFrom, effectiveTo, severityTargets });
+  }
+
+  const displayError = validationError ?? submitError;
+
+  return (
+    <div className="sla-modal-overlay" role="dialog" aria-modal="true">
+      <div className="sla-modal">
+        <h2 className="sla-modal-title">Edit SLA Policy</h2>
+
+        <div className="sla-form-field">
+          <label htmlFor="sla-name">Name</label>
+          <input
+            id="sla-name"
+            type="text"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
+            data-testid="sla-form-name"
+          />
+        </div>
+
+        <div className="sla-form-field">
+          <label>Scope</label>
+          <p className="sla-scope-readonly" data-testid="sla-form-scope-display">
+            {policy.scopeDisplayName}
+          </p>
+        </div>
+
+        <div className="sla-form-field">
+          <label htmlFor="sla-effective-from">Effective From</label>
+          <input
+            id="sla-effective-from"
+            type="datetime-local"
+            value={effectiveFrom}
+            onChange={(e) => {
+              setEffectiveFrom(e.target.value);
+            }}
+            data-testid="sla-form-effective-from"
+          />
+        </div>
+
+        <div className="sla-form-field">
+          <label htmlFor="sla-effective-to">Effective To</label>
+          <input
+            id="sla-effective-to"
+            type="datetime-local"
+            value={effectiveTo}
+            onChange={(e) => {
+              setEffectiveTo(e.target.value);
+            }}
+            data-testid="sla-form-effective-to"
+          />
+        </div>
+
+        <p className="sla-severity-targets-label">Severity Targets</p>
+        <div className="sla-severity-targets-grid">
+          <span className="sla-severity-targets-grid-header">Severity</span>
+          <span className="sla-severity-targets-grid-header">Response (hrs)</span>
+          <span className="sla-severity-targets-grid-header">Resolution (hrs)</span>
+
+          {severityTargets.map((target, i) => (
+            <React.Fragment key={target.severity}>
+              <span className="sla-severity-label">{target.severity}</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={target.responseTimeHours}
+                onChange={(e) => {
+                  if (/^\d*\.?\d*$/.test(e.target.value)) {
+                    setTargetField(i, 'responseTimeHours', e.target.value);
+                  }
+                }}
+                data-testid={`sla-form-response-${target.severity.toLowerCase()}`}
+              />
+              <input
+                type="text"
+                inputMode="numeric"
+                value={target.resolutionTimeHours}
+                onChange={(e) => {
+                  if (/^\d*\.?\d*$/.test(e.target.value)) {
+                    setTargetField(i, 'resolutionTimeHours', e.target.value);
+                  }
+                }}
+                data-testid={`sla-form-resolution-${target.severity.toLowerCase()}`}
+              />
+            </React.Fragment>
+          ))}
+        </div>
+
+        {displayError && (
+          <p className="sla-modal-error" role="alert" data-testid="sla-form-error">
+            {displayError}
+          </p>
+        )}
+
+        <div className="sla-modal-actions">
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm"
+            onClick={onClose}
+            disabled={submitting}
+            data-testid="sla-form-cancel"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={handleSubmit}
             disabled={submitting}
             data-testid="sla-form-submit"
           >
-            {submitting ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
+            {submitting ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>
@@ -335,15 +507,28 @@ const AdminSLAPoliciesPage: React.FC = () => {
   const { execute: updatePolicy, loading: updating, error: updateError } = useUpdateSlaPolicy();
   const { execute: deletePolicy, loading: deleting } = useDeleteSlaPolicy();
 
+  const {
+    orgs,
+    customerUsers,
+    loading: loadingScopes,
+    fetch: fetchScopeOptions,
+  } = useSlaScopeOptions();
+
   const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
   const [editingPolicy, setEditingPolicy] = useState<SlaPolicyResponse | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
   useEffect(() => {
     void fetchPolicies();
-    // Infinite loop if fetchPolicies added here
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Fetch orgs and customer users when create modal opens
+  useEffect(() => {
+    if (modalMode !== 'create') return;
+    void fetchScopeOptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modalMode]);
 
   function openCreate(): void {
     setEditingPolicy(null);
@@ -363,8 +548,8 @@ const AdminSLAPoliciesPage: React.FC = () => {
   async function handleCreate(form: PolicyFormState): Promise<void> {
     const result = await createPolicy({
       name: form.name,
-      organizationId: form.scopeType === 'org' ? form.organizationId : undefined,
-      userId: form.scopeType === 'user' ? form.userId : undefined,
+      organizationId: form.scopeType === 'org' ? form.scopeId : undefined,
+      userId: form.scopeType === 'user' ? form.scopeId : undefined,
       contract: { severityTargets: buildSeverityTargets(form.severityTargets) },
       effectiveFrom: new Date(form.effectiveFrom).toISOString(),
       effectiveTo: new Date(form.effectiveTo).toISOString(),
@@ -375,13 +560,18 @@ const AdminSLAPoliciesPage: React.FC = () => {
     }
   }
 
-  async function handleEdit(form: PolicyFormState): Promise<void> {
+  async function handleEdit(data: {
+    name: string;
+    effectiveFrom: string;
+    effectiveTo: string;
+    severityTargets: SeverityTargetDraft[];
+  }): Promise<void> {
     if (!editingPolicy) return;
     const result = await updatePolicy(editingPolicy.id, {
-      name: form.name,
-      contract: { severityTargets: buildSeverityTargets(form.severityTargets) },
-      effectiveFrom: new Date(form.effectiveFrom).toISOString(),
-      effectiveTo: new Date(form.effectiveTo).toISOString(),
+      name: data.name,
+      contract: { severityTargets: buildSeverityTargets(data.severityTargets) },
+      effectiveFrom: new Date(data.effectiveFrom).toISOString(),
+      effectiveTo: new Date(data.effectiveTo).toISOString(),
     });
     if (result) {
       closeModal();
@@ -535,9 +725,10 @@ const AdminSLAPoliciesPage: React.FC = () => {
       </div>
 
       {modalMode === 'create' && (
-        <PolicyModal
-          mode="create"
-          initial={buildDefaultForm()}
+        <CreateModal
+          orgs={orgs}
+          customerUsers={customerUsers}
+          loadingScopes={loadingScopes}
           submitting={creating}
           submitError={createError}
           onSubmit={(form) => {
@@ -548,13 +739,12 @@ const AdminSLAPoliciesPage: React.FC = () => {
       )}
 
       {modalMode === 'edit' && editingPolicy !== null && (
-        <PolicyModal
-          mode="edit"
-          initial={formFromPolicy(editingPolicy)}
+        <EditModal
+          policy={editingPolicy}
           submitting={updating}
           submitError={updateError}
-          onSubmit={(form) => {
-            void handleEdit(form);
+          onSubmit={(data) => {
+            void handleEdit(data);
           }}
           onClose={closeModal}
         />

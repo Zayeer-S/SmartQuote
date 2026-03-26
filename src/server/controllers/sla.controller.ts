@@ -123,8 +123,6 @@ export class SlaController {
     return {
       id: policy.id as unknown as number,
       name: policy.name,
-      userId: policy.user_id as string | null,
-      organizationId: policy.organization_id as string | null,
       scopeDisplayName: policy.scopeDisplayName,
       contract: policy.contract as SlaPolicyResponse['contract'],
       effectiveFrom: policy.effective_from.toISOString(),

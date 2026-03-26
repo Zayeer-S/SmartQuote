@@ -129,10 +129,10 @@ smartquote/
 │   │   │   │   ├── useListRateProfile.ts
 │   │   │   │   └── useUpdateRateProfile.ts
 │   │   │   ├── sla/ 
-│   │   │   │   ├── useCreateSlaPolicies.ts
-│   │   │   │   ├── useDeleteSlaPolicies.ts
-│   │   │   │   ├── useListSlaPolicies.ts
-│   │   │   │   └── useUpdateSlaPolicies.ts
+│   │   │   │   ├── useCreateSlaPolicy.ts
+│   │   │   │   ├── useDeleteSlaPolicy.ts
+│   │   │   │   ├── useListSlaPolicy.ts
+│   │   │   │   └── useUpdateSlaPolicy.ts
 │   │   │   └── tickets/
 │   │   │       ├── useAddComment.ts
 │   │   │       ├── useAssignTicket.ts

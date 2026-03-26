@@ -110,3 +110,10 @@
   margin-left: var(--spacing-xs);
   vertical-align: middle;
 }
+
+.sla-scope-readonly {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-sm) 0;
+  margin: 0;
+}
