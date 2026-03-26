@@ -455,9 +455,7 @@ const AdminSLAPoliciesPage: React.FC = () => {
                   <tr key={policy.id} data-testid={`sla-row-${String(policy.id)}`}>
                     <td data-testid={`sla-name-${String(policy.id)}`}>{policy.name}</td>
                     <td data-testid={`sla-scope-${String(policy.id)}`}>
-                      {policy.organizationId !== null
-                        ? `Org: ${policy.organizationId}`
-                        : `User: ${policy.userId ?? ''}`}
+                      {policy.scopeDisplayName}
                     </td>
                     <td data-testid={`sla-from-${String(policy.id)}`}>
                       {new Date(policy.effectiveFrom).toLocaleDateString()}

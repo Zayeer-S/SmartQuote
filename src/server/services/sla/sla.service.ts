@@ -1,17 +1,25 @@
 import { AUTH_ROLES, PERMISSIONS } from '../../../shared/constants/index.js';
 import type { InsertData, TransactionContext, UpdateData } from '../../daos/base/types.js';
 import type { SlaPoliciesDAO } from '../../daos/children/sla.policies.dao.js';
-import type { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
+import type {
+  OrganizationMembersDAO,
+  OrganizationsDAO,
+} from '../../daos/children/organizations.domain.dao.js';
 import type { UsersDAO } from '../../daos/children/users.dao.js';
 import type { RolesDAO } from '../../daos/children/roles.dao.js';
-import type { SlaPolicyId, UserId } from '../../database/types/ids.js';
+import type { OrganizationId, SlaPolicyId, UserId } from '../../database/types/ids.js';
 import type { SlaPolicy, User } from '../../database/types/tables.js';
 import type { RBACService } from '../rbac/rbac.service.js';
 import { SlaError, SlaForbiddenError, SLA_ERROR_MSGS } from './sla.errors.js';
 import type { CreateSlaPolicyData, UpdateSlaPolicyData } from './sla.service.types.js';
 
+export interface SlaPolicyWithDisplayName extends SlaPolicy {
+  scopeDisplayName: string;
+}
+
 export class SlaService {
   private slaPoliciesDAO: SlaPoliciesDAO;
+  private orgsDAO: OrganizationsDAO;
   private orgMembersDAO: OrganizationMembersDAO;
   private usersDAO: UsersDAO;
   private rolesDAO: RolesDAO;
@@ -19,12 +27,14 @@ export class SlaService {
 
   constructor(
     slaPoliciesDAO: SlaPoliciesDAO,
+    orgsDAO: OrganizationsDAO,
     orgMembersDAO: OrganizationMembersDAO,
     usersDAO: UsersDAO,
     rolesDAO: RolesDAO,
     rbacService: RBACService
   ) {
     this.slaPoliciesDAO = slaPoliciesDAO;
+    this.orgsDAO = orgsDAO;
     this.orgMembersDAO = orgMembersDAO;
     this.usersDAO = usersDAO;
     this.rolesDAO = rolesDAO;
@@ -42,7 +52,7 @@ export class SlaService {
    * @param data Policy fields
    * @param actorId Actor performing the action
    * @param options Optional transaction context
-   * @returns Created SlaPolicy
+   * @returns Created SlaPolicyWithDisplayName
    * @throws SlaForbiddenError if actor lacks permission
    * @throws SlaError if user-scoping rules are violated
    */
@@ -50,7 +60,7 @@ export class SlaService {
     data: CreateSlaPolicyData,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<SlaPolicy> {
+  ): Promise<SlaPolicyWithDisplayName> {
     const canCreate = await this.rbacService.hasPermission(
       actorId,
       PERMISSIONS.SLA_POLICIES_CREATE,
@@ -62,7 +72,7 @@ export class SlaService {
       await this.assertValidUserScope(data.userId, options);
     }
 
-    return this.slaPoliciesDAO.create(
+    const policy = await this.slaPoliciesDAO.create(
       {
         name: data.name,
         user_id: data.userId,
@@ -74,6 +84,8 @@ export class SlaService {
       } satisfies InsertData<SlaPolicy>,
       options
     );
+
+    return this.attachDisplayName(policy, options);
   }
 
   /**
@@ -89,7 +101,7 @@ export class SlaService {
    * @param slaPolicyId Policy to retrieve
    * @param actorId Actor requesting
    * @param options Optional transaction context
-   * @returns SlaPolicy
+   * @returns SlaPolicyWithDisplayName
    * @throws SlaError if not found
    * @throws SlaForbiddenError if actor cannot see the policy
    */
@@ -97,13 +109,13 @@ export class SlaService {
     slaPolicyId: SlaPolicyId,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<SlaPolicy> {
+  ): Promise<SlaPolicyWithDisplayName> {
     const policy = await this.slaPoliciesDAO.getById(slaPolicyId, options);
     if (!policy) throw new SlaError(SLA_ERROR_MSGS.NOT_FOUND, 404);
 
     await this.assertReadAccess(policy, actorId, options);
 
-    return policy;
+    return this.attachDisplayName(policy, options);
   }
 
   /**
@@ -114,23 +126,27 @@ export class SlaService {
    *   - Customer with org membership: only their org's policy
    *   - Customer without org membership: only their user-scoped policy
    *
+   * Display names are resolved in a single batch per scope type to avoid N+1 queries.
+   *
    * @param actorId Actor requesting
    * @param options Optional transaction context
-   * @returns Array of visible SlaPolicy rows
+   * @returns Array of SlaPolicyWithDisplayName
    */
-  async listPolicies(actorId: UserId, options?: TransactionContext): Promise<SlaPolicy[]> {
+  async listPolicies(
+    actorId: UserId,
+    options?: TransactionContext
+  ): Promise<SlaPolicyWithDisplayName[]> {
     const canReadAll = await this.rbacService.hasPermission(
       actorId,
       PERMISSIONS.SLA_POLICIES_READ,
       options
     );
 
-    if (canReadAll) {
-      return this.slaPoliciesDAO.getAll(options);
-    }
+    const policies = canReadAll
+      ? await this.slaPoliciesDAO.getAll(options)
+      : await this.getCustomerPolicies(actorId, options);
 
-    // Customer path: return only the policy that applies to them
-    return this.getCustomerPolicies(actorId, options);
+    return this.attachDisplayNames(policies, options);
   }
 
   /**
@@ -143,7 +159,7 @@ export class SlaService {
    * @param data Fields to update
    * @param actorId Actor performing the action
    * @param options Optional transaction context
-   * @returns Updated SlaPolicy
+   * @returns Updated SlaPolicyWithDisplayName
    * @throws SlaForbiddenError if actor lacks permission
    * @throws SlaError if not found or date range is invalid
    */
@@ -152,7 +168,7 @@ export class SlaService {
     data: UpdateSlaPolicyData,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<SlaPolicy> {
+  ): Promise<SlaPolicyWithDisplayName> {
     const canUpdate = await this.rbacService.hasPermission(
       actorId,
       PERMISSIONS.SLA_POLICIES_UPDATE,
@@ -186,7 +202,7 @@ export class SlaService {
       includeInactive: true,
     });
     if (!updated) throw new SlaError(SLA_ERROR_MSGS.NOT_FOUND, 404);
-    return updated;
+    return this.attachDisplayName(updated, options);
   }
 
   /**
@@ -215,6 +231,70 @@ export class SlaService {
     if (!existing) throw new SlaError(SLA_ERROR_MSGS.NOT_FOUND, 404);
 
     await this.slaPoliciesDAO.deactivate(slaPolicyId, options);
+  }
+
+  /**
+   * Attach a scopeDisplayName to a single policy.
+   */
+  private async attachDisplayName(
+    policy: SlaPolicy,
+    options?: TransactionContext
+  ): Promise<SlaPolicyWithDisplayName> {
+    const [result] = await this.attachDisplayNames([policy], options);
+    // attachDisplayNames always returns one entry per input
+
+    return result;
+  }
+
+  /**
+   * Batch-resolve display names for a list of policies.
+   *
+   * Collects all distinct org IDs and user IDs referenced by the list,
+   * fetches them in two parallel queries, then maps back -- O(1) queries
+   * regardless of list length.
+   */
+  private async attachDisplayNames(
+    policies: SlaPolicy[],
+    options?: TransactionContext
+  ): Promise<SlaPolicyWithDisplayName[]> {
+    const orgIds = [
+      ...new Set(
+        policies.filter((p) => p.organization_id !== null).map((p) => p.organization_id as string)
+      ),
+    ];
+
+    const userIds = [
+      ...new Set(policies.filter((p) => p.user_id !== null).map((p) => p.user_id as string)),
+    ];
+
+    const [orgs, users] = await Promise.all([
+      orgIds.length > 0
+        ? this.orgsDAO.getByManyIds(orgIds as OrganizationId[], options)
+        : Promise.resolve([]),
+      userIds.length > 0
+        ? this.usersDAO.getByManyIds(userIds as UserId[], options)
+        : Promise.resolve([]),
+    ]);
+
+    const orgNameById = new Map(orgs.map((o) => [o.id as string, o.name]));
+    const userDisplayById = new Map(
+      users.map((u) => [u.id as string, `${u.first_name} ${u.last_name} (${u.email})`])
+    );
+
+    return policies.map((policy) => {
+      let scopeDisplayName: string;
+
+      if (policy.organization_id !== null) {
+        scopeDisplayName =
+          orgNameById.get(policy.organization_id as string) ??
+          `Org ${policy.organization_id as string}`;
+      } else {
+        scopeDisplayName =
+          userDisplayById.get(policy.user_id as string) ?? `User ${policy.user_id as string}`;
+      }
+
+      return { ...policy, scopeDisplayName };
+    });
   }
 
   /**
@@ -259,20 +339,17 @@ export class SlaService {
     );
     if (canReadAll) return;
 
-    // User-scoped policy: must be the exact user
     if (policy.user_id !== null) {
       if ((policy.user_id as string) === (actorId as string)) return;
       throw new SlaForbiddenError(SLA_ERROR_MSGS.FORBIDDEN);
     }
 
-    // Org-scoped policy: actor must be a member of the org
     if (policy.organization_id !== null) {
       const isMember = await this.orgMembersDAO.isMember(actorId, policy.organization_id, options);
       if (isMember) return;
       throw new SlaForbiddenError(SLA_ERROR_MSGS.FORBIDDEN);
     }
 
-    // Should never reach here given the DB check constraint, but be safe
     throw new SlaForbiddenError(SLA_ERROR_MSGS.FORBIDDEN);
   }
 
@@ -287,7 +364,6 @@ export class SlaService {
     const memberships = await this.orgMembersDAO.findByUser(actorId, options);
 
     if (memberships !== null && memberships.length > 0) {
-      // Customers are single-org -- take the first membership
       return this.slaPoliciesDAO.findByOrg(memberships[0].organization_id, options);
     }
 

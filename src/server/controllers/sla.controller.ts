@@ -8,13 +8,12 @@ import {
 } from '../validators/sla.validator.js';
 import { success, error } from '../lib/respond.js';
 import type {
-  SlaPolicyResponse,
   ListSlaPoliciesResponse,
   SlaContract,
+  SlaPolicyResponse,
 } from '../../shared/contracts/sla-contracts.js';
 import type { OrganizationId, SlaPolicyId, UserId } from '../database/types/ids.js';
-import type { SlaPolicy } from '../database/types/tables.js';
-import type { SlaService } from '../services/sla/sla.service.js';
+import type { SlaService, SlaPolicyWithDisplayName } from '../services/sla/sla.service.js';
 
 export class SlaController {
   private slaService: SlaService;
@@ -120,12 +119,13 @@ export class SlaController {
     }
   };
 
-  private mapPolicy(policy: SlaPolicy): SlaPolicyResponse {
+  private mapPolicy(policy: SlaPolicyWithDisplayName): SlaPolicyResponse {
     return {
       id: policy.id as unknown as number,
       name: policy.name,
       userId: policy.user_id as string | null,
       organizationId: policy.organization_id as string | null,
+      scopeDisplayName: policy.scopeDisplayName,
       contract: policy.contract as SlaPolicyResponse['contract'],
       effectiveFrom: policy.effective_from.toISOString(),
       effectiveTo: policy.effective_to.toISOString(),

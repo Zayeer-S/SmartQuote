@@ -37,6 +37,12 @@ export interface SlaPolicyResponse {
   name: string;
   userId: string | null;
   organizationId: string | null;
+  /**
+   * Human-readable label for the scope target.
+   * Org-scoped:  the organization name
+   * User-scoped: the user's full name + email, e.g. "Jane Smith (jane@example.com)"
+   */
+  scopeDisplayName: string;
   contract: SlaContract;
   effectiveFrom: string;
   effectiveTo: string;
