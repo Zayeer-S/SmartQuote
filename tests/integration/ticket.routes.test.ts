@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, beforeAll } from 'vitest';
+import path from 'path';
 import request from 'supertest';
 import type { Express } from 'express';
 import { bootstrapApplication } from '../../src/server/bootstrap/app.bootstrap';
@@ -11,6 +12,8 @@ import { USERS } from '../e2e/constants/test.user.credentials';
 
 const LOGIN = `/api${AUTH_ENDPOINTS.BASE}${AUTH_ENDPOINTS.LOGIN}`;
 const BASE = `/api${TICKET_ENDPOINTS.BASE}`;
+
+const FIXTURES = path.join(__dirname, '../fixtures');
 
 let app: Express;
 let customer1Token: string;
@@ -210,94 +213,129 @@ describe(`POST ${BASE}${TICKET_ENDPOINTS.CREATE}`, () => {
 
     expect(res.status).toBe(400);
   });
+});
 
-  it('returns 201 with a valid PDF attachment', async () => {
-    // Minimal valid 1-byte PDF buffer - content does not matter for the
-    // integration layer, only the MIME type and size are inspected
-    const pdfBuffer = Buffer.from('%PDF-1.4 test');
+describe(`POST ${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT()}`, () => {
+  // One ticket shared across all upload tests - upload count accumulates
+  // deliberately so the MAX_COUNT test can rely on prior uploads.
+  let ticketId: string;
 
+  beforeAll(async () => {
     const res = await request(app)
       .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
       .set('Authorization', `Bearer ${customer1Token}`)
-      .field('title', validTicket.title)
-      .field('description', validTicket.description)
-      .field('ticketType', validTicket.ticketType)
-      .field('ticketSeverity', validTicket.ticketSeverity)
-      .field('businessImpact', validTicket.businessImpact)
-      .field('deadline', validTicket.deadline)
-      .field('usersImpacted', String(validTicket.usersImpacted))
-      .attach('attachments', pdfBuffer, { filename: 'test.pdf', contentType: 'application/pdf' });
+      .send({
+        title: 'Attachment upload test ticket',
+        description: 'Created for attachment endpoint testing.',
+        ticketType: 'Support',
+        ticketSeverity: 'Low',
+        businessImpact: 'Minor',
+        deadline: new Date(Date.now() + 86400000 * 7).toISOString(),
+        usersImpacted: 1,
+      });
 
-    expect(res.status).toBe(201);
-    expect(res.body.data).toMatchObject({
-      title: validTicket.title,
-      creatorUserId: expect.any(String),
-    });
+    ticketId = res.body.data.id as string;
   });
 
-  it('returns 400 when a file has a disallowed MIME type', async () => {
-    const txtBuffer = Buffer.from('hello world');
-
+  it('returns 401 when unauthenticated', async () => {
     const res = await request(app)
-      .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
+      .send({});
+
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 400 when no file is provided', async () => {
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
       .set('Authorization', `Bearer ${customer1Token}`)
-      .field('title', validTicket.title)
-      .field('description', validTicket.description)
-      .field('ticketType', validTicket.ticketType)
-      .field('ticketSeverity', validTicket.ticketSeverity)
-      .field('businessImpact', validTicket.businessImpact)
-      .field('deadline', validTicket.deadline)
-      .field('usersImpacted', String(validTicket.usersImpacted))
-      .attach('attachments', txtBuffer, { filename: 'notes.txt', contentType: 'text/plain' });
+      .send({});
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 when a disallowed MIME type is uploaded', async () => {
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .attach('file', path.join(FIXTURES, 'sample.txt'));
 
     expect(res.status).toBe(400);
   });
 
   it('returns 400 when a file exceeds 5MB', async () => {
-    // 5MB + 1 byte - large enough to trigger multer LIMIT_FILE_SIZE
     const oversizedBuffer = Buffer.alloc(5 * 1024 * 1024 + 1);
 
     const res = await request(app)
-      .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
       .set('Authorization', `Bearer ${customer1Token}`)
-      .field('title', validTicket.title)
-      .field('description', validTicket.description)
-      .field('ticketType', validTicket.ticketType)
-      .field('ticketSeverity', validTicket.ticketSeverity)
-      .field('businessImpact', validTicket.businessImpact)
-      .field('deadline', validTicket.deadline)
-      .field('usersImpacted', String(validTicket.usersImpacted))
-      .attach('attachments', oversizedBuffer, {
-        filename: 'big.pdf',
-        contentType: 'application/pdf',
-      });
+      .attach('file', oversizedBuffer, { filename: 'big.pdf', contentType: 'application/pdf' });
 
     expect(res.status).toBe(400);
   });
 
-  it('returns 400 when more than 5 files are attached', async () => {
-    const smallPdf = Buffer.from('%PDF-1.4 test');
-
-    let req = request(app)
-      .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
+  // Uploads 1-3: valid files that also accumulate toward the MAX_COUNT limit
+  it('returns 201 and attachment metadata when a valid PDF is uploaded (1/5)', async () => {
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
       .set('Authorization', `Bearer ${customer1Token}`)
-      .field('title', validTicket.title)
-      .field('description', validTicket.description)
-      .field('ticketType', validTicket.ticketType)
-      .field('ticketSeverity', validTicket.ticketSeverity)
-      .field('businessImpact', validTicket.businessImpact)
-      .field('deadline', validTicket.deadline)
-      .field('usersImpacted', String(validTicket.usersImpacted));
+      .attach('file', path.join(FIXTURES, 'sample.pdf'));
 
-    // Attach 6 files - one over the MAX_COUNT of 5
-    for (let i = 0; i < 6; i++) {
-      req = req.attach('attachments', smallPdf, {
-        filename: `file-${String(i)}.pdf`,
-        contentType: 'application/pdf',
-      });
-    }
+    expect(res.status).toBe(201);
+    expect(res.body.data).toMatchObject({
+      ticketId,
+      originalName: 'sample.pdf',
+      mimeType: 'application/pdf',
+      sizeBytes: expect.any(Number),
+      storageKey: expect.any(String),
+      uploadedByUserId: expect.any(String),
+    });
+  });
 
-    const res = await req;
+  it('returns 201 when a valid JPEG is uploaded (2/5)', async () => {
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .attach('file', path.join(FIXTURES, 'sample.jpg'));
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.mimeType).toBe('image/jpeg');
+  });
+
+  it('returns 201 when a valid PNG is uploaded (3/5)', async () => {
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .attach('file', path.join(FIXTURES, 'sample.png'));
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.mimeType).toBe('image/png');
+  });
+
+  it('returns 201 for 4th attachment', async () => {
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .attach('file', path.join(FIXTURES, 'sample.pdf'));
+
+    expect(res.status).toBe(201);
+  });
+
+  it('returns 201 for 5th attachment (cap)', async () => {
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .attach('file', path.join(FIXTURES, 'sample.pdf'));
+
+    expect(res.status).toBe(201);
+  });
+
+  it('returns 400 when a 6th attachment is uploaded (MAX_COUNT=5 exceeded)', async () => {
+    const res = await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .attach('file', path.join(FIXTURES, 'sample.pdf'));
+
     expect(res.status).toBe(400);
   });
 });
@@ -306,23 +344,27 @@ describe(`GET ${BASE}${TICKET_ENDPOINTS.GET()} - attachments`, () => {
   let createdTicketId: string;
 
   beforeAll(async () => {
-    // Create a ticket with a PDF so we can assert on the attachments array
-    const pdfBuffer = Buffer.from('%PDF-1.4 test');
-    const deadline = new Date(Date.now() + 86400000 * 7).toISOString();
-
-    const res = await request(app)
+    // Step 1: create ticket as JSON
+    const createRes = await request(app)
       .post(`${BASE}${TICKET_ENDPOINTS.CREATE}`)
       .set('Authorization', `Bearer ${customer1Token}`)
-      .field('title', 'Attachment detail test ticket')
-      .field('description', 'For attachment response shape testing')
-      .field('ticketType', 'Support')
-      .field('ticketSeverity', 'Low')
-      .field('businessImpact', 'Minor')
-      .field('deadline', deadline)
-      .field('usersImpacted', '1')
-      .attach('attachments', pdfBuffer, { filename: 'report.pdf', contentType: 'application/pdf' });
+      .send({
+        title: 'Attachment detail test ticket',
+        description: 'For attachment response shape testing',
+        ticketType: 'Support',
+        ticketSeverity: 'Low',
+        businessImpact: 'Minor',
+        deadline: new Date(Date.now() + 86400000 * 7).toISOString(),
+        usersImpacted: 1,
+      });
 
-    createdTicketId = res.body.data.id as string;
+    createdTicketId = createRes.body.data.id as string;
+
+    // Step 2: upload attachment separately
+    await request(app)
+      .post(`${BASE}${TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(createdTicketId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .attach('file', path.join(FIXTURES, 'sample.pdf'));
   });
 
   it('includes an attachments array in the ticket detail response', async () => {
@@ -334,7 +376,7 @@ describe(`GET ${BASE}${TICKET_ENDPOINTS.GET()} - attachments`, () => {
     expect(Array.isArray(res.body.data.attachments)).toBe(true);
     expect(res.body.data.attachments).toHaveLength(1);
     expect(res.body.data.attachments[0]).toMatchObject({
-      originalName: 'report.pdf',
+      originalName: 'sample.pdf',
       mimeType: 'application/pdf',
       sizeBytes: expect.any(Number),
       storageKey: expect.any(String),

@@ -8,6 +8,7 @@ import { requirePermission } from '../middleware/rbac.middleware.js';
 import { PERMISSIONS } from '../../shared/constants/lookup-values.js';
 import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../shared/constants';
 import type { QuoteController } from '../controllers/quote.controller.js';
+import busboy from 'busboy';
 
 export function createTicketRoutes(
   ticketController: TicketController,
@@ -66,18 +67,75 @@ export function createTicketRoutes(
   }
 
   const parseAttachment: RequestHandler = (req, _res, next) => {
-    if (!(req.body instanceof Buffer)) {
-      next(new Error('Expected binary body'));
+    const contentType = req.headers['content-type'] ?? '';
+
+    if (!contentType.startsWith('multipart/form-data')) {
+      const e = new Error('Expected multipart/form-data');
+      (e as NodeJS.ErrnoException).name = 'ValidationError';
+      next(e);
       return;
     }
-    try {
-      const contentType = req.headers['content-type'] ?? '';
-      const file = parseMultipartFile(req.body as Buffer, contentType);
+
+    // Lambda path: serverless-http decodes the binary body into a Buffer before
+    // Express sees it. Parse it directly without streaming.
+    if (req.body instanceof Buffer) {
+      try {
+        const file = parseMultipartFile(req.body, contentType);
+        (req as unknown as Request & { incomingFile: IncomingFile }).incomingFile = file;
+        next();
+      } catch (err) {
+        next(err);
+      }
+      return;
+    }
+
+    // Direct Express path: used in integration tests and local dev.
+    // req is a readable stream - pipe it through busboy.
+    const chunks: Buffer[] = [];
+    let originalName = '';
+    let mimeType = '';
+    let resolved = false;
+
+    const bb = busboy({ headers: req.headers });
+
+    bb.on('file', (_field, stream, info) => {
+      originalName = info.filename;
+      mimeType = info.mimeType;
+      stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+      stream.on('end', () => {
+        // file stream exhausted - busboy will emit 'finish' next
+      });
+    });
+
+    bb.on('finish', () => {
+      if (resolved) return;
+      resolved = true;
+
+      if (!originalName) {
+        const e = new Error('No file provided');
+        (e as NodeJS.ErrnoException).name = 'ValidationError';
+        next(e);
+        return;
+      }
+
+      const buffer = Buffer.concat(chunks);
+      const file: IncomingFile = {
+        buffer,
+        originalName,
+        mimeType,
+        sizeBytes: buffer.length,
+      };
       (req as unknown as Request & { incomingFile: IncomingFile }).incomingFile = file;
       next();
-    } catch (err) {
+    });
+
+    bb.on('error', (err: Error) => {
+      if (resolved) return;
+      resolved = true;
       next(err);
-    }
+    });
+
+    req.pipe(bb);
   };
 
   router.post(

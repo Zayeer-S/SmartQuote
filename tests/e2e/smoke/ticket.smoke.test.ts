@@ -15,7 +15,7 @@ const VALID_TICKET = {
 const NEW_TICKET_URL = '/customer/tickets/new';
 const TICKETS_URL = '/customer/tickets';
 
-const FIXTURES_DIR = path.join(__dirname, '../fixtures');
+const FIXTURES_DIR = path.join(__dirname, '../../fixtures');
 const FIXTURE_PDF = path.join(FIXTURES_DIR, 'sample.pdf');
 const FIXTURE_JPG = path.join(FIXTURES_DIR, 'sample.jpg');
 const FIXTURE_PNG = path.join(FIXTURES_DIR, 'sample.png');

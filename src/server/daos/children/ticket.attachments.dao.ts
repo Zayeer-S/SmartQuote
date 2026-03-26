@@ -44,4 +44,18 @@ export class TicketAttachmentsDAO extends BaseDAO<TicketAttachment, TicketAttach
   async deleteByStorageKey(storageKey: string): Promise<void> {
     await this.getQuery().where({ storage_key: storageKey }).delete();
   }
+
+  /**
+   * Count existing attachments for a ticket.
+   * Used by AttachmentService to enforce MAX_COUNT before accepting a new upload.
+   *
+   * @param ticketId Ticket ID
+   * @returns Number of existing attachment records
+   */
+  async countByTicket(ticketId: TicketId): Promise<number> {
+    const [{ count }] = (await this.getQuery()
+      .where({ ticket_id: ticketId })
+      .count('id as count')) as [{ count: string | number }];
+    return Number(count);
+  }
 }

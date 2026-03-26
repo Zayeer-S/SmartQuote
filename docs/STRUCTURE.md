@@ -353,11 +353,6 @@ smartquote/
 │   │   │   ├── comment.smoke.data.ts
 │   │   │   ├── e2e.paths.ts
 │   │   │   └── test.user.credentials.ts
-│   │   ├── fixtures/
-│   │   │   ├── sample.jpg
-│   │   │   ├── sample.pdf
-│   │   │   ├── sample.png
-│   │   │   └── sample.txt
 │   │   ├── setup/
 │   │   │   ├── admin.setup.ts
 │   │   │   └── customer.setup.ts
@@ -369,6 +364,11 @@ smartquote/
 │   │   │   └── ticket.smoke.test.ts
 │   │   └── utils/
 │   │       └── login.utils.ts
+│   ├── fixtures/
+│   │   ├── sample.jpg
+│   │   ├── sample.pdf
+│   │   ├── sample.png
+│   │   └── sample.txt
 │   ├── helpers/
 │   │   ├── setup.client.ts
 │   │   ├── setup.integration.ts
