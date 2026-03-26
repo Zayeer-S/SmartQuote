@@ -59,6 +59,11 @@ export class TicketContainer {
     const awsRegion = backEnv.AWS_REGION ?? process.env.AWS_REGION;
     const isS3 = awsRegion !== undefined && backEnv.AWS_S3_BUCKET !== undefined;
 
+    const useExplicitCredentials =
+      backEnv.NODE_ENV !== 'production' &&
+      backEnv.AWS_ACCESS_KEY_ID !== undefined &&
+      backEnv.AWS_SECRET_ACCESS_KEY !== undefined;
+
     let storageTypeName: FileStorageType;
 
     if (isS3) {
@@ -66,9 +71,7 @@ export class TicketContainer {
         region: awsRegion,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         bucket: backEnv.AWS_S3_BUCKET!,
-        // Passed only when explicitly set (local dev pointing at real S3).
-        // Omitted in Lambda so the execution role is used instead.
-        ...(backEnv.AWS_ACCESS_KEY_ID && backEnv.AWS_SECRET_ACCESS_KEY
+        ...(useExplicitCredentials
           ? {
               accessKeyId: backEnv.AWS_ACCESS_KEY_ID,
               secretAccessKey: backEnv.AWS_SECRET_ACCESS_KEY,

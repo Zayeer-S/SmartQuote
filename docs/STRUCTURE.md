@@ -353,7 +353,6 @@ smartquote/
 │   │   │   ├── comment.smoke.data.ts
 │   │   │   ├── e2e.paths.ts
 │   │   │   └── test.user.credentials.ts
-│   │   ├── flows/
 │   │   ├── setup/
 │   │   │   ├── admin.setup.ts
 │   │   │   └── customer.setup.ts
@@ -361,20 +360,30 @@ smartquote/
 │   │   │   ├── admin.comment.smoke.test.ts
 │   │   │   ├── auth.smoke.test.ts
 │   │   │   ├── customer.comment.smoke.test.ts
+│   │   │   ├── rate.profile.smoke.test.ts
 │   │   │   └── ticket.smoke.test.ts
 │   │   └── utils/
 │   │       └── login.utils.ts
+│   ├── fixtures/
+│   │   ├── sample.jpg
+│   │   ├── sample.pdf
+│   │   ├── sample.png
+│   │   └── sample.txt
 │   ├── helpers/
 │   │   ├── setup.client.ts
 │   │   ├── setup.integration.ts
 │   │   └── setup.server.ts
 │   ├── integration/
 │   │   ├── auth.routes.test.ts
+│   │   ├── quote.routes.test.ts
+│   │   ├── rate.profiles.routes.test.ts
 │   │   └── ticket.routes.test.ts
 │   ├── unit/
 │   │   └── server/
 │   │       ├── auth.service.test.ts
 │   │       ├── password.service.test.ts
+│   │       ├── quote.engine.service.test.ts
+│   │       ├── quote.service.test.ts
 │   │       └── session.service.test.ts
 │   └── utils/
 │       ├── mock.daos.ts

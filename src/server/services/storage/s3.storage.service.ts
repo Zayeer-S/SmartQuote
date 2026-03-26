@@ -1,4 +1,10 @@
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl as awsGetSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { StorageService } from './storage.service.js';
 import type { IncomingFile, StoredFile } from './storage.service.types.js';
 import { STORAGE_ERROR_MSGS, StorageError } from './storage.errors.js';
@@ -15,8 +21,8 @@ export interface S3StorageConfig {
 /**
  * AWS S3 implementation of StorageService.
  * The storageKey is used directly as the S3 object key.
- * getUrl() returns a public object URL - switch to presigned URLs if the
- * bucket is private (recommended for prod).
+ * getUrl() returns a public object URL.
+ * getSignedUrl() returns a presigned GET URL for private buckets (recommended for prod).
  */
 export class S3StorageService implements StorageService {
   private readonly client: S3Client;
@@ -79,5 +85,20 @@ export class S3StorageService implements StorageService {
 
   getUrl(storageKey: string): string {
     return `https://${this.bucket}.s3.amazonaws.com/${storageKey}`;
+  }
+
+  async getSignedUrl(storageKey: string, expirySeconds = 300): Promise<string> {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: storageKey,
+      });
+
+      return await awsGetSignedUrl(this.client, command, { expiresIn: expirySeconds });
+    } catch (err) {
+      throw new StorageError(
+        `${STORAGE_ERROR_MSGS.UPLOAD_FAILED}: failed to generate presigned URL: ${(err as Error).message}`
+      );
+    }
   }
 }

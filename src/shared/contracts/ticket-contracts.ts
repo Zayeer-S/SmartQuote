@@ -17,8 +17,6 @@ export interface CreateTicketRequest {
   /** ISO 8601 date string */
   deadline: string;
   usersImpacted: number;
-  /** Optional file attachments - PDF, JPG, PNG only, max 5MB each, max 5 files */
-  attachments?: File[];
 }
 
 export interface UpdateTicketRequest {
@@ -38,6 +36,10 @@ export interface UpdateTicketRequest {
 
 export interface AssignTicketRequest {
   assigneeId: string;
+}
+
+export interface UploadAttachmentResponse {
+  attachment: AttachmentResponse;
 }
 
 export interface TicketResponse {
@@ -97,6 +99,10 @@ export interface CommentResponse {
   commentType: CommentType;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AttachmentUrlResponse {
+  url: string;
 }
 
 export interface ListCommentsResponse {

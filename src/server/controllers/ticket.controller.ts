@@ -29,8 +29,14 @@ import type { OrganizationId } from '../database/types/ids.js';
 import type { TicketService } from '../services/ticket/ticket.service.js';
 import type { CommentService } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
-import type { IncomingFile } from '../services/storage/storage.service.types.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
+import type { IncomingFile } from '../services/storage/storage.service.types.js';
+import { backEnv } from '../config/env.backend.js';
+
+/** Shape attached to req by the parseAttachment middleware in ticket.routes.ts */
+interface RequestWithIncomingFile extends Request {
+  incomingFile?: IncomingFile;
+}
 
 export class TicketController {
   private ticketService: TicketService;
@@ -55,19 +61,6 @@ export class TicketController {
       const actor = (req as AuthenticatedRequest).user;
       const body = validateOrThrow(createTicketSchema, req.body);
 
-      // multer populates req.files as Express.Multer.File[] for array fields.
-      // We map to IncomingFile so the service layer has no Express dependency.
-      const multerFiles = (req.files as Express.Multer.File[] | undefined) ?? [];
-      const files: IncomingFile[] = multerFiles.map((f) => ({
-        originalName: f.originalname,
-        mimeType: f.mimetype,
-        sizeBytes: f.size,
-        buffer: f.buffer,
-      }));
-
-      // Validate before opening the DB transaction
-      this.attachmentService.validateFiles(files);
-
       const ticket = await this.ticketService.createTicket(
         {
           title: body.title,
@@ -78,11 +71,33 @@ export class TicketController {
           deadline: new Date(body.deadline),
           users_impacted: body.usersImpacted,
         },
-        actor.id as UserId,
-        files
+        actor.id as UserId
       );
 
       success(res, this.mapTicket(ticket), 201);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
+  uploadAttachment = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const actor = (req as AuthenticatedRequest).user;
+      const ticketId = req.params.ticketId as TicketId;
+      const file = (req as RequestWithIncomingFile).incomingFile;
+
+      if (!file) {
+        error(res, 400, 'No file provided');
+        return;
+      }
+
+      const attachment = await this.attachmentService.uploadAttachment(
+        file,
+        ticketId,
+        actor.id as UserId
+      );
+
+      success(res, this.mapAttachment(attachment), 201);
     } catch (err: unknown) {
       handleError(res, err);
     }
@@ -222,6 +237,19 @@ export class TicketController {
     }
   };
 
+  getAttachmentUrl = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { attachmentId } = req.params;
+      const url = await this.attachmentService.getAttachmentUrl(
+        attachmentId as string,
+        backEnv.ATTACHMENT_PRESIGN_EXPIRY_SECONDS
+      );
+      success(res, { url }, 200);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
   listComments = async (req: Request, res: Response): Promise<void> => {
     try {
       const actor = (req as AuthenticatedRequest).user;
@@ -325,6 +353,12 @@ function handleError(res: Response, err: unknown): void {
   if (err.name === 'ForbiddenError') {
     const e = err as Error & { statusCode: number };
     error(res, e.statusCode, e.message);
+    return;
+  }
+
+  if (err.name === 'StorageError') {
+    const e = err as Error & { statusCode?: number };
+    error(res, e.statusCode ?? 500, e.message);
     return;
   }
 

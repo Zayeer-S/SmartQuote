@@ -7,6 +7,7 @@ import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badg
 import AssignTicketForm from './AssignTicketForm.js';
 import AdminQuotePanel from './AdminQuotePanel.js';
 import CommentThread from './CommentThread.js';
+import AttachmentList from './AttachmentList.js';
 import './AdminTicketDetail.css';
 
 interface AdminTicketDetailProps {
@@ -216,6 +217,13 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
           </div>
         </section>
       )}
+
+      <section className="admin-detail-section" aria-labelledby="attachments-section-heading">
+        <h2 className="admin-detail-section-heading" id="attachments-section-heading">
+          Attachments
+        </h2>
+        <AttachmentList ticketId={ticketId} attachments={t.attachments} />
+      </section>
 
       <section className="admin-detail-section" aria-labelledby="quote-section-heading">
         <AdminQuotePanel

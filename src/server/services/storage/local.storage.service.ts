@@ -61,4 +61,10 @@ export class LocalStorageService implements StorageService {
     }
     return resolved;
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getSignedUrl(storageKey: string, _expirySeconds?: number): Promise<string> {
+    console.log('Error: calling getSignedUrl in development - rerouting to getUrl');
+    return Promise.resolve(this.getUrl(storageKey));
+  }
 }

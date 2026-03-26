@@ -17,10 +17,9 @@ async function getHandler(): Promise<(event: unknown, context: unknown) => Promi
 
   const app = await bootstrapApplication({ runBackgroundJobs: false });
 
-  cachedHandler = serverless(app, { binary: false }) as (
-    event: unknown,
-    context: unknown
-  ) => Promise<unknown>;
+  cachedHandler = serverless(app, {
+    binary: ['multipart/form-data'],
+  }) as (event: unknown, context: unknown) => Promise<unknown>;
 
   return cachedHandler;
 }

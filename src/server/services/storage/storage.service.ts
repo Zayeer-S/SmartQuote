@@ -23,9 +23,20 @@ export interface StorageService {
   /**
    * Resolve a storage key to a URL or absolute path suitable for serving.
    * For local storage this is a filesystem path.
-   * For S3 this is a presigned URL or a public object URL.
+   * For S3 this is a public object URL (use getSignedUrl for private buckets).
    *
    * @param storageKey The key returned by upload()
    */
   getUrl(storageKey: string): string;
+
+  /**
+   * Generate a short-lived presigned URL for downloading a file.
+   * For S3 this is a presigned GET URL valid for expirySeconds.
+   * For local storage this falls back to getUrl() since there is no
+   * bucket ACL to work around.
+   *
+   * @param storageKey The key returned by upload()
+   * @param expirySeconds TTL for the presigned URL (default: 300)
+   */
+  getSignedUrl(storageKey: string, expirySeconds?: number): Promise<string>;
 }

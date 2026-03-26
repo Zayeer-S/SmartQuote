@@ -1,6 +1,8 @@
 import type {
   AddCommentRequest,
   AssignTicketRequest,
+  AttachmentResponse,
+  AttachmentUrlResponse,
   CommentResponse,
   CreateTicketRequest,
   ListCommentsResponse,
@@ -16,34 +18,30 @@ const base = TICKET_ENDPOINTS.BASE;
 
 export const ticketAPI = {
   /**
-   * Create a new ticket, optionally with file attachments.
-   * Always sends as multipart/form-data to satisfy the multer middleware.
-   * Axios sets the correct Content-Type boundary automatically when given FormData.
+   * Create a new ticket. Sends as JSON - no binary data.
+   * Attachments are uploaded separately via presignAttachment / confirmAttachment.
    *
-   * @param payload Ticket creation fields including optional attachments
+   * @param payload Ticket creation fields
    * @returns The created ticket
    */
   async createTicket(payload: CreateTicketRequest): Promise<TicketResponse> {
-    const form = new FormData();
-    form.append('title', payload.title);
-    form.append('description', payload.description);
-    form.append('ticketType', payload.ticketType);
-    form.append('ticketSeverity', payload.ticketSeverity);
-    form.append('businessImpact', payload.businessImpact);
-    form.append('deadline', payload.deadline);
-    form.append('usersImpacted', String(payload.usersImpacted));
-
-    if (payload.attachments) {
-      payload.attachments.forEach((file) => {
-        form.append('attachments', file);
-      });
-    }
-
     const response = await httpClient.post<ApiResponse<TicketResponse>>(
       base + TICKET_ENDPOINTS.CREATE,
-      form,
-      // Let axios derive Content-Type from the FormData instance so the multipart boundary is set correctly. Overriding to undefined removes the default 'application/json' header set in http-client.ts.
-      { headers: { 'Content-Type': undefined } }
+      payload
+    );
+    return extractData(response);
+  },
+
+  async uploadAttachment(ticketId: string, file: File): Promise<AttachmentResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await httpClient.post<ApiResponse<AttachmentResponse>>(
+      base + TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId),
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
     );
     return extractData(response);
   },
@@ -139,6 +137,19 @@ export const ticketAPI = {
   async listComments(ticketId: string): Promise<ListCommentsResponse> {
     const response = await httpClient.get<ApiResponse<ListCommentsResponse>>(
       base + TICKET_ENDPOINTS.LIST_COMMENTS(ticketId)
+    );
+    return extractData(response);
+  },
+
+  /**
+   * Get a short-lived presigned URL for viewing or downloading an attachment.
+   * @param ticketId Owner ticket ID
+   * @param attachmentId Attachment to resolve
+   * @returns Presigned URL valid for the server-configured TTL
+   */
+  async getAttachmentUrl(ticketId: string, attachmentId: string): Promise<AttachmentUrlResponse> {
+    const response = await httpClient.get<ApiResponse<AttachmentUrlResponse>>(
+      base + TICKET_ENDPOINTS.GET_ATTACHMENT_URL(ticketId, attachmentId)
     );
     return extractData(response);
   },
