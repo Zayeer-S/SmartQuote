@@ -1,7 +1,5 @@
-import busboy from 'busboy';
 import type { IncomingFile } from '../services/storage/storage.service.types.js';
 import { Router, RequestHandler } from 'express';
-import { Readable } from 'stream';
 import type { TicketController } from '../controllers/ticket.controller.js';
 import type { AuthService } from '../services/auth/auth.service.js';
 import type { RBACService } from '../services/rbac/rbac.service.js';
@@ -23,36 +21,42 @@ export function createTicketRoutes(
   const can = (...perms: Parameters<typeof requirePermission>[1][]) =>
     requirePermission(rbacService, ...perms);
 
-  function parseMultipartFile(req: Request): Promise<IncomingFile> {
-    return new Promise((resolve, reject) => {
-      const body = req.body as unknown as Buffer;
-      const bb = busboy({ headers: req.headers as unknown as Record<string, string> });
-      let resolved = false;
+  function parseMultipartFile(buffer: Buffer, contentType: string): IncomingFile {
+    const boundaryMatch = /boundary=(.+)$/.exec(contentType);
+    if (!boundaryMatch) throw new Error('Missing multipart boundary');
 
-      bb.on('file', (_field, stream, info) => {
-        const chunks: Buffer[] = [];
-        stream.on('data', (chunk: Buffer) => chunks.push(chunk));
-        stream.on('end', () => {
-          resolved = true;
-          resolve({
-            buffer: Buffer.concat(chunks),
-            originalName: info.filename,
-            mimeType: info.mimeType,
-            sizeBytes: Buffer.concat(chunks).byteLength,
-          });
-        });
-        stream.on('error', reject);
-      });
+    const boundary = Buffer.from('--' + boundaryMatch[1].trim());
+    const crlf = Buffer.from('\r\n');
+    const crlfcrlf = Buffer.from('\r\n\r\n');
 
-      bb.on('finish', () => {
-        if (!resolved) reject(new Error('No file found in request'));
-      });
-      bb.on('error', reject);
+    // Find the start of the first part
+    const partStart = buffer.indexOf(boundary) + boundary.length + crlf.length;
+    const headerEnd = buffer.indexOf(crlfcrlf, partStart);
+    if (headerEnd === -1) throw new Error('Malformed multipart body');
 
-      const readable = Readable.from(body);
+    const headerSection = buffer.subarray(partStart, headerEnd).toString('utf8');
+    const fileDataStart = headerEnd + crlfcrlf.length;
 
-      readable.pipe(bb);
-    });
+    // Find the end boundary
+    const endBoundary = Buffer.from('\r\n--' + boundaryMatch[1].trim() + '--');
+    const fileDataEnd = buffer.indexOf(endBoundary, fileDataStart);
+    if (fileDataEnd === -1) throw new Error('Malformed multipart body: missing end boundary');
+
+    const fileBuffer = buffer.subarray(fileDataStart, fileDataEnd);
+
+    // Parse headers
+    const filenameMatch = /filename="([^"]+)"/.exec(headerSection);
+    const mimeMatch = /Content-Type:\s*(.+)$/im.exec(headerSection);
+
+    if (!filenameMatch) throw new Error('No filename in multipart headers');
+    if (!mimeMatch) throw new Error('No Content-Type in multipart headers');
+
+    return {
+      buffer: fileBuffer,
+      originalName: filenameMatch[1],
+      mimeType: mimeMatch[1].trim(),
+      sizeBytes: fileBuffer.length,
+    };
   }
 
   const parseAttachment: RequestHandler = (req, _res, next) => {
@@ -60,12 +64,14 @@ export function createTicketRoutes(
       next(new Error('Expected binary body'));
       return;
     }
-    parseMultipartFile(req as unknown as Request)
-      .then((file) => {
-        (req as unknown as Request & { incomingFile: IncomingFile }).incomingFile = file;
-        next();
-      })
-      .catch(next);
+    try {
+      const contentType = req.headers['content-type'] ?? '';
+      const file = parseMultipartFile(req.body as Buffer, contentType);
+      (req as unknown as Request & { incomingFile: IncomingFile }).incomingFile = file;
+      next();
+    } catch (err) {
+      next(err);
+    }
   };
 
   router.post(
