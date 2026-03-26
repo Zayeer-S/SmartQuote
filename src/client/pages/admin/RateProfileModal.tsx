@@ -5,10 +5,6 @@ import type {
 } from '../../../shared/contracts/rate-profile-contracts.js';
 import './RateProfileModal.css';
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 export interface RateProfileModalProps {
   mode: 'edit';
   profile: RateProfileResponse;
@@ -17,19 +13,11 @@ export interface RateProfileModalProps {
   submitting: boolean;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 const DECIMAL_RE = /^\d*\.?\d{0,2}$/;
 
 function isValidDecimal(val: string): boolean {
   return DECIMAL_RE.test(val) && val !== '' && val !== '.';
 }
-
-// ---------------------------------------------------------------------------
-// Form state types
-// ---------------------------------------------------------------------------
 
 interface EditFormState {
   businessHoursRate: string;
@@ -40,10 +28,6 @@ interface EditFormState {
 }
 
 type FormErrors = Partial<Record<string, string>>;
-
-// ---------------------------------------------------------------------------
-// Validation
-// ---------------------------------------------------------------------------
 
 function validateEdit(state: EditFormState): FormErrors {
   const errors: FormErrors = {};
@@ -57,10 +41,6 @@ function validateEdit(state: EditFormState): FormErrors {
   }
   return errors;
 }
-
-// ---------------------------------------------------------------------------
-// Sub-components
-// ---------------------------------------------------------------------------
 
 interface FieldProps {
   label: string;
@@ -84,10 +64,6 @@ function Field({ label, fieldId, error, children }: FieldProps) {
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Modal
-// ---------------------------------------------------------------------------
 
 export function RateProfileModal({
   profile,

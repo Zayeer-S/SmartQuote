@@ -217,10 +217,6 @@ export class SlaService {
     await this.slaPoliciesDAO.deactivate(slaPolicyId, options);
   }
 
-  // ---------------------------------------------------------------------------
-  // Private helpers
-  // ---------------------------------------------------------------------------
-
   /**
    * Assert that a user-scoped target is a Customer with no org membership.
    */
