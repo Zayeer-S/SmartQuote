@@ -25,6 +25,7 @@ import type {
   SlaPolicyId,
   TicketAttachmentId,
   TicketCommentId,
+  TicketEmbeddingId,
   TicketId,
   TicketPriorityId,
   TicketPriorityRuleId,
@@ -293,4 +294,12 @@ export interface PriorityEngineAnchor extends BaseAuditRows, ActivatableRow {
   label: string;
   description_text: string;
   urgency_score: number;
+}
+
+export interface TicketEmbedding extends BaseAuditRows {
+  id: TicketEmbeddingId;
+  ticket_id: TicketId;
+  /** Stored as a JSONB float array. Length matches the embedding model's output dimension. */
+  embedding: number[];
+  computed_at: Date;
 }

@@ -113,3 +113,27 @@ export interface AttachmentUrlResponse {
 export interface ListCommentsResponse {
   comments: CommentResponse[];
 }
+
+export interface SimilarQuoteResponse {
+  id: string;
+  version: number;
+  estimatedHoursMinimum: number;
+  estimatedHoursMaximum: number;
+  estimatedResolutionTime: number;
+  estimatedCost: number;
+  finalCost: number | null;
+  approvalStatus: string | null;
+  createdAt: string;
+}
+
+export interface SimilarTicketResponse {
+  ticket: TicketResponse;
+  /** Most recent approved quote for this ticket, or null if none exists */
+  quote: SimilarQuoteResponse | null;
+  /** Cosine similarity score (0-1), most similar first */
+  similarityScore: number;
+}
+
+export interface ListSimilarTicketsResponse {
+  similarTickets: SimilarTicketResponse[];
+}
