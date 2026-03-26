@@ -6,7 +6,7 @@ const TABLE = 'ticket_embeddings';
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTableIfNotExists(TABLE, (table) => {
     table.increments('id').primary();
-    table.string('ticket_id').notNullable().unique();
+    table.uuid('ticket_id').notNullable().unique();
     table.jsonb('embedding').notNullable();
     table.timestamp('computed_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
