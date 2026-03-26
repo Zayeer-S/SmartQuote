@@ -7,6 +7,7 @@ import StatsOverview from '../../features/dashboard/StatsOverview.js';
 import TicketStatusChart from '../../features/dashboard/TicketStatusChart.js';
 import CustomerTicketCard from '../../features/tickets/CustomerTicketCard.js';
 import './DashboardPage.css';
+import { IconTicketEmpty } from '../../components/icons/MiscIcons.js';
 
 const RECENT_TICKET_COUNT = 5;
 
@@ -25,7 +26,11 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="dashboard-page" data-testid="dashboard-page">
-      <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
+      <div>
+        <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
+      </div>
+
+      <div className="dashboard-line" />
 
       {loading && (
         <p className="loading-text" data-testid="dashboard-loading">
@@ -50,22 +55,17 @@ const DashboardPage: React.FC = () => {
       )}
 
       {!loading && !error && (
-        <section aria-labelledby="recent-tickets-heading">
+        <section className="dashboard-section" aria-labelledby="recent-tickets-heading">
           <div className="dashboard-section-header">
             <h2 className="dashboard-section-title" id="recent-tickets-heading">
               Recent Tickets
             </h2>
-            <Link
-              to={CLIENT_ROUTES.CUSTOMER.TICKETS}
-              className="dashboard-view-all"
-              data-testid="view-all-tickets-link"
-            >
-              View all
-            </Link>
           </div>
-
           {recentTickets.length === 0 ? (
             <div className="empty-state" data-testid="dashboard-no-tickets">
+              <div className="empty-state-icon-wrap">
+                <IconTicketEmpty />
+              </div>
               <p className="empty-state-message">You have not submitted any tickets yet.</p>
               <Link className="btn btn-primary btn-sm" to={CLIENT_ROUTES.CUSTOMER.NEW_TICKET}>
                 Submit your first ticket

@@ -40,7 +40,7 @@ const StatsOverview: React.FC<StatsOverviewProps> = ({ tickets }) => {
       data-testid="stats-overview"
     >
       <StatCard label="Total Tickets" value={total} testId="stat-total" />
-      <StatCard label="Open" value={open} testId="stat-open" />
+      <StatCard label="Active" value={open} testId="stat-open" />
       <StatCard label="Resolved" value={resolved} testId="stat-resolved" />
     </div>
   );

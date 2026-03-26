@@ -25,6 +25,8 @@ import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage.js';
 import AdminSLAPoliciesPage from './pages/admin/AdminSLAPoliciesPage.js';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage.js';
 import './styles/globals.css';
+import AdminOrganizationsPage from './pages/admin/AdminOrganizationsPage.js';
+import AdminOrganizationMembersPage from './pages/admin/AdminOrganizationMembersPage.js';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 createRoot(document.getElementById('root')!).render(
@@ -65,6 +67,14 @@ createRoot(document.getElementById('root')!).render(
                       element={<AdminSLAPoliciesPage />}
                     />
                     <Route path={CLIENT_ROUTES.ADMIN.SETTINGS} element={<AdminSettingsPage />} />
+                    <Route
+                      path={CLIENT_ROUTES.ADMIN.ORGANIZATIONS}
+                      element={<AdminOrganizationsPage />}
+                    />
+                    <Route
+                      path={CLIENT_ROUTES.ADMIN.ORGANIZATION_MEMBERS}
+                      element={<AdminOrganizationMembersPage />}
+                    />
                   </Route>
                 </Route>
 
@@ -75,6 +85,10 @@ createRoot(document.getElementById('root')!).render(
                     <Route path={CLIENT_ROUTES.CUSTOMER.TICKET()} element={<TicketDetailPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.NEW_TICKET} element={<NewTicketPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.SETTINGS} element={<SettingsPage />} />
+                    <Route
+                      path={CLIENT_ROUTES.CUSTOMER.ORG_MEMBERS}
+                      element={<AdminOrganizationsPage />}
+                    />
                   </Route>
                 </Route>
 

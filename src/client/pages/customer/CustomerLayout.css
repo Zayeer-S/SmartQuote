@@ -1,18 +1,26 @@
+/* ═══════════════════════════════════════════════
+   GIACOM Customer Layout
+   Navy #100235 | Purple #99338a | Magenta #ec008c
+   Font: Montserrat
+   ═══════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap');
+
 .customer-layout {
   display: flex;
   min-height: 100vh;
-  background-color: var(--color-bg-secondary);
-  font-family: var(--font-sans);
+  background-color: #f4f2f8;
+  font-family: 'Montserrat', Arial, sans-serif;
 }
 
 .customer-sidebar {
   display: flex;
   flex-direction: column;
-  width: 248px;
+  width: 240px;
   min-height: 100vh;
   flex-shrink: 0;
-  background-color: var(--color-brand-panel-dark);
-  padding: 28px 16px;
+  background: linear-gradient(180deg, #100235 0%, #1d0a4a 60%, #67236a 100%);
+  padding: 28px 14px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -20,21 +28,39 @@
 }
 
 .customer-sidebar-brand {
-  padding: 0 8px;
-  margin-bottom: 36px;
+  padding: 0 10px;
+  margin-bottom: 40px;
 }
 
 .customer-sidebar-logo {
-  font-family: var(--font-display);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-normal);
-  color: var(--color-text-inverse);
-  letter-spacing: 0.08em;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  display: block;
+  line-height: 1;
+}
+
+.customer-sidebar-logo-dot {
+  color: #ec008c;
+}
+
+.customer-sidebar-sub {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 5px;
+  display: block;
 }
 
 .customer-sidebar-nav {
   list-style: none;
+  padding: 0;
+  margin: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -46,16 +72,20 @@
 }
 
 .customer-sidebar-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 10px 12px;
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
   text-decoration: none;
   transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
+    background-color 0.15s ease,
+    color 0.15s ease;
+  font-family: 'Montserrat', Arial, sans-serif;
+  border-left: 3px solid transparent;
 }
 
 .customer-sidebar-link:hover {
@@ -64,14 +94,29 @@
 }
 
 .customer-sidebar-link.active {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-text-inverse);
+  background: rgba(236, 0, 140, 0.15);
+  color: #ffffff;
+  border-left: 3px solid #ec008c;
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.customer-sidebar-link.active .nav-icon,
+.customer-sidebar-link:hover .nav-icon {
+  opacity: 1;
 }
 
 .customer-sidebar-footer {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   margin-top: auto;
@@ -79,48 +124,59 @@
 
 .customer-sidebar-user {
   display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px;
+}
+
+.customer-sidebar-user-info {
+  display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 0 4px;
+  min-width: 0;
 }
 
 .customer-sidebar-user-name {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-inverse);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .customer-sidebar-user-role {
-  font-size: var(--font-size-xs);
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.03em;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .customer-sidebar-logout {
   width: 100%;
   padding: 9px 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
+  border-radius: 8px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.45);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.4);
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
   text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast),
-    border-color var(--transition-fast);
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .customer-sidebar-logout:hover {
-  background-color: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.75);
-  border-color: rgba(255, 255, 255, 0.18);
+  background-color: rgba(236, 0, 140, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(236, 0, 140, 0.25);
 }
 
 .customer-main {
@@ -128,22 +184,24 @@
   min-width: 0;
   padding: 40px 48px;
   overflow-y: auto;
+  background-color: #f4f2f8;
 }
 
 [data-theme='dark'] .customer-sidebar {
-  background-color: var(--color-brand-panel-dark-deep);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(180deg, #0a001e 0%, #100235 60%, #3d1244 100%);
 }
-
 [data-theme='dark'] .customer-main {
-  background-color: var(--color-gray-900);
+  background-color: #0f0a1a;
 }
-
 [data-theme='dark'] .customer-layout {
-  background-color: var(--color-gray-900);
+  background-color: #0f0a1a;
 }
 
 @media (max-width: 768px) {
+  .customer-layout {
+    flex-direction: column;
+  }
+
   .customer-sidebar {
     width: 100%;
     min-height: unset;
@@ -153,17 +211,33 @@
     align-items: center;
     padding: 12px 16px;
     gap: 12px;
+    background: linear-gradient(90deg, #100235, #67236a);
   }
 
   .customer-sidebar-brand {
     margin-bottom: 0;
   }
+  .customer-sidebar-sub {
+    display: none;
+  }
 
   .customer-sidebar-nav {
     flex-direction: row;
     flex: 1;
-    gap: 4px;
+    gap: 2px;
     overflow-x: auto;
+  }
+
+  .customer-sidebar-link {
+    padding: 8px 10px;
+    white-space: nowrap;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .customer-sidebar-link.active {
+    border-left: none;
+    border-bottom: 3px solid #ec008c;
   }
 
   .customer-sidebar-footer {
@@ -174,17 +248,15 @@
     margin-top: 0;
     border-left: 1px solid rgba(255, 255, 255, 0.08);
     padding-left: 12px;
-    gap: 8px;
   }
 
-  .customer-sidebar-user {
+  .customer-sidebar-user-info {
     display: none;
   }
-
-  .customer-layout {
-    flex-direction: column;
+  .customer-sidebar-logout {
+    width: auto;
+    padding: 8px 10px;
   }
-
   .customer-main {
     padding: 24px 16px;
   }
