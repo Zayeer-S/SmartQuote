@@ -53,28 +53,6 @@ export class LocalStorageService implements StorageService {
     return this.resolve(storageKey);
   }
 
-  /**
-   * Not supported in local storage - there is no public URL server to sign
-   * against. This is a hard failure so misconfiguration is caught immediately
-   * in development rather than silently falling through.
-   */
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async getPresignedUploadUrl(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _storageKey: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _mimeType: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _sizeBytes: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _expiresInSeconds: number
-  ): Promise<string> {
-    throw new StorageError(
-      'Presigned upload URLs are not supported by LocalStorageService. ' +
-        'Configure S3 storage (AWS_S3_BUCKET, AWS_REGION) to use direct browser uploads.'
-    );
-  }
-
   private resolve(storageKey: string): string {
     // Guard against path traversal
     const resolved = path.resolve(this.uploadRoot, storageKey);

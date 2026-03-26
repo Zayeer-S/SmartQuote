@@ -1,5 +1,4 @@
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { StorageService } from './storage.service.js';
 import type { IncomingFile, StoredFile } from './storage.service.types.js';
 import { STORAGE_ERROR_MSGS, StorageError } from './storage.errors.js';
@@ -80,40 +79,5 @@ export class S3StorageService implements StorageService {
 
   getUrl(storageKey: string): string {
     return `https://${this.bucket}.s3.amazonaws.com/${storageKey}`;
-  }
-
-  /**
-   * Generate a presigned PUT URL for direct browser-to-S3 uploads.
-   *
-   * ContentLength is intentionally excluded from the command. Browsers treat
-   * Content-Length as a forbidden header and strip it silently from fetch
-   * requests, which would cause a SignatureDoesNotMatch error because it
-   * would appear in SignedHeaders but be absent from the actual PUT.
-   *
-   * @param storageKey       S3 object key to write to
-   * @param mimeType         Content-Type the browser PUT must declare
-   * @param sizeBytes        Accepted to satisfy the interface; not used in signing
-   * @param expiresInSeconds TTL for the presigned URL
-   */
-  async getPresignedUploadUrl(
-    storageKey: string,
-    mimeType: string,
-    sizeBytes: number,
-    expiresInSeconds: number
-  ): Promise<string> {
-    void sizeBytes;
-    try {
-      const command = new PutObjectCommand({
-        Bucket: this.bucket,
-        Key: storageKey,
-        ContentType: mimeType,
-      });
-
-      return await getSignedUrl(this.client, command, { expiresIn: expiresInSeconds });
-    } catch (err) {
-      throw new StorageError(
-        `${STORAGE_ERROR_MSGS.UPLOAD_FAILED}: failed to generate presigned URL: ${(err as Error).message}`
-      );
-    }
   }
 }

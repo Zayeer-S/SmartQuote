@@ -1,13 +1,12 @@
+import 'multer';
 import type { Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
 import { validateOrThrow } from '../validators/validation-utils.js';
 import {
   addCommentSchema,
   assignTicketSchema,
-  confirmAttachmentSchema,
   createTicketSchema,
   listTicketsQuerySchema,
-  presignAttachmentSchema,
   updateTicketSchema,
 } from '../validators/ticket.validator.js';
 import { success, error } from '../lib/respond.js';
@@ -16,7 +15,6 @@ import type {
   CommentResponse,
   ListCommentsResponse,
   ListTicketsResponse,
-  PresignAttachmentResponse,
   TicketDetailResponse,
   TicketResponse,
   TicketSummaryResponse,
@@ -33,6 +31,7 @@ import type { TicketService } from '../services/ticket/ticket.service.js';
 import type { CommentService } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
+import { IncomingFile } from '../services/storage/storage.service.types.js';
 
 export class TicketController {
   private ticketService: TicketService;
@@ -76,53 +75,26 @@ export class TicketController {
     }
   };
 
-  /**
-   * Generate a presigned S3 PUT URL for a single attachment.
-   * The browser should PUT the file directly to S3 using this URL, then call
-   * confirmAttachment with the returned storageKey.
-   */
-  presignAttachment = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const body = validateOrThrow(presignAttachmentSchema, req.body);
-      const ticketId = req.params.ticketId as TicketId;
-
-      const result = await this.attachmentService.presignUpload(
-        {
-          originalName: body.originalName,
-          mimeType: body.mimeType,
-          sizeBytes: body.sizeBytes,
-        },
-        ticketId
-      );
-
-      const response: PresignAttachmentResponse = {
-        storageKey: result.storageKey,
-        presignedUrl: result.presignedUrl,
-      };
-
-      success(res, response, 200);
-    } catch (err: unknown) {
-      handleError(res, err);
-    }
-  };
-
-  /**
-   * Register an attachment in the database after the browser has successfully
-   * PUT the file directly to S3.
-   */
-  confirmAttachment = async (req: Request, res: Response): Promise<void> => {
+  uploadAttachment = async (req: Request, res: Response): Promise<void> => {
     try {
       const actor = (req as AuthenticatedRequest).user;
-      const body = validateOrThrow(confirmAttachmentSchema, req.body);
       const ticketId = req.params.ticketId as TicketId;
+      const file = (req as Request & { file?: Express.Multer.File }).file;
 
-      const attachment = await this.attachmentService.confirmUpload(
-        body.storageKey,
-        {
-          originalName: body.originalName,
-          mimeType: body.mimeType,
-          sizeBytes: body.sizeBytes,
-        },
+      if (!file) {
+        error(res, 400, 'No file provided');
+        return;
+      }
+
+      const incomingFile: IncomingFile = {
+        buffer: file.buffer,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        sizeBytes: file.size,
+      };
+
+      const attachment = await this.attachmentService.uploadAttachment(
+        incomingFile,
         ticketId,
         actor.id as UserId
       );

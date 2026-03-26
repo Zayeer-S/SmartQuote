@@ -30,7 +30,7 @@ interface FormState {
   files: File[];
 }
 
-type SubmitPhase = 'idle' | 'creating' | 'uploading' | 'confirming';
+type SubmitPhase = 'idle' | 'creating' | 'uploading';
 
 const TICKET_TYPE_OPTIONS: { value: TicketType; label: string }[] = [
   { value: TICKET_TYPES.SUPPORT, label: TICKET_TYPES.SUPPORT },
@@ -67,7 +67,6 @@ const PHASE_LABEL: Record<SubmitPhase, string> = {
   idle: 'Submit Ticket',
   creating: 'Submitting...',
   uploading: 'Uploading files...',
-  confirming: 'Finalizing...',
 };
 
 function validateForm(form: FormState): string | null {
@@ -146,36 +145,9 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
       }
 
       if (form.files.length > 0) {
+        setPhase('uploading');
         for (const file of form.files) {
-          setPhase('uploading');
-          const { storageKey, presignedUrl } = await ticketAPI.presignAttachment(ticket.id, {
-            originalName: file.name,
-            mimeType: file.type,
-            sizeBytes: file.size,
-          });
-
-          const putResponse = await fetch(presignedUrl, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': file.type,
-              'Content-Length': String(file.size),
-            },
-            body: file,
-          });
-
-          if (!putResponse.ok) {
-            throw new Error(
-              `Failed to upload "${file.name}" to storage (HTTP ${String(putResponse.status)}).`
-            );
-          }
-
-          setPhase('confirming');
-          await ticketAPI.confirmAttachment(ticket.id, {
-            storageKey,
-            originalName: file.name,
-            mimeType: file.type,
-            sizeBytes: file.size,
-          });
+          await ticketAPI.uploadAttachment(ticket.id, file);
         }
       }
 

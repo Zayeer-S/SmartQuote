@@ -1,12 +1,14 @@
+import 'multer';
 import { Router } from 'express';
 import type { TicketController } from '../controllers/ticket.controller.js';
 import type { AuthService } from '../services/auth/auth.service.js';
 import type { RBACService } from '../services/rbac/rbac.service.js';
 import { createAuthMiddleware } from '../middleware/auth.middleware.js';
 import { requirePermission } from '../middleware/rbac.middleware.js';
-import { PERMISSIONS } from '../../shared/constants/lookup-values.js';
+import { ATTACHMENT_CONFIG, PERMISSIONS } from '../../shared/constants/lookup-values.js';
 import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../shared/constants';
 import type { QuoteController } from '../controllers/quote.controller.js';
+import multer from 'multer';
 
 export function createTicketRoutes(
   ticketController: TicketController,
@@ -19,6 +21,21 @@ export function createTicketRoutes(
 
   const can = (...perms: Parameters<typeof requirePermission>[1][]) =>
     requirePermission(rbacService, ...perms);
+
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: ATTACHMENT_CONFIG.MAX_SIZE_BYTES,
+      files: 1,
+    },
+    fileFilter: (_req, file, cb) => {
+      if ((ATTACHMENT_CONFIG.ALLOWED_MIME_TYPES as readonly string[]).includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error(`File type not allowed: ${file.mimetype}`));
+      }
+    },
+  });
 
   router.post(
     TICKET_ENDPOINTS.CREATE,
@@ -84,17 +101,11 @@ export function createTicketRoutes(
   );
 
   router.post(
-    TICKET_ENDPOINTS.PRESIGN_ATTACHMENT(),
+    TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(),
     authenticate,
     can(PERMISSIONS.TICKETS_CREATE),
-    ticketController.presignAttachment
-  );
-
-  router.post(
-    TICKET_ENDPOINTS.CONFIRM_ATTACHMENT(),
-    authenticate,
-    can(PERMISSIONS.TICKETS_CREATE),
-    ticketController.confirmAttachment
+    upload.single('file'),
+    ticketController.uploadAttachment
   );
 
   router.get(

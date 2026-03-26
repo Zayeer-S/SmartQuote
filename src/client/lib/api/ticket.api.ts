@@ -3,12 +3,9 @@ import type {
   AssignTicketRequest,
   AttachmentResponse,
   CommentResponse,
-  ConfirmAttachmentRequest,
   CreateTicketRequest,
   ListCommentsResponse,
   ListTicketsResponse,
-  PresignAttachmentRequest,
-  PresignAttachmentResponse,
   TicketDetailResponse,
   TicketResponse,
   UpdateTicketRequest,
@@ -34,40 +31,16 @@ export const ticketAPI = {
     return extractData(response);
   },
 
-  /**
-   * Request a presigned S3 PUT URL for a single attachment.
-   * The browser should PUT the file directly to the returned presignedUrl,
-   * then call confirmAttachment with the returned storageKey.
-   *
-   * @param ticketId Parent ticket ID
-   * @param payload  File metadata
-   * @returns storageKey and presignedUrl
-   */
-  async presignAttachment(
-    ticketId: string,
-    payload: PresignAttachmentRequest
-  ): Promise<PresignAttachmentResponse> {
-    const response = await httpClient.post<ApiResponse<PresignAttachmentResponse>>(
-      base + TICKET_ENDPOINTS.PRESIGN_ATTACHMENT(ticketId),
-      payload
-    );
-    return extractData(response);
-  },
+  async uploadAttachment(ticketId: string, file: File): Promise<AttachmentResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
 
-  /**
-   * Register an attachment in the database after a successful direct-to-S3 PUT.
-   *
-   * @param ticketId  Parent ticket ID
-   * @param payload   storageKey plus file metadata
-   * @returns The created attachment record
-   */
-  async confirmAttachment(
-    ticketId: string,
-    payload: ConfirmAttachmentRequest
-  ): Promise<AttachmentResponse> {
     const response = await httpClient.post<ApiResponse<AttachmentResponse>>(
-      base + TICKET_ENDPOINTS.CONFIRM_ATTACHMENT(ticketId),
-      payload
+      base + TICKET_ENDPOINTS.UPLOAD_ATTACHMENT(ticketId),
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
     );
     return extractData(response);
   },

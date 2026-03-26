@@ -38,29 +38,8 @@ export interface AssignTicketRequest {
   assigneeId: string;
 }
 
-/** Request a presigned S3 URL for a single attachment. */
-export interface PresignAttachmentRequest {
-  originalName: string;
-  mimeType: string;
-  sizeBytes: number;
-}
-
-/**
- * Returned by the presign endpoint.
- * The browser should PUT the file to presignedUrl, then call the confirm endpoint
- * with the storageKey.
- */
-export interface PresignAttachmentResponse {
-  storageKey: string;
-  presignedUrl: string;
-}
-
-/** Sent after a successful direct-to-S3 PUT to register the attachment in the DB. */
-export interface ConfirmAttachmentRequest {
-  storageKey: string;
-  originalName: string;
-  mimeType: string;
-  sizeBytes: number;
+export interface UploadAttachmentResponse {
+  attachment: AttachmentResponse;
 }
 
 export interface TicketResponse {
