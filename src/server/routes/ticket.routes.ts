@@ -8,7 +8,6 @@ import { requirePermission } from '../middleware/rbac.middleware.js';
 import { PERMISSIONS } from '../../shared/constants/lookup-values.js';
 import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../shared/constants';
 import type { QuoteController } from '../controllers/quote.controller.js';
-import busboy from 'busboy';
 
 export function createTicketRoutes(
   ticketController: TicketController,
@@ -66,7 +65,7 @@ export function createTicketRoutes(
     };
   }
 
-  const parseAttachment: RequestHandler = (req, _res, next) => {
+  const parseAttachment: RequestHandler = async (req, _res, next) => {
     const contentType = req.headers['content-type'] ?? '';
 
     if (!contentType.startsWith('multipart/form-data')) {
@@ -91,12 +90,16 @@ export function createTicketRoutes(
 
     // Direct Express path: used in integration tests and local dev.
     // req is a readable stream - pipe it through busboy.
+    // Dynamic import keeps busboy out of the Lambda bundle entirely since
+    // this path never executes in Lambda (req.body is always a Buffer there).
+    const { default: Busboy } = await import('busboy');
+
     const chunks: Buffer[] = [];
     let originalName = '';
     let mimeType = '';
     let resolved = false;
 
-    const bb = busboy({ headers: req.headers });
+    const bb = Busboy({ headers: req.headers });
 
     bb.on('file', (_field, stream, info) => {
       originalName = info.filename;
