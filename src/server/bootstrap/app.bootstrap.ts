@@ -40,7 +40,13 @@ export async function bootstrapApplication(
 
   // TODO MOVE TO TICKET CONTROLLER
   let embedder: BertEmbedder | null = null;
-  if (backEnv.AWS_REGION && backEnv.AWS_ACCESS_KEY_ID) {
+  // The embedder requires AWS (Bedrock). In Lambda AWS_REGION is always set as
+  // a reserved runtime variable, so NODE_ENV=production is the reliable signal
+  // that we're running in Lambda with the execution role available.
+  // AWS_ACCESS_KEY_ID is NOT a valid signal - Lambda injects it automatically
+  // as a temporary STS credential, making it truthy in all Lambda invocations.
+  const awsRegion = backEnv.AWS_REGION ?? process.env.AWS_REGION;
+  if (awsRegion !== undefined && backEnv.NODE_ENV === 'production') {
     console.log('Initializing NLP embedder...');
     embedder = new BertEmbedder();
     const anchors = await new PriorityEngineAnchorsDAO(db).getAll({ includeInactive: true });
@@ -48,7 +54,7 @@ export async function bootstrapApplication(
     console.log(`NLP embedder ready (${String(anchors.length)} anchors warmed).`);
   } else {
     console.log(
-      'AWS credentials not present -- NLP embedder skipped, using rule-based scoring only.'
+      'AWS region not set or not in production -- NLP embedder skipped, using rule-based scoring only.'
     );
   }
 

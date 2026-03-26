@@ -22,34 +22,40 @@ export function createTicketRoutes(
     requirePermission(rbacService, ...perms);
 
   function parseMultipartFile(buffer: Buffer, contentType: string): IncomingFile {
-    const boundaryMatch = /boundary=(.+)$/.exec(contentType);
+    const boundaryMatch = /boundary=([^\s;]+)/.exec(contentType);
     if (!boundaryMatch) throw new Error('Missing multipart boundary');
 
-    const boundary = Buffer.from('--' + boundaryMatch[1].trim());
-    const crlf = Buffer.from('\r\n');
+    const boundary = boundaryMatch[1].trim().replace(/^["']|["']$/g, '');
+    const delimBuffer = Buffer.from('\r\n--' + boundary);
+    const firstDelim = Buffer.from('--' + boundary);
+
+    // Find first boundary
+    let pos = buffer.indexOf(firstDelim);
+    if (pos === -1) throw new Error('Could not find multipart boundary in body');
+
+    // Skip past boundary + CRLF
+    pos += firstDelim.length;
+    if (buffer[pos] === 13 && buffer[pos + 1] === 10) pos += 2; // skip CRLF
+
+    // Find end of headers (double CRLF)
     const crlfcrlf = Buffer.from('\r\n\r\n');
+    const headerEnd = buffer.indexOf(crlfcrlf, pos);
+    if (headerEnd === -1) throw new Error('Could not find end of part headers');
 
-    // Find the start of the first part
-    const partStart = buffer.indexOf(boundary) + boundary.length + crlf.length;
-    const headerEnd = buffer.indexOf(crlfcrlf, partStart);
-    if (headerEnd === -1) throw new Error('Malformed multipart body');
+    const headers = buffer.subarray(pos, headerEnd).toString('utf8');
+    const dataStart = headerEnd + 4; // skip \r\n\r\n
 
-    const headerSection = buffer.subarray(partStart, headerEnd).toString('utf8');
-    const fileDataStart = headerEnd + crlfcrlf.length;
+    // Find next boundary (marks end of file data)
+    const dataEnd = buffer.indexOf(delimBuffer, dataStart);
+    if (dataEnd === -1) throw new Error('Could not find end of file data');
 
-    // Find the end boundary
-    const endBoundary = Buffer.from('\r\n--' + boundaryMatch[1].trim() + '--');
-    const fileDataEnd = buffer.indexOf(endBoundary, fileDataStart);
-    if (fileDataEnd === -1) throw new Error('Malformed multipart body: missing end boundary');
+    const fileBuffer = buffer.subarray(dataStart, dataEnd);
 
-    const fileBuffer = buffer.subarray(fileDataStart, fileDataEnd);
+    const filenameMatch = /filename="([^"]+)"/.exec(headers);
+    const mimeMatch = /Content-Type:\s*([^\r\n]+)/i.exec(headers);
 
-    // Parse headers
-    const filenameMatch = /filename="([^"]+)"/.exec(headerSection);
-    const mimeMatch = /Content-Type:\s*(.+)$/im.exec(headerSection);
-
-    if (!filenameMatch) throw new Error('No filename in multipart headers');
-    if (!mimeMatch) throw new Error('No Content-Type in multipart headers');
+    if (!filenameMatch) throw new Error('No filename in part headers');
+    if (!mimeMatch) throw new Error('No Content-Type in part headers');
 
     return {
       buffer: fileBuffer,
