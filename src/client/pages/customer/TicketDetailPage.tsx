@@ -1,6 +1,5 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { CLIENT_ROUTES } from '../../constants/client.routes.js';
+import { useParams } from 'react-router-dom';
 import CustomerTicketDetail from '../../features/customer/ticket/CustomerTicketDetail.js';
 
 const TicketDetailPage: React.FC = () => {
@@ -9,17 +8,13 @@ const TicketDetailPage: React.FC = () => {
   if (!ticketId) {
     return (
       <div data-testid="ticket-detail-page-error">
-        <p>Invalid ticket link.</p>
-        <Link to={CLIENT_ROUTES.CUSTOMER.TICKETS}>Back to tickets</Link>
+        <p>Invalid ticket link</p>
       </div>
     );
   }
 
   return (
     <div data-testid="ticket-detail-page">
-      <Link to={CLIENT_ROUTES.CUSTOMER.TICKETS} data-testid="back-to-tickets">
-        Back to tickets
-      </Link>
       <CustomerTicketDetail ticketId={ticketId} />
     </div>
   );

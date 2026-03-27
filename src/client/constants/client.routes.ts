@@ -3,7 +3,6 @@ export const CLIENT_ROUTES = {
   CANT_ACCESS_ACCOUNT: '/cannot',
   CUSTOMER: {
     ROOT: '/customer',
-    TICKETS: '/customer/tickets',
     TICKET: (id = ':ticketId') => `/customer/tickets/${id}`,
     ORG_MEMBERS: `/customer/org/members`,
     SETTINGS: '/customer/settings',

@@ -264,7 +264,7 @@ test.describe('SLA breach indicator on ticket list and detail', () => {
 
   test('breached ticket shows SLA Breached badge on the ticket list', async ({ page }) => {
     await page.goto(TICKETS_URL);
-    await expect(page.getByTestId('admin-ticket-list-container')).toBeVisible();
+    await expect(page.getByTestId('admin-tickets-container')).toBeVisible();
 
     const card = page.getByTestId(`admin-ticket-card-${breachedTicketId}`);
     await expect(card).toBeVisible();
@@ -276,7 +276,7 @@ test.describe('SLA breach indicator on ticket list and detail', () => {
 
   test('non-breached ticket shows SLA OK badge on the ticket list', async ({ page }) => {
     await page.goto(TICKETS_URL);
-    await expect(page.getByTestId('admin-ticket-list-container')).toBeVisible();
+    await expect(page.getByTestId('admin-tickets-container')).toBeVisible();
 
     const okBadges = page.locator('[data-testid="ticket-sla-badge"]:has-text("SLA OK")');
     await expect(okBadges.first()).toBeVisible();
