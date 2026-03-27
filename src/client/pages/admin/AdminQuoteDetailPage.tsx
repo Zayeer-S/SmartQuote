@@ -4,7 +4,7 @@ import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import { getStatusBadgeClass } from '../../lib/utils/badge-utils.js';
-import AdminQuotePanel from '../../features/tickets/AdminQuotePanel.js';
+import AdminQuotePanel from '../../features/admin/quotes/AdminQuotePanel.js';
 import CommentThread from '../../features/tickets/CommentThread.js';
 import './AdminQuoteDetailPage.css';
 

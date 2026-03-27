@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useSidebar } from '../../hooks/contexts/useSidebar.js';
-import { IconSignOut } from '../icons/MiscIcons.js';
+import { useSidebar } from '../hooks/contexts/useSidebar.js';
+import { IconSignOut } from './icons/MiscIcons.js';
 import './Sidebar.css';
 
 // ------------------------------------------------------------------

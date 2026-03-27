@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/contexts/useAuth.js';
 import StatsOverview from '../../features/dashboard/StatsOverview.js';
 import TicketStatusChart from '../../features/dashboard/TicketStatusChart.js';
 import TicketList from '../../features/tickets/TicketList.js';
-import Modal from '../../components/modal/Modal.js';
+import Modal from '../../components/Modal.js';
 import SubmitTicketForm from '../../features/customer/dashboard/SubmitTicketForm.js';
 import './DashboardPage.css';
 

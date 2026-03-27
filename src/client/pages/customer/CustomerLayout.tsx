@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
 import { useSidebar } from '../../hooks/contexts/useSidebar.js';
-import Sidebar, { type SidebarNavItem } from '../../components/sidebar/Sidebar.js';
+import Sidebar, { type SidebarNavItem } from '../../components/Sidebar.js';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import { IconDashboard, IconOrganisation, IconSettings } from '../../components/icons/MiscIcons.js';
 import './CustomerLayout.css';

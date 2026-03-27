@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
-import QuotePanel from './QuotePanel.js';
+import QuotePanel from '../admin/quotes/QuotePanel.js';
 import TicketTimeline from './TicketTimeline.js';
 import CommentThread from './CommentThread.js';
 import AttachmentList from './AttachmentList.js';

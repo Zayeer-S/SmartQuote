@@ -1,5 +1,5 @@
 import React from 'react';
-import type { QuoteResponse } from '../../../shared/contracts/quote-contracts.js';
+import type { QuoteResponse } from '../../../../shared/contracts/quote-contracts.js';
 import QuoteActions from './QuoteActions.js';
 import './QuotePanel.css';
 

@@ -1,6 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import { useTicketFilters } from '../../hooks/useTicketFilters.js';
 import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
 import CustomerTicketCard from '../customer/dashboard/CustomerTicketCard.js';
@@ -31,9 +29,6 @@ const TicketList: React.FC<TicketListProps> = ({ tickets }) => {
     return (
       <div className="empty-state" data-testid="tickets-empty">
         <p className="empty-state-message">You have no tickets yet.</p>
-        <Link className="btn btn-primary btn-sm" to={CLIENT_ROUTES.CUSTOMER.NEW_TICKET}>
-          Submit your first ticket
-        </Link>
       </div>
     );
   }

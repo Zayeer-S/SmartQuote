@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import { useGenerateQuote } from '../../hooks/quotes/useGenerateQuote.js';
-import { useCreateManualQuote } from '../../hooks/quotes/useCreateManualQuote.js';
-import { useUpdateQuote } from '../../hooks/quotes/useUpdateQuote.js';
-import { useSubmitForApproval } from '../../hooks/quotes/useSubmitForApproval.js';
-import { useApproveQuote } from '../../hooks/quotes/useApproveQuote.js';
-import { useRejectQuote } from '../../hooks/quotes/useRejectQuote.js';
-import { useGetRevisionHistory } from '../../hooks/quotes/useGetRevisionHistory.js';
-import { useQuotePermissions } from '../../hooks/auth/useQuotePermissions.js';
+import { useGenerateQuote } from '../../../hooks/quotes/useGenerateQuote.js';
+import { useCreateManualQuote } from '../../../hooks/quotes/useCreateManualQuote.js';
+import { useUpdateQuote } from '../../../hooks/quotes/useUpdateQuote.js';
+import { useSubmitForApproval } from '../../../hooks/quotes/useSubmitForApproval.js';
+import { useApproveQuote } from '../../../hooks/quotes/useApproveQuote.js';
+import { useRejectQuote } from '../../../hooks/quotes/useRejectQuote.js';
+import { useGetRevisionHistory } from '../../../hooks/quotes/useGetRevisionHistory.js';
+import { useQuotePermissions } from '../../../hooks/auth/useQuotePermissions.js';
 import {
   QUOTE_EFFORT_LEVELS,
   QUOTE_CONFIDENCE_LEVELS,
   QUOTE_APPROVAL_STATUSES,
-} from '../../../shared/constants/lookup-values.js';
+} from '../../../../shared/constants/lookup-values.js';
 import type {
   QuoteEffortLevel,
   QuoteConfidenceLevel,
   QuoteApprovalStatus,
-} from '../../../shared/constants/lookup-values.js';
-import type { QuoteWithApprovalResponse } from '../../../shared/contracts/quote-contracts.js';
+} from '../../../../shared/constants/lookup-values.js';
+import type { QuoteWithApprovalResponse } from '../../../../shared/contracts/quote-contracts.js';
 import './AdminQuotePanel.css';
 
 const APPROVAL_STATUS_BADGE: Record<QuoteApprovalStatus, string> = {
