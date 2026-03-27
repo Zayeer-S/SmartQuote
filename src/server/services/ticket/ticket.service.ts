@@ -18,6 +18,7 @@ import type { AttachmentService } from './attachment.service.js';
 import type { IncomingFile } from '../storage/storage.service.types.js';
 import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
 import type { TicketSimilarityService } from './ticket.similarity.service.js';
+import type { NotificationService } from '../notification/notification.service.js';
 
 export class TicketService {
   private db: Knex;
@@ -29,6 +30,7 @@ export class TicketService {
   private priorityEngine: TicketPriorityEngine;
   private attachmentService: AttachmentService;
   private similarityService: TicketSimilarityService;
+  private notificationService: NotificationService;
 
   constructor(
     db: Knex,
@@ -39,7 +41,8 @@ export class TicketService {
     lookup: LookupResolver,
     priorityEngine: TicketPriorityEngine,
     attachmentService: AttachmentService,
-    similarityService: TicketSimilarityService
+    similarityService: TicketSimilarityService,
+    notificationService: NotificationService
   ) {
     this.db = db;
     this.ticketsDAO = ticketsDAO;
@@ -50,6 +53,7 @@ export class TicketService {
     this.priorityEngine = priorityEngine;
     this.attachmentService = attachmentService;
     this.similarityService = similarityService;
+    this.notificationService = notificationService;
   }
 
   /**
@@ -103,24 +107,31 @@ export class TicketService {
         ctx
       );
 
-      // Step 2: persist attachment DB records inside the same transaction.
-      // If this fails, the whole transaction rolls back and nothing is written
-      // to storage (uploads haven't happened yet).
       return this.attachmentService.persistAttachmentRecords(files, ticket.id, actorId, ctx);
     });
 
-    // Step 3: upload files to storage now that the transaction has committed.
-    // Failures are handled per-file inside uploadAttachments() - the ticket
-    // itself is never rolled back at this point.
+    // Step 2: upload files to storage now that the transaction has committed.
     if (pendingUploads.length > 0) {
       await this.attachmentService.uploadAttachments(pendingUploads);
     }
 
-    // Step 4: compute and store the embedding for this ticket's description.
-    // Runs after the transaction has committed -- a failure here must never
-    // affect the ticket creation result. similarityService no-ops when the
-    // embedder is unavailable.
+    // Step 3: compute and store embedding. Fire-and-forget -- failure must
+    // never affect the ticket creation result.
     void this.similarityService.computeAndStoreEmbedding(ticket.id, ticket.description);
+
+    // Step 4: notify the creator. Fire-and-forget -- a notification failure
+    // must never affect the ticket creation result.
+    void this.notificationService.notifyTicketReceived({
+      ticketId: ticket.id as string,
+      ticketTitle: ticket.title,
+      ticketDescription: ticket.description,
+      ticketType: this.lookup.ticketTypeName(ticket.ticket_type_id as unknown as number),
+      severity: this.lookup.ticketSeverityName(ticket.ticket_severity_id as unknown as number),
+      createdAt: ticket.created_at,
+      userId: actor.id as string,
+      userEmail: actor.email,
+      userFirstName: actor.first_name,
+    });
 
     return ticket;
   }
@@ -303,6 +314,9 @@ export class TicketService {
     const ticket = await this.ticketsDAO.getById(ticketId, options);
     if (!ticket) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
 
+    // Fetch the creator before updating so we have their details for the notification.
+    const creator = await this.usersDAO.getById(ticket.creator_user_id, options);
+
     await this.ticketsDAO.update(
       { id: ticketId },
       {
@@ -315,6 +329,22 @@ export class TicketService {
 
     const updated = await this.ticketsDAO.getById(ticketId, options);
     if (!updated) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
+
+    // Notify the ticket creator. Fire-and-forget -- failure must not affect
+    // the resolve result. Skip silently if the creator record is missing.
+    if (creator) {
+      const resolver = await this.usersDAO.getById(actorId, options);
+      void this.notificationService.notifyTicketResolved({
+        ticketId: updated.id as string,
+        ticketTitle: updated.title,
+        resolvedBy: resolver ? `${resolver.first_name} ${resolver.last_name}` : 'Support Team',
+        resolvedAt: updated.resolved_at ?? new Date(),
+        userId: creator.id as string,
+        userEmail: creator.email,
+        userFirstName: creator.first_name,
+      });
+    }
+
     return updated;
   }
 
