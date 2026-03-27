@@ -25,6 +25,7 @@ import AdminSettingsPage from './pages/admin/AdminSettingsPage.js';
 import './styles/globals.css';
 import './styles/buttons.css';
 import './styles/forms.css';
+import './styles/cards.css';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 createRoot(document.getElementById('root')!).render(

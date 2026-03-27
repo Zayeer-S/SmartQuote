@@ -1,7 +1,6 @@
 import React from 'react';
 import type { TicketResponse } from '../../../shared/contracts/ticket-contracts.js';
 import { TICKET_STATUSES } from '../../../shared/constants/lookup-values.js';
-import './StatsOverview.css';
 
 interface StatsOverviewProps {
   tickets: TicketResponse[];

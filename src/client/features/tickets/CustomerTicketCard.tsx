@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
 import type { TicketResponse } from '../../../shared/contracts/ticket-contracts.js';
-import './CustomerTicketCard.css';
 
 interface CustomerTicketCardProps {
   ticket: TicketResponse;

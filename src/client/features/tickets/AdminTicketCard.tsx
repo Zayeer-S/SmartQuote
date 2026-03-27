@@ -24,7 +24,7 @@ const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
   const sla = ticket.slaStatus;
 
   return (
-    <article className="admin-ticket-card" data-testid={`admin-ticket-card-${ticket.id}`}>
+    <article className="card admin-ticket-card" data-testid={`admin-ticket-card-${ticket.id}`}>
       <div className="admin-ticket-card-header">
         <div className="admin-ticket-card-badges">
           <span
