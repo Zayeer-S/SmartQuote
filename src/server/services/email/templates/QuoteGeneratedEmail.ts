@@ -1,5 +1,5 @@
 import { emailLayout } from './EmailLayout.js';
-import type { NotifyQuoteGeneratedData } from '../../notification/notification.types.js';
+import type { NotifyQuoteGeneratedData } from '../../notification/notification.service.types.js';
 
 export function quoteGeneratedEmail(data: NotifyQuoteGeneratedData): string {
   const formattedCost = new Intl.NumberFormat('en-GB', {

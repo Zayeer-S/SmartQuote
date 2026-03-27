@@ -6,9 +6,9 @@ import type { InsertData, TransactionContext } from '../../daos/base/types.js';
 import { PERMISSIONS, COMMENT_TYPES } from '../../../shared/constants/lookup-values.js';
 import type { CommentType } from '../../../shared/constants/lookup-values.js';
 import { ForbiddenError } from './ticket.errors.js';
-import type { TicketCommentsDAO } from '../../daos/children/ticket.comments.dao.js';
-import type { UsersDAO } from '../../daos/children/users.dao.js';
+import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
+import { TicketCommentsDAO } from '../../daos/children/tickets-domain.dao.js';
 
 export interface EnrichedComment extends TicketComment {
   author_display_name: string;

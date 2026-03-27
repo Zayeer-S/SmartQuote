@@ -74,7 +74,7 @@ export async function generateUsers(
       {
         first_name: 'John',
         last_name: 'Smith',
-        email: 'mdqasim191@gmail.com',
+        email: 'c2@demo.com',
         password: passwordHash,
         phone_number: '+44 11 1111 0002',
         role_id: roleIdMap[AUTH_ROLES.CUSTOMER],

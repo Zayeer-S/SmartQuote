@@ -1,5 +1,5 @@
 import { emailLayout } from './EmailLayout.js';
-import type { NotifyTicketResolvedData } from '../../notification/notification.types.js';
+import type { NotifyTicketResolvedData } from '../../notification/notification.service.types.js';
 
 export function ticketResolvedEmail(data: NotifyTicketResolvedData): string {
   const content = `

@@ -4,7 +4,7 @@ import {
   type SidebarContextValue,
   type SidebarProviderProps,
 } from './sidebar.context.types.js';
-import { KEYS } from '../../lib/storage/keys.js';
+import { KEYS } from '../lib/storage/keys.js';
 
 function readCollapsedFromStorage(): boolean {
   try {

@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
-import { validateOrThrow } from '../validators/validation-utils.js';
+import { validateOrThrow } from '../validators/validation.utils.js';
 import { success, error } from '../lib/respond.js';
 import type { UserId, QuoteId, TicketId } from '../database/types/ids.js';
 import type {
@@ -10,7 +10,7 @@ import type {
   QuoteWithApproval,
 } from '../database/types/tables.js';
 import type { QuoteService } from '../services/quote/quote.service.js';
-import type { QuoteEngineService } from '../services/quote/quote.engine.service.js';
+import type { QuoteEngineService } from '../services/quote/quote-engine.service.js';
 import {
   approveQuoteSchema,
   createManualQuoteSchema,

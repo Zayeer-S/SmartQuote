@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto';
-import type { TicketAttachmentsDAO } from '../../daos/children/ticket.attachments.dao.js';
 import type { TransactionContext } from '../../daos/base/types.js';
 import type { TicketAttachment } from '../../database/types/tables.js';
 import type { TicketId, UserId } from '../../database/types/ids.js';
@@ -9,6 +8,7 @@ import { ATTACHMENT_CONFIG } from '../../../shared/constants/index.js';
 import type { FileStorageType } from '../../../shared/constants/lookup-values.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { StorageError } from '../storage/storage.errors.js';
+import { TicketAttachmentsDAO } from '../../daos/children/tickets-domain.dao.js';
 
 export interface AttachmentMeta {
   originalName: string;

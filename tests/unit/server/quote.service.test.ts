@@ -1,40 +1,29 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { QuoteEngineService } from '../../../src/server/services/quote/quote.engine.service';
+import { QuoteEngineService } from '../../../src/server/services/quote/quote-engine.service';
 import { ForbiddenError } from '../../../src/server/services/ticket/ticket.errors';
 import { QUOTE_ERROR_MSGS } from '../../../src/server/services/quote/quote.errors';
 import { TICKET_ERROR_MSGS } from '../../../src/server/services/ticket/ticket.errors';
-import type { QuotesDAO } from '../../../src/server/daos/children/quotes.dao';
-import type { TicketsDAO } from '../../../src/server/daos/children/tickets.dao';
-import type { QuoteCalculationRulesDAO } from '../../../src/server/daos/children/quote.calculation.rules.dao';
+import type {
+  QuotesDAO,
+  QuoteCalculationRulesDAO,
+} from '../../../src/server/daos/children/quotes-domain.dao';
+import type { TicketsDAO } from '../../../src/server/daos/children/tickets-domain.dao';
 import type {
   RateProfile,
   Ticket,
   QuoteCalculationRule,
 } from '../../../src/server/database/types/tables';
 import type { TicketId, UserId } from '../../../src/server/database/types/ids';
-import { makeMockRateProfilesDAO } from './utils/mock.daos';
-import { makeMockRBACService } from './utils/mock.services';
-
-function makeMockQuotesDAO(): QuotesDAO {
-  return {
-    create: vi.fn(),
-    findLatestForTicket: vi.fn().mockResolvedValue(null),
-  } as unknown as QuotesDAO;
-}
-
-function makeMockTicketsDAO(): TicketsDAO {
-  return {
-    getById: vi.fn(),
-    update: vi.fn(),
-  } as unknown as TicketsDAO;
-}
-
-function makeMockRulesDAO(): QuoteCalculationRulesDAO {
-  return {
-    getAll: vi.fn(),
-  } as unknown as QuoteCalculationRulesDAO;
-}
+import {
+  makeMockQuotesDAO,
+  makeMockRateProfilesDAO,
+  makeMockRulesDAO,
+  makeMockTicketsDAO,
+  makeMockUsersDAO,
+} from './utils/mock.daos';
+import { makeMockNotificationService, makeMockRBACService } from './utils/mock.services';
+import { NotificationService } from '../../../src/server/services/notification/notification.service';
 
 const ACTOR_ID = 'user-1' as unknown as UserId;
 const TICKET_ID = 'ticket-1' as unknown as TicketId;
@@ -97,9 +86,11 @@ function clockAt(hour: number): () => Date {
 describe('QuoteEngineService.generateQuote', () => {
   let quotesDAO: QuotesDAO;
   let ticketsDAO: TicketsDAO;
+  let usersDAO: ReturnType<typeof makeMockUsersDAO>;
   let rateProfilesDAO: ReturnType<typeof makeMockRateProfilesDAO>;
   let rulesDAO: QuoteCalculationRulesDAO;
   let rbac: ReturnType<typeof makeMockRBACService>;
+  let notificationService: NotificationService;
 
   // No lookup needed -- LookupResolver is only used for quoteCreatorId which we stub via the DAO
   const stubLookup = {
@@ -110,10 +101,12 @@ describe('QuoteEngineService.generateQuote', () => {
     return new QuoteEngineService(
       quotesDAO,
       ticketsDAO,
+      usersDAO,
       rateProfilesDAO,
       rulesDAO,
       rbac,
       stubLookup as never,
+      notificationService,
       clock
     );
   }
@@ -121,9 +114,11 @@ describe('QuoteEngineService.generateQuote', () => {
   beforeEach(() => {
     quotesDAO = makeMockQuotesDAO();
     ticketsDAO = makeMockTicketsDAO();
+    usersDAO = makeMockUsersDAO();
     rateProfilesDAO = makeMockRateProfilesDAO();
     rulesDAO = makeMockRulesDAO();
     rbac = makeMockRBACService();
+    notificationService = makeMockNotificationService();
   });
 
   it('throws ForbiddenError when actor lacks QUOTES_CREATE', async () => {

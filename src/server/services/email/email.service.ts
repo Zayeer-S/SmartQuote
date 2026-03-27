@@ -8,7 +8,7 @@ import type {
   NotifyQuoteGeneratedData,
   NotifyTicketResolvedData,
   NotificationResult,
-} from '../notification/notification.types.js';
+} from '../notification/notification.service.types.js';
 
 export class EmailService {
   private transporter: Transporter;

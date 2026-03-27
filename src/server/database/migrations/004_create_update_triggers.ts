@@ -4,7 +4,7 @@ import {
   dropUpdatedAtFunction,
   dropUpdatedAtTriggerSQL,
   updatedAtTriggerSQL,
-} from '../migration-utils.js';
+} from '../migration.utils.js';
 
 const TABLES = [
   'roles',

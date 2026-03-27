@@ -1,10 +1,9 @@
-import { BUSINESS_HOURS, PERMISSIONS, QUOTE_CREATORS } from '../../../shared/constants';
+import { BUSINESS_HOURS, PERMISSIONS, QUOTE_CREATORS } from '../../../shared/constants/index.js';
 import type { InsertData, TransactionContext } from '../../daos/base/types.js';
-import type { QuoteCalculationRulesDAO } from '../../daos/children/quote.calculation.rules.dao.js';
-import type { QuotesDAO } from '../../daos/children/quotes.dao.js';
-import type { RateProfilesDAO } from '../../daos/children/rate.profiles.dao.js';
-import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
-import type { UsersDAO } from '../../daos/children/users.dao.js';
+import type { QuoteCalculationRulesDAO, QuotesDAO } from '../../daos/children/quotes-domain.dao.js';
+import type { RateProfilesDAO } from '../../daos/children/rate-profiles.dao.js';
+import type { TicketsDAO } from '../../daos/children/tickets-domain.dao.js';
+import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { TicketId, UserId } from '../../database/types/ids.js';
 import type {
   Quote,

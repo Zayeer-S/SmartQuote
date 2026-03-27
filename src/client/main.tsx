@@ -1,14 +1,14 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from './context/auth/AuthContext.js';
-import { SidebarProvider } from './context/sidebar/SidebarContext.js';
-import LoginPage from './pages/login/LoginPage.js';
+import { AuthProvider } from './context/AuthContext.js';
+import { SidebarProvider } from './context/SidebarContext.js';
+import LoginPage from './pages/misc/LoginPage.js';
 import CantAccessPage from './pages/misc/CantAccessPage.js';
 import NotFoundPage from './pages/misc/NotFoundPage.js';
 import ProtectedRoute from './components/ProtectedRoute.js';
 import { CLIENT_ROUTES } from './constants/client.routes.js';
-import { ThemeProvider } from './context/theme/ThemeContext.js';
+import { ThemeProvider } from './context/ThemeContext.js';
 import { AUTH_ROLES } from '../shared/constants';
 import CustomerLayout from './pages/customer/CustomerLayout.js';
 import CustomerDashboardPage from './pages/customer/CustomerDashboardPage.js';

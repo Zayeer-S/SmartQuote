@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { buildPasswordSchema } from './validation-utils.js';
+import { buildPasswordSchema } from './validation.utils.js';
 
 export const loginSchema = z.object({
   email: z.email('Invalid email format'),

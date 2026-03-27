@@ -2,18 +2,20 @@ import type { Knex } from 'knex';
 import type { RBACService } from '../services/rbac/rbac.service.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 
-import { TicketsDAO } from '../daos/children/tickets.dao.js';
-import { QuotesDAO } from '../daos/children/quotes.dao.js';
-import { QuoteApprovalsDAO } from '../daos/children/quote.approvals.dao.js';
-import { QuoteDetailRevisionsDAO } from '../daos/children/quote.detail.revisions.dao.js';
-import { RateProfilesDAO } from '../daos/children/rate.profiles.dao.js';
-import { QuoteCalculationRulesDAO } from '../daos/children/quote.calculation.rules.dao.js';
-import { UsersDAO } from '../daos/children/users.dao.js';
+import { TicketsDAO } from '../daos/children/tickets-domain.dao.js';
+import {
+  QuoteApprovalsDAO,
+  QuoteCalculationRulesDAO,
+  QuoteDetailRevisionsDAO,
+  QuotesDAO,
+} from '../daos/children/quotes-domain.dao.js';
+import { RateProfilesDAO } from '../daos/children/rate-profiles.dao.js';
+import { UsersDAO } from '../daos/children/users-domain.dao.js';
 
 import { QuoteService } from '../services/quote/quote.service.js';
-import { QuoteEngineService } from '../services/quote/quote.engine.service.js';
+import { QuoteEngineService } from '../services/quote/quote-engine.service.js';
 import { QuoteController } from '../controllers/quote.controller.js';
-import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
+import { OrganizationMembersDAO } from '../daos/children/organizations-domain.dao.js';
 import type { NotificationService } from '../services/notification/notification.service.js';
 
 export class QuoteContainer {

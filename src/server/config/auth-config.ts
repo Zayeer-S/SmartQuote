@@ -1,4 +1,8 @@
-import type { AuthConfig, AuthRateLimitConfig, PasswordConfig } from '../services/auth/index.js';
+import {
+  AuthConfig,
+  AuthRateLimitConfig,
+  PasswordConfig,
+} from '../services/auth/auth.config.types.js';
 import { backEnv } from './env.backend.js';
 
 export const passwordConfig: PasswordConfig = {

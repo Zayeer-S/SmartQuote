@@ -2,13 +2,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import type { Request, Response } from 'express';
-import type { UsersDAO } from '../daos/children/users.dao.js';
+import type { UsersDAO } from '../daos/children/users-domain.dao.js';
 import type { AuthService } from '../services/auth/auth.service.js';
-import { validateOrThrow } from '../validators/validation-utils.js';
+import { validateOrThrow } from '../validators/validation.utils.js';
 import { createUserSchema, listUsersQuerySchema } from '../validators/user.validator.js';
 import type { CreateUserRequest } from '../../shared/contracts/user-contracts.js';
 import { error, success } from '../lib/respond.js';
-import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
+import { OrganizationMembersDAO } from '../daos/children/organizations-domain.dao.js';
 
 export class AdminController {
   private authService: AuthService;

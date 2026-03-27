@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import { PasswordService } from '../../../../src/server/services/auth/password.service';
 import { SessionService } from '../../../../src/server/services/auth/session.service';
 import { RBACService } from '../../../../src/server/services/rbac/rbac.service';
+import { NotificationService } from '../../../../src/server/services/notification/notification.service';
 
 export function makeMockSessionService(): SessionService {
   return {
@@ -30,4 +31,12 @@ export function makeMockRBACService(): RBACService {
     getUserPermissions: vi.fn(),
     getUserPermissionIds: vi.fn(),
   } as unknown as RBACService;
+}
+
+export function makeMockNotificationService(): NotificationService {
+  return {
+    notifyTicketReceived: vi.fn().mockResolvedValue({ success: true }),
+    notifyQuoteGenerated: vi.fn().mockResolvedValue({ success: true }),
+    notifyTicketResolved: vi.fn().mockResolvedValue({ success: true }),
+  } as unknown as NotificationService;
 }

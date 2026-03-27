@@ -1,8 +1,65 @@
-import type { Knex } from 'knex';
-import { BaseDAO } from '../base/base.dao.js';
-import { ENGINE_TABLES } from '../../database/config/table-names.js';
-import type { TicketEmbedding } from '../../database/types/tables.js';
-import type { TicketEmbeddingId, TicketId } from '../../database/types/ids.js';
+import { Knex } from 'knex';
+import {
+  PriorityEngineAnchorsId as PriorityEngineAnchorId,
+  TicketEmbeddingId,
+  TicketId,
+  TicketPriorityRuleId,
+  TicketPriorityThresholdId,
+} from '../../database/types/ids';
+import {
+  PriorityEngineAnchor,
+  TicketEmbedding,
+  TicketPriorityRule,
+  TicketPriorityThreshold,
+} from '../../database/types/tables';
+import { ActivatableDAO } from '../base/activatable.dao';
+import { ENGINE_TABLES } from '../../database/config/table-names';
+import { BaseDAO } from '../base/base.dao';
+
+export class TicketPriorityRulesDAO extends ActivatableDAO<
+  TicketPriorityRule,
+  TicketPriorityRuleId
+> {
+  constructor(db: Knex) {
+    super(
+      {
+        tableName: ENGINE_TABLES.TICKET_PRIORITY_RULES,
+        primaryKey: 'id',
+      },
+      db
+    );
+  }
+}
+
+export class TicketPriorityThresholdsDAO extends ActivatableDAO<
+  TicketPriorityThreshold,
+  TicketPriorityThresholdId
+> {
+  constructor(db: Knex) {
+    super(
+      {
+        tableName: ENGINE_TABLES.TICKET_PRIORITY_THRESHOLDS,
+        primaryKey: 'id',
+      },
+      db
+    );
+  }
+}
+
+export class PriorityEngineAnchorsDAO extends ActivatableDAO<
+  PriorityEngineAnchor,
+  PriorityEngineAnchorId
+> {
+  constructor(db: Knex) {
+    super(
+      {
+        tableName: ENGINE_TABLES.PRIORITY_ENGINE_ANCHORS,
+        primaryKey: 'id',
+      },
+      db
+    );
+  }
+}
 
 export class TicketEmbeddingsDAO extends BaseDAO<TicketEmbedding, TicketEmbeddingId> {
   constructor(db: Knex) {

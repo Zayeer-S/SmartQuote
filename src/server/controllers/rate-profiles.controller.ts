@@ -1,16 +1,16 @@
 import type { Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
-import { validateOrThrow } from '../validators/validation-utils.js';
+import { validateOrThrow } from '../validators/validation.utils.js';
 import { success, error } from '../lib/respond.js';
 import type { UserId } from '../database/types/ids.js';
 import type { RateProfileId } from '../database/types/ids.js';
 import type { RateProfile } from '../database/types/tables.js';
-import type { RateProfileService } from '../services/rate-profiles/rate.profiles.service.js';
+import type { RateProfileService } from '../services/rate-profiles/rate-profiles.service.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 import {
   createRateProfileSchema,
   updateRateProfileSchema,
-} from '../validators/rate.profile.validator.js';
+} from '../validators/rate-profile.validator.js';
 import type {
   ListRateProfilesResponse,
   RateProfileResponse,

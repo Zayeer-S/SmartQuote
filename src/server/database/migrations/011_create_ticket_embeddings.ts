@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { updatedAtTriggerSQL } from '../migration-utils.js';
+import { updatedAtTriggerSQL } from '../migration.utils.js';
 
 const TABLE = 'ticket_embeddings';
 

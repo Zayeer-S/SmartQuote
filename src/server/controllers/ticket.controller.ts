@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
-import { validateOrThrow } from '../validators/validation-utils.js';
+import { validateOrThrow } from '../validators/validation.utils.js';
 import {
   addCommentSchema,
   assignTicketSchema,
@@ -29,8 +29,8 @@ import type { TicketService } from '../services/ticket/ticket.service.js';
 import type { CommentService, EnrichedComment } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
 import type { SlaService } from '../services/sla/sla.service.js';
-import type { TicketSimilarityService } from '../services/ticket/ticket.similarity.service.js';
-import type { SimilarTicketResult } from '../services/ticket/ticket.similarity.service.types.js';
+import type { TicketSimilarityService } from '../services/ticket/ticket-similarity.service.js';
+import type { SimilarTicketResult } from '../services/ticket/ticket-similarity.service.types.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 import type { IncomingFile } from '../services/storage/storage.service.types.js';
 import type { QuoteWithApproval } from '../database/types/tables.js';

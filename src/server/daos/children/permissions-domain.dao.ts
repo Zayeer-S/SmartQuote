@@ -2,7 +2,7 @@
 import type { Knex } from 'knex';
 import type { Permission } from '../../database/types/tables.js';
 import type { OrgRoleId, PermissionId, RoleId } from '../../database/types/ids.js';
-import { LookupTableDAO } from '../base/lookup.table.dao.js';
+import { LookupTableDAO } from '../base/lookup-table.dao.js';
 import { LOOKUP_TABLES, LINK_TABLES } from '../../database/config/table-names.js';
 import type { QueryOptions } from '../base/types.js';
 

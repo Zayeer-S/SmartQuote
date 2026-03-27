@@ -1,6 +1,6 @@
 import { PERMISSIONS } from '../../../shared/constants/index.js';
 import type { TransactionContext } from '../../daos/base/types.js';
-import type { OrganizationsDAO } from '../../daos/children/organizations.domain.dao.js';
+import type { OrganizationsDAO } from '../../daos/children/organizations-domain.dao.js';
 import type { OrganizationId, UserId } from '../../database/types/ids.js';
 import type { Organization } from '../../database/types/tables.js';
 import type { RBACService } from '../rbac/rbac.service.js';

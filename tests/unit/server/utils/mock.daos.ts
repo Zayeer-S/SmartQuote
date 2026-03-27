@@ -1,8 +1,16 @@
 import { vi } from 'vitest';
-import { UsersDAO } from '../../../../src/server/daos/children/users.dao';
+import {
+  UserNotificationPreferencesDAO,
+  UsersDAO,
+} from '../../../../src/server/daos/children/users-domain.dao';
 import { SessionsDAO } from '../../../../src/server/daos/children/sessions.dao';
-import { OrganizationMembersDAO } from '../../../../src/server/daos/children/organizations.domain.dao';
-import { RateProfilesDAO } from '../../../../src/server/daos/children/rate.profiles.dao';
+import { OrganizationMembersDAO } from '../../../../src/server/daos/children/organizations-domain.dao';
+import { RateProfilesDAO } from '../../../../src/server/daos/children/rate-profiles.dao';
+import { TicketsDAO } from '../../../../src/server/daos/children/tickets-domain.dao';
+import {
+  QuoteCalculationRulesDAO,
+  QuotesDAO,
+} from '../../../../src/server/daos/children/quotes-domain.dao';
 
 export function makeMockUsersDAO(): UsersDAO {
   return {
@@ -42,4 +50,35 @@ export function makeMockRateProfilesDAO(): RateProfilesDAO {
     update: vi.fn(),
     findActive: vi.fn(),
   } as unknown as RateProfilesDAO;
+}
+
+export function makeMockQuotesDAO(): QuotesDAO {
+  return {
+    create: vi.fn(),
+    findLatestForTicket: vi.fn().mockResolvedValue(null),
+  } as unknown as QuotesDAO;
+}
+
+export function makeMockTicketsDAO(): TicketsDAO {
+  return {
+    getById: vi.fn(),
+    update: vi.fn(),
+  } as unknown as TicketsDAO;
+}
+
+export function makeMockRulesDAO(): QuoteCalculationRulesDAO {
+  return {
+    getAll: vi.fn(),
+  } as unknown as QuoteCalculationRulesDAO;
+}
+
+export function makeMockUserNotificationPreferencesDAO(): UserNotificationPreferencesDAO {
+  return {
+    findByUserId: vi.fn(),
+    hasPreference: vi.fn(),
+    setPreference: vi.fn(),
+    removePreference: vi.fn(),
+    setPreferences: vi.fn(),
+    getEnabledNotificationTypes: vi.fn(),
+  } as unknown as UserNotificationPreferencesDAO;
 }

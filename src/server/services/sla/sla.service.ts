@@ -1,12 +1,12 @@
 import { AUTH_ROLES, PERMISSIONS } from '../../../shared/constants/index.js';
 import type { InsertData, TransactionContext, UpdateData } from '../../daos/base/types.js';
-import type { SlaPoliciesDAO } from '../../daos/children/sla.policies.dao.js';
+import type { SlaPoliciesDAO } from '../../daos/children/sla-policies.dao.js';
 import type {
   OrganizationMembersDAO,
   OrganizationsDAO,
-} from '../../daos/children/organizations.domain.dao.js';
-import type { UsersDAO } from '../../daos/children/users.dao.js';
-import type { RolesDAO } from '../../daos/children/roles.dao.js';
+} from '../../daos/children/organizations-domain.dao.js';
+import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
+import type { RolesDAO } from '../../daos/children/roles-domain.dao.js';
 import type { OrganizationId, SlaPolicyId, UserId } from '../../database/types/ids.js';
 import type { SlaPolicy, Ticket, User } from '../../database/types/tables.js';
 import type { RBACService } from '../rbac/rbac.service.js';

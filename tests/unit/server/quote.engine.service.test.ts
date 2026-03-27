@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   computeQuote,
   isBusinessHours,
-} from '../../../src/server/services/quote/quote.engine.service';
-import type { ComputeQuoteInput } from '../../../src/server/services/quote/quote.engine.service';
+} from '../../../src/server/services/quote/quote-engine.service';
+import type { ComputeQuoteInput } from '../../../src/server/services/quote/quote-engine.service';
 import type { QuoteCalculationRule, Ticket } from '../../../src/server/database/types/tables';
 
 function makeRule(overrides: Partial<QuoteCalculationRule> = {}): QuoteCalculationRule {

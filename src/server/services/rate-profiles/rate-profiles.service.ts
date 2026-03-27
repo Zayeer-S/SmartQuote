@@ -1,5 +1,5 @@
 import { PERMISSIONS } from '../../../shared/constants/lookup-values.js';
-import type { RateProfilesDAO } from '../../daos/children/rate.profiles.dao.js';
+import type { RateProfilesDAO } from '../../daos/children/rate-profiles.dao.js';
 import type {
   BusinessImpactId,
   RateProfileId,
@@ -14,7 +14,7 @@ import {
   RateProfileError,
   RateProfileForbiddenError,
   RATE_PROFILE_ERROR_MSGS,
-} from './rate.profiles.errors.js';
+} from './rate-profiles.errors.js';
 
 export interface CreateRateProfileData {
   ticket_type_id: number;

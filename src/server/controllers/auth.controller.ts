@@ -4,7 +4,7 @@
 import type { Request, Response } from 'express';
 import type { AuthService } from '../services/auth/auth.service.js';
 import type { RBACService } from '../services/rbac/rbac.service.js';
-import { validateOrThrow } from '../validators/validation-utils.js';
+import { validateOrThrow } from '../validators/validation.utils.js';
 import { changePasswordSchema, loginSchema } from '../validators/auth.validator.js';
 import type { ChangePasswordRequest, LoginRequest } from '../../shared/contracts/auth-contracts.js';
 import { success, error } from '../lib/respond.js';

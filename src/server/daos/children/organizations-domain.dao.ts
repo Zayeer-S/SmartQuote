@@ -3,7 +3,7 @@ import { LINK_TABLES, LOOKUP_TABLES } from '../../database/config/table-names';
 import { OrganizationId, UserId } from '../../database/types/ids';
 import { Organization, OrganizationMember } from '../../database/types/tables';
 import { ActivatableDAO } from '../base/activatable.dao';
-import { CompositeKeyDAO } from '../base/composite.key.dao';
+import { CompositeKeyDAO } from '../base/composite-key.dao';
 import { QueryOptions } from '../base/types';
 
 export class OrganizationsDAO extends ActivatableDAO<Organization, OrganizationId> {
