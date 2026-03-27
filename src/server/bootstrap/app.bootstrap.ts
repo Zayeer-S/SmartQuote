@@ -26,6 +26,10 @@ import { createAnalyticsRoutes } from '../routes/analytics.routes.js';
 import { RATE_PROFILE_ENDPOINTS, SLA_ENDPOINTS } from '../../shared/constants/endpoints.js';
 import { SlaContainer } from '../containers/sla.container.js';
 import { createSlaRoutes } from '../routes/sla.routes.js';
+import { EmailService } from '../services/email/email.service.js';
+import { NotificationService } from '../services/notification/notification.service.js';
+import { NotificationTypesDAO } from '../daos/children/notification.types.dao.js';
+import { UserNotificationPreferencesDAO } from '../daos/children/user.notification.preferences.dao.js';
 
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
@@ -120,19 +124,29 @@ export async function bootstrapApplication(
     adminContainer.rbacService,
     authContainer.orgMembersDAO
   );
+
+  const emailService = new EmailService();
+  const notificationService = new NotificationService(
+    emailService,
+    new UserNotificationPreferencesDAO(db),
+    new NotificationTypesDAO(db)
+  );
+
   const ticketContainer = new TicketContainer(
     db,
     adminContainer.rbacService,
     authContainer.orgMembersDAO,
     lookupResolver,
     embedder,
-    slaContainer.slaService
+    slaContainer.slaService,
+    notificationService
   );
   const quoteContainer = new QuoteContainer(
     db,
     adminContainer.rbacService,
     lookupResolver,
-    authContainer.orgMembersDAO
+    authContainer.orgMembersDAO,
+    notificationService
   );
   const orgContainer = new OrgContainer(
     db,

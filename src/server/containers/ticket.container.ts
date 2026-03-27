@@ -26,6 +26,7 @@ import { FILE_STORAGE_TYPES } from '../../shared/constants/index.js';
 import type { FileStorageType } from '../../shared/constants/lookup-values.js';
 import { backEnv } from '../config/env.backend.js';
 import type { SlaService } from '../services/sla/sla.service.js';
+import type { NotificationService } from '../services/notification/notification.service.js';
 
 export class TicketContainer {
   public readonly ticketsDAO: TicketsDAO;
@@ -52,7 +53,8 @@ export class TicketContainer {
     orgMembersDAO: OrganizationMembersDAO,
     lookupResolver: LookupResolver,
     embedder: BertEmbedder | null,
-    slaService: SlaService
+    slaService: SlaService,
+    notificationService: NotificationService
   ) {
     this.ticketsDAO = new TicketsDAO(db);
     this.ticketCommentsDAO = new TicketCommentsDAO(db);
@@ -121,7 +123,8 @@ export class TicketContainer {
       lookupResolver,
       this.priorityEngine,
       this.attachmentService,
-      this.similarityService
+      this.similarityService,
+      notificationService
     );
 
     this.commentService = new CommentService(

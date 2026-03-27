@@ -8,6 +8,7 @@ import {
   BUSINESS_IMPACTS,
   TICKET_PRIORITIES,
   QUOTE_EFFORT_LEVELS,
+  NOTIFICATION_TYPES,
 } from '../../../shared/constants/index.js';
 import {
   buildAllLookupIdMaps,
@@ -838,6 +839,19 @@ export async function seed(knex: Knex): Promise<void> {
       org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
     },
   ]);
+
+  const notificationTypeIds = await knex('notification_types')
+    .whereIn('name', Object.values(NOTIFICATION_TYPES))
+    .select('id');
+
+  const notifPreferenceRows = [customer1Id, customer2Id, customer3Id].flatMap((userId) =>
+    notificationTypeIds.map((row: { id: number }) => ({
+      user_id: userId,
+      notification_type_id: row.id,
+    }))
+  );
+
+  await knex('user_notification_preferences').insert(notifPreferenceRows);
 
   // Quote Effort Level Ranges
   await knex('quote_effort_level_ranges').insert([

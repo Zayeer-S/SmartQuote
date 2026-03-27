@@ -68,10 +68,12 @@ export const PERMISSIONS = {
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
 export const NOTIFICATION_TYPES = {
-  EMAIL: 'Email',
+  TICKET_RECEIVED: 'Ticket Received',
+  QUOTE_GENERATED: 'Quote Generated',
+  TICKET_RESOLVED: 'Ticket Resolved',
 } as const;
 
-export type NotificationType = (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];
+export type NotificationTypeName = (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];
 
 export const NOTIFICATION_TOKEN_TYPES = {
   FCM: 'FCM',

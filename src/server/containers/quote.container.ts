@@ -14,6 +14,7 @@ import { QuoteService } from '../services/quote/quote.service.js';
 import { QuoteEngineService } from '../services/quote/quote.engine.service.js';
 import { QuoteController } from '../controllers/quote.controller.js';
 import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
+import type { NotificationService } from '../services/notification/notification.service.js';
 
 export class QuoteContainer {
   public readonly ticketsDAO: TicketsDAO;
@@ -33,7 +34,8 @@ export class QuoteContainer {
     db: Knex,
     rbacService: RBACService,
     lookup: LookupResolver,
-    orgMembersDAO: OrganizationMembersDAO
+    orgMembersDAO: OrganizationMembersDAO,
+    notificationService: NotificationService
   ) {
     this.ticketsDAO = new TicketsDAO(db);
     this.quotesDAO = new QuotesDAO(db);
@@ -53,13 +55,16 @@ export class QuoteContainer {
       rbacService,
       lookup
     );
+
     this.quoteEngineService = new QuoteEngineService(
       this.quotesDAO,
       this.ticketsDAO,
+      this.usersDAO,
       this.rateProfilesDAO,
       this.quoteCalculationRulesDAO,
       rbacService,
-      lookup
+      lookup,
+      notificationService
     );
 
     this.quoteController = new QuoteController(this.quoteService, this.quoteEngineService, lookup);
