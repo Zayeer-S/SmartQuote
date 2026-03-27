@@ -93,7 +93,7 @@ function validateForm(form: FormState): string | null {
 }
 
 const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
-  const [form, setForm] = useState<FormState>(INITIAL_FORM_STATE);
+  const [form, setForm] = useState(INITIAL_FORM_STATE);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [phase, setPhase] = useState<SubmitPhase>('idle');

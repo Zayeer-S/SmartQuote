@@ -56,7 +56,7 @@ function readStoredIndex(): number {
 }
 
 const AdminAnalyticsPage: React.FC = () => {
-  const [dateRange, setDateRange] = useState<DateRange>(DEFAULT_RANGE);
+  const [dateRange, setDateRange] = useState(DEFAULT_RANGE);
   const [carouselIndex, setCarouselIndex] = useState<number>(readStoredIndex);
 
   const ticketsHook = useListTickets();

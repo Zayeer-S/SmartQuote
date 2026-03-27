@@ -499,7 +499,7 @@ export class SlaService {
    */
   private async assertIsCustomer(user: User): Promise<void> {
     const role = await this.rolesDAO.getById(user.role_id);
-    if (!role || role.name !== AUTH_ROLES.CUSTOMER) {
+    if (role?.name !== AUTH_ROLES.CUSTOMER) {
       throw new SlaError(SLA_ERROR_MSGS.TARGET_USER_NOT_CUSTOMER, 422);
     }
   }

@@ -106,7 +106,7 @@ function CreateModal({
   onSubmit,
   onClose,
 }: CreateModalProps): React.ReactElement {
-  const [form, setForm] = useState<PolicyFormState>(buildDefaultForm());
+  const [form, setForm] = useState(buildDefaultForm());
   const [validationError, setValidationError] = useState<string | null>(null);
 
   function setField<K extends keyof PolicyFormState>(key: K, value: PolicyFormState[K]): void {

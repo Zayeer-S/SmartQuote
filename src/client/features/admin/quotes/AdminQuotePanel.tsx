@@ -201,7 +201,7 @@ const AdminQuotePanel: React.FC<AdminQuotePanelProps> = ({ ticketId, quotes, onQ
   const revisionHistory = useGetRevisionHistory();
 
   const [activePanel, setActivePanel] = useState<ActivePanel>('none');
-  const [manualForm, setManualForm] = useState<ManualQuoteFormState>(INITIAL_MANUAL_FORM);
+  const [manualForm, setManualForm] = useState(INITIAL_MANUAL_FORM);
   const [updateReason, setUpdateReason] = useState('');
   const [updateForm, setUpdateForm] = useState<UpdateQuoteFormState>({});
   const [rejectionNotes, setRejectionNotes] = useState('');
