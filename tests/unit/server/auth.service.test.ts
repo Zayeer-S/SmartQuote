@@ -6,8 +6,8 @@ import {
   PasswordValidationError,
   AUTH_ERROR_MSGS,
 } from '../../../src/server/services/auth/auth.errors';
-import type { UsersDAO } from '../../../src/server/daos/children/users.dao';
-import type { OrganizationMembersDAO } from '../../../src/server/daos/children/organizations.domain.dao';
+import type { UsersDAO } from '../../../src/server/daos/children/users-domain.dao';
+import type { OrganizationMembersDAO } from '../../../src/server/daos/children/organizations-domain.dao';
 import type { SessionService } from '../../../src/server/services/auth/session.service';
 import type { PasswordService } from '../../../src/server/services/auth/password.service';
 import type { UserId } from '../../../src/server/database/types/ids';

@@ -18,7 +18,7 @@ import type {
 import type { OrganizationId, UserId } from '../database/types/ids.js';
 import type { Organization, OrganizationMember } from '../database/types/tables.js';
 import type { OrgService } from '../services/org/org.service.js';
-import type { OrgMembersService } from '../services/org/org.members.service.js';
+import type { OrgMembersService } from '../services/org/org-members.service.js';
 
 export class OrgController {
   private orgService: OrgService;

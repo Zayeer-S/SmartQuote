@@ -9,7 +9,7 @@ import type {
   NotifyQuoteGeneratedData,
   NotifyTicketReceivedData,
   NotifyTicketResolvedData,
-} from './notification.types.js';
+} from './notification.service.types.js';
 
 export class NotificationService {
   private emailService: EmailService;

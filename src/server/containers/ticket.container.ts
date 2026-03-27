@@ -9,8 +9,8 @@ import { QuotesDAO } from '../daos/children/quotes-domain.dao.js';
 import { TicketService } from '../services/ticket/ticket.service.js';
 import { CommentService } from '../services/ticket/comment.service.js';
 import { AttachmentService } from '../services/ticket/attachment.service.js';
-import { TicketPriorityEngine } from '../services/ticket/ticket.priority.engine.js';
-import { TicketSimilarityService } from '../services/ticket/ticket.similarity.service.js';
+import { TicketPriorityEngineService } from '../services/ticket/ticket-priority-engine.service.js';
+import { TicketSimilarityService } from '../services/ticket/ticket-similarity.service.js';
 import { TicketController } from '../controllers/ticket.controller.js';
 import { RBACService } from '../services/rbac/rbac.service.js';
 import { LookupResolver } from '../lib/lookup-resolver.js';
@@ -22,8 +22,8 @@ import {
 } from '../daos/children/ticket-nlp.dao.js';
 import { OrganizationMembersDAO } from '../daos/children/organizations-domain.dao.js';
 import type { StorageService } from '../services/storage/storage.service.js';
-import { LocalStorageService } from '../services/storage/local.storage.service.js';
-import { S3StorageService } from '../services/storage/s3.storage.service.js';
+import { LocalStorageService } from '../services/storage/local-storage.service.js';
+import { S3StorageService } from '../services/storage/s3-storage.service.js';
 import { FILE_STORAGE_TYPES } from '../../shared/constants/index.js';
 import type { FileStorageType } from '../../shared/constants/lookup-values.js';
 import { backEnv } from '../config/env.backend.js';
@@ -41,7 +41,7 @@ export class TicketContainer {
   public readonly priorityThresholdsDAO: TicketPriorityThresholdsDAO;
 
   public readonly storageService: StorageService;
-  public readonly priorityEngine: TicketPriorityEngine;
+  public readonly priorityEngine: TicketPriorityEngineService;
   public readonly attachmentService: AttachmentService;
   public readonly similarityService: TicketSimilarityService;
   public readonly ticketService: TicketService;
@@ -95,7 +95,7 @@ export class TicketContainer {
       storageTypeName = FILE_STORAGE_TYPES.LOCAL;
     }
 
-    this.priorityEngine = new TicketPriorityEngine(
+    this.priorityEngine = new TicketPriorityEngineService(
       this.priorityRulesDAO,
       this.priorityThresholdsDAO,
       embedder,

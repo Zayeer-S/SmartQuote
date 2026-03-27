@@ -14,7 +14,7 @@ import type {
   PriorityEngineInput,
   PriorityRule,
   PriorityThreshold,
-} from './ticket.priority.engine.types.js';
+} from './ticket-priority-engine.service.types.js';
 import type { Knex } from 'knex';
 
 // TODO
@@ -25,7 +25,7 @@ interface ConfigRow {
 
 type RuleMap = Map<string, Map<string, number>>;
 
-export class TicketPriorityEngine {
+export class TicketPriorityEngineService {
   private rulesDAO: TicketPriorityRulesDAO;
   private thresholdsDAO: TicketPriorityThresholdsDAO;
   private embedder: BertEmbedder | null;

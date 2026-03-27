@@ -10,7 +10,7 @@ import type {
   QuoteWithApproval,
 } from '../database/types/tables.js';
 import type { QuoteService } from '../services/quote/quote.service.js';
-import type { QuoteEngineService } from '../services/quote/quote.engine.service.js';
+import type { QuoteEngineService } from '../services/quote/quote-engine.service.js';
 import {
   approveQuoteSchema,
   createManualQuoteSchema,

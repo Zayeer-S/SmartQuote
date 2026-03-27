@@ -1,4 +1,4 @@
-import { PERMISSIONS, TICKET_STATUSES } from '../../../shared/constants';
+import { PERMISSIONS, TICKET_STATUSES } from '../../../shared/constants/index.js';
 import type { Knex } from 'knex';
 import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types.js';
 import type { TicketsDAO } from '../../daos/children/tickets-domain.dao.js';
@@ -12,12 +12,12 @@ import type {
   CreateTicketData,
   ListTicketsFilters,
   UpdateTicketData,
-} from './ticket.service.types.js';
-import type { TicketPriorityEngine } from './ticket.priority.engine.js';
+} from './ticket-service.types.js';
+import type { TicketPriorityEngineService } from './ticket-priority-engine.service.js';
 import type { AttachmentService } from './attachment.service.js';
 import type { IncomingFile } from '../storage/storage.service.types.js';
 import { OrganizationMembersDAO } from '../../daos/children/organizations-domain.dao.js';
-import type { TicketSimilarityService } from './ticket.similarity.service.js';
+import type { TicketSimilarityService } from './ticket-similarity.service.js';
 import type { NotificationService } from '../notification/notification.service.js';
 
 export class TicketService {
@@ -27,7 +27,7 @@ export class TicketService {
   private orgMembersDAO: OrganizationMembersDAO;
   private rbacService: RBACService;
   private lookup: LookupResolver;
-  private priorityEngine: TicketPriorityEngine;
+  private priorityEngine: TicketPriorityEngineService;
   private attachmentService: AttachmentService;
   private similarityService: TicketSimilarityService;
   private notificationService: NotificationService;
@@ -39,7 +39,7 @@ export class TicketService {
     orgMembersDAO: OrganizationMembersDAO,
     rbacService: RBACService,
     lookup: LookupResolver,
-    priorityEngine: TicketPriorityEngine,
+    priorityEngine: TicketPriorityEngineService,
     attachmentService: AttachmentService,
     similarityService: TicketSimilarityService,
     notificationService: NotificationService

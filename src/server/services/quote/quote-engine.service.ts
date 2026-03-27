@@ -1,4 +1,4 @@
-import { BUSINESS_HOURS, PERMISSIONS, QUOTE_CREATORS } from '../../../shared/constants';
+import { BUSINESS_HOURS, PERMISSIONS, QUOTE_CREATORS } from '../../../shared/constants/index.js';
 import type { InsertData, TransactionContext } from '../../daos/base/types.js';
 import type { QuoteCalculationRulesDAO, QuotesDAO } from '../../daos/children/quotes-domain.dao.js';
 import type { RateProfilesDAO } from '../../daos/children/rate-profiles.dao.js';
