@@ -2,17 +2,17 @@ import { backEnv } from './env.backend';
 
 export interface EmailConfig {
   smtp: {
-    host: string;
-    port: number;
-    secure: boolean;
+    host?: string;
+    port?: number;
+    secure?: boolean;
     auth: {
-      user: string;
-      pass: string;
+      user?: string;
+      pass?: string;
     };
   };
   from: {
-    name: string;
-    address: string;
+    name?: string;
+    address?: string;
   };
   enabled: boolean;
 }
@@ -31,5 +31,5 @@ export const emailConfig: EmailConfig = {
     name: 'SmartQuote Support',
     address: backEnv.SMTP_USER,
   },
-  enabled: backEnv.NODE_ENV !== 'test',
+  enabled: backEnv.NODE_ENV !== 'test' && !!backEnv.SMTP_HOST && !!backEnv.SMTP_USER,
 };
