@@ -3,53 +3,53 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-brand-surface-muted);
-  padding: var(--spacing-xl);
-  font-family: var(--font-sans);
+  background-color: var(--color-bg-subtle);
+  padding: var(--space-8);
+  font-family: var(--font-primary);
 }
 
 .cant-access-card {
   width: 100%;
   max-width: 420px;
-  padding: 48px 52px;
-  border-radius: var(--radius-3xl);
-  background-color: var(--color-brand-surface);
+  padding: var(--space-12) var(--space-14);
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-surface);
   box-shadow: var(--shadow-xl);
 }
 
 .cant-access-logo {
   font-family: var(--font-display);
   font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-normal);
-  letter-spacing: 0.1em;
+  font-weight: var(--font-weight-light);
+  letter-spacing: var(--letter-spacing-wider);
   text-transform: uppercase;
-  color: var(--color-primary-600);
-  margin-bottom: var(--spacing-xl);
+  color: var(--color-interactive);
+  margin-bottom: var(--space-8);
   display: block;
 }
 
 .cant-access-title {
   font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semi-bold);
   color: var(--color-text-primary);
-  letter-spacing: -0.02em;
-  margin-bottom: var(--spacing-md);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-4);
 }
 
 .cant-access-body {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: var(--line-height-relaxed);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-8);
 }
 
 .cant-access-back {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-2);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary-600);
+  color: var(--color-interactive);
   transition: opacity var(--transition-fast);
 }
 
@@ -58,19 +58,19 @@
 }
 
 [data-theme='dark'] .cant-access-page {
-  background-color: var(--color-gray-900);
+  background-color: var(--color-bg);
 }
 
 [data-theme='dark'] .cant-access-card {
-  background-color: var(--color-gray-800);
+  background-color: var(--color-surface-raised);
   box-shadow: none;
-  border: 1px solid var(--color-gray-700);
+  border: 1px solid var(--color-border);
 }
 
 [data-theme='dark'] .cant-access-title {
-  color: var(--color-gray-50);
+  color: var(--color-text-primary);
 }
 
 [data-theme='dark'] .cant-access-body {
-  color: var(--color-gray-400);
+  color: var(--color-text-secondary);
 }

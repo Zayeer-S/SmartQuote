@@ -1,24 +1,24 @@
-/* ─────────────────────────────────────────────
+/* -----------------------------------------------
    Admin quote detail page
    Breadcrumb styles live in AdminLayout.css
-───────────────────────────────────────────── */
+----------------------------------------------- */
 
 .admin-quote-detail-header {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-8);
 }
 
 .admin-quote-detail-title {
   font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semi-bold);
   color: var(--color-text-primary);
-  letter-spacing: -0.02em;
-  margin-bottom: var(--spacing-sm);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-2);
 }
 
 .admin-quote-detail-meta {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
 }
 
 .admin-quote-detail-org {
@@ -26,8 +26,6 @@
   color: var(--color-text-secondary);
 }
 
-/* Dark mode */
-
 [data-theme='dark'] .admin-quote-detail-title {
-  color: var(--color-gray-50);
+  color: var(--color-text-primary);
 }

@@ -1,15 +1,15 @@
 .analytics-section {
-  padding: var(--spacing-xl) 0;
-  border-top: 1px solid var(--color-border-primary);
+  padding: var(--space-8) 0;
+  border-top: 1px solid var(--color-border);
 }
 
 .analytics-section-heading {
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semi-bold);
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: var(--spacing-lg);
+  letter-spacing: var(--letter-spacing-wide);
+  margin-bottom: var(--space-6);
 }
 
 .chart-placeholder {
@@ -17,14 +17,14 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  border: 2px dashed var(--color-border-secondary);
+  border: 2px dashed var(--color-border);
   border-radius: var(--radius-xl);
-  background-color: var(--color-bg-tertiary);
+  background-color: var(--color-bg-subtle);
 }
 
 .chart-placeholder-text {
   font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -38,27 +38,27 @@
 
 .analytics-header-actions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
   align-items: center;
 }
 
 .export-btn {
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: var(--space-1) var(--space-3);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-primary);
-  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   color: var(--color-text-primary);
   cursor: pointer;
   transition:
-    background 0.15s,
-    border-color 0.15s;
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .export-btn:hover {
-  background: var(--color-bg-tertiary);
-  border-color: var(--color-border-secondary);
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border-strong);
 }
 
 /* --- Date range filter --- */
@@ -67,58 +67,58 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
 .date-range-presets {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--space-1);
 }
 
 .date-range-preset-btn {
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: var(--space-1) var(--space-3);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-border-primary);
-  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition:
-    border-color 0.15s,
-    color 0.15s,
-    background 0.15s;
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .date-range-preset-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: var(--color-interactive);
+  color: var(--color-interactive);
 }
 
 .date-range-preset-btn.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-on-primary);
+  background: var(--color-interactive);
+  border-color: var(--color-interactive);
+  color: var(--color-text-on-accent);
 }
 
 .date-range-custom {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-1);
 }
 
 .date-range-label {
   font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
 }
 
 .date-range-input {
   font-size: var(--font-size-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-primary);
-  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   color: var(--color-text-primary);
 }
 
@@ -127,7 +127,7 @@
 .analytics-charts-grid {
   display: grid;
   grid-template-columns: 200px 1fr;
-  gap: var(--spacing-lg);
+  gap: var(--space-6);
   align-items: start;
 }
 
@@ -142,15 +142,15 @@
 .analytics-pie-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
 }
 
 .chart-panel-heading {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semi-bold);
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--letter-spacing-wide);
   margin: 0;
 }
 
@@ -159,11 +159,11 @@
 .analytics-carousel-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  border: 1px solid var(--color-border-primary);
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: var(--spacing-lg);
-  background: var(--color-bg-secondary);
+  padding: var(--space-6);
+  background: var(--color-surface);
   min-height: 260px;
 }
 
@@ -176,7 +176,7 @@
 .carousel-controls {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
 }
 
 .carousel-arrow {
@@ -186,24 +186,24 @@
   width: 28px;
   height: 28px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-primary);
-  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
   color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition:
-    background 0.15s,
-    border-color 0.15s;
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .carousel-arrow:hover {
-  background: var(--color-bg-tertiary);
-  border-color: var(--color-border-secondary);
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border-strong);
 }
 
 .carousel-indicator {
   font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   min-width: 36px;
   text-align: center;
 }
@@ -220,7 +220,7 @@
 .chart-inner {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--space-1);
 }
 
 .chart-summary-text {
@@ -236,58 +236,58 @@
 .chart-loading-text,
 .chart-empty-text {
   font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   text-align: center;
-  padding: var(--spacing-xl) 0;
+  padding: var(--space-8) 0;
   margin: 0;
 }
 
 /* --- Dark mode --- */
 
 [data-theme='dark'] .analytics-section {
-  border-top-color: var(--color-gray-700);
+  border-top-color: var(--color-border);
 }
 
 [data-theme='dark'] .analytics-section-heading {
-  color: var(--color-gray-400);
+  color: var(--color-text-secondary);
 }
 
 [data-theme='dark'] .chart-placeholder {
-  border-color: var(--color-gray-600);
-  background-color: var(--color-gray-800);
+  border-color: var(--color-border-strong);
+  background-color: var(--color-surface-raised);
 }
 
 [data-theme='dark'] .analytics-carousel-panel {
-  border-color: var(--color-gray-700);
-  background: var(--color-gray-800);
+  border-color: var(--color-border);
+  background: var(--color-surface-raised);
 }
 
 [data-theme='dark'] .carousel-arrow {
-  border-color: var(--color-gray-600);
-  background: var(--color-gray-700);
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-overlay);
 }
 
 [data-theme='dark'] .carousel-arrow:hover {
-  background: var(--color-gray-600);
-  border-color: var(--color-gray-500);
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
 }
 
 [data-theme='dark'] .export-btn {
-  border-color: var(--color-gray-600);
-  background: var(--color-gray-800);
+  border-color: var(--color-border);
+  background: var(--color-surface-raised);
 }
 
 [data-theme='dark'] .export-btn:hover {
-  background: var(--color-gray-700);
-  border-color: var(--color-gray-500);
+  background: var(--color-surface-overlay);
+  border-color: var(--color-border-strong);
 }
 
 [data-theme='dark'] .date-range-preset-btn {
-  border-color: var(--color-gray-600);
-  background: var(--color-gray-800);
+  border-color: var(--color-border);
+  background: var(--color-surface-raised);
 }
 
 [data-theme='dark'] .date-range-input {
-  border-color: var(--color-gray-600);
-  background: var(--color-gray-800);
+  border-color: var(--color-border);
+  background: var(--color-surface-raised);
 }
