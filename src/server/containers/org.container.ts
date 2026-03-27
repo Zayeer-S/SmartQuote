@@ -4,7 +4,7 @@ import {
   OrganizationMembersDAO,
 } from '../daos/children/organizations.domain.dao.js';
 import { OrgPermissionsDAO } from '../daos/children/permissions.dao.js';
-import { RolesDAO, OrgRolesDAO } from '../daos/children/roles.dao.js';
+import { RolesDAO, OrgRolesDAO } from '../daos/children/roles-domain.dao.js';
 import { UsersDAO } from '../daos/children/users.domain.dao.js';
 import type { RBACService } from '../services/rbac/rbac.service.js';
 import { OrgRBACService } from '../services/rbac/org.rbac.service.js';

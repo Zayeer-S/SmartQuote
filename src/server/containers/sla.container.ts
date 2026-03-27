@@ -5,7 +5,7 @@ import {
   OrganizationMembersDAO,
 } from '../daos/children/organizations.domain.dao.js';
 import { UsersDAO } from '../daos/children/users.domain.dao.js';
-import { RolesDAO } from '../daos/children/roles.dao.js';
+import { RolesDAO } from '../daos/children/roles-domain.dao.js';
 import type { RBACService } from '../services/rbac/rbac.service.js';
 import { SlaService } from '../services/sla/sla.service.js';
 import { SlaController } from '../controllers/sla.controller.js';

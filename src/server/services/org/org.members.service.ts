@@ -4,7 +4,7 @@ import type {
   OrganizationMembersDAO,
   OrganizationsDAO,
 } from '../../daos/children/organizations.domain.dao.js';
-import type { OrgRolesDAO, RolesDAO } from '../../daos/children/roles.dao.js';
+import type { OrgRolesDAO, RolesDAO } from '../../daos/children/roles-domain.dao.js';
 import type { UsersDAO } from '../../daos/children/users.domain.dao.js';
 import type { OrganizationId, UserId } from '../../database/types/ids.js';
 import type { Organization, OrganizationMember } from '../../database/types/tables.js';
