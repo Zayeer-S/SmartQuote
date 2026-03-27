@@ -55,8 +55,6 @@ smartquote/
 │   │   │       ├── theme.context.types.ts
 │   │   │       └── ThemeContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
-│   │   │   ├── BaseTicketCard.css
-│   │   │   ├── BaseTicketCard.tsx
 │   │   │   ├── admin/
 │   │   │   │   ├── analytics/
 │   │   │   │   │   ├── DateRangeFilter.tsx
