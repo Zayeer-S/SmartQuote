@@ -1,8 +1,5 @@
 import { useContext } from 'react';
-import {
-  SidebarContext,
-  type SidebarContextValue,
-} from '../../context/sidebar/sidebar.context.types.js';
+import { SidebarContext, type SidebarContextValue } from '../../context/sidebar.context.types.js';
 
 /**
  * Hook to access sidebar context

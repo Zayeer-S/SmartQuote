@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { tokenStorage } from '../../lib/storage/tokenStorage.js';
-import { authAPI } from '../../lib/api/auth.api.js';
+import { tokenStorage } from '../lib/storage/tokenStorage.js';
+import { authAPI } from '../lib/api/auth.api.js';
 import {
   AuthContext,
   type AuthContextValue,

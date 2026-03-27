@@ -1,24 +1,21 @@
 smartquote/
 ├── .github/
 │   ├── actions/
-│   │   └── actions/
-│   │       ├── code-quality/
-│   │       └── setup/
+│   │   ├── code-quality/
+│   │   └── setup/
 │   └── workflows/
 │       ├── cd.yml
 │       ├── ci-e2e.yml
 │       └── ci-unit-integaration.yml
 │
-├── .husky/
-│   └── pre-commit/                                 # Lint-staged
+├── .husky/pre-commit/                              # Lint-staged
 │
 ├── docs/
 │   ├── STRUCTURE.md
 │   └── TEAM_GUIDE.md
 │
 ├── infra/                                          # CDK - only include custom files here
-│   ├── bin/
-│   │   └── infra.ts
+│   ├── bin/infra.ts
 │   └── lib/
 │       ├── app-stack.ts
 │       ├── certificate-stack.ts
@@ -38,22 +35,15 @@ smartquote/
 │   │   │       ├── giacom-logo-webp.ts
 │   │   │       ├── MiscIcons.ts
 │   │   │       └── LoginIcons.tsx
-│   │   ├── config/                                 # Environment and config values only; no runtime logic
-│   │   │   ├── index.ts
-│   │   │   └── env.frontend.ts
-│   │   ├── constants/
-│   │   │   └── client.routes.ts
+│   │   ├── config/env.frontend.ts                  # Environment and config values only; no runtime logic
+│   │   ├── constants/client.routes.ts
 │   │   ├── contexts/
-│   │   │   ├── auth/
-│   │   │   │   ├── auth.context.types.ts
-│   │   │   │   └── AuthContext.ts
-│   │   │   ├── sidebar/
-│   │   │   │   ├── sidebar.context.types.ts
-│   │   │   │   └── SidebarContext.ts
-│   │   │   └── theme/
-│   │   │       ├── index.ts # TODO REMOVE
-│   │   │       ├── theme.context.types.ts
-│   │   │       └── ThemeContext.ts
+│   │   │   ├── auth.context.types.ts
+│   │   │   ├── AuthContext.ts
+│   │   │   ├── sidebar.context.types.ts
+│   │   │   ├── SidebarContext.ts
+│   │   │   ├── theme.context.types.ts
+│   │   │   └── ThemeContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
 │   │   │   ├── admin/
 │   │   │   │   ├── analytics/
@@ -105,6 +95,7 @@ smartquote/
 │   │   │       ├── BaseTicketCard.tsx
 │   │   │       ├── BaseTicketList.css
 │   │   │       ├── BaseTicketList.tsx
+│   │   │       ├── StatsOverview.css
 │   │   │       ├── StatsOverview.tsx
 │   │   │       ├── TicketCommentTimeline.css
 │   │   │       └── TicketCommentTimeline.tsx
@@ -185,24 +176,36 @@ smartquote/
 │   │   │       └── export-pdf.ts
 │   │   ├── pages/                                  # Route level composition (no logic, only assemble features)
 │   │   │   ├── admin/
-│   │   │   │   ├── AdminAnalyticsPage.css
-│   │   │   │   ├── AdminAnalyticsPage.tsx
 │   │   │   │   ├── AdminLayout.css
 │   │   │   │   ├── AdminLayout.tsx
-│   │   │   │   ├── AdminQuoteDetailPage.css
-│   │   │   │   ├── AdminQuoteDetailPage.tsx
-│   │   │   │   ├── AdminQuotesPage.css
-│   │   │   │   ├── AdminQuotesPage.tsx
-│   │   │   │   ├── AdminSettingsPage.css
-│   │   │   │   ├── AdminSettingsPage.tsx
-│   │   │   │   ├── AdminSLAPoliciesPage.css
-│   │   │   │   ├── AdminSLAPoliciesPage.tsx
-│   │   │   │   ├── AdminTicketDetailPage.css
-│   │   │   │   ├── AdminTicketDetailPage.tsx
-│   │   │   │   ├── AdminTicketsPage.css
-│   │   │   │   ├── AdminTicketsPage.tsx
-│   │   │   │   ├── RateProfileModal.css
-│   │   │   │   └── RateProfileModal.tsx
+│   │   │   │   ├── analytics/
+│   │   │   │   │   ├── AdminAnalyticsPage.css
+│   │   │   │   │   └── AdminAnalyticsPage.tsx
+│   │   │   │   ├── orgs/
+│   │   │   │   │   ├── AdminOrgsMembersPage.css
+│   │   │   │   │   ├── AdminOrgsMembersPage.tsx
+│   │   │   │   │   ├── AdminOrgsPage.css
+│   │   │   │   │   └── AdminOrgsPage.tsx
+│   │   │   │   ├── quote/
+│   │   │   │   │   ├── AdminQuoteDetailPage.css
+│   │   │   │   │   └── AdminQuoteDetailPage.tsx
+│   │   │   │   ├── rate-profiles/
+│   │   │   │   │   ├── AdminRateProfilesPage.css
+│   │   │   │   │   └── AdminRateProfilesPage.tsx
+│   │   │   │   ├── sla/
+│   │   │   │   │   ├── AdminSLAPoliciesPage.css
+│   │   │   │   │   └── AdminSLAPoliciesPage.tsx
+│   │   │   │   ├── system-config/
+│   │   │   │   │   ├── AdminSystemConfigPage.css
+│   │   │   │   │   └── AdminSystemConfigPage.tsx
+│   │   │   │   ├── tickets/
+│   │   │   │   │   ├── AdminTicketDetailPage.css
+│   │   │   │   │   ├── AdminTicketDetailPage.tsx
+│   │   │   │   │   ├── AdminTicketsPage.css
+│   │   │   │   │   └── AdminTicketsPage.tsx
+│   │   │   │   └── user-management/
+│   │   │   │       ├── AdminUserManagementPage.css
+│   │   │   │       └── AdminUserManagementPage.tsx
 │   │   │   ├── customer/
 │   │   │   │   ├── CustomerLayout.css
 │   │   │   │   ├── CustomerLayout.tsx
@@ -212,14 +215,18 @@ smartquote/
 │   │   │   │   ├── DashboardPage.tsx
 │   │   │   │   ├── TicketDetailPage.tsx
 │   │   │   │   └── TicketsPage.tsx
-│   │   │   ├── login/
+│   │   │   ├── misc/
+│   │   │   │   ├── CantAccessPage.css
+│   │   │   │   ├── CantAccessPage.tsx
+│   │   │   │   ├── InsufficientPermissionsPage.css # STUBS: TODO
+│   │   │   │   ├── InsufficientPermissionPage.tsx  # STUBS: TODO
 │   │   │   │   ├── LoginPage.css
-│   │   │   │   └── LoginPage.tsx
-│   │   │   └── misc/
-│   │   │       ├── CantAccessPage.css
-│   │   │       ├── CantAccessPage.tsx
-│   │   │       ├── NotFoundPage.css
-│   │   │       └── NotFoundPage.tsx
+│   │   │   │   ├── LoginPage.tsx
+│   │   │   │   ├── NotFoundPage.css
+│   │   │   │   └── NotFoundPage.tsx
+│   │   │   └── shared/
+│   │   │       ├── SettingsPage.css
+│   │   │       └── SettingsPage.tsx
 │   │   └── styles/
 │   │       ├── buttons.css
 │   │       ├── cards.css
