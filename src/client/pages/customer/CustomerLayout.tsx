@@ -4,27 +4,15 @@ import { useAuth } from '../../hooks/contexts/useAuth.js';
 import { useSidebar } from '../../hooks/contexts/useSidebar.js';
 import Sidebar, { type SidebarNavItem } from '../../components/sidebar/Sidebar.js';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
-import {
-  IconDashboard,
-  IconOrganisation,
-  IconSettings,
-  IconTickets,
-} from '../../components/icons/MiscIcons.js';
+import { IconDashboard, IconOrganisation, IconSettings } from '../../components/icons/MiscIcons.js';
 import './CustomerLayout.css';
 
 const CUSTOMER_NAV_ITEMS: SidebarNavItem[] = [
   {
     to: CLIENT_ROUTES.CUSTOMER.ROOT,
-    label: 'Dashboard',
+    label: 'Home',
     icon: <IconDashboard />,
     testId: 'nav-dashboard',
-    end: true,
-  },
-  {
-    to: CLIENT_ROUTES.CUSTOMER.ROOT,
-    label: 'My Tickets',
-    icon: <IconTickets />,
-    testId: 'nav-tickets',
     end: true,
   },
   {

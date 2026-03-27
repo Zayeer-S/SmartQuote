@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import { useTicketFilters } from '../../hooks/useTicketFilters.js';
 import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
-import CustomerTicketCard from './CustomerTicketCard.js';
+import CustomerTicketCard from '../customer/dashboard/CustomerTicketCard.js';
 import TicketFilters from '../collate/TicketFilters.js';
 import TicketPagination from '../collate/TicketPagination.js';
 import './TicketList.css';
