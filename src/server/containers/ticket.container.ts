@@ -2,7 +2,6 @@ import type { Knex } from 'knex';
 import { TicketsDAO } from '../daos/children/tickets.dao.js';
 import { TicketCommentsDAO } from '../daos/children/ticket.comments.dao.js';
 import { TicketAttachmentsDAO } from '../daos/children/ticket.attachments.dao.js';
-import { TicketEmbeddingsDAO } from '../daos/children/ticket.embeddings.dao.js';
 import { UsersDAO } from '../daos/children/users.domain.dao.js';
 import { QuotesDAO } from '../daos/children/quotes.dao.js';
 import { TicketService } from '../services/ticket/ticket.service.js';
@@ -15,9 +14,10 @@ import { RBACService } from '../services/rbac/rbac.service.js';
 import { LookupResolver } from '../lib/lookup-resolver.js';
 import type { BertEmbedder } from '../lib/nlp/bert-embedder.js';
 import {
+  TicketEmbeddingsDAO,
   TicketPriorityRulesDAO,
   TicketPriorityThresholdsDAO,
-} from '../daos/children/ticket.priority.dao.js';
+} from '../daos/children/ticket.nlp.dao.js';
 import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
 import type { StorageService } from '../services/storage/storage.service.js';
 import { LocalStorageService } from '../services/storage/local.storage.service.js';
