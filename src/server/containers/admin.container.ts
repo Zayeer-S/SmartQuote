@@ -3,7 +3,7 @@ import { RBACService } from '../services/rbac/rbac.service.js';
 import { AdminController } from '../controllers/admin.controller.js';
 import type { AuthService } from '../services/auth/auth.service.js';
 import { UsersDAO } from '../daos/children/users.domain.dao.js';
-import { PermissionsDAO } from '../daos/children/permissions.dao.js';
+import { PermissionsDAO } from '../daos/children/permissions-domain.dao.js';
 import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
 
 export class AdminContainer {
