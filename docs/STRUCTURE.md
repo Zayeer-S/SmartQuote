@@ -288,7 +288,7 @@ smartquote/
 │   │   │       └── users-domain.dao.ts
 │   │   ├── database/                               # Connection, migrations, and schema definitions only.
 │   │   │   ├── connection.ts
-│   │   │   ├── migration-utils.ts
+│   │   │   ├── migration.utils.ts
 │   │   │   ├── config/table-names.ts
 │   │   │   ├── migrations/
 │   │   │   │   ├── 001_create_lookup_tables.ts

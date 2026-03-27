@@ -139,7 +139,7 @@ export class AppStack extends cdk.Stack {
           beforeInstall: () => [],
           afterBundling: (inputDir: string, outputDir: string) => [
             `cp -r ${inputDir}/../dist-db/server/database/migrations ${outputDir}/migrations`,
-            `cp ${inputDir}/../dist-db/server/database/migration-utils.js ${outputDir}/migration-utils.js`,
+            `cp ${inputDir}/../dist-db/server/database/migration.utils.js ${outputDir}/migration.utils.js`,
             `echo '{"type":"module"}' > ${outputDir}/migrations/package.json`,
             `echo '{"type":"module"}' > ${outputDir}/package.json`,
           ],
