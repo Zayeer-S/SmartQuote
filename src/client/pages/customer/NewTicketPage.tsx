@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import SubmitTicketForm from '../../features/tickets/SubmitTicketForm.js';
+import SubmitTicketForm from '../../features/customer/dashboard/SubmitTicketForm.js';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 
 const NewTicketPage: React.FC = () => {

@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { useCreateTicket } from '../../hooks/tickets/useCreateTicket.js';
-import { ticketAPI } from '../../lib/api/ticket.api.js';
+import { useCreateTicket } from '../../../hooks/tickets/useCreateTicket.js';
+import { ticketAPI } from '../../../lib/api/ticket.api.js';
 import {
   TICKET_TYPES,
   TICKET_SEVERITIES,
   BUSINESS_IMPACTS,
   ATTACHMENT_CONFIG,
-} from '../../../shared/constants/lookup-values.js';
+} from '../../../../shared/constants/lookup-values.js';
 import type {
   TicketType,
   TicketSeverity,
   BusinessImpact,
-} from '../../../shared/constants/lookup-values.js';
-import type { CreateTicketRequest } from '../../../shared/contracts/ticket-contracts.js';
+} from '../../../../shared/constants/lookup-values.js';
+import type { CreateTicketRequest } from '../../../../shared/contracts/ticket-contracts.js';
 import './SubmitTicketForm.css';
 
 interface SubmitTicketFormProps {

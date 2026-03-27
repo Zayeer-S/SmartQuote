@@ -1,23 +1,18 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import { useTicketFilters } from '../../hooks/useTicketFilters.js';
+import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
 import CustomerTicketCard from './CustomerTicketCard.js';
-import TicketFilters from './TicketFilters.js';
-import TicketPagination from './TicketPagination.js';
+import TicketFilters from '../collate/TicketFilters.js';
+import TicketPagination from '../collate/TicketPagination.js';
 import './TicketList.css';
 
-const TicketList: React.FC = () => {
-  const { execute, data, loading, error } = useListTickets();
+interface TicketListProps {
+  tickets: TicketSummaryResponse[];
+}
 
-  useEffect(() => {
-    void execute();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const allTickets = data?.tickets ?? [];
-
+const TicketList: React.FC<TicketListProps> = ({ tickets }) => {
   const {
     filteredTickets,
     search,
@@ -30,25 +25,9 @@ const TicketList: React.FC = () => {
     setPage,
     totalPages,
     clearFilters,
-  } = useTicketFilters(allTickets);
+  } = useTicketFilters(tickets);
 
-  if (loading) {
-    return (
-      <p className="loading-text" data-testid="tickets-loading">
-        Loading tickets...
-      </p>
-    );
-  }
-
-  if (error) {
-    return (
-      <p className="feedback-error" role="alert" data-testid="tickets-error">
-        {error}
-      </p>
-    );
-  }
-
-  if (allTickets.length === 0) {
+  if (tickets.length === 0) {
     return (
       <div className="empty-state" data-testid="tickets-empty">
         <p className="empty-state-message">You have no tickets yet.</p>

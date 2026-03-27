@@ -1,8 +1,8 @@
 .ticket-filters {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
   flex-wrap: wrap;
 }
 
@@ -23,6 +23,6 @@
   }
 
   .ticket-filters-select {
-    width: calc(50% - var(--spacing-xs));
+    width: calc(50% - var(--space-1));
   }
 }

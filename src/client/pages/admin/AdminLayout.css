@@ -1,189 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap');
+/* ==========================================================================
+   AdminLayout.css
+   Grid shell only -- sidebar styles live in Sidebar.css.
+
+   NOTE: .breadcrumb and .admin-table styles live here temporarily.
+   These are shared UI patterns and should be extracted to their own files
+   (e.g. Breadcrumb.css, AdminTable.css) once those components are isolated.
+   ========================================================================== */
 
 .admin-layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: var(--sidebar-width-expanded) 1fr;
   min-height: 100vh;
-  font-family: 'Montserrat', Arial, sans-serif;
-  background-color: #f4f2f8;
+  background-color: var(--color-bg-subtle);
+  transition: grid-template-columns var(--transition-slow);
+}
+
+.admin-layout--sidebar-collapsed {
+  grid-template-columns: var(--sidebar-width-collapsed) 1fr;
 }
 
 .admin-main {
   overflow-y: auto;
-  padding: 40px 48px;
-  background-color: #f4f2f8;
+  padding: var(--space-10) var(--space-12);
+  background-color: var(--color-bg-subtle);
   min-height: 100vh;
 }
 
-.admin-nav {
-  display: flex;
-  flex-direction: column;
-  width: 240px;
-  min-height: 100vh;
-  flex-shrink: 0;
-  background: linear-gradient(180deg, #100235 0%, #1d0a4a 60%, #67236a 100%);
-  padding: 28px 14px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.admin-nav-brand {
-  padding: 0 10px;
-  margin-bottom: 40px;
-}
-
-.admin-nav-logo {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  display: block;
-  line-height: 1;
-}
-
-.admin-nav-logo-dot {
-  color: #ec008c;
-}
-
-.admin-nav-sub {
-  font-size: 0.62rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.3);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-top: 5px;
-  display: block;
-}
-
-.admin-nav-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.admin-nav-link {
-  display: flex;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.45);
-  text-decoration: none;
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease;
-  border-left: 3px solid transparent;
-}
-
-.admin-nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.admin-nav-link--active {
-  background: rgba(236, 0, 140, 0.15);
-  color: #ffffff;
-  border-left-color: #ec008c;
-  font-weight: 600;
-}
-
-.admin-nav-link--active:hover {
-  background: rgba(236, 0, 140, 0.15);
-}
-
-.admin-nav-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  margin-top: auto;
-}
-
-.admin-nav-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px;
-}
-
-.admin-nav-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #99338a, #ec008c);
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 0.82rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.admin-nav-user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.admin-nav-user-name {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #ffffff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.admin-nav-user-role {
-  font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.3);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.admin-nav-signout {
-  width: 100%;
-  padding: 9px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.4);
-  font-family: 'Montserrat', Arial, sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease;
-}
-
-.admin-nav-signout:hover:not(:disabled) {
-  background-color: rgba(236, 0, 140, 0.1);
-  color: rgba(255, 255, 255, 0.8);
-  border-color: rgba(236, 0, 140, 0.25);
-}
-
+/* ==========================================================================
+   Breadcrumb -- TODO: extract to Breadcrumb.css when component is isolated
+   ========================================================================== */
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xl);
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
   flex-wrap: wrap;
 }
 
@@ -195,12 +45,12 @@
 }
 
 .breadcrumb-link:hover {
-  color: var(--color-primary-600);
+  color: var(--color-interactive-hover);
 }
 
 .breadcrumb-sep {
   font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-muted);
   user-select: none;
 }
 
@@ -210,6 +60,9 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* ==========================================================================
+   Admin table -- TODO: extract to AdminTable.css when component is isolated
+   ========================================================================== */
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -219,18 +72,18 @@
 .admin-table th {
   text-align: left;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.06em;
+  font-weight: var(--font-weight-semi-bold);
+  letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
   color: var(--color-text-secondary);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid var(--color-border-primary);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
   white-space: nowrap;
 }
 
 .admin-table td {
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border-primary);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
   color: var(--color-text-primary);
   vertical-align: middle;
 }
@@ -240,123 +93,53 @@
 }
 
 .admin-table tbody tr:hover td {
-  background-color: var(--color-bg-hover);
+  background-color: var(--color-bg-subtle);
 }
 
 .admin-table-actions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--space-2);
   align-items: center;
 }
 
-[data-theme='dark'] .admin-layout {
-  background-color: #0f0a1a;
-}
-
+[data-theme='dark'] .admin-layout,
 [data-theme='dark'] .admin-main {
-  background-color: #0f0a1a;
-}
-
-[data-theme='dark'] .admin-nav {
-  background: linear-gradient(180deg, #0a001e 0%, #100235 60%, #3d1244 100%);
+  background-color: var(--color-bg);
 }
 
 [data-theme='dark'] .admin-table th {
-  color: var(--color-gray-400);
-  border-bottom-color: var(--color-gray-700);
+  color: var(--color-text-secondary);
+  border-bottom-color: var(--color-border);
 }
 
 [data-theme='dark'] .admin-table td {
-  color: var(--color-gray-100);
-  border-bottom-color: var(--color-gray-700);
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-border);
 }
 
 [data-theme='dark'] .admin-table tbody tr:hover td {
-  background-color: var(--color-gray-800);
+  background-color: var(--color-surface-raised);
 }
 
 [data-theme='dark'] .breadcrumb-current {
-  color: var(--color-gray-100);
-}
-
-[data-theme='dark'] .breadcrumb-link:hover {
-  color: var(--color-primary-400);
+  color: var(--color-text-primary);
 }
 
 @media (max-width: 1024px) {
-  .admin-layout {
+  .admin-layout,
+  .admin-layout--sidebar-collapsed {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
   }
 
-  .admin-nav {
-    width: 100%;
-    min-height: unset;
-    height: auto;
-    position: static;
-    flex-direction: row;
-    align-items: center;
-    padding: 12px 16px;
-    gap: 12px;
-    background: linear-gradient(90deg, #100235, #67236a);
-    overflow-x: auto;
-    overflow-y: visible;
-  }
-
-  .admin-nav-brand {
-    margin-bottom: 0;
-  }
-
-  .admin-nav-sub {
-    display: none;
-  }
-
-  .admin-nav-links {
-    flex-direction: row;
-    flex: 1;
-    gap: 2px;
-    overflow-x: auto;
-  }
-
-  .admin-nav-link {
-    padding: 8px 10px;
-    white-space: nowrap;
-    border-left: none;
-    border-bottom: 3px solid transparent;
-  }
-
-  .admin-nav-link--active {
-    border-left: none;
-    border-bottom: 3px solid #ec008c;
-  }
-
-  .admin-nav-footer {
-    flex-direction: row;
-    align-items: center;
-    padding-top: 0;
-    border-top: none;
-    margin-top: 0;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    padding-left: 12px;
-  }
-
-  .admin-nav-user {
-    display: none;
-  }
-
-  .admin-nav-signout {
-    width: auto;
-    white-space: nowrap;
-  }
-
   .admin-main {
     min-height: auto;
-    padding: 24px 16px;
+    padding: var(--space-6) var(--space-4);
   }
 }
 
 @media (max-width: 768px) {
   .admin-main {
-    padding: 24px 16px;
+    padding: var(--space-6) var(--space-4);
   }
 }

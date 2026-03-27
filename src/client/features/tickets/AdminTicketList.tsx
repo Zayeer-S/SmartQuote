@@ -2,8 +2,8 @@ import React, { useEffect, useMemo } from 'react';
 import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useTicketFilters } from '../../hooks/useTicketFilters.js';
 import AdminTicketCard from './AdminTicketCard.js';
-import TicketFilters from './TicketFilters.js';
-import TicketPagination from './TicketPagination.js';
+import TicketFilters from '../collate/TicketFilters.js';
+import TicketPagination from '../collate/TicketPagination.js';
 import './AdminTicketList.css';
 
 /**
