@@ -8,7 +8,7 @@ import request from 'supertest';
 import type { Express } from 'express';
 import { bootstrapApplication } from '../../src/server/bootstrap/app.bootstrap';
 import { AUTH_ENDPOINTS, TICKET_ENDPOINTS } from '../../src/shared/constants/endpoints';
-import { USERS } from '../e2e/constants/test.user.credentials';
+import { USERS } from '../constants/test.user.credentials';
 
 const LOGIN = `/api${AUTH_ENDPOINTS.BASE}${AUTH_ENDPOINTS.LOGIN}`;
 const BASE = `/api${TICKET_ENDPOINTS.BASE}`;
@@ -45,8 +45,8 @@ beforeAll(async () => {
   };
 
   const [customer1, customer2, agent, admin] = await Promise.all([
-    login(USERS.CUSTOMER1.EMAIL, USERS.CUSTOMER1.PASSWORD),
-    login(USERS.CUSTOMER2.EMAIL, USERS.CUSTOMER2.PASSWORD),
+    login(USERS.CUSTOMER1_DIFF_ORG.EMAIL, USERS.CUSTOMER1_DIFF_ORG.PASSWORD),
+    login(USERS.CUSTOMER2_SAME_ORG.EMAIL, USERS.CUSTOMER2_SAME_ORG.PASSWORD),
     login(USERS.AGENT.EMAIL, USERS.AGENT.PASSWORD),
     login(USERS.ADMIN.EMAIL, USERS.ADMIN.PASSWORD),
   ]);

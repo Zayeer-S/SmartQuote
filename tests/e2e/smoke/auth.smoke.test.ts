@@ -1,8 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../utils/login.utils';
+import { USERS } from '../../constants/test.user.credentials';
 
-const CUSTOMER = { email: 'customer1@demo.com', password: 'password' };
-const ADMIN = { email: 'admin@giacom.com', password: 'password' };
+const CUSTOMER = {
+  email: USERS.CUSTOMER1_DIFF_ORG.EMAIL,
+  password: USERS.CUSTOMER1_DIFF_ORG.PASSWORD,
+};
+const ADMIN = { email: USERS.ADMIN.EMAIL, password: USERS.ADMIN.PASSWORD };
 
 test.describe('Unauthenticated access', () => {
   test('visiting /admin redirects to /login', async ({ page }) => {
@@ -15,13 +19,13 @@ test.describe('Unauthenticated access', () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('visiting /customer/tickets redirects to /login', async ({ page }) => {
-    await page.goto('/customer/tickets');
+  test('visiting /customer/settings redirects to /login', async ({ page }) => {
+    await page.goto('/customer/settings');
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('visiting /admin/tickets redirects to /login', async ({ page }) => {
-    await page.goto('/admin/tickets');
+  test('visiting /admin/settings redirects to /login', async ({ page }) => {
+    await page.goto('/admin/settings');
     await expect(page).toHaveURL(/\/login/);
   });
 
@@ -41,9 +45,9 @@ test.describe('Customer role', () => {
     await expect(page).toHaveURL(/\/customer/);
   });
 
-  test('can access /customer/tickets', async ({ page }) => {
-    await page.goto('/customer/tickets');
-    await expect(page).toHaveURL(/\/customer\/tickets/);
+  test('can access /customer/settings', async ({ page }) => {
+    await page.goto('/customer/settings');
+    await expect(page).toHaveURL(/\/customer\/settings/);
   });
 
   test('is redirected away from /admin to /login', async ({ page }) => {
@@ -51,8 +55,8 @@ test.describe('Customer role', () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('is redirected away from /admin/tickets to /login', async ({ page }) => {
-    await page.goto('/admin/tickets');
+  test('is redirected away from /admin/settings to /login', async ({ page }) => {
+    await page.goto('/admin/settings');
     await expect(page).toHaveURL(/\/login/);
   });
 });
@@ -66,14 +70,14 @@ test.describe('Admin role', () => {
     await expect(page).toHaveURL(/\/admin/);
   });
 
-  test('can access /admin/tickets', async ({ page }) => {
-    await page.goto('/admin/tickets');
-    await expect(page).toHaveURL(/\/admin\/tickets/);
+  test('can access /admin/rate-profiles', async ({ page }) => {
+    await page.goto('/admin/rate-profiles');
+    await expect(page).toHaveURL(/\/admin\/rate-profiles/);
   });
 
-  test('can access /admin/analytics', async ({ page }) => {
-    await page.goto('/admin/analytics');
-    await expect(page).toHaveURL(/\/admin\/analytics/);
+  test('can access /admin/settings', async ({ page }) => {
+    await page.goto('/admin/settings');
+    await expect(page).toHaveURL(/\/admin\/settings/);
   });
 
   test('is redirected away from /customer to /login', async ({ page }) => {

@@ -28,6 +28,7 @@ export const MAIN_TABLES = {
   RATE_PROFILES: 'rate_profiles',
   QUOTE_CALCULATION_RULES: 'quote_calculation_rules',
   ANALYTICS: 'analytics',
+  SLA_POLICIES: 'sla_policies',
 } as const;
 
 export const LINK_TABLES = {
@@ -38,18 +39,18 @@ export const LINK_TABLES = {
   TICKET_COMMENTS: 'ticket_comments',
   TICKET_ATTACHMENTS: 'ticket_attachments',
   ORGANIZATION_MEMBERS: 'organization_members',
-  SLA_POLICIES: 'sla_policies',
   SESSIONS: 'sessions',
   RESOURCE_UTILIZATIONS: 'resource_utilizations',
   QUOTE_EFFORT_LEVEL_RANGES: 'quote_effort_level_ranges',
   NOTIFICATION_TOKENS: 'notification_tokens',
 } as const;
 
-export const TICKET_PRIORITY_ENGINE_TABLES = {
+export const ENGINE_TABLES = {
   TICKET_PRIORITY_RULES: 'ticket_priority_rules',
   TICKET_PRIORITY_THRESHOLDS: 'ticket_priority_thresholds',
   PRIORITY_ENGINE_ANCHORS: 'priority_engine_anchors',
-};
+  TICKET_EMBEDDINGS: 'ticket_embeddings',
+} as const;
 
 export const CONFIG_TABLES = {
   SMARTQUOTE_CONFIGS: 'smartquote_configs',

@@ -21,6 +21,7 @@ export const TICKET_ENDPOINTS = {
   DELETE: (ticketId = ':ticketId') => `/${ticketId}`,
   ASSIGN: (ticketId = ':ticketId') => `/${ticketId}/assign`,
   RESOLVE: (ticketId = ':ticketId') => `/${ticketId}/resolve`,
+  SIMILAR: (ticketId = ':ticketId') => `/${ticketId}/similar`,
   LIST_COMMENTS: (ticketId = ':ticketId') => `/${ticketId}/comments`,
   ADD_COMMENT: (ticketId = ':ticketId') => `/${ticketId}/comments`,
   UPLOAD_ATTACHMENT: (ticketId = ':ticketId') => `/${ticketId}/attachments`,
@@ -70,4 +71,13 @@ export const ANALYTICS_ENDPOINTS = {
   RESOLUTION_TIME: '/resolution-time',
   TICKET_VOLUME: '/ticket-volume',
   QUOTE_ACCURACY: '/quote-accuracy',
+} as const;
+
+export const SLA_ENDPOINTS = {
+  BASE: '/sla-policies',
+  LIST: '/',
+  CREATE: '/',
+  GET: (slaPolicyId = ':slaPolicyId') => `/${slaPolicyId}`,
+  UPDATE: (slaPolicyId = ':slaPolicyId') => `/${slaPolicyId}`,
+  DELETE: (slaPolicyId = ':slaPolicyId') => `/${slaPolicyId}`,
 } as const;

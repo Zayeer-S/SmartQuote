@@ -23,7 +23,9 @@ import { BertEmbedder } from '../lib/nlp/bert-embedder.js';
 import { PriorityEngineAnchorsDAO } from '../daos/children/ticket.priority.dao.js';
 import { AnalyticsContainer } from '../containers/analytics.container.js';
 import { createAnalyticsRoutes } from '../routes/analytics.routes.js';
-import { RATE_PROFILE_ENDPOINTS } from '../../shared/constants/endpoints.js';
+import { RATE_PROFILE_ENDPOINTS, SLA_ENDPOINTS } from '../../shared/constants/endpoints.js';
+import { SlaContainer } from '../containers/sla.container.js';
+import { createSlaRoutes } from '../routes/sla.routes.js';
 
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
@@ -113,12 +115,18 @@ export async function bootstrapApplication(
     authContainer.authService,
     authContainer.orgMembersDAO
   );
+  const slaContainer = new SlaContainer(
+    db,
+    adminContainer.rbacService,
+    authContainer.orgMembersDAO
+  );
   const ticketContainer = new TicketContainer(
     db,
     adminContainer.rbacService,
     authContainer.orgMembersDAO,
     lookupResolver,
-    embedder
+    embedder,
+    slaContainer.slaService
   );
   const quoteContainer = new QuoteContainer(
     db,
@@ -166,6 +174,14 @@ export async function bootstrapApplication(
     '/api/analytics',
     createAnalyticsRoutes(
       analyticsContainer.analyticsController,
+      authContainer.authService,
+      adminContainer.rbacService
+    )
+  );
+  app.use(
+    `/api${SLA_ENDPOINTS.BASE}`,
+    createSlaRoutes(
+      slaContainer.slaController,
       authContainer.authService,
       adminContainer.rbacService
     )

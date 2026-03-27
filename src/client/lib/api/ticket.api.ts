@@ -6,6 +6,7 @@ import type {
   CommentResponse,
   CreateTicketRequest,
   ListCommentsResponse,
+  ListSimilarTicketsResponse,
   ListTicketsResponse,
   TicketDetailResponse,
   TicketResponse,
@@ -164,6 +165,24 @@ export const ticketAPI = {
     const response = await httpClient.post<ApiResponse<CommentResponse>>(
       base + TICKET_ENDPOINTS.ADD_COMMENT(ticketId),
       payload
+    );
+    return extractData(response);
+  },
+
+  /**
+   * Fetch the top similar resolved tickets for a given ticket (admin only).
+   * Results are ranked by semantic similarity of the ticket description,
+   * filtered to the same type/severity/impact bucket.
+   *
+   * Returns an empty array when no embedder is available (non-production)
+   * or when no resolved tickets exist in the same bucket yet.
+   *
+   * @param ticketId Target ticket ID
+   * @returns Ranked list of similar tickets with their approved quotes
+   */
+  async getSimilarTickets(ticketId: string): Promise<ListSimilarTicketsResponse> {
+    const response = await httpClient.get<ApiResponse<ListSimilarTicketsResponse>>(
+      base + TICKET_ENDPOINTS.SIMILAR(ticketId)
     );
     return extractData(response);
   },

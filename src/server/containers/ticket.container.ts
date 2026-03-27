@@ -2,11 +2,14 @@ import type { Knex } from 'knex';
 import { TicketsDAO } from '../daos/children/tickets.dao.js';
 import { TicketCommentsDAO } from '../daos/children/ticket.comments.dao.js';
 import { TicketAttachmentsDAO } from '../daos/children/ticket.attachments.dao.js';
+import { TicketEmbeddingsDAO } from '../daos/children/ticket.embeddings.dao.js';
 import { UsersDAO } from '../daos/children/users.dao.js';
+import { QuotesDAO } from '../daos/children/quotes.dao.js';
 import { TicketService } from '../services/ticket/ticket.service.js';
 import { CommentService } from '../services/ticket/comment.service.js';
 import { AttachmentService } from '../services/ticket/attachment.service.js';
 import { TicketPriorityEngine } from '../services/ticket/ticket.priority.engine.js';
+import { TicketSimilarityService } from '../services/ticket/ticket.similarity.service.js';
 import { TicketController } from '../controllers/ticket.controller.js';
 import { RBACService } from '../services/rbac/rbac.service.js';
 import { LookupResolver } from '../lib/lookup-resolver.js';
@@ -22,18 +25,22 @@ import { S3StorageService } from '../services/storage/s3.storage.service.js';
 import { FILE_STORAGE_TYPES } from '../../shared/constants/index.js';
 import type { FileStorageType } from '../../shared/constants/lookup-values.js';
 import { backEnv } from '../config/env.backend.js';
+import type { SlaService } from '../services/sla/sla.service.js';
 
 export class TicketContainer {
   public readonly ticketsDAO: TicketsDAO;
   public readonly ticketCommentsDAO: TicketCommentsDAO;
   public readonly ticketAttachmentsDAO: TicketAttachmentsDAO;
+  public readonly ticketEmbeddingsDAO: TicketEmbeddingsDAO;
   public readonly usersDAO: UsersDAO;
+  public readonly quotesDAO: QuotesDAO;
   public readonly priorityRulesDAO: TicketPriorityRulesDAO;
   public readonly priorityThresholdsDAO: TicketPriorityThresholdsDAO;
 
   public readonly storageService: StorageService;
   public readonly priorityEngine: TicketPriorityEngine;
   public readonly attachmentService: AttachmentService;
+  public readonly similarityService: TicketSimilarityService;
   public readonly ticketService: TicketService;
   public readonly commentService: CommentService;
 
@@ -44,18 +51,18 @@ export class TicketContainer {
     rbacService: RBACService,
     orgMembersDAO: OrganizationMembersDAO,
     lookupResolver: LookupResolver,
-    embedder: BertEmbedder | null
+    embedder: BertEmbedder | null,
+    slaService: SlaService
   ) {
     this.ticketsDAO = new TicketsDAO(db);
     this.ticketCommentsDAO = new TicketCommentsDAO(db);
     this.ticketAttachmentsDAO = new TicketAttachmentsDAO(db);
+    this.ticketEmbeddingsDAO = new TicketEmbeddingsDAO(db);
     this.usersDAO = new UsersDAO(db);
+    this.quotesDAO = new QuotesDAO(db);
     this.priorityRulesDAO = new TicketPriorityRulesDAO(db);
     this.priorityThresholdsDAO = new TicketPriorityThresholdsDAO(db);
 
-    // S3 is active when the bucket name is configured. AWS_REGION is always
-    // available in Lambda as a reserved runtime variable - it does not go
-    // through backEnv since CDK cannot set it explicitly.
     const awsRegion = backEnv.AWS_REGION ?? process.env.AWS_REGION;
     const isS3 = awsRegion !== undefined && backEnv.AWS_S3_BUCKET !== undefined;
 
@@ -98,6 +105,13 @@ export class TicketContainer {
       storageTypeName
     );
 
+    this.similarityService = new TicketSimilarityService(
+      this.ticketsDAO,
+      this.quotesDAO,
+      this.ticketEmbeddingsDAO,
+      embedder
+    );
+
     this.ticketService = new TicketService(
       db,
       this.ticketsDAO,
@@ -106,7 +120,8 @@ export class TicketContainer {
       rbacService,
       lookupResolver,
       this.priorityEngine,
-      this.attachmentService
+      this.attachmentService,
+      this.similarityService
     );
 
     this.commentService = new CommentService(
@@ -120,6 +135,8 @@ export class TicketContainer {
       this.ticketService,
       this.commentService,
       this.attachmentService,
+      slaService,
+      this.similarityService,
       lookupResolver
     );
   }

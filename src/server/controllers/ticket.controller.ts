@@ -13,11 +13,15 @@ import type {
   AttachmentResponse,
   CommentResponse,
   ListCommentsResponse,
+  ListSimilarTicketsResponse,
   ListTicketsResponse,
+  SimilarQuoteResponse,
+  SimilarTicketResponse,
   TicketDetailResponse,
   TicketResponse,
   TicketSummaryResponse,
 } from '../../shared/contracts/ticket-contracts.js';
+import type { SlaStatusResponse } from '../../shared/contracts/sla-contracts.js';
 import type { UserId, TicketId } from '../database/types/ids.js';
 import type {
   Ticket,
@@ -29,8 +33,12 @@ import type { OrganizationId } from '../database/types/ids.js';
 import type { TicketService } from '../services/ticket/ticket.service.js';
 import type { CommentService } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
+import type { SlaService } from '../services/sla/sla.service.js';
+import type { TicketSimilarityService } from '../services/ticket/ticket.similarity.service.js';
+import type { SimilarTicketResult } from '../services/ticket/ticket.similarity.service.types.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 import type { IncomingFile } from '../services/storage/storage.service.types.js';
+import type { QuoteWithApproval } from '../database/types/tables.js';
 import { backEnv } from '../config/env.backend.js';
 
 /** Shape attached to req by the parseAttachment middleware in ticket.routes.ts */
@@ -42,17 +50,23 @@ export class TicketController {
   private ticketService: TicketService;
   private commentService: CommentService;
   private attachmentService: AttachmentService;
+  private slaService: SlaService;
+  private similarityService: TicketSimilarityService;
   private lookup: LookupResolver;
 
   constructor(
     ticketService: TicketService,
     commentService: CommentService,
     attachmentService: AttachmentService,
+    slaService: SlaService,
+    similarityService: TicketSimilarityService,
     lookup: LookupResolver
   ) {
     this.ticketService = ticketService;
     this.commentService = commentService;
     this.attachmentService = attachmentService;
+    this.slaService = slaService;
+    this.similarityService = similarityService;
     this.lookup = lookup;
   }
 
@@ -111,8 +125,15 @@ export class TicketController {
         actor.id as UserId
       );
 
-      const attachments = await this.attachmentService.listAttachments(ticket.id);
-      success(res, this.mapTicketDetail(ticket, attachments), 200);
+      const [attachments, slaStatus] = await Promise.all([
+        this.attachmentService.listAttachments(ticket.id),
+        this.slaService.resolveForTicket(
+          ticket,
+          this.lookup.ticketSeverityName(ticket.ticket_severity_id as unknown as number)
+        ),
+      ]);
+
+      success(res, this.mapTicketDetail(ticket, attachments, slaStatus), 200);
     } catch (err: unknown) {
       handleError(res, err);
     }
@@ -133,8 +154,20 @@ export class TicketController {
         { limit: query.limit, offset: query.offset }
       );
 
+      // Batch-resolve SLA status for all tickets in two queries total
+      const slaStatusMap = await this.slaService.resolveForTickets(
+        tickets.map((t) => ({
+          ticket: t,
+          ticketSeverityName: this.lookup.ticketSeverityName(
+            t.ticket_severity_id as unknown as number
+          ),
+        }))
+      );
+
       const response: ListTicketsResponse = {
-        tickets: tickets.map((t) => this.mapTicketSummary(t)),
+        tickets: tickets.map((t) =>
+          this.mapTicketSummary(t, slaStatusMap.get(t.id as string) ?? null)
+        ),
       };
       success(res, response, 200);
     } catch (err: unknown) {
@@ -266,6 +299,20 @@ export class TicketController {
     }
   };
 
+  getSimilarTickets = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const ticketId = req.params.ticketId as TicketId;
+      const results = await this.similarityService.findSimilar(ticketId);
+
+      const response: ListSimilarTicketsResponse = {
+        similarTickets: results.map((r) => this.mapSimilarTicketResult(r)),
+      };
+      success(res, response, 200);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
   private mapTicket(ticket: Ticket): TicketResponse {
     return {
       id: ticket.id as string,
@@ -293,21 +340,27 @@ export class TicketController {
     };
   }
 
-  private mapTicketSummary(ticket: TicketWithDetails): TicketSummaryResponse {
+  private mapTicketSummary(
+    ticket: TicketWithDetails,
+    slaStatus: SlaStatusResponse | null
+  ): TicketSummaryResponse {
     return {
       ...this.mapTicket(ticket),
       organizationName: ticket.organization_name,
+      slaStatus,
     };
   }
 
   private mapTicketDetail(
     ticket: TicketWithDetails,
-    attachments: TicketAttachment[]
+    attachments: TicketAttachment[],
+    slaStatus: SlaStatusResponse | null
   ): TicketDetailResponse {
     return {
       ...this.mapTicket(ticket),
       organizationName: ticket.organization_name,
       attachments: attachments.map((a) => this.mapAttachment(a)),
+      slaStatus,
     };
   }
 
@@ -334,6 +387,28 @@ export class TicketController {
       commentType: this.lookup.commentTypeName(comment.comment_type_id as unknown as number),
       createdAt: comment.created_at.toISOString(),
       updatedAt: comment.updated_at.toISOString(),
+    };
+  }
+
+  private mapSimilarQuote(quote: QuoteWithApproval): SimilarQuoteResponse {
+    return {
+      id: quote.id as unknown as string,
+      version: quote.version,
+      estimatedHoursMinimum: quote.estimated_hours_minimum,
+      estimatedHoursMaximum: quote.estimated_hours_maximum,
+      estimatedResolutionTime: quote.estimated_resolution_time,
+      estimatedCost: quote.estimated_cost,
+      finalCost: quote.final_cost,
+      approvalStatus: quote.approval_status_name,
+      createdAt: quote.created_at.toISOString(),
+    };
+  }
+
+  private mapSimilarTicketResult(result: SimilarTicketResult): SimilarTicketResponse {
+    return {
+      ticket: this.mapTicket(result.ticket),
+      quote: result.quote ? this.mapSimilarQuote(result.quote) : null,
+      similarityScore: result.similarityScore,
     };
   }
 }

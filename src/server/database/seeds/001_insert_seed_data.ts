@@ -52,7 +52,6 @@ export async function seed(knex: Knex): Promise<void> {
     'quote_effort_level_ranges',
     'resource_utilizations',
     'sessions',
-    'sla_policies',
     'organization_members',
     'ticket_attachments',
     'ticket_comments',
@@ -65,6 +64,7 @@ export async function seed(knex: Knex): Promise<void> {
     'quote_calculation_rules',
     'rate_profiles',
     'quotes',
+    'sla_policies',
     'quote_approvals',
     'tickets',
     'users',
@@ -144,10 +144,13 @@ export async function seed(knex: Knex): Promise<void> {
 
   const passwordHash = DEV_PASSWORD_HASH;
 
-  const { customer1Id, customer2Id, supportAgentId, managerId } = await generateUsers(knex, {
-    passwordHash,
-    roleIdMap: lookupIds.roles,
-  });
+  const { customer1Id, customer2Id, customer3Id, supportAgentId, managerId } = await generateUsers(
+    knex,
+    {
+      passwordHash,
+      roleIdMap: lookupIds.roles,
+    }
+  );
 
   const ticketIds = await generateTickets(knex, {
     customer1Id,
@@ -636,7 +639,15 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
+      permission_id: lookupIds.permissions[PERMISSIONS.TICKETS_DELETE_OWN],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
       permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_READ_OWN],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
+      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_REJECT],
     },
 
     // SUPPORT AGENT permissions
@@ -664,8 +675,28 @@ export async function seed(knex: Knex): Promise<void> {
       role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
       permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_UPDATE],
     },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.USERS_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.USERS_UPDATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.ANALYTICS_READ],
+    },
 
-    // MANAGER permissions (all Support Agent perms + approval)
+    // MANAGER permissions
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
       permission_id: lookupIds.permissions[PERMISSIONS.TICKETS_READ_ALL],
@@ -708,7 +739,11 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
-      permission_id: lookupIds.permissions[PERMISSIONS.ANALYTICS_READ],
+      permission_id: lookupIds.permissions[PERMISSIONS.USERS_UPDATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.USERS_DELETE],
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
@@ -725,6 +760,38 @@ export async function seed(knex: Knex): Promise<void> {
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
       permission_id: lookupIds.permissions[PERMISSIONS.ORGANIZATIONS_DELETE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_CREATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_UPDATE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.SLA_POLICIES_DELETE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ANALYTICS_EXPORT],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.ANALYTICS_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.CONFIG_READ],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
+      permission_id: lookupIds.permissions[PERMISSIONS.CONFIG_UPDATE],
     },
 
     // ADMIN permissions (all permissions)
@@ -763,6 +830,11 @@ export async function seed(knex: Knex): Promise<void> {
     {
       organization_id: org2Id,
       user_id: customer2Id,
+      org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
+    },
+    {
+      organization_id: org2Id,
+      user_id: customer3Id,
       org_role_id: lookupIds.orgRoles[ORG_ROLES.MEMBER],
     },
   ]);
@@ -840,45 +912,65 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Demo Corporation - Standard SLA',
       user_id: null,
       organization_id: org1Id,
-      contract: {
-        hourly_rate: 120,
-        response_times: {
-          critical: '1 hour',
-          high: '4 hours',
-          medium: '1 business day',
-          low: '3 business days',
-        },
-        resolution_times: {
-          critical: '4 hours',
-          high: '1 business day',
-          medium: '3 business days',
-          low: '5 business days',
-        },
-      },
+      is_active: true,
+      contract: JSON.stringify({
+        severityTargets: [
+          {
+            severity: TICKET_SEVERITIES.CRITICAL,
+            responseTimeHours: 1,
+            resolutionTimeHours: 4,
+          },
+          {
+            severity: TICKET_SEVERITIES.HIGH,
+            responseTimeHours: 4,
+            resolutionTimeHours: 8,
+          },
+          {
+            severity: TICKET_SEVERITIES.MEDIUM,
+            responseTimeHours: 8,
+            resolutionTimeHours: 24,
+          },
+          {
+            severity: TICKET_SEVERITIES.LOW,
+            responseTimeHours: 24,
+            resolutionTimeHours: 72,
+          },
+        ],
+      }),
       effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      effective_to: new Date(Date.now() + ONE_YEAR_MS),
     },
     {
       name: 'Test Industries Ltd - Premium SLA',
       user_id: null,
       organization_id: org2Id,
-      contract: {
-        hourly_rate: 150,
-        response_times: {
-          critical: '30 minutes',
-          high: '2 hours',
-          medium: '4 hours',
-          low: '1 business day',
-        },
-        resolution_times: {
-          critical: '2 hours',
-          high: '4 hours',
-          medium: '1 business day',
-          low: '3 business days',
-        },
-      },
+      is_active: true,
+      contract: JSON.stringify({
+        severityTargets: [
+          {
+            severity: TICKET_SEVERITIES.CRITICAL,
+            responseTimeHours: 0.5,
+            resolutionTimeHours: 2,
+          },
+          {
+            severity: TICKET_SEVERITIES.HIGH,
+            responseTimeHours: 2,
+            resolutionTimeHours: 4,
+          },
+          {
+            severity: TICKET_SEVERITIES.MEDIUM,
+            responseTimeHours: 4,
+            resolutionTimeHours: 8,
+          },
+          {
+            severity: TICKET_SEVERITIES.LOW,
+            responseTimeHours: 8,
+            resolutionTimeHours: 24,
+          },
+        ],
+      }),
       effective_from: new Date(),
-      effective_to: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      effective_to: new Date(Date.now() + ONE_YEAR_MS),
     },
   ]);
 
@@ -890,7 +982,7 @@ export async function seed(knex: Knex): Promise<void> {
   console.log('\nSeeding complete');
   console.log('Summary:');
   console.log('\t- 2 Organizations');
-  console.log('\t- 5 Users (all password: "password")');
+  console.log('\t- 7 Users (all password: "password")');
   console.log('\t- 4 Tickets');
   console.log('\t- 6 Quotes (including version history)');
   console.log('\t- 12 Rate Profiles');
@@ -898,9 +990,11 @@ export async function seed(knex: Knex): Promise<void> {
   console.log('\t- 2 SLA Policies');
   console.log('\t- All lookup tables populated\n');
   console.log('Test User Logins:');
-  console.log('\t - customer1@demo.com - Customer at Demo Corporation');
-  console.log('\t - customer2@demo.com - Customer at Test Industries Ltd');
-  console.log('\t - agent@giacom.com - Support Agent');
-  console.log('\t - manager@giacom.com - Manager');
-  console.log('\t - admin@giacom.com - Admin\n');
+  console.log(`\t - c1@demo.com - Customer at Demo Corporation`);
+  console.log(`\t - c2@demo.com - Customer at Test Industries Ltd`);
+  console.log(`\t - c3@demo.com - Customer at Test Industries Ltd`);
+  console.log(`\t - c4@demo.com - No organization`);
+  console.log(`\t - agent@giacom.com - Support Agent`);
+  console.log(`\t - manager@giacom.com - Manager`);
+  console.log(`\t - admin@giacom.com - Admin\n`);
 }

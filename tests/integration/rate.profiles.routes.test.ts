@@ -10,13 +10,17 @@ import {
   TICKET_SEVERITIES,
   BUSINESS_IMPACTS,
 } from '../../src/shared/constants/lookup-values';
+import { USERS } from '../constants/test.user.credentials';
 
 const AUTH_BASE = `/api${AUTH_ENDPOINTS.BASE}`;
 const BASE = `/api${RATE_PROFILE_ENDPOINTS.BASE}`;
 
-const ADMIN = { email: 'admin@giacom.com', password: 'password' };
-const MANAGER = { email: 'manager@giacom.com', password: 'password' };
-const CUSTOMER = { email: 'customer1@demo.com', password: 'password' };
+const ADMIN = { email: USERS.ADMIN.EMAIL, password: USERS.ADMIN.PASSWORD };
+const MANAGER = { email: USERS.MANAGER.EMAIL, password: USERS.MANAGER.PASSWORD };
+const CUSTOMER = {
+  email: USERS.CUSTOMER1_DIFF_ORG.EMAIL,
+  password: USERS.CUSTOMER1_DIFF_ORG.PASSWORD,
+};
 
 async function login(
   app: Express,

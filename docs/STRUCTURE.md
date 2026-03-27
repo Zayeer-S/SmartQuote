@@ -29,8 +29,14 @@ smartquote/
 │   ├── client/
 │   │   ├── main.tsx
 │   │   ├── components/                             # Pure reusable UI elements; must not know about APIs, auths, or domain concepts
+│   │   │   ├── Modal.css
+│   │   │   ├── Modal.tsx
 │   │   │   ├── ProtectedRoute.tsx
-│   │   │   └── auth/
+│   │   │   ├── Sidebar.css
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── icons/
+│   │   │       ├── giacom-logo-webp.ts
+│   │   │       ├── MiscIcons.ts
 │   │   │       └── LoginIcons.tsx
 │   │   ├── config/                                 # Environment and config values only; no runtime logic
 │   │   │   ├── index.ts
@@ -49,45 +55,61 @@ smartquote/
 │   │   │       ├── theme.context.types.ts
 │   │   │       └── ThemeContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
-│   │   │   ├── dashboard/
-│   │   │   │   ├── DateRangeFilter.tsx
-│   │   │   │   ├── QuoteAccuracyChart.tsx
-│   │   │   │   ├── ResolutionTimeChart.tsx
-│   │   │   │   ├── StatsOverview.css
-│   │   │   │   ├── StatsOverview.tsx
-│   │   │   │   ├── TicketStatusChart.tsx
-│   │   │   │   └── TicketVolumeChart.tsx
-│   │   │   └── tickets/
-│   │   │       ├── AdminQuotePanel.css
-│   │   │       ├── AdminQuotePanel.tsx
-│   │   │       ├── AdminTicketCard.css
-│   │   │       ├── AdminTicketCard.tsx
-│   │   │       ├── AdminTicketDetail.css
-│   │   │       ├── AdminTicketDetail.tsx
-│   │   │       ├── AdminTicketList.css
-│   │   │       ├── AdminTicketList.tsx
-│   │   │       ├── AdminTicketForm.css
-│   │   │       ├── AdminTicketForm.tsx
-│   │   │       ├── CommentThread.css
-│   │   │       ├── CommentThread.tsx
-│   │   │       ├── CustomerTicketCard.css
-│   │   │       ├── CustomerTicketCard.tsx
-│   │   │       ├── CustomerTicketDetail.css
-│   │   │       ├── CustomerTicketDetail.tsx
-│   │   │       ├── QuoteActions.css
-│   │   │       ├── QuoteActions.tsx
-│   │   │       ├── QuotePanel.css
-│   │   │       ├── QuotePanel.tsx
-│   │   │       ├── SubmitTicketForm.css
-│   │   │       ├── SubmitTicketForm.tsx
-│   │   │       ├── TicketFilters.css
-│   │   │       ├── TicketFilters.tsx
-│   │   │       ├── TicketList.css
-│   │   │       ├── TicketList.tsx
-│   │   │       ├── TicketPagination.css
-│   │   │       ├── TicketPagination.tsx
-│   │   │       ├── TicketTimeline.css
-│   │   │       └── TicketTimeline.tsx
+│   │   │   ├── BaseTicketCard.css
+│   │   │   ├── BaseTicketCard.tsx
+│   │   │   ├── admin/
+│   │   │   │   ├── analytics/
+│   │   │   │   │   ├── DateRangeFilter.tsx
+│   │   │   │   │   ├── QuoteAccuracyChart.tsx
+│   │   │   │   │   ├── ResolutionTimeChart.tsx
+│   │   │   │   │   ├── TicketStatusChart.tsx
+│   │   │   │   │   └── TicketVolumeChart.tsx
+│   │   │   │   ├── quotes/
+│   │   │   │   │   ├── AdminQuotePanel.css
+│   │   │   │   │   └── AdminQuotePanel.tsx
+│   │   │   │   └── tickets/
+│   │   │   │       ├── AdminTicketCard.css
+│   │   │   │       ├── AdminTicketCard.tsx
+│   │   │   │       ├── AdminTicketDetail.css
+│   │   │   │       ├── AdminTicketDetail.tsx
+│   │   │   │       ├── AdminTicketList.css
+│   │   │   │       ├── AdminTicketList.tsx
+│   │   │   │       ├── AssignTicketForm.css
+│   │   │   │       ├── AssignTicketForm.tsx
+│   │   │   │       ├── SimilarTicketsPanel.css
+│   │   │   │       └── SimilarTicketsPanel.tsx
+│   │   │   ├── collate/
+│   │   │   │   ├── TicketFilters.css
+│   │   │   │   ├── TicketFilters.tsx
+│   │   │   │   ├── TicketPagination.css
+│   │   │   │   └── TicketPagination.tsx
+│   │   │   ├── customer/
+│   │   │   │   ├── dashboard/
+│   │   │   │   │   ├── SubmitTicketForm.css
+│   │   │   │   │   └── SubmitTicketForm.tsx
+│   │   │   │   ├── quote/
+│   │   │   │   │   ├── QuoteActions.css
+│   │   │   │   │   ├── QuoteActions.tsx
+│   │   │   │   │   ├── QuotePanel.css
+│   │   │   │   │   └── QuotePanel.tsx
+│   │   │   │   └── tickets/
+│   │   │   │       ├── CustomerTicketCard.tsx
+│   │   │   │       ├── CustomerTicketDetail.css
+│   │   │   │       ├── CustomerTicketDetail.tsx
+│   │   │   │       ├── TicketCommentThread.css
+│   │   │   │       ├── TicketCommentThread.tsx
+│   │   │   │       ├── TicketList.css
+│   │   │   │       └── TicketList.tsx
+│   │   │   └── shared/
+│   │   │       ├── AttachmentList.css
+│   │   │       ├── AttachmentList.tsx
+│   │   │       ├── BaseTicketCard.css
+│   │   │       ├── BaseTicketCard.tsx
+│   │   │       ├── BaseTicketList.css
+│   │   │       ├── BaseTicketList.tsx
+│   │   │       ├── StatsOverview.tsx
+│   │   │       ├── TicketCommentTimeline.css
+│   │   │       └── TicketCommentTimeline.tsx
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules. All context hooks
 │   │   │   ├── useLogin.ts
 │   │   │   ├── useTicketFilters.ts
@@ -123,11 +145,23 @@ smartquote/
 │   │   │   │   ├── useRejectQuote.ts
 │   │   │   │   ├── useSubmitForApproval.ts
 │   │   │   │   └── useUpdateForQuote.ts
+│   │   │   ├── rate-profiles/ 
+│   │   │   │   ├── useCreateRateProfile.ts
+│   │   │   │   ├── useDeleteRateProfile.ts
+│   │   │   │   ├── useListRateProfile.ts
+│   │   │   │   └── useUpdateRateProfile.ts
+│   │   │   ├── sla/ 
+│   │   │   │   ├── useCreateSlaPolicy.ts
+│   │   │   │   ├── useDeleteSlaPolicy.ts
+│   │   │   │   ├── useListSlaPolicy.ts
+│   │   │   │   └── useUpdateSlaPolicy.ts
 │   │   │   └── tickets/
 │   │   │       ├── useAddComment.ts
 │   │   │       ├── useAssignTicket.ts
 │   │   │       ├── useCreateTicket.ts
 │   │   │       ├── useDeleteTicket.ts
+│   │   │       ├── useGetAttachmentUrl.ts
+│   │   │       ├── useGetSimilarTicket.ts
 │   │   │       ├── useGetTicket.ts
 │   │   │       ├── useListComments.ts
 │   │   │       ├── useListTicket.ts
@@ -141,6 +175,8 @@ smartquote/
 │   │   │   │   ├── http-client.ts
 │   │   │   │   ├── org.api.ts
 │   │   │   │   ├── quote.api.ts
+│   │   │   │   ├── rate.profile.api.ts
+│   │   │   │   ├── sla.api.ts
 │   │   │   │   └── ticket.api.ts
 │   │   │   ├── storage/                            # Browser persistence tokens
 │   │   │   │   ├── keys.ts
@@ -176,15 +212,20 @@ smartquote/
 │   │   │   │   ├── CustomerSettingsPage.tsx
 │   │   │   │   ├── DashboardPage.css
 │   │   │   │   ├── DashboardPage.tsx
-│   │   │   │   ├── NewTicketPage.tsx
 │   │   │   │   ├── TicketDetailPage.tsx
 │   │   │   │   └── TicketsPage.tsx
-│   │   │   └── login/
+│   │   │   ├── login/
+│   │   │   │   ├── LoginPage.css
+│   │   │   │   └── LoginPage.tsx
+│   │   │   └── misc/
 │   │   │       ├── CantAccessPage.css
 │   │   │       ├── CantAccessPage.tsx
-│   │   │       ├── LoginPage.css
-│   │   │       └── LoginPage.tsx
-│   │   └── styles/                                 # Global styling and design tokens only; no component-specific styling
+│   │   │       ├── NotFoundPage.css
+│   │   │       └── NotFoundPage.tsx
+│   │   └── styles/
+│   │       ├── buttons.css
+│   │       ├── cards.css
+│   │       ├── forms.css
 │   │       └── globals.css
 │   │
 │   ├── server/
@@ -209,6 +250,7 @@ smartquote/
 │   │   │   ├── auth.container.ts
 │   │   │   ├── org.container.ts
 │   │   │   ├── quote.container.ts
+│   │   │   ├── sla.container.ts
 │   │   │   └── ticket.container.ts
 │   │   ├── controllers/
 │   │   │   ├── admin.controller.ts
@@ -217,6 +259,7 @@ smartquote/
 │   │   │   ├── org.controller.ts
 │   │   │   ├── quote.controller.ts
 │   │   │   ├── rate.profiles.controller.ts
+│   │   │   ├── sla.controller.ts
 │   │   │   └── ticket.controller.ts
 │   │   ├── daos/                                   # Database persistence/access only - no validation, permissions, or workflow rules
 │   │   │   ├── base/
@@ -236,6 +279,7 @@ smartquote/
 │   │   │       ├── rate.profiles.dao.ts
 │   │   │       ├── roles.dao.ts
 │   │   │       ├── sessions.dao.ts
+│   │   │       ├── sla.policies.dao.ts
 │   │   │       ├── ticket.attachments.dao.ts
 │   │   │       ├── ticket.comments.dao.ts
 │   │   │       ├── ticket.priority.dao.ts
@@ -253,7 +297,9 @@ smartquote/
 │   │   │   │   ├── 005_create_priority_engine_tables.ts
 │   │   │   │   ├── 006_fix_org_tables.ts
 │   │   │   │   ├── 007_alter_ticket_attachments.ts
-│   │   │   │   └── 008_add_resolved_at_to_tickets.ts
+│   │   │   │   ├── 008_add_resolved_at_to_tickets.ts
+│   │   │   │   ├── 009_alter_rate_profiles_table.ts
+│   │   │   │   └── 010_alter_sla_policies_table.ts
 │   │   │   ├── seeds/
 │   │   │   │   ├── 001_insert_seed_data.ts
 │   │   │   │   └── helpers
@@ -310,6 +356,10 @@ smartquote/
 │   │   │   ├── rbac/
 │   │   │   │   ├── org.rbac.service.ts             # Local/Org RBAC
 │   │   │   │   └── rbac.service.ts                 # System RBAC
+│   │   │   ├── sla/
+│   │   │   │   ├── sla.errors.ts
+│   │   │   │   ├── sla.service.ts
+│   │   │   │   └── sla.service.types.ts
 │   │   │   ├── storage/
 │   │   │   │   ├── local.storage.service.ts
 │   │   │   │   ├── s3.storage.service.ts
@@ -322,13 +372,16 @@ smartquote/
 │   │   │       ├── ticket.service.ts
 │   │   │       ├── ticket.priority.engine.ts
 │   │   │       ├── ticket.priority.engine.types.ts
-│   │   │       └── ticket.service.types.ts
+│   │   │       ├── ticket.service.types.ts
+│   │   │       ├── ticket.similarity.service.ts
+│   │   │       └── ticket.similarity.service.types.ts
 │   │   └── validators/                             # Input shape validation only; must not access database or services.
 │   │       ├── analytics.validator.ts
 │   │       ├── auth.validator.ts
 │   │       ├── org.validator.ts
 │   │       ├── quote.validator.ts
 │   │       ├── rate.profile.validator.ts
+│   │       ├── sla.validator.ts
 │   │       ├── ticket.validator.ts
 │   │       ├── user.validator.ts
 │   │       └── validation-utils.ts
@@ -343,16 +396,19 @@ smartquote/
 │           ├── auth-contracts.ts
 │           ├── org-contracts.ts
 │           ├── quote-contracts.ts
+│           ├── rate-profile-contracts.ts
+│           ├── sla-contracts.ts
 │           ├── ticket-contracts.ts
 │           └── user-contracts.ts
 │
 ├── tests/
+│   ├── constants/
+│   │   └── test.user.credentials.ts
 │   ├── e2e/
 │   │   ├── global.setup.ts
 │   │   ├── constants/
 │   │   │   ├── comment.smoke.data.ts
-│   │   │   ├── e2e.paths.ts
-│   │   │   └── test.user.credentials.ts
+│   │   │   └── e2e.paths.ts
 │   │   ├── setup/
 │   │   │   ├── admin.setup.ts
 │   │   │   └── customer.setup.ts
@@ -361,6 +417,7 @@ smartquote/
 │   │   │   ├── auth.smoke.test.ts
 │   │   │   ├── customer.comment.smoke.test.ts
 │   │   │   ├── rate.profile.smoke.test.ts
+│   │   │   ├── sla.smoke.test.ts
 │   │   │   └── ticket.smoke.test.ts
 │   │   └── utils/
 │   │       └── login.utils.ts
@@ -377,6 +434,7 @@ smartquote/
 │   │   ├── auth.routes.test.ts
 │   │   ├── quote.routes.test.ts
 │   │   ├── rate.profiles.routes.test.ts
+│   │   ├── sla.routes.test.ts
 │   │   └── ticket.routes.test.ts
 │   ├── unit/
 │   │   └── server/

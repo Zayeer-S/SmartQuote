@@ -1,0 +1,16 @@
+.base-ticket-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.base-ticket-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.base-ticket-list li {
+  display: contents;
+}
