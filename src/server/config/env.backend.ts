@@ -4,14 +4,16 @@ import z from 'zod';
 dotenv.config({ path: '.env.local' });
 
 const optionalStr = z
-  .string()
-  .optional()
+  .union([z.string(), z.undefined()])
   .transform((val) => (val === '' ? undefined : val));
 
 const optionalNum = z
-  .string()
-  .optional()
+  .union([z.string(), z.undefined()])
   .transform((val) => (val === '' || val === undefined ? undefined : Number(val)));
+
+const optionalBool = z
+  .union([z.string(), z.undefined()])
+  .transform((val) => (val === '' || val === undefined ? undefined : val === 'true'));
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']),
@@ -49,11 +51,11 @@ const envSchema = z.object({
   REDIS_PORT: optionalNum,
   REDIS_PASSWORD: optionalStr,
 
-  SMTP_HOST: z.string(),
-  SMTP_PORT: z.string().transform(Number),
-  SMTP_SECURE: z.string().transform((val) => val === 'true'),
-  SMTP_USER: z.string(),
-  SMTP_PASSWORD: z.string(),
+  SMTP_HOST: optionalStr,
+  SMTP_PORT: optionalNum,
+  SMTP_SECURE: optionalBool,
+  SMTP_USER: optionalStr,
+  SMTP_PASSWORD: optionalStr,
 });
 
 /** Validated env vars */

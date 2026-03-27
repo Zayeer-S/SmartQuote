@@ -11,7 +11,7 @@ import type {
 } from '../notification/notification.service.types.js';
 
 export class EmailService {
-  private transporter: Transporter;
+  private transporter: Transporter | null;
 
   constructor() {
     this.transporter = nodemailer.createTransport({
@@ -54,6 +54,8 @@ export class EmailService {
     subject: string;
     html: string;
   }): Promise<NotificationResult> {
+    if (!this.transporter) return { success: true, messageId: 'email-skipped-in-dev' };
+
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const info = await this.transporter.sendMail({

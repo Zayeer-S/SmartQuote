@@ -14,6 +14,7 @@ import { UsersDAO } from '../daos/children/users-domain.dao.js';
 
 import { QuoteService } from '../services/quote/quote.service.js';
 import { QuoteEngineService } from '../services/quote/quote-engine.service.js';
+import { QuoteApprovalService } from '../services/quote/quote-approval.service.js';
 import { QuoteController } from '../controllers/quote.controller.js';
 import { OrganizationMembersDAO } from '../daos/children/organizations-domain.dao.js';
 import type { NotificationService } from '../services/notification/notification.service.js';
@@ -29,6 +30,7 @@ export class QuoteContainer {
 
   public readonly quoteService: QuoteService;
   public readonly quoteEngineService: QuoteEngineService;
+  public readonly quoteApprovalService: QuoteApprovalService;
 
   public readonly quoteController: QuoteController;
 
@@ -49,7 +51,6 @@ export class QuoteContainer {
 
     this.quoteService = new QuoteService(
       this.quotesDAO,
-      this.quoteApprovalsDAO,
       this.quoteDetailRevisionsDAO,
       this.ticketsDAO,
       this.usersDAO,
@@ -69,6 +70,19 @@ export class QuoteContainer {
       notificationService
     );
 
-    this.quoteController = new QuoteController(this.quoteService, this.quoteEngineService, lookup);
+    this.quoteApprovalService = new QuoteApprovalService(
+      this.quotesDAO,
+      this.quoteApprovalsDAO,
+      this.usersDAO,
+      rbacService,
+      lookup
+    );
+
+    this.quoteController = new QuoteController(
+      this.quoteService,
+      this.quoteEngineService,
+      this.quoteApprovalService,
+      lookup
+    );
   }
 }
