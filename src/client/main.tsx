@@ -15,7 +15,7 @@ import CustomerDashboardPage from './pages/customer/CustomerDashboardPage.js';
 import TicketDetailPage from './pages/customer/TicketDetailPage.js';
 import SettingsPage from './pages/shared/SettingsPage.js';
 import AdminLayout from './pages/admin/AdminLayout.js';
-import { AdminDashboardPage } from './pages/admin/AdminDashboardPage.js';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage.js';
 import AdminTicketDetailPage from './pages/admin/tickets/AdminTicketDetailPage.js';
 import AdminAnalyticsPage from './pages/admin/analytics/AdminAnalyticsPage.js';
 import AdminSLAPoliciesPage from './pages/admin/sla/AdminSLAPoliciesPage.js';

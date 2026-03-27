@@ -1,13 +1,16 @@
 import React, { useEffect, useMemo } from 'react';
-import { useAuth } from '../../hooks/contexts/useAuth';
-import { useListTickets } from '../../hooks/tickets/useListTicket';
-import StatsOverview from '../../features/shared/StatsOverview';
-import AdminTicketList from '../../features/admin/tickets/AdminTicketList';
+import { useAuth } from '../../hooks/contexts/useAuth.js';
+import { useListTickets } from '../../hooks/tickets/useListTicket.js';
+import { useAdminTicketFilters, slaUrgencyKey } from '../../hooks/useAdminTicketFilters.js';
+import StatsOverview from '../../features/shared/StatsOverview.js';
+import AdminTicketList from '../../features/admin/tickets/AdminTicketList.js';
+import AdminTicketFilters from '../../features/admin/tickets/AdminTicketFilters.js';
+import TicketPagination from '../../features/collate/TicketPagination.js';
 import './AdminDashboardPage.css';
 
 const PRIORITY_ORDER: Record<string, number> = { P1: 1, P2: 2, P3: 3, P4: 4 };
 
-export const AdminDashboardPage: React.FC = () => {
+const AdminDashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { execute, data, loading, error } = useListTickets();
 
@@ -17,20 +20,48 @@ export const AdminDashboardPage: React.FC = () => {
   }, []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tickets = data?.tickets ?? [];
+  const allTickets = data?.tickets ?? [];
 
+  // Sort before filtering so filter results also arrive pre-sorted
   const sortedTickets = useMemo(
     () =>
-      [...tickets].sort((a, b) => {
-        const aAssigned = a.assignedToUserId !== null ? 0 : 1;
-        const bAssigned = b.assignedToUserId !== null ? 0 : 1;
-        if (aAssigned !== bAssigned) return aAssigned - bAssigned;
+      [...allTickets].sort((a, b) => {
+        // 1. Unassigned first
+        const aUnassigned = a.assignedToUserId === null ? 0 : 1;
+        const bUnassigned = b.assignedToUserId === null ? 0 : 1;
+        if (aUnassigned !== bUnassigned) return aUnassigned - bUnassigned;
+
+        // 2. SLA urgency ascending (breached = 0, null SLA = Infinity)
+        const slaDiff = slaUrgencyKey(a) - slaUrgencyKey(b);
+        if (slaDiff !== 0) return slaDiff;
+
+        // 3. Priority ascending (P1 = 1 ... P4 = 4)
         const aPriority = PRIORITY_ORDER[a.ticketPriority] ?? 99;
         const bPriority = PRIORITY_ORDER[b.ticketPriority] ?? 99;
         return aPriority - bPriority;
       }),
-    [tickets]
+    [allTickets]
   );
+
+  const {
+    filteredTickets,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    typeFilter,
+    setTypeFilter,
+    slaBreachFilter,
+    setSlaBreachFilter,
+    createdAfter,
+    setCreatedAfter,
+    createdBefore,
+    setCreatedBefore,
+    page,
+    setPage,
+    totalPages,
+    clearFilters,
+  } = useAdminTicketFilters(sortedTickets);
 
   const firstName = user?.firstName ?? '';
 
@@ -44,7 +75,7 @@ export const AdminDashboardPage: React.FC = () => {
       {!loading && !error && (
         <div className="admin-dashboard-stats">
           <span className="admin-dashboard-stats-title">Overview</span>
-          <StatsOverview tickets={tickets} />
+          <StatsOverview tickets={allTickets} />
         </div>
       )}
 
@@ -54,8 +85,29 @@ export const AdminDashboardPage: React.FC = () => {
             Tickets
           </h2>
         </div>
-        <AdminTicketList tickets={sortedTickets} loading={loading} error={error} />
+
+        <AdminTicketFilters
+          search={search}
+          onSearchChange={setSearch}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          typeFilter={typeFilter}
+          onTypeChange={setTypeFilter}
+          slaBreachFilter={slaBreachFilter}
+          onSlaBreachChange={setSlaBreachFilter}
+          createdAfter={createdAfter}
+          onCreatedAfterChange={setCreatedAfter}
+          createdBefore={createdBefore}
+          onCreatedBeforeChange={setCreatedBefore}
+          onClear={clearFilters}
+        />
+
+        <AdminTicketList tickets={filteredTickets} loading={loading} error={error} />
+
+        <TicketPagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </section>
     </div>
   );
 };
+
+export default AdminDashboardPage;
