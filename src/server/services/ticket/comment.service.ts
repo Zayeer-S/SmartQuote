@@ -7,21 +7,29 @@ import { PERMISSIONS, COMMENT_TYPES } from '../../../shared/constants/lookup-val
 import type { CommentType } from '../../../shared/constants/lookup-values.js';
 import { ForbiddenError } from './ticket.errors.js';
 import type { TicketCommentsDAO } from '../../daos/children/ticket.comments.dao.js';
+import type { UsersDAO } from '../../daos/children/users.dao.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
+
+export interface EnrichedComment extends TicketComment {
+  author_display_name: string;
+}
 
 export class CommentService {
   private ticketCommentsDAO: TicketCommentsDAO;
+  private usersDAO: UsersDAO;
   private ticketService: TicketService;
   private rbacService: RBACService;
   private lookup: LookupResolver;
 
   constructor(
     ticketCommentsDAO: TicketCommentsDAO,
+    usersDAO: UsersDAO,
     ticketService: TicketService,
     rbacService: RBACService,
     lookup: LookupResolver
   ) {
     this.ticketCommentsDAO = ticketCommentsDAO;
+    this.usersDAO = usersDAO;
     this.ticketService = ticketService;
     this.rbacService = rbacService;
     this.lookup = lookup;
@@ -38,7 +46,7 @@ export class CommentService {
    * @param commentType Type of comment
    * @param actorId Actor posting the comment
    * @param options Optional transaction context
-   * @returns Created comment
+   * @returns Created comment enriched with author display name
    * @throws TicketError if ticket not found or not visible to actor
    * @throws ForbiddenError if customer attempts an internal/system comment type
    */
@@ -48,8 +56,7 @@ export class CommentService {
     commentType: CommentType,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<TicketComment> {
-    // Enforces existence + org visibility in one call
+  ): Promise<EnrichedComment> {
     await this.ticketService.getTicket(ticketId, actorId, options);
 
     const canUpdateAll = await this.rbacService.hasPermission(
@@ -64,7 +71,7 @@ export class CommentService {
 
     const commentTypeId = this.lookup.commentTypeId(commentType);
 
-    return this.ticketCommentsDAO.create(
+    const comment = await this.ticketCommentsDAO.create(
       {
         ticket_id: ticketId,
         user_id: actorId,
@@ -73,6 +80,8 @@ export class CommentService {
       } satisfies InsertData<TicketComment>,
       options
     );
+
+    return this.enrichOne(comment, options);
   }
 
   /**
@@ -84,15 +93,14 @@ export class CommentService {
    * @param ticketId Ticket to list comments for
    * @param actorId Actor requesting comments
    * @param options Optional transaction context
-   * @returns Array of comments ordered oldest first
+   * @returns Array of enriched comments ordered oldest first
    * @throws TicketError if ticket not found or not visible to actor
    */
   async listComments(
     ticketId: TicketId,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<TicketComment[]> {
-    // Enforces existence + org visibility in one call
+  ): Promise<EnrichedComment[]> {
     await this.ticketService.getTicket(ticketId, actorId, options);
 
     const canUpdateAll = await this.rbacService.hasPermission(
@@ -101,23 +109,61 @@ export class CommentService {
       options
     );
 
+    let comments: TicketComment[];
+
     if (canUpdateAll) {
-      return this.ticketCommentsDAO.findByTicket(ticketId, options);
+      comments = await this.ticketCommentsDAO.findByTicket(ticketId, options);
+    } else {
+      const [external, system] = await Promise.all([
+        this.ticketCommentsDAO.findByType(
+          ticketId,
+          this.lookup.commentTypeId(COMMENT_TYPES.EXTERNAL),
+          options
+        ),
+        this.ticketCommentsDAO.findByType(
+          ticketId,
+          this.lookup.commentTypeId(COMMENT_TYPES.SYSTEM),
+          options
+        ),
+      ]);
+      comments = [...external, ...system].sort(
+        (a, b) => a.created_at.getTime() - b.created_at.getTime()
+      );
     }
 
-    const [external, system] = await Promise.all([
-      this.ticketCommentsDAO.findByType(
-        ticketId,
-        this.lookup.commentTypeId(COMMENT_TYPES.EXTERNAL),
-        options
-      ),
-      this.ticketCommentsDAO.findByType(
-        ticketId,
-        this.lookup.commentTypeId(COMMENT_TYPES.SYSTEM),
-        options
-      ),
-    ]);
+    return this.enrichMany(comments, options);
+  }
 
-    return [...external, ...system].sort((a, b) => a.created_at.getTime() - b.created_at.getTime());
+  /** Resolve author display names for a batch of comments in two queries. */
+  private async enrichMany(
+    comments: TicketComment[],
+    options?: TransactionContext
+  ): Promise<EnrichedComment[]> {
+    if (comments.length === 0) return [];
+
+    const uniqueUserIds = [...new Set(comments.map((c) => c.user_id))] as UserId[];
+    const users = await this.usersDAO.getByManyIds(uniqueUserIds, options);
+
+    const nameMap = new Map<string, string>();
+    for (const user of users) {
+      const parts = [user.first_name, user.middle_name, user.last_name].filter(Boolean);
+      nameMap.set(user.id as string, parts.join(' '));
+    }
+
+    return comments.map((c) => ({
+      ...c,
+      author_display_name: nameMap.get(c.user_id as string) ?? 'Unknown',
+    }));
+  }
+
+  /** Resolve author display name for a single comment. */
+  private async enrichOne(
+    comment: TicketComment,
+    options?: TransactionContext
+  ): Promise<EnrichedComment> {
+    const [enriched] = await this.enrichMany([comment], options);
+    // enrichMany always returns one entry when given one
+
+    return enriched;
   }
 }

@@ -23,15 +23,10 @@ import type {
 } from '../../shared/contracts/ticket-contracts.js';
 import type { SlaStatusResponse } from '../../shared/contracts/sla-contracts.js';
 import type { UserId, TicketId } from '../database/types/ids.js';
-import type {
-  Ticket,
-  TicketAttachment,
-  TicketWithDetails,
-  TicketComment,
-} from '../database/types/tables.js';
+import type { Ticket, TicketAttachment, TicketWithDetails } from '../database/types/tables.js';
 import type { OrganizationId } from '../database/types/ids.js';
 import type { TicketService } from '../services/ticket/ticket.service.js';
-import type { CommentService } from '../services/ticket/comment.service.js';
+import type { CommentService, EnrichedComment } from '../services/ticket/comment.service.js';
 import type { AttachmentService } from '../services/ticket/attachment.service.js';
 import type { SlaService } from '../services/sla/sla.service.js';
 import type { TicketSimilarityService } from '../services/ticket/ticket.similarity.service.js';
@@ -378,11 +373,11 @@ export class TicketController {
     };
   }
 
-  private mapComment(comment: TicketComment): CommentResponse {
+  private mapComment(comment: EnrichedComment): CommentResponse {
     return {
       id: comment.id as unknown as number,
       ticketId: comment.ticket_id as string,
-      userId: comment.user_id as string,
+      authorDisplayName: comment.author_display_name,
       commentText: comment.comment_text,
       commentType: this.lookup.commentTypeName(comment.comment_type_id as unknown as number),
       createdAt: comment.created_at.toISOString(),

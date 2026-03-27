@@ -22,12 +22,6 @@ const ADMIN_NAV_ITEMS: SidebarNavItem[] = [
     testId: 'nav-tickets',
   },
   {
-    to: CLIENT_ROUTES.ADMIN.QUOTES,
-    label: 'Quotes',
-    icon: <IconQuotes />,
-    testId: 'nav-quotes',
-  },
-  {
     to: CLIENT_ROUTES.ADMIN.ANALYTICS,
     label: 'Analytics',
     icon: <IconAnalytics />,
@@ -48,19 +42,19 @@ const ADMIN_NAV_ITEMS: SidebarNavItem[] = [
   {
     to: CLIENT_ROUTES.ADMIN.RATE_PROFILES,
     label: 'Rate Profiles',
-    icon: <IconSLA />, // RESOLVE
+    icon: <IconQuotes />, // RESOLVE
     testId: 'nav-rate-profiles',
   },
   {
     to: CLIENT_ROUTES.ADMIN.USER_MANAGEMENT,
     label: 'User Management',
-    icon: <IconSLA />, // RESOLVE
+    icon: <IconOrganisation />, // RESOLVE
     testId: 'nav-user-management',
   },
   {
     to: CLIENT_ROUTES.ADMIN.SYSTEM_CONFIG,
     label: 'System Config',
-    icon: <IconSLA />, // RESOLVE
+    icon: <IconSettings />, // RESOLVE
     testId: 'nav-system-config',
   },
   {

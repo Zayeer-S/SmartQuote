@@ -99,7 +99,8 @@ export interface AddCommentRequest {
 export interface CommentResponse {
   id: number;
   ticketId: string;
-  userId: string;
+  /** Resolved full name of the comment author */
+  authorDisplayName: string;
   commentText: string;
   commentType: CommentType;
   createdAt: string;

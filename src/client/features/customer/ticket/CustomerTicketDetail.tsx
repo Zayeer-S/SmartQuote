@@ -3,8 +3,7 @@ import { useGetTicket } from '../../../hooks/tickets/useGetTicket.js';
 import { useListQuotes } from '../../../hooks/quotes/useListQuote.js';
 import { getStatusBadgeClass, getPriorityBadgeClass } from '../../../lib/utils/badge-utils.js';
 import QuotePanel from '../quote/QuotePanel.js';
-import TicketCommentTimeline from '../../shared/TicketCommentTimeline.js';
-import TicketCommentThread from './TicketCommentThread.js';
+import TicketCommentThread from '../../shared/TicketCommentThread.js';
 import AttachmentList from '../../shared/AttachmentList.js';
 import './CustomerTicketDetail.css';
 
@@ -152,8 +151,6 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
           </p>
         )}
       </section>
-
-      <TicketCommentTimeline ticketId={ticketId} />
 
       <section className="ticket-detail-section">
         <TicketCommentThread ticketId={ticketId} />

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useListComments } from '../../../hooks/tickets/useListComments.js';
-import { useAddComment } from '../../../hooks/tickets/useAddComment.js';
-import { useTicketPermissions } from '../../../hooks/auth/useTicketPermissions.js';
-import { COMMENT_TYPES } from '../../../../shared/constants/lookup-values.js';
-import type { CommentType } from '../../../../shared/constants/lookup-values.js';
+import { useListComments } from '../../hooks/tickets/useListComments.js';
+import { useAddComment } from '../../hooks/tickets/useAddComment.js';
+import { useTicketPermissions } from '../../hooks/auth/useTicketPermissions.js';
+import { COMMENT_TYPES } from '../../../shared/constants/lookup-values.js';
+import type { CommentType } from '../../../shared/constants/lookup-values.js';
 import './TicketCommentThread.css';
 
 interface CommentThreadProps {
@@ -110,7 +110,7 @@ const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
                     {comment.commentType}
                   </span>
                   <span className="comment-user" data-testid={`comment-user-${String(comment.id)}`}>
-                    {comment.userId}
+                    {comment.authorDisplayName}
                   </span>
                   <span className="comment-date" data-testid={`comment-date-${String(comment.id)}`}>
                     {formattedDate}

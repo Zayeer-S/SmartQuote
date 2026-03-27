@@ -648,6 +648,10 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
+      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_APPROVE],
+    },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
       permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_REJECT],
     },
 

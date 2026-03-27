@@ -13,7 +13,7 @@ import type { SlaStatusResponse } from '../../../../shared/contracts/sla-contrac
 import type { UserListItem } from '../../../../shared/contracts/user-contracts.js';
 import AssignTicketForm from './AssignTicketForm.js';
 import AdminQuotePanel from '../quotes/AdminQuotePanel.js';
-import TicketCommentThread from '../../customer/ticket/TicketCommentThread.js';
+import TicketCommentThread from '../../shared/TicketCommentThread.js';
 import AttachmentList from '../../shared/AttachmentList.js';
 import SimilarTicketsPanel from './SimilarTicketsPanel.js';
 import './AdminTicketDetail.css';

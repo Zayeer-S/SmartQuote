@@ -129,6 +129,7 @@ export class TicketContainer {
 
     this.commentService = new CommentService(
       this.ticketCommentsDAO,
+      this.usersDAO,
       this.ticketService,
       rbacService,
       lookupResolver
