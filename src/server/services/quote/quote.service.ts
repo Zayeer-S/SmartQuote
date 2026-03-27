@@ -1,6 +1,6 @@
 import type { QuotesDAO } from '../../daos/children/quotes.dao.js';
 import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
-import type { UsersDAO } from '../../daos/children/users.dao.js';
+import type { UsersDAO } from '../../daos/children/users.domain.dao.js';
 import type { RBACService } from '../rbac/rbac.service.js';
 import type {
   Quote,

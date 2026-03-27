@@ -3,7 +3,7 @@ import { AuthController } from '../controllers/auth.controller.js';
 import { PermissionsDAO } from '../daos/children/permissions.dao.js';
 import { RolesDAO } from '../daos/children/roles.dao.js';
 import { SessionsDAO } from '../daos/children/sessions.dao.js';
-import { UsersDAO } from '../daos/children/users.dao.js';
+import { UsersDAO } from '../daos/children/users.domain.dao.js';
 import { AuthService } from '../services/auth/auth.service.js';
 import { PasswordService } from '../services/auth/password.service.js';
 import { SessionService } from '../services/auth/session.service.js';

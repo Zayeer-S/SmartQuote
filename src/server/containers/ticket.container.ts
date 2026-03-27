@@ -3,7 +3,7 @@ import { TicketsDAO } from '../daos/children/tickets.dao.js';
 import { TicketCommentsDAO } from '../daos/children/ticket.comments.dao.js';
 import { TicketAttachmentsDAO } from '../daos/children/ticket.attachments.dao.js';
 import { TicketEmbeddingsDAO } from '../daos/children/ticket.embeddings.dao.js';
-import { UsersDAO } from '../daos/children/users.dao.js';
+import { UsersDAO } from '../daos/children/users.domain.dao.js';
 import { QuotesDAO } from '../daos/children/quotes.dao.js';
 import { TicketService } from '../services/ticket/ticket.service.js';
 import { CommentService } from '../services/ticket/comment.service.js';

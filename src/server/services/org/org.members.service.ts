@@ -5,7 +5,7 @@ import type {
   OrganizationsDAO,
 } from '../../daos/children/organizations.domain.dao.js';
 import type { OrgRolesDAO, RolesDAO } from '../../daos/children/roles.dao.js';
-import type { UsersDAO } from '../../daos/children/users.dao.js';
+import type { UsersDAO } from '../../daos/children/users.domain.dao.js';
 import type { OrganizationId, UserId } from '../../database/types/ids.js';
 import type { Organization, OrganizationMember } from '../../database/types/tables.js';
 import type { OrgRBACService } from '../rbac/org.rbac.service.js';

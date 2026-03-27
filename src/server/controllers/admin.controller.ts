@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import type { Request, Response } from 'express';
-import type { UsersDAO } from '../daos/children/users.dao.js';
+import type { UsersDAO } from '../daos/children/users.domain.dao.js';
 import type { AuthService } from '../services/auth/auth.service.js';
 import { validateOrThrow } from '../validators/validation-utils.js';
 import { createUserSchema, listUsersQuerySchema } from '../validators/user.validator.js';

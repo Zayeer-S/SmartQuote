@@ -8,7 +8,7 @@ import { QuoteApprovalsDAO } from '../daos/children/quote.approvals.dao.js';
 import { QuoteDetailRevisionsDAO } from '../daos/children/quote.detail.revisions.dao.js';
 import { RateProfilesDAO } from '../daos/children/rate.profiles.dao.js';
 import { QuoteCalculationRulesDAO } from '../daos/children/quote.calculation.rules.dao.js';
-import { UsersDAO } from '../daos/children/users.dao.js';
+import { UsersDAO } from '../daos/children/users.domain.dao.js';
 
 import { QuoteService } from '../services/quote/quote.service.js';
 import { QuoteEngineService } from '../services/quote/quote.engine.service.js';

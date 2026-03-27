@@ -29,7 +29,7 @@ import { createSlaRoutes } from '../routes/sla.routes.js';
 import { EmailService } from '../services/email/email.service.js';
 import { NotificationService } from '../services/notification/notification.service.js';
 import { NotificationTypesDAO } from '../daos/children/notification.types.dao.js';
-import { UserNotificationPreferencesDAO } from '../daos/children/user.notification.preferences.dao.js';
+import { UserNotificationPreferencesDAO } from '../daos/children/users.domain.dao.js';
 
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
