@@ -59,8 +59,19 @@
   margin-bottom: var(--space-10);
   min-height: 44px;
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+/* Wraps the logo + portal label when expanded */
+.sidebar-brand-content {
+  display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
+  flex: 1;
 }
 
 .sidebar-logo-link {
@@ -280,25 +291,20 @@
 }
 
 /* ==========================================================================
-   Collapse toggle -- desktop only
-   Pinned to the right edge of the sidebar, vertically centered.
+   Collapse toggle -- desktop only, sits in the brand row
    ========================================================================== */
 .sidebar-toggle {
-  position: absolute;
-  right: -12px;
-  top: 50%;
-  transform: translateY(-50%);
   width: 24px;
   height: 24px;
+  flex-shrink: 0;
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: var(--_gradient-mid);
+  background: transparent;
   color: rgba(255, 255, 255, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: var(--z-sticky);
   transition:
     background-color var(--transition-fast),
     color var(--transition-fast),
@@ -309,6 +315,11 @@
   background-color: var(--color-accent-primary);
   color: var(--color-white);
   border-color: transparent;
+}
+
+/* When collapsed the logo is gone -- center the toggle in the brand row */
+.sidebar--collapsed .sidebar-brand {
+  justify-content: center;
 }
 
 .sidebar-toggle-icon {
@@ -349,7 +360,6 @@
     transition: none;
   }
 
-  /* Collapsed class has no effect on mobile -- always full bar */
   .sidebar--collapsed {
     width: 100%;
   }
@@ -357,6 +367,7 @@
   .sidebar-brand {
     margin-bottom: 0;
     min-height: unset;
+    flex-shrink: 0;
   }
 
   .sidebar-portal-label {
@@ -381,7 +392,6 @@
     border-bottom-color: var(--color-accent-secondary-razzmatazz);
   }
 
-  /* Collapsed state on mobile: still show labels */
   .sidebar--collapsed .sidebar-link {
     justify-content: flex-start;
     padding: var(--space-2) var(--space-2);
@@ -416,7 +426,7 @@
     padding: var(--space-2) var(--space-2);
   }
 
-  /* Hide desktop collapse toggle on mobile */
+  /* Hide collapse toggle on mobile -- no concept of collapsed in top bar mode */
   .sidebar-toggle {
     display: none;
   }

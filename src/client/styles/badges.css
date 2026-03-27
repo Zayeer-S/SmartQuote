@@ -1,0 +1,157 @@
+/* ==========================================================================
+   BADGES
+   Base + all variants. Import once in main.tsx.
+   Never define badge-* classes in components.
+
+   Composition model:
+     <span class="badge badge-open">Open</span>
+     <span class="badge badge-p1">P1</span>
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  line-height: var(--line-height-tight);
+  border: 1px solid transparent;
+}
+
+/* --------------------------------------------------------------------------
+   Neutral -- fallback for unknown values
+   -------------------------------------------------------------------------- */
+.badge-neutral {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+/* --------------------------------------------------------------------------
+   Ticket status
+   -------------------------------------------------------------------------- */
+.badge-open {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 12%, transparent);
+  color: var(--color-accent-secondary-deep-teal);
+  border-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 30%, transparent);
+}
+
+.badge-assigned {
+  background-color: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+  color: var(--color-accent-primary);
+  border-color: color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+}
+
+.badge-in-progress {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 12%, transparent);
+  color: var(--color-accent-secondary-indigo);
+  border-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 30%, transparent);
+}
+
+.badge-resolved {
+  background-color: var(--color-feedback-success-bg);
+  color: var(--color-feedback-success-text);
+  border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
+}
+
+.badge-closed {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+.badge-cancelled {
+  background-color: var(--color-feedback-error-bg);
+  color: var(--color-feedback-error-text);
+  border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   Ticket priority
+   P1 = critical (red), P2 = high (amber), P3 = medium (indigo), P4 = low (teal)
+   -------------------------------------------------------------------------- */
+.badge-p1 {
+  background-color: var(--color-feedback-error-bg);
+  color: var(--color-feedback-error-text);
+  border-color: color-mix(in srgb, var(--color-error) 40%, transparent);
+}
+
+.badge-p2 {
+  background-color: var(--color-feedback-warning-bg);
+  color: var(--color-feedback-warning-text);
+  border-color: color-mix(in srgb, var(--color-warning) 40%, transparent);
+}
+
+.badge-p3 {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 12%, transparent);
+  color: var(--color-accent-secondary-indigo);
+  border-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 30%, transparent);
+}
+
+.badge-p4 {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 12%, transparent);
+  color: var(--color-accent-secondary-deep-teal);
+  border-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 30%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   SLA -- consolidated from AdminTicketCard.css
+   -------------------------------------------------------------------------- */
+.badge-sla-ok {
+  background-color: var(--color-feedback-success-bg);
+  color: var(--color-feedback-success-text);
+  border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
+}
+
+.badge-sla-breached {
+  background-color: var(--color-feedback-error-bg);
+  color: var(--color-feedback-error-text);
+  border-color: color-mix(in srgb, var(--color-error) 40%, transparent);
+  font-weight: var(--font-weight-bold);
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme overrides
+   -------------------------------------------------------------------------- */
+[data-theme='dark'] .badge-neutral {
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .badge-open {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 80%, var(--color-white));
+}
+
+[data-theme='dark'] .badge-assigned {
+  background-color: color-mix(in srgb, var(--color-accent-primary-light) 20%, transparent);
+  color: var(--color-accent-primary-light);
+}
+
+[data-theme='dark'] .badge-in-progress {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-indigo) 80%, var(--color-white));
+}
+
+[data-theme='dark'] .badge-closed {
+  background-color: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .badge-p3 {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-indigo) 80%, var(--color-white));
+}
+
+[data-theme='dark'] .badge-p4 {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 80%, var(--color-white));
+}

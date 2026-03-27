@@ -1,25 +1,32 @@
 import React, { useState } from 'react';
 import { useAssignTicket } from '../../../hooks/tickets/useAssignTicket.js';
+import type { UserListItem } from '../../../../shared/contracts/user-contracts.js';
 import './AssignTicketForm.css';
 
 interface AssignTicketFormProps {
   ticketId: string;
   currentAssigneeId: string | null;
+  adminUsers: UserListItem[];
   onAssigned: () => void;
+}
+
+function fullName(user: UserListItem): string {
+  return [user.firstName, user.middleName, user.lastName].filter(Boolean).join(' ');
 }
 
 const AssignTicketForm: React.FC<AssignTicketFormProps> = ({
   ticketId,
   currentAssigneeId,
+  adminUsers,
   onAssigned,
 }) => {
-  const [assigneeId, setAssigneeId] = useState(currentAssigneeId ?? '');
+  const [selectedId, setSelectedId] = useState('');
   const { execute, loading, error } = useAssignTicket();
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    if (!assigneeId.trim()) return;
-    void execute(ticketId, { assigneeId }).then(() => {
+    if (!selectedId) return;
+    void execute(ticketId, { assigneeId: selectedId }).then(() => {
       onAssigned();
     });
   };
@@ -33,29 +40,36 @@ const AssignTicketForm: React.FC<AssignTicketFormProps> = ({
     >
       <div className="assign-ticket-form-row">
         <div className="field-group assign-ticket-field">
-          <label className="field-label" htmlFor="assignee-id">
-            Assignee User ID
+          <label className="field-label" htmlFor="assignee-select">
+            Assignee
           </label>
-          <input
+          <select
             className="field-input"
-            id="assignee-id"
-            type="text"
-            value={assigneeId}
+            id="assignee-select"
+            value={selectedId}
             onChange={(e) => {
-              setAssigneeId(e.target.value);
+              setSelectedId(e.target.value);
             }}
-            placeholder="Enter user ID"
             required
             disabled={loading}
             aria-required="true"
-            data-testid="assignee-id-input"
-          />
+            data-testid="assignee-select"
+          >
+            <option value="" disabled>
+              Assign...
+            </option>
+            {adminUsers.map((user) => (
+              <option key={user.id} value={user.id}>
+                {fullName(user)} ({user.email})
+              </option>
+            ))}
+          </select>
         </div>
 
         <button
           type="submit"
           className="btn btn-primary btn-sm assign-ticket-submit"
-          disabled={loading || !assigneeId.trim()}
+          disabled={loading || !selectedId}
           aria-busy={loading}
           data-testid="assign-submit-btn"
         >

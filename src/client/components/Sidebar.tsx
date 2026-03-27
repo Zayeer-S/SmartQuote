@@ -63,14 +63,43 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <nav className={sidebarClass} aria-label={ariaLabel} data-testid={testId ?? 'sidebar'}>
-      {/* Brand */}
+      {/* Brand + collapse toggle */}
       <div className="sidebar-brand">
         {!isCollapsed && (
-          <a className="sidebar-logo-link">
-            <img src={brand.logoSrc} width={130} height={22} alt="Giacom logo" />
-          </a>
+          <div className="sidebar-brand-content">
+            <a className="sidebar-logo-link">
+              <img src={brand.logoSrc} width={130} height={22} alt="Giacom logo" />
+            </a>
+            <span className="sidebar-portal-label">{brand.portalLabel}</span>
+          </div>
         )}
-        {!isCollapsed && <span className="sidebar-portal-label">{brand.portalLabel}</span>}
+        <button
+          type="button"
+          className="sidebar-toggle"
+          onClick={toggle}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-expanded={!isCollapsed}
+          data-testid="sidebar-toggle"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+            className={['sidebar-toggle-icon', isCollapsed ? 'sidebar-toggle-icon--flipped' : '']
+              .filter(Boolean)
+              .join(' ')}
+          >
+            <path
+              d="M10 12L6 8L10 4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
 
       {/* Nav links */}
@@ -114,36 +143,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           {!isCollapsed && <span>Sign out</span>}
         </button>
       </div>
-
-      {/* Collapse chevron -- desktop only, hidden on mobile */}
-      {/** RESOLVE: MOVE UP */}
-      <button
-        type="button"
-        className="sidebar-toggle"
-        onClick={toggle}
-        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        aria-expanded={!isCollapsed}
-        data-testid="sidebar-toggle"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          aria-hidden="true"
-          className={['sidebar-toggle-icon', isCollapsed ? 'sidebar-toggle-icon--flipped' : '']
-            .filter(Boolean)
-            .join(' ')}
-        >
-          <path
-            d="M10 12L6 8L10 4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
     </nav>
   );
 };

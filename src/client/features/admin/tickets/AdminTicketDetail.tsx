@@ -3,12 +3,14 @@ import { useGetTicket } from '../../../hooks/tickets/useGetTicket.js';
 import { useListQuotes } from '../../../hooks/quotes/useListQuote.js';
 import { useResolveTicket } from '../../../hooks/tickets/useResolveTicket.js';
 import { useTicketPermissions } from '../../../hooks/auth/useTicketPermissions.js';
+import { useListEmployeeUsers } from '../../../hooks/useListEmployeeUsers.js';
 import {
   getStatusBadgeClass,
   getPriorityBadgeClass,
   getSlaBadgeClass,
 } from '../../../lib/utils/badge-utils.js';
 import type { SlaStatusResponse } from '../../../../shared/contracts/sla-contracts.js';
+import type { UserListItem } from '../../../../shared/contracts/user-contracts.js';
 import AssignTicketForm from './AssignTicketForm.js';
 import AdminQuotePanel from '../quotes/AdminQuotePanel.js';
 import TicketCommentThread from '../../customer/ticket/TicketCommentThread.js';
@@ -101,10 +103,19 @@ function formatHours(hours: number): string {
   if (hours % 1 === 0) {
     return `${String(hours)} hr${hours === 1 ? '' : 's'}`;
   }
-  // e.g. 1.5 -> "1 hr 30 min"
   const wholeHours = Math.floor(hours);
   const minutes = Math.round((hours - wholeHours) * 60);
   return `${String(wholeHours)} hr ${String(minutes)} min`;
+}
+
+function resolveAssigneeName(
+  assignedToUserId: string | null,
+  adminUsers: UserListItem[]
+): string | null {
+  if (!assignedToUserId) return null;
+  const user = adminUsers.find((u) => u.id === assignedToUserId);
+  if (!user) return null;
+  return [user.firstName, user.middleName, user.lastName].filter(Boolean).join(' ');
 }
 
 const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
@@ -112,6 +123,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
   const quotes = useListQuotes();
   const resolve = useResolveTicket();
   const { canAssign } = useTicketPermissions();
+  const adminUsers = useListEmployeeUsers();
 
   const [showAssignForm, setShowAssignForm] = useState(false);
 
@@ -122,12 +134,9 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
   useEffect(() => {
     loadTicket();
     void quotes.execute(ticketId);
+    void adminUsers.execute();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId]);
-
-  useEffect(() => {
-    console.log('quotes data updated:', JSON.stringify(quotes.data, null, 2));
-  }, [quotes.data]);
 
   const handleResolve = (): void => {
     void resolve.execute(ticketId).then(loadTicket);
@@ -180,6 +189,8 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
   });
 
   const isResolved = t.ticketStatus === 'Resolved' || t.ticketStatus === 'Closed';
+
+  const assigneeName = resolveAssigneeName(t.assignedToUserId, adminUsers.data ?? []);
 
   return (
     <div className="admin-ticket-detail" data-testid="admin-ticket-detail">
@@ -249,7 +260,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
           <div className="admin-detail-dl-row">
             <dt>Assigned To</dt>
             <dd data-testid="ticket-assignee">
-              {t.assignedToUserId ?? <em className="admin-detail-unassigned">Unassigned</em>}
+              {assigneeName ?? <em className="admin-detail-unassigned">Unassigned</em>}
             </dd>
           </div>
         </dl>
@@ -280,6 +291,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
               <AssignTicketForm
                 ticketId={ticketId}
                 currentAssigneeId={t.assignedToUserId}
+                adminUsers={adminUsers.data ?? []}
                 onAssigned={handleAssigned}
               />
               <button
@@ -336,9 +348,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
           quotes={quotes.data?.quotes ?? []}
           onQuoteMutated={() => {
             loadTicket();
-            void quotes.execute(ticketId).then((result) => {
-              console.log('quotes re-fetched:', result);
-            });
+            void quotes.execute(ticketId);
           }}
         />
       </section>

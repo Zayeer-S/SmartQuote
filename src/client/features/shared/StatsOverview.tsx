@@ -1,22 +1,24 @@
 import React from 'react';
 import type { TicketResponse } from '../../../shared/contracts/ticket-contracts.js';
 import { TICKET_STATUSES } from '../../../shared/constants/lookup-values.js';
+import './StatsOverview.css';
 
 interface StatsOverviewProps {
   tickets: TicketResponse[];
 }
 
+type StatCardColor = 'purple' | 'razzmatazz' | 'amber';
+
 interface StatCardProps {
   label: string;
   value: number;
+  color: StatCardColor;
   testId: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ label, value, testId }) => (
-  <div className="stat-card" data-testid={testId}>
-    <div>
-      <span className="stat-card-value">{value}</span>
-    </div>
+const StatCard: React.FC<StatCardProps> = ({ label, value, color, testId }) => (
+  <div className={`stat-card stat-card--${color}`} data-testid={testId}>
+    <span className="stat-card-value">{value}</span>
     <span className="stat-card-label">{label}</span>
   </div>
 );
@@ -38,9 +40,9 @@ const StatsOverview: React.FC<StatsOverviewProps> = ({ tickets }) => {
       aria-label="Ticket overview statistics"
       data-testid="stats-overview"
     >
-      <StatCard label="Total Tickets" value={total} testId="stat-total" />
-      <StatCard label="Active" value={open} testId="stat-open" />
-      <StatCard label="Resolved" value={resolved} testId="stat-resolved" />
+      <StatCard label="Total Tickets" value={total} color="purple" testId="stat-total" />
+      <StatCard label="Active" value={open} color="razzmatazz" testId="stat-open" />
+      <StatCard label="Resolved" value={resolved} color="amber" testId="stat-resolved" />
     </div>
   );
 };
