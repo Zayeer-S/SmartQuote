@@ -4,13 +4,11 @@ import z from 'zod';
 dotenv.config({ path: '.env.local' });
 
 const optionalStr = z
-  .string()
-  .optional()
+  .union([z.string(), z.undefined()])
   .transform((val) => (val === '' ? undefined : val));
 
 const optionalNum = z
-  .string()
-  .optional()
+  .union([z.string(), z.undefined()])
   .transform((val) => (val === '' || val === undefined ? undefined : Number(val)));
 
 const envSchema = z.object({
