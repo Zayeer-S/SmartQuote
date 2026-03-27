@@ -11,9 +11,6 @@ export const CLIENT_ROUTES = {
     ROOT: '/admin',
     TICKETS: '/admin/tickets',
     TICKET: (id = ':ticketId') => `/admin/tickets/${id}`,
-    QUOTES: '/admin/quotes',
-    QUOTE: (ticketId = ':ticketId', quoteId = ':quoteId') =>
-      `/admin/tickets/${ticketId}/quotes/${quoteId}`,
     ORGANIZATIONS_LIST: '/admin/organizations',
     ORGANIZATIONS: (orgId = ':orgId') => `/admin/organizations/${orgId}`,
     ORGANIZATION_MEMBERS: (orgId = ':orgId') => `/admin/organizations/${orgId}/members`,
