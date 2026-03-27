@@ -11,6 +11,7 @@ import type {
 } from '../database/types/tables.js';
 import type { QuoteService } from '../services/quote/quote.service.js';
 import type { QuoteEngineService } from '../services/quote/quote-engine.service.js';
+import type { QuoteApprovalService } from '../services/quote/quote-approval.service.js';
 import {
   approveQuoteSchema,
   createManualQuoteSchema,
@@ -31,15 +32,18 @@ import { QuoteApprovalStatus } from '../../shared/constants/lookup-values.js';
 export class QuoteController {
   private quoteService: QuoteService;
   private quoteEngineService: QuoteEngineService;
+  private quoteApprovalService: QuoteApprovalService;
   private lookup: LookupResolver;
 
   constructor(
     quoteService: QuoteService,
     quoteEngineService: QuoteEngineService,
+    quoteApprovalService: QuoteApprovalService,
     lookup: LookupResolver
   ) {
     this.quoteService = quoteService;
     this.quoteEngineService = quoteEngineService;
+    this.quoteApprovalService = quoteApprovalService;
     this.lookup = lookup;
   }
 
@@ -144,7 +148,7 @@ export class QuoteController {
     try {
       const actor = (req as AuthenticatedRequest).user;
 
-      const approval = await this.quoteService.submitForApproval(
+      const approval = await this.quoteApprovalService.submitForApproval(
         req.params.quoteId as QuoteId,
         actor.id as UserId
       );
@@ -160,7 +164,7 @@ export class QuoteController {
       const actor = (req as AuthenticatedRequest).user;
       const body = validateOrThrow(approveQuoteSchema, req.body);
 
-      const approval = await this.quoteService.approveQuote(
+      const approval = await this.quoteApprovalService.approveQuote(
         req.params.quoteId as QuoteId,
         actor.id as UserId,
         body.comment ?? null
@@ -177,7 +181,7 @@ export class QuoteController {
       const actor = (req as AuthenticatedRequest).user;
       const body = validateOrThrow(rejectQuoteSchema, req.body);
 
-      const approval = await this.quoteService.rejectQuote(
+      const approval = await this.quoteApprovalService.rejectQuote(
         req.params.quoteId as QuoteId,
         body.comment,
         actor.id as UserId

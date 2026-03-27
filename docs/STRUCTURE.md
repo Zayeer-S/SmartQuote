@@ -359,6 +359,7 @@ smartquote/
 │   │   │   │   ├── org.service.ts
 │   │   │   │   └── org.service.types.ts
 │   │   │   ├── quote/
+│   │   │   │   ├── quote-approval.service.ts
 │   │   │   │   ├── quote-engine.service.ts
 │   │   │   │   ├── quote.errors.ts
 │   │   │   │   └── quote.service.ts
