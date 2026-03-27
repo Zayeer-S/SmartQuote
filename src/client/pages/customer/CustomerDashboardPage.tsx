@@ -3,12 +3,12 @@ import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
 import StatsOverview from '../../features/dashboard/StatsOverview.js';
 import TicketStatusChart from '../../features/dashboard/TicketStatusChart.js';
-import TicketList from '../../features/tickets/TicketList.js';
+import TicketList from '../../features/customer/ticket/TicketList.js';
 import Modal from '../../components/Modal.js';
 import SubmitTicketForm from '../../features/customer/dashboard/SubmitTicketForm.js';
-import './DashboardPage.css';
+import './CustomerDashboardPage.css';
 
-const DashboardPage: React.FC = () => {
+const CustomerDashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { execute, data, loading, error } = useListTickets();
   const [modalOpen, setModalOpen] = useState(false);
@@ -47,18 +47,6 @@ const DashboardPage: React.FC = () => {
 
       <div className="dashboard-line" />
 
-      {loading && (
-        <p className="loading-text" data-testid="dashboard-loading">
-          Loading...
-        </p>
-      )}
-
-      {error && (
-        <p className="feedback-error" role="alert" data-testid="dashboard-error">
-          {error}
-        </p>
-      )}
-
       {!loading && !error && (
         <div className="card dashboard-overview" data-testid="dashboard-overview">
           <TicketStatusChart tickets={allTickets} />
@@ -69,25 +57,23 @@ const DashboardPage: React.FC = () => {
         </div>
       )}
 
-      {!loading && !error && (
-        <section className="dashboard-section" aria-labelledby="tickets-heading">
-          <div className="dashboard-section-header">
-            <h2 className="dashboard-section-title" id="tickets-heading">
-              My Tickets
-            </h2>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleOpenModal}
-              data-testid="open-new-ticket-modal-btn"
-            >
-              + New Ticket
-            </button>
-          </div>
+      <section className="dashboard-section" aria-labelledby="tickets-heading">
+        <div className="dashboard-section-header">
+          <h2 className="dashboard-section-title" id="tickets-heading">
+            My Tickets
+          </h2>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleOpenModal}
+            data-testid="open-new-ticket-modal-btn"
+          >
+            + New Ticket
+          </button>
+        </div>
 
-          <TicketList tickets={allTickets} />
-        </section>
-      )}
+        <TicketList tickets={allTickets} loading={loading} error={error} />
+      </section>
 
       <Modal
         isOpen={modalOpen}
@@ -111,4 +97,4 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage;
+export default CustomerDashboardPage;

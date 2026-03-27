@@ -9,7 +9,7 @@ import {
   getSlaBadgeClass,
 } from '../../lib/utils/badge-utils.js';
 import type { SlaStatusResponse } from '../../../shared/contracts/sla-contracts.js';
-import AssignTicketForm from './AssignTicketForm.js';
+import AssignTicketForm from '../admin/tickets/AssignTicketForm.js';
 import AdminQuotePanel from '../admin/quotes/AdminQuotePanel.js';
 import CommentThread from './CommentThread.js';
 import AttachmentList from './AttachmentList.js';

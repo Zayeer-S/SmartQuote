@@ -34,7 +34,6 @@ const ADMIN_NAV_ITEMS: SidebarNavItem[] = [
     testId: 'nav-analytics',
   },
   {
-    // No specific org selected in nav -- resolves to /admin/org/:orgId pattern
     to: CLIENT_ROUTES.ADMIN.ORGANIZATION_MEMBERS(),
     label: 'Organisation Members',
     icon: <IconOrganisation />,
@@ -51,6 +50,24 @@ const ADMIN_NAV_ITEMS: SidebarNavItem[] = [
     label: 'SLA Policies',
     icon: <IconSLA />,
     testId: 'nav-sla-policies',
+  },
+  {
+    to: CLIENT_ROUTES.ADMIN.RATE_PROFILES,
+    label: 'Rate Profiles',
+    icon: <IconSLA />, // RESOLVE
+    testId: 'nav-rate-profiles',
+  },
+  {
+    to: CLIENT_ROUTES.ADMIN.USER_MANAGEMENT,
+    label: 'User Management',
+    icon: <IconSLA />, // RESOLVE
+    testId: 'nav-user-management',
+  },
+  {
+    to: CLIENT_ROUTES.ADMIN.SYSTEM_CONFIG,
+    label: 'System Config',
+    icon: <IconSLA />, // RESOLVE
+    testId: 'nav-system-config',
   },
   {
     to: CLIENT_ROUTES.ADMIN.SETTINGS,

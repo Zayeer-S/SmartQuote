@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTheme } from '../../hooks/contexts/useTheme.js';
-import './CustomerSettingsPage.css';
+import './SettingsPage.css';
 
 const SettingsPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();

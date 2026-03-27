@@ -4,24 +4,25 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/auth/AuthContext.js';
 import { SidebarProvider } from './context/sidebar/SidebarContext.js';
 import LoginPage from './pages/login/LoginPage.js';
-import CantAccessPage from './pages/login/CantAccessPage.js';
+import CantAccessPage from './pages/misc/CantAccessPage.js';
 import NotFoundPage from './pages/NotFoundPage.js';
 import ProtectedRoute from './components/ProtectedRoute.js';
 import { CLIENT_ROUTES } from './constants/client.routes.js';
 import { ThemeProvider } from './context/theme/ThemeContext.js';
 import { AUTH_ROLES } from '../shared/constants';
 import CustomerLayout from './pages/customer/CustomerLayout.js';
-import DashboardPage from './pages/customer/DashboardPage.js';
+import CustomerDashboardPage from './pages/customer/CustomerDashboardPage.js';
 import TicketDetailPage from './pages/customer/TicketDetailPage.js';
-import SettingsPage from './pages/customer/CustomerSettingsPage.js';
+import SettingsPage from './pages/shared/SettingsPage.js';
 import AdminLayout from './pages/admin/AdminLayout.js';
-import AdminTicketsPage from './pages/admin/AdminTicketsPage.js';
-import AdminTicketDetailPage from './pages/admin/AdminTicketDetailPage.js';
-import AdminQuotesPage from './pages/admin/AdminQuotesPage.js';
-import AdminQuoteDetailPage from './pages/admin/AdminQuoteDetailPage.js';
+import AdminTicketsPage from './pages/admin/tickets/AdminTicketsPage.js';
+import AdminTicketDetailPage from './pages/admin/tickets/AdminTicketDetailPage.js';
+import AdminQuoteDetailPage from './pages/admin/quote/AdminQuoteDetailPage.js';
 import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage.js';
 import AdminSLAPoliciesPage from './pages/admin/AdminSLAPoliciesPage.js';
-import AdminSettingsPage from './pages/admin/AdminSettingsPage.js';
+import AdminRateProfilesPage from './pages/admin/AdminRateProfilesPage.js';
+import AdminUserManagementPage from './pages/admin/user-management/AdminUserManagementPage.js';
+import AdminSystemConfigPage from './pages/admin/system-config/AdminSystemConfigPage.js';
 import './styles/globals.css';
 import './styles/buttons.css';
 import './styles/forms.css';
@@ -58,20 +59,31 @@ createRoot(document.getElementById('root')!).render(
                       path={CLIENT_ROUTES.ADMIN.TICKET()}
                       element={<AdminTicketDetailPage />}
                     />
-                    <Route path={CLIENT_ROUTES.ADMIN.QUOTES} element={<AdminQuotesPage />} />
                     <Route path={CLIENT_ROUTES.ADMIN.QUOTE()} element={<AdminQuoteDetailPage />} />
                     <Route path={CLIENT_ROUTES.ADMIN.ANALYTICS} element={<AdminAnalyticsPage />} />
                     <Route
                       path={CLIENT_ROUTES.ADMIN.SLA_POLICIES}
                       element={<AdminSLAPoliciesPage />}
                     />
-                    <Route path={CLIENT_ROUTES.ADMIN.SETTINGS} element={<AdminSettingsPage />} />
+                    <Route
+                      path={CLIENT_ROUTES.ADMIN.RATE_PROFILES}
+                      element={<AdminRateProfilesPage />}
+                    />
+                    <Route
+                      path={CLIENT_ROUTES.ADMIN.USER_MANAGEMENT}
+                      element={<AdminUserManagementPage />}
+                    />
+                    <Route
+                      path={CLIENT_ROUTES.ADMIN.SYSTEM_CONFIG}
+                      element={<AdminSystemConfigPage />}
+                    />
+                    <Route path={CLIENT_ROUTES.ADMIN.SETTINGS} element={<SettingsPage />} />
                   </Route>
                 </Route>
 
                 <Route element={<ProtectedRoute allowedRoles={[AUTH_ROLES.CUSTOMER]} />}>
                   <Route path={CLIENT_ROUTES.CUSTOMER.ROOT} element={<CustomerLayout />}>
-                    <Route index element={<DashboardPage />} />
+                    <Route index element={<CustomerDashboardPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.TICKET()} element={<TicketDetailPage />} />
                     <Route path={CLIENT_ROUTES.CUSTOMER.SETTINGS} element={<SettingsPage />} />
                   </Route>

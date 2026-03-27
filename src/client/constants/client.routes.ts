@@ -19,6 +19,9 @@ export const CLIENT_ROUTES = {
     ORGANIZATION_MEMBERS: (orgId = ':orgId') => `/admin/org/${orgId}/members`,
     ANALYTICS: '/admin/analytics',
     SLA_POLICIES: '/admin/sla-policies',
+    RATE_PROFILES: '/admin/rate-profiles',
+    USER_MANAGEMENT: '/admin/user-management',
+    SYSTEM_CONFIG: '/admin/system-config',
     SETTINGS: '/admin/settings',
   },
 } as const;

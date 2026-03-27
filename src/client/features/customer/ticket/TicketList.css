@@ -2,7 +2,6 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
 }
 
 .ticket-list li {
