@@ -2,7 +2,7 @@ import React from 'react';
 import { CLIENT_ROUTES } from '../../../constants/client.routes.js';
 import { getSlaBadgeClass } from '../../../lib/utils/badge-utils.js';
 import type { TicketSummaryResponse } from '../../../../shared/contracts/ticket-contracts.js';
-import BaseTicketCard from '../../BaseTicketCard.js';
+import BaseTicketCard from '../../shared/BaseTicketCard.js';
 
 interface AdminTicketCardProps {
   ticket: TicketSummaryResponse;

@@ -5,7 +5,7 @@ import { useListQuotes } from '../../../hooks/quotes/useListQuote.js';
 import { useGetTicket } from '../../../hooks/tickets/useGetTicket.js';
 import { getStatusBadgeClass } from '../../../lib/utils/badge-utils.js';
 import AdminQuotePanel from '../../../features/admin/quotes/AdminQuotePanel.js';
-import CommentThread from '../../../features/tickets/CommentThread.js';
+import TicketCommentThread from '../../../features/customer/ticket/TicketCommentThread.js';
 import './AdminQuoteDetailPage.css';
 
 const AdminQuoteDetailPage: React.FC = () => {
@@ -107,7 +107,7 @@ const AdminQuoteDetailPage: React.FC = () => {
 
       <AdminQuotePanel ticketId={ticketId} quotes={allQuotes} onQuoteMutated={loadData} />
 
-      <CommentThread ticketId={ticketId} />
+      <TicketCommentThread ticketId={ticketId} />
     </div>
   );
 };

@@ -1,5 +1,3 @@
-// src/client/features/dashboard/QuoteAccuracyChart.tsx
-
 import React from 'react';
 import {
   BarChart,
@@ -11,7 +9,7 @@ import {
   CartesianGrid,
   ReferenceLine,
 } from 'recharts';
-import type { QuoteAccuracyResponse } from '../../../shared/contracts/analytics-contract';
+import type { QuoteAccuracyResponse } from '../../../../shared/contracts/analytics-contract';
 
 interface QuoteAccuracyChartProps {
   data: QuoteAccuracyResponse;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { getStatusBadgeClass, getPriorityBadgeClass } from '../lib/utils/badge-utils.js';
-import type { TicketSummaryResponse } from '../../shared/contracts/ticket-contracts.js';
+import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
+import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
 import './BaseTicketCard.css';
 
 export interface BaseTicketCardProps {

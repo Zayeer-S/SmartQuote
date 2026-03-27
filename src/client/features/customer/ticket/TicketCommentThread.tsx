@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useListComments } from '../../hooks/tickets/useListComments.js';
-import { useAddComment } from '../../hooks/tickets/useAddComment.js';
-import { useTicketPermissions } from '../../hooks/auth/useTicketPermissions.js';
-import { COMMENT_TYPES } from '../../../shared/constants/lookup-values.js';
-import type { CommentType } from '../../../shared/constants/lookup-values.js';
-import './CommentThread.css';
+import { useListComments } from '../../../hooks/tickets/useListComments.js';
+import { useAddComment } from '../../../hooks/tickets/useAddComment.js';
+import { useTicketPermissions } from '../../../hooks/auth/useTicketPermissions.js';
+import { COMMENT_TYPES } from '../../../../shared/constants/lookup-values.js';
+import type { CommentType } from '../../../../shared/constants/lookup-values.js';
+import './TicketCommentThread.css';
 
 interface CommentThreadProps {
   ticketId: string;
@@ -22,7 +22,7 @@ const COMMENT_TYPE_BADGE_CLASS: Record<CommentType, string> = {
   [COMMENT_TYPES.SYSTEM]: 'badge comment-type-badge comment-type-badge--system',
 };
 
-const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
+const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
   const list = useListComments();
   const add = useAddComment();
   const { canUpdateAll } = useTicketPermissions();
@@ -200,4 +200,4 @@ const CommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
   );
 };
 
-export default CommentThread;
+export default TicketCommentThread;

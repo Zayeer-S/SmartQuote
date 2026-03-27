@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
-import StatsOverview from '../../features/dashboard/StatsOverview.js';
-import TicketStatusChart from '../../features/dashboard/TicketStatusChart.js';
+import StatsOverview from '../../features/shared/StatsOverview.js';
+import TicketStatusChart from '../../features/admin/analytics/TicketStatusChart.js';
 import TicketList from '../../features/customer/ticket/TicketList.js';
 import Modal from '../../components/Modal.js';
 import SubmitTicketForm from '../../features/customer/dashboard/SubmitTicketForm.js';

@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
-import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
-import { useResolveTicket } from '../../hooks/tickets/useResolveTicket.js';
-import { useTicketPermissions } from '../../hooks/auth/useTicketPermissions.js';
+import { useGetTicket } from '../../../hooks/tickets/useGetTicket.js';
+import { useListQuotes } from '../../../hooks/quotes/useListQuote.js';
+import { useResolveTicket } from '../../../hooks/tickets/useResolveTicket.js';
+import { useTicketPermissions } from '../../../hooks/auth/useTicketPermissions.js';
 import {
   getStatusBadgeClass,
   getPriorityBadgeClass,
   getSlaBadgeClass,
-} from '../../lib/utils/badge-utils.js';
-import type { SlaStatusResponse } from '../../../shared/contracts/sla-contracts.js';
-import AssignTicketForm from '../admin/tickets/AssignTicketForm.js';
-import AdminQuotePanel from '../admin/quotes/AdminQuotePanel.js';
-import CommentThread from './CommentThread.js';
-import AttachmentList from './AttachmentList.js';
-import SimilarTicketsPanel from '../admin/tickets/SimilarTicketsPanel.js';
+} from '../../../lib/utils/badge-utils.js';
+import type { SlaStatusResponse } from '../../../../shared/contracts/sla-contracts.js';
+import AssignTicketForm from './AssignTicketForm.js';
+import AdminQuotePanel from '../quotes/AdminQuotePanel.js';
+import TicketCommentThread from '../../customer/ticket/TicketCommentThread.js';
+import AttachmentList from '../../shared/AttachmentList.js';
+import SimilarTicketsPanel from './SimilarTicketsPanel.js';
 import './AdminTicketDetail.css';
 
 interface AdminTicketDetailProps {
@@ -347,7 +347,7 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
       <SimilarTicketsPanel ticketId={ticketId} />
 
       <section className="admin-detail-section">
-        <CommentThread ticketId={ticketId} />
+        <TicketCommentThread ticketId={ticketId} />
       </section>
     </div>
   );

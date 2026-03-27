@@ -1,7 +1,7 @@
 import React from 'react';
 import type { TicketSummaryResponse } from '../../../../shared/contracts/ticket-contracts.js';
 import CustomerTicketCard from './CustomerTicketCard.js';
-import BaseTicketList from '../../BaseTicketList.js';
+import BaseTicketList from '../../shared/BaseTicketList.js';
 
 interface TicketListProps {
   tickets: TicketSummaryResponse[];

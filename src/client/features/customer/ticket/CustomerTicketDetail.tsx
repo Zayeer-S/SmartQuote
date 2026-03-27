@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
-import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
-import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
-import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
-import QuotePanel from '../customer/quote/QuotePanel.js';
-import TicketTimeline from './TicketTimeline.js';
-import CommentThread from './CommentThread.js';
-import AttachmentList from './AttachmentList.js';
+import { useGetTicket } from '../../../hooks/tickets/useGetTicket.js';
+import { useListQuotes } from '../../../hooks/quotes/useListQuote.js';
+import { getStatusBadgeClass, getPriorityBadgeClass } from '../../../lib/utils/badge-utils.js';
+import QuotePanel from '../quote/QuotePanel.js';
+import TicketCommentTimeline from '../../shared/TicketCommentTimeline.js';
+import TicketCommentThread from './TicketCommentThread.js';
+import AttachmentList from '../../shared/AttachmentList.js';
 import './CustomerTicketDetail.css';
 
 interface CustomerTicketDetailProps {
@@ -153,10 +153,10 @@ const CustomerTicketDetail: React.FC<CustomerTicketDetailProps> = ({ ticketId })
         )}
       </section>
 
-      <TicketTimeline ticketId={ticketId} />
+      <TicketCommentTimeline ticketId={ticketId} />
 
       <section className="ticket-detail-section">
-        <CommentThread ticketId={ticketId} />
+        <TicketCommentThread ticketId={ticketId} />
       </section>
     </div>
   );

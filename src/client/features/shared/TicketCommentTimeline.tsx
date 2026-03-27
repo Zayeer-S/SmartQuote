@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { useListComments } from '../../hooks/tickets/useListComments.js';
 import { COMMENT_TYPES } from '../../../shared/constants/lookup-values.js';
-import './TicketTimeline.css';
+import './TicketCommentTimeline.css';
 
 interface TicketTimelineProps {
   ticketId: string;
 }
 
-const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
+const TicketCommentTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
   const { execute, data, loading, error } = useListComments();
 
   useEffect(() => {
@@ -19,7 +19,7 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
     return (
       <section className="ticket-timeline" data-testid="ticket-timeline">
         <h2 className="ticket-timeline-title">Timeline</h2>
-        <p className="ticket-timeline-empty" data-testid="timeline-loading">
+        <p className="loading-text" data-testid="timeline-loading">
           Loading timeline...
         </p>
       </section>
@@ -52,7 +52,9 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
       </h2>
 
       {visibleComments.length === 0 ? (
-        <p className="ticket-timeline-empty" data-testid="timeline-empty"></p>
+        <p className="ticket-timeline-empty" data-testid="timeline-empty">
+          No activity yet.
+        </p>
       ) : (
         <ol className="ticket-timeline-list" data-testid="timeline-list">
           {visibleComments.map((comment) => {
@@ -94,4 +96,4 @@ const TicketTimeline: React.FC<TicketTimelineProps> = ({ ticketId }) => {
   );
 };
 
-export default TicketTimeline;
+export default TicketCommentTimeline;

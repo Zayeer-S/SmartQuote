@@ -1,15 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import type {
+
+import { useListRateProfiles } from '../../../hooks/rate-profiles/useListRateProfiles.js';
+import { useUpdateRateProfile } from '../../../hooks/rate-profiles/useUpdateRateProfile.js';
+import './AdminRateProfilesPage.css';
+import {
   RateProfileResponse,
   UpdateRateProfileRequest,
-} from '../../../shared/contracts/rate-profile-contracts.js';
-import { useListRateProfiles } from '../../hooks/rate-profiles/useListRateProfiles.js';
-import { useUpdateRateProfile } from '../../hooks/rate-profiles/useUpdateRateProfile.js';
-import './AdminRateProfilesPage.css';
-
-// ------------------------------------------------------------------
-// Constants
-// ------------------------------------------------------------------
+} from '../../../../shared/contracts/rate-profile-contracts.js';
 
 const RATE_PROFILE_COLUMNS = [
   'Ticket Type',

@@ -1,5 +1,3 @@
-// src/client/features/dashboard/ResolutionTimeChart.tsx
-
 import React from 'react';
 import {
   BarChart,
@@ -11,7 +9,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import type { ResolutionTimeResponse } from '../../../shared/contracts/analytics-contract';
+import type { ResolutionTimeResponse } from '../../../../shared/contracts/analytics-contract';
 
 interface ResolutionTimeChartProps {
   data: ResolutionTimeResponse;
@@ -47,6 +45,7 @@ const ResolutionTimeChart: React.FC<ResolutionTimeChartProps> = ({ data }) => {
   const buckets = data.data.reduce<Record<string, { total: number; count: number }>>(
     (acc, point) => {
       const key = point.ticketSeverity;
+
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!acc[key]) acc[key] = { total: 0, count: 0 };
       acc[key].total += point.resolutionTimeHours;

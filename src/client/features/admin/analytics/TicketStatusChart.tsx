@@ -1,7 +1,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
-import type { TicketResponse } from '../../../shared/contracts/ticket-contracts.js';
-import { TICKET_STATUSES } from '../../../shared/constants/lookup-values.js';
+import type { TicketResponse } from '../../../../shared/contracts/ticket-contracts';
+import { TICKET_STATUSES } from '../../../../shared/constants/lookup-values.js';
 
 interface TicketStatusChartProps {
   tickets: TicketResponse[];

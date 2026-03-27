@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import type { TicketVolumeResponse } from '../../../shared/contracts/analytics-contract';
+import type { TicketVolumeResponse } from '../../../../shared/contracts/analytics-contract';
 
 interface TicketVolumeChartProps {
   data: TicketVolumeResponse;

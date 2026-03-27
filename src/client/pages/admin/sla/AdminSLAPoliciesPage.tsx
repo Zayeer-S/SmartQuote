@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { TICKET_SEVERITIES } from '../../../shared/constants/lookup-values.js';
-import type {
+import { TICKET_SEVERITIES } from '../../../../shared/constants/lookup-values.js';
+import type { OrgResponse } from '../../../../shared/contracts/org-contracts.js';
+import type { UserListItem } from '../../../../shared/contracts/user-contracts.js';
+import { useListSlaPolicies } from '../../../hooks/sla/useListSlaPolicy.js';
+import { useCreateSlaPolicy } from '../../../hooks/sla/useCreateSlaPolicy.js';
+import { useUpdateSlaPolicy } from '../../../hooks/sla/useUpdateSlaPolicy.js';
+import { useDeleteSlaPolicy } from '../../../hooks/sla/useDeleteSlaPolicy.js';
+import './AdminSLAPoliciesPage.css';
+import { useSlaScopeOptions } from '../../../hooks/sla/useSlaScopeOptions.js';
+import {
   SlaPolicyResponse,
   SlaSeverityTarget,
-} from '../../../shared/contracts/sla-contracts.js';
-import type { OrgResponse } from '../../../shared/contracts/org-contracts.js';
-import type { UserListItem } from '../../../shared/contracts/user-contracts.js';
-import { useListSlaPolicies } from '../../hooks/sla/useListSlaPolicy.js';
-import { useCreateSlaPolicy } from '../../hooks/sla/useCreateSlaPolicy.js';
-import { useUpdateSlaPolicy } from '../../hooks/sla/useUpdateSlaPolicy.js';
-import { useDeleteSlaPolicy } from '../../hooks/sla/useDeleteSlaPolicy.js';
-import './AdminSLAPoliciesPage.css';
-import { useSlaScopeOptions } from '../../hooks/sla/useSlaScopeOptions.js';
+} from '../../../../shared/contracts/sla-contracts.js';
 
 const ALL_SEVERITIES = [
   TICKET_SEVERITIES.CRITICAL,

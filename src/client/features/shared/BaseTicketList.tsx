@@ -1,8 +1,8 @@
 import React, { type ReactNode } from 'react';
-import type { TicketSummaryResponse } from '../../shared/contracts/ticket-contracts.js';
-import { useTicketFilters } from '../hooks/useTicketFilters.js';
-import TicketFilters from './collate/TicketFilters.js';
-import TicketPagination from './collate/TicketPagination.js';
+import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
+import { useTicketFilters } from '../../hooks/useTicketFilters.js';
+import TicketFilters from '../collate/TicketFilters.js';
+import TicketPagination from '../collate/TicketPagination.js';
 import './BaseTicketList.css';
 
 interface BaseTicketListProps<T extends TicketSummaryResponse> {
@@ -36,6 +36,11 @@ function BaseTicketList<T extends TicketSummaryResponse>({
     totalPages,
     clearFilters,
   } = useTicketFilters(tickets);
+
+  // useTicketFilters operates on TicketSummaryResponse[] and returns the same
+  // items unmodified -- only filtered and paginated. The cast back to T[] is
+  // safe because no structural transformation occurs inside the hook.
+  const typedFilteredTickets = filteredTickets as T[];
 
   if (loading) {
     return (
@@ -73,13 +78,13 @@ function BaseTicketList<T extends TicketSummaryResponse>({
         onClear={clearFilters}
       />
 
-      {filteredTickets.length === 0 ? (
+      {typedFilteredTickets.length === 0 ? (
         <div className="empty-state" data-testid={`${testIdPrefix}-no-results`}>
           <p className="empty-state-message">No tickets match your filters.</p>
         </div>
       ) : (
         <ul className="base-ticket-list" role="list" data-testid={`${testIdPrefix}-list`}>
-          {filteredTickets.map((ticket) => (
+          {typedFilteredTickets.map((ticket) => (
             <li key={ticket.id}>{renderItem(ticket)}</li>
           ))}
         </ul>
