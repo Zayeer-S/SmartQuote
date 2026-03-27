@@ -77,7 +77,7 @@ const DashboardPage: React.FC = () => {
             </h2>
             <button
               type="button"
-              className="btn-base btn-primary"
+              className="btn btn-primary"
               onClick={handleOpenModal}
               data-testid="open-new-ticket-modal-btn"
             >

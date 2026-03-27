@@ -23,6 +23,7 @@ import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage.js';
 import AdminSLAPoliciesPage from './pages/admin/AdminSLAPoliciesPage.js';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage.js';
 import './styles/globals.css';
+import './styles/buttons.css';
 import './styles/forms.css';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
