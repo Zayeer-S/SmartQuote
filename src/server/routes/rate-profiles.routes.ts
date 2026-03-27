@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import type { RateProfileController } from '../controllers/rate.profiles.controller.js';
+import type { RateProfileController } from '../controllers/rate-profiles.controller.js';
 import type { AuthService } from '../services/auth/auth.service.js';
 import { RATE_PROFILE_ENDPOINTS } from '../../shared/constants/endpoints.js';
 import { createAuthMiddleware } from '../middleware/auth.middleware.js';

@@ -6,7 +6,7 @@ import type { RBACService } from '../services/rbac/rbac.service.js';
 import { createAuthMiddleware } from '../middleware/auth.middleware.js';
 import { requirePermission } from '../middleware/rbac.middleware.js';
 import { PERMISSIONS } from '../../shared/constants/lookup-values.js';
-import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../shared/constants';
+import { TICKET_ENDPOINTS, QUOTE_ENDPOINTS } from '../../shared/constants/index.js';
 import type { QuoteController } from '../controllers/quote.controller.js';
 
 export function createTicketRoutes(

@@ -236,11 +236,11 @@ smartquote/
 │   │   │   ├── secrets.ts
 │   │   │   └── server.ts
 │   │   ├── config/                                 # Environment and config values only; no runtime logic
-│   │   │   ├── index.ts
 │   │   │   ├── auth-config.ts
 │   │   │   ├── database-config.ts
 │   │   │   ├── email-config.ts
 │   │   │   ├── env.backend.ts
+│   │   │   └── index.ts
 │   │   │   └── redis-config.ts
 │   │   ├── containers/                             # Construct controllers by injecting dependencies; no business behaviour
 │   │   │   ├── admin.container.ts
@@ -248,6 +248,7 @@ smartquote/
 │   │   │   ├── auth.container.ts
 │   │   │   ├── org.container.ts
 │   │   │   ├── quote.container.ts
+│   │   │   ├── rate-profiles.container.ts
 │   │   │   ├── sla.container.ts
 │   │   │   └── ticket.container.ts
 │   │   ├── controllers/
@@ -256,33 +257,28 @@ smartquote/
 │   │   │   ├── auth.controller.ts
 │   │   │   ├── org.controller.ts
 │   │   │   ├── quote.controller.ts
-│   │   │   ├── rate.profiles.controller.ts
+│   │   │   ├── rate-profiles.controller.ts
 │   │   │   ├── sla.controller.ts
 │   │   │   └── ticket.controller.ts
 │   │   ├── daos/                                   # Database persistence/access only - no validation, permissions, or workflow rules
 │   │   │   ├── base/
 │   │   │   │   ├── activatable.dao.ts
 │   │   │   │   ├── base.dao.ts
-│   │   │   │   ├── composite.key.dao.ts
+│   │   │   │   ├── composite-key.dao.ts
 │   │   │   │   ├── deletable.dao.ts
-│   │   │   │   ├── lookup.table.dao.ts
+│   │   │   │   ├── lookup-table.dao.ts
 │   │   │   │   └── types.ts
-│   │   │   └── children/
-│   │   │       ├── organizations.domain.dao.ts
+│   │   │   └── children/                           # Domain DAO = File with multiple DAOs grouped by similarity
+│   │   │       ├── notification-types.dao.ts
+│   │   │       ├── organizations-domain.dao.ts
 │   │   │       ├── permissions.dao.ts
-│   │   │       ├── quote.approvals.dao.ts
-│   │   │       ├── quote.calculation.rules.dao.ts
-│   │   │       ├── quote.detail.revisions.dao.ts
-│   │   │       ├── quotes.dao.ts
-│   │   │       ├── rate.profiles.dao.ts
-│   │   │       ├── roles.dao.ts
+│   │   │       ├── quotes-domain.dao.ts
+│   │   │       ├── rate-profiles.dao.ts
+│   │   │       ├── roles-domain.dao.ts
 │   │   │       ├── sessions.dao.ts
-│   │   │       ├── sla.policies.dao.ts
-│   │   │       ├── ticket.attachments.dao.ts
-│   │   │       ├── ticket.comments.dao.ts
-│   │   │       ├── ticket.priority.dao.ts
-│   │   │       ├── tickets.dao.ts
-│   │   │       └── users.dao.ts
+│   │   │       ├── sla-policies.dao.ts
+│   │   │       ├── tickets-domain.dao.ts
+│   │   │       └── users-domain.dao.ts
 │   │   ├── database/                               # Connection, migrations, and schema definitions only.
 │   │   │   ├── connection.ts
 │   │   │   ├── migration-utils.ts
@@ -319,7 +315,7 @@ smartquote/
 │   │   ├── middleware/                             # Cross-cutting HTTP behaviour (auth, errors, logging), never business decisions.
 │   │   │   ├── auth.middleware.ts
 │   │   │   ├── error.middleware.ts
-│   │   │   ├── rate.limit.middleware.ts
+│   │   │   ├── rate-limit.middleware.ts
 │   │   │   └── rbac.middleware.ts
 │   │   ├── routes/                                 # Map URLs to controllers only - no logic allowed.
 │   │   │   ├── admin.routes.ts
@@ -336,53 +332,65 @@ smartquote/
 │   │   │   │   ├── auth.config.types.ts
 │   │   │   │   ├── auth.errors.ts
 │   │   │   │   ├── auth.service.ts
-│   │   │   │   ├── index.ts
 │   │   │   │   ├── password.service.ts
 │   │   │   │   └── session.service.ts
 │   │   │   ├── email/
+│   │   │   │   ├── email.servcice.ts
+│   │   │   │   └── templates/
+│   │   │   │       ├── EmailLayout.ts
+│   │   │   │       ├── QuoteGeneratedEmail.ts
+│   │   │   │       ├── TicketReceivedEmail.ts
+│   │   │   │       └── TicketResolvedEmail.ts
 │   │   │   ├── notification/
+│   │   │   │   ├── notification.errors.ts
+│   │   │   │   ├── notification.service.ts
+│   │   │   │   └── notification.service.types.ts
 │   │   │   ├── org/
+│   │   │   │   ├── org-members.service.ts
+│   │   │   │   ├── org-members.service.types.ts
 │   │   │   │   ├── org.errors.ts
-│   │   │   │   ├── org.members.service.ts
-│   │   │   │   ├── org.members.service.types.ts
 │   │   │   │   ├── org.service.ts
 │   │   │   │   └── org.service.types.ts
 │   │   │   ├── quote/
-│   │   │   │   ├── quote.engine.service.ts
+│   │   │   │   ├── quote-engine.service.ts
 │   │   │   │   ├── quote.errors.ts
 │   │   │   │   └── quote.service.ts
+│   │   │   ├── rate-profiles/
+│   │   │   │   ├── rate-profiles.errors.ts
+│   │   │   │   └── rate-profiles.service.ts
 │   │   │   ├── rbac/
-│   │   │   │   ├── org.rbac.service.ts             # Local/Org RBAC
+│   │   │   │   ├── org-rbac.service.ts             # Local/Org RBAC
 │   │   │   │   └── rbac.service.ts                 # System RBAC
 │   │   │   ├── sla/
 │   │   │   │   ├── sla.errors.ts
 │   │   │   │   ├── sla.service.ts
 │   │   │   │   └── sla.service.types.ts
 │   │   │   ├── storage/
-│   │   │   │   ├── local.storage.service.ts
-│   │   │   │   ├── s3.storage.service.ts
+│   │   │   │   ├── local-storage.service.ts
+│   │   │   │   ├── s3-storage.service.ts
 │   │   │   │   ├── storage.errors.ts
 │   │   │   │   ├── storage.service.ts
 │   │   │   │   └── storage.service.types.ts
 │   │   │   └── ticket/
+│   │   │       ├── attachment.service.ts
 │   │   │       ├── comment.service.ts
 │   │   │       ├── ticket.errors.ts
 │   │   │       ├── ticket.service.ts
-│   │   │       ├── ticket.priority.engine.ts
-│   │   │       ├── ticket.priority.engine.types.ts
-│   │   │       ├── ticket.service.types.ts
-│   │   │       ├── ticket.similarity.service.ts
-│   │   │       └── ticket.similarity.service.types.ts
+│   │   │       ├── ticket-priority-engine.service.ts
+│   │   │       ├── ticket-priority-engine.service.types.ts
+│   │   │       ├── ticket-service.types.ts
+│   │   │       ├── ticket-similarity.service.ts
+│   │   │       └── ticket-similarity.service.types.ts
 │   │   └── validators/                             # Input shape validation only; must not access database or services.
 │   │       ├── analytics.validator.ts
 │   │       ├── auth.validator.ts
 │   │       ├── org.validator.ts
 │   │       ├── quote.validator.ts
-│   │       ├── rate.profile.validator.ts
+│   │       ├── rate-profile.validator.ts
 │   │       ├── sla.validator.ts
 │   │       ├── ticket.validator.ts
 │   │       ├── user.validator.ts
-│   │       └── validation-utils.ts
+│   │       └── validation.utils.ts
 │   │
 │   └── shared/
 │       ├── constants/                              # Define all seed lookup table data here so frontend/backend stay in sync
