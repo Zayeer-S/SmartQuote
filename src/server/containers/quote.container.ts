@@ -3,11 +3,13 @@ import type { RBACService } from '../services/rbac/rbac.service.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 
 import { TicketsDAO } from '../daos/children/tickets.domain.dao.js';
-import { QuotesDAO } from '../daos/children/quotes.dao.js';
-import { QuoteApprovalsDAO } from '../daos/children/quote.approvals.dao.js';
-import { QuoteDetailRevisionsDAO } from '../daos/children/quote.detail.revisions.dao.js';
+import {
+  QuoteApprovalsDAO,
+  QuoteCalculationRulesDAO,
+  QuoteDetailRevisionsDAO,
+  QuotesDAO,
+} from '../daos/children/quotes.domain.dao.js';
 import { RateProfilesDAO } from '../daos/children/rate.profiles.dao.js';
-import { QuoteCalculationRulesDAO } from '../daos/children/quote.calculation.rules.dao.js';
 import { UsersDAO } from '../daos/children/users.domain.dao.js';
 
 import { QuoteService } from '../services/quote/quote.service.js';

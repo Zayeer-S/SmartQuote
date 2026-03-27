@@ -5,7 +5,7 @@ import {
   TicketsDAO,
 } from '../daos/children/tickets.domain.dao.js';
 import { UsersDAO } from '../daos/children/users.domain.dao.js';
-import { QuotesDAO } from '../daos/children/quotes.dao.js';
+import { QuotesDAO } from '../daos/children/quotes.domain.dao.js';
 import { TicketService } from '../services/ticket/ticket.service.js';
 import { CommentService } from '../services/ticket/comment.service.js';
 import { AttachmentService } from '../services/ticket/attachment.service.js';

@@ -1,11 +1,25 @@
 import type { Knex } from 'knex';
 import { DeletableDAO } from '../base/deletable.dao.js';
-import { LOOKUP_TABLES, MAIN_TABLES } from '../../database/config/table-names.js';
-import type { Quote, QuoteWithApproval } from '../../database/types/tables.js';
-import type { QuoteId, TicketId } from '../../database/types/ids.js';
+import { LINK_TABLES, LOOKUP_TABLES, MAIN_TABLES } from '../../database/config/table-names.js';
+import type {
+  Quote,
+  QuoteApproval,
+  QuoteCalculationRule,
+  QuoteDetailRevision,
+  QuoteWithApproval,
+} from '../../database/types/tables.js';
+import type {
+  QuoteApprovalId,
+  QuoteApprovalStatusId,
+  QuoteCalculationRuleId,
+  QuoteDetailRevisionId,
+  QuoteId,
+  TicketId,
+} from '../../database/types/ids.js';
 import type { GetManyOptions, QueryOptions } from '../base/types.js';
 import { AnalyticsQuoteAccuracyRow } from '../../database/types/sanitized.types.js';
 import { QUOTE_APPROVAL_STATUSES } from '../../../shared/constants/lookup-values.js';
+import { BaseDAO } from '../base/base.dao.js';
 
 export class QuotesDAO extends DeletableDAO<Quote, QuoteId> {
   constructor(db: Knex) {
@@ -201,5 +215,77 @@ export class QuotesDAO extends DeletableDAO<Quote, QuoteId> {
       .orderBy(`${q}.created_at`, 'asc');
 
     return results as AnalyticsQuoteAccuracyRow[];
+  }
+}
+
+export class QuoteDetailRevisionsDAO extends BaseDAO<QuoteDetailRevision, QuoteDetailRevisionId> {
+  constructor(db: Knex) {
+    super(
+      {
+        tableName: LINK_TABLES.QUOTE_DETAIL_REVISIONS,
+        primaryKey: 'id',
+      },
+      db
+    );
+  }
+
+  /**
+   * Find all revisions for a quote, ordered oldest first
+   *
+   * @param quoteId Quote ID
+   * @param options Query options
+   * @returns Array of revisions ordered by created_at ascending
+   */
+  async findByQuote(quoteId: QuoteId, options?: GetManyOptions): Promise<QuoteDetailRevision[]> {
+    let query = this.getQuery(options);
+    query = query.where({ quote_id: quoteId });
+    query = this.applyFilters(query, options);
+    query = query.orderBy('created_at', 'asc');
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const results = await query;
+    return results as QuoteDetailRevision[];
+  }
+}
+
+export class QuoteCalculationRulesDAO extends BaseDAO<
+  QuoteCalculationRule,
+  QuoteCalculationRuleId
+> {
+  constructor(db: Knex) {
+    super(
+      {
+        tableName: MAIN_TABLES.QUOTE_CALCULATION_RULES,
+        primaryKey: 'id',
+        hasActivation: true,
+      },
+      db
+    );
+  }
+}
+
+export class QuoteApprovalsDAO extends BaseDAO<QuoteApproval, QuoteApprovalId> {
+  constructor(db: Knex) {
+    super(
+      {
+        tableName: MAIN_TABLES.QUOTE_APPROVALS,
+        primaryKey: 'id',
+      },
+      db
+    );
+  }
+
+  /**
+   * Find all approvals with a given status
+   *
+   * @param statusId Approval status ID to filter by
+   * @param options Query options
+   * @returns Array of matching approvals
+   */
+  async findByStatus(
+    statusId: QuoteApprovalStatusId,
+    options?: GetManyOptions
+  ): Promise<QuoteApproval[]> {
+    return this.getMany({ approval_status_id: statusId }, options);
   }
 }

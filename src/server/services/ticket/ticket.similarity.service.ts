@@ -1,5 +1,5 @@
 import type { TicketsDAO } from '../../daos/children/tickets.domain.dao.js';
-import type { QuotesDAO } from '../../daos/children/quotes.dao.js';
+import type { QuotesDAO } from '../../daos/children/quotes.domain.dao.js';
 import type { BertEmbedder } from '../../lib/nlp/bert-embedder.js';
 import { cosineSimilarity } from '../../lib/nlp/cosine-similarity.js';
 import type { TicketId } from '../../database/types/ids.js';
