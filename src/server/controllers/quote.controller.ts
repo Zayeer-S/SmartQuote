@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
-import { validateOrThrow } from '../validators/validation-utils.js';
+import { validateOrThrow } from '../validators/validation.utils.js';
 import { success, error } from '../lib/respond.js';
 import type { UserId, QuoteId, TicketId } from '../database/types/ids.js';
 import type {

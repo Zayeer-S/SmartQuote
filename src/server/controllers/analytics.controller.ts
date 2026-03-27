@@ -2,7 +2,7 @@
 
 import type { Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
-import { validateOrThrow } from '../validators/validation-utils.js';
+import { validateOrThrow } from '../validators/validation.utils.js';
 import { analyticsDateRangeSchema } from '../validators/analytics.validator.js';
 import { success, error } from '../lib/respond.js';
 import type { AnalyticsService } from '../services/analytics/analytics.service.js';

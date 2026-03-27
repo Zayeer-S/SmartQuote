@@ -4,7 +4,7 @@
 import type { Request, Response } from 'express';
 import type { UsersDAO } from '../daos/children/users-domain.dao.js';
 import type { AuthService } from '../services/auth/auth.service.js';
-import { validateOrThrow } from '../validators/validation-utils.js';
+import { validateOrThrow } from '../validators/validation.utils.js';
 import { createUserSchema, listUsersQuerySchema } from '../validators/user.validator.js';
 import type { CreateUserRequest } from '../../shared/contracts/user-contracts.js';
 import { error, success } from '../lib/respond.js';

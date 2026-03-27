@@ -1,6 +1,6 @@
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import z from 'zod';
-import { buildPasswordSchema } from './validation-utils.js';
+import { buildPasswordSchema } from './validation.utils.js';
 
 const phoneNumberSchema = z
   .string()

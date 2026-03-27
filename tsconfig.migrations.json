@@ -12,7 +12,7 @@
   "include": [
     "src/server/database/migrations/**/*",
     "src/server/database/seeds/**/*",
-    "src/server/database/migration-utils.ts",
+    "src/server/database/migration.utils.ts",
     "src/shared/**/*"
   ]
 }
