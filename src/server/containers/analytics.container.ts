@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import { TicketsDAO } from '../daos/children/tickets.dao.js';
+import { TicketsDAO } from '../daos/children/tickets.domain.dao.js';
 import { QuotesDAO } from '../daos/children/quotes.dao.js';
 import { RBACService } from '../services/rbac/rbac.service.js';
 import { AnalyticsService } from '../services/analytics/analytics.service.js';

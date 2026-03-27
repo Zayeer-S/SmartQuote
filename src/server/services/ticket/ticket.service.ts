@@ -1,7 +1,7 @@
 import { PERMISSIONS, TICKET_STATUSES } from '../../../shared/constants';
 import type { Knex } from 'knex';
 import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types.js';
-import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
+import type { TicketsDAO } from '../../daos/children/tickets.domain.dao.js';
 import type { UsersDAO } from '../../daos/children/users.domain.dao.js';
 import type { OrganizationId, TicketId, UserId } from '../../database/types/ids.js';
 import type { Ticket, TicketWithDetails } from '../../database/types/tables.js';

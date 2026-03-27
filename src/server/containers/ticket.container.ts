@@ -1,7 +1,9 @@
 import type { Knex } from 'knex';
-import { TicketsDAO } from '../daos/children/tickets.dao.js';
-import { TicketCommentsDAO } from '../daos/children/ticket.comments.dao.js';
-import { TicketAttachmentsDAO } from '../daos/children/ticket.attachments.dao.js';
+import {
+  TicketAttachmentsDAO,
+  TicketCommentsDAO,
+  TicketsDAO,
+} from '../daos/children/tickets.domain.dao.js';
 import { UsersDAO } from '../daos/children/users.domain.dao.js';
 import { QuotesDAO } from '../daos/children/quotes.dao.js';
 import { TicketService } from '../services/ticket/ticket.service.js';

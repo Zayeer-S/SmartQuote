@@ -1,7 +1,10 @@
 import type { Knex } from 'knex';
 import type {
   BusinessImpactId,
+  CommentTypeId,
   OrganizationId,
+  TicketAttachmentId,
+  TicketCommentId,
   TicketId,
   TicketSeverityId,
   TicketStatusId,
@@ -9,13 +12,19 @@ import type {
   UserId,
 } from '../../database/types/ids.js';
 import { DeletableDAO } from '../base/deletable.dao.js';
-import { LOOKUP_TABLES, MAIN_TABLES } from '../../database/config/table-names.js';
+import { LINK_TABLES, LOOKUP_TABLES, MAIN_TABLES } from '../../database/config/table-names.js';
 import type { GetManyOptions, QueryOptions } from '../base/types.js';
-import type { Ticket, TicketWithDetails } from '../../database/types/tables.js';
+import type {
+  Ticket,
+  TicketAttachment,
+  TicketComment,
+  TicketWithDetails,
+} from '../../database/types/tables.js';
 import {
   AnalyticsResolutionTimeRow,
   AnalyticsVolumeRow,
 } from '../../database/types/sanitized.types.js';
+import { BaseDAO } from '../base/base.dao.js';
 
 export class TicketsDAO extends DeletableDAO<Ticket, TicketId> {
   constructor(db: Knex) {
@@ -237,5 +246,113 @@ export class TicketsDAO extends DeletableDAO<Ticket, TicketId> {
     query = this.applyFilters(query, options);
 
     return query;
+  }
+}
+
+export class TicketCommentsDAO extends BaseDAO<TicketComment, TicketCommentId> {
+  constructor(db: Knex) {
+    super(
+      {
+        tableName: LINK_TABLES.TICKET_COMMENTS,
+        primaryKey: 'id',
+      },
+      db
+    );
+  }
+
+  /**
+   * Find all comments for a ticket, ordered oldest first
+   *
+   * @param ticketId Ticket ID
+   * @param options Query options
+   * @returns Array of comments ordered by created_at ascending
+   */
+  async findByTicket(ticketId: TicketId, options?: GetManyOptions): Promise<TicketComment[]> {
+    let query = this.getQuery(options);
+    query = query.where({ ticket_id: ticketId });
+    query = this.applyFilters(query, options);
+    query = query.orderBy('created_at', 'asc');
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const results = await query;
+    return results as TicketComment[];
+  }
+
+  /**
+   * Find all comments of a specific type on a ticket
+   *
+   * @param ticketId Ticket ID
+   * @param commentTypeId Comment type ID to filter by
+   * @param options Query options
+   * @returns Array of matching comments ordered by created_at ascending
+   */
+  async findByType(
+    ticketId: TicketId,
+    commentTypeId: CommentTypeId,
+    options?: GetManyOptions
+  ): Promise<TicketComment[]> {
+    let query = this.getQuery(options);
+    query = query.where({ ticket_id: ticketId, comment_type_id: commentTypeId });
+    query = this.applyFilters(query, options);
+    query = query.orderBy('created_at', 'asc');
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const results = await query;
+    return results as TicketComment[];
+  }
+}
+
+export class TicketAttachmentsDAO extends BaseDAO<TicketAttachment, TicketAttachmentId> {
+  constructor(db: Knex) {
+    super(
+      {
+        tableName: LINK_TABLES.TICKET_ATTACHMENTS,
+        primaryKey: 'id',
+      },
+      db
+    );
+  }
+
+  /**
+   * Find all attachments for a ticket, ordered oldest first
+   *
+   * @param ticketId Ticket ID
+   * @param options Query options
+   * @returns Array of attachments ordered by created_at ascending
+   */
+  async findByTicket(ticketId: TicketId, options?: GetManyOptions): Promise<TicketAttachment[]> {
+    let query = this.getQuery(options);
+    query = query.where({ ticket_id: ticketId });
+    query = this.applyFilters(query, options);
+    query = query.orderBy('created_at', 'asc');
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const results = await query;
+    return results as TicketAttachment[];
+  }
+
+  /**
+   * Delete an attachment record by its storage key.
+   * Used by AttachmentService to clean up DB records when a post-commit
+   * storage upload fails.
+   *
+   * @param storageKey The provider-agnostic storage key
+   */
+  async deleteByStorageKey(storageKey: string): Promise<void> {
+    await this.getQuery().where({ storage_key: storageKey }).delete();
+  }
+
+  /**
+   * Count existing attachments for a ticket.
+   * Used by AttachmentService to enforce MAX_COUNT before accepting a new upload.
+   *
+   * @param ticketId Ticket ID
+   * @returns Number of existing attachment records
+   */
+  async countByTicket(ticketId: TicketId): Promise<number> {
+    const [{ count }] = (await this.getQuery()
+      .where({ ticket_id: ticketId })
+      .count('id as count')) as [{ count: string | number }];
+    return Number(count);
   }
 }

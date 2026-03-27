@@ -2,7 +2,7 @@ import type { Knex } from 'knex';
 import type { RBACService } from '../services/rbac/rbac.service.js';
 import type { LookupResolver } from '../lib/lookup-resolver.js';
 
-import { TicketsDAO } from '../daos/children/tickets.dao.js';
+import { TicketsDAO } from '../daos/children/tickets.domain.dao.js';
 import { QuotesDAO } from '../daos/children/quotes.dao.js';
 import { QuoteApprovalsDAO } from '../daos/children/quote.approvals.dao.js';
 import { QuoteDetailRevisionsDAO } from '../daos/children/quote.detail.revisions.dao.js';

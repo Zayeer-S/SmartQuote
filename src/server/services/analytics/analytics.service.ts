@@ -1,7 +1,7 @@
 // src/server/services/analytics/analytics.service.ts
 
 import { PERMISSIONS } from '../../../shared/constants/index.js';
-import type { TicketsDAO } from '../../daos/children/tickets.dao.js';
+import type { TicketsDAO } from '../../daos/children/tickets.domain.dao.js';
 import type { QuotesDAO } from '../../daos/children/quotes.dao.js';
 import type { RBACService } from '../rbac/rbac.service.js';
 import type { UserId } from '../../database/types/ids.js';
