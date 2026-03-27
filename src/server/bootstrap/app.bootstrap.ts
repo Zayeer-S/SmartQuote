@@ -20,7 +20,7 @@ import { createRateProfileRoutes } from '../routes/rate.profiles.routes.js';
 import { LookupResolver } from '../lib/lookup-resolver.js';
 import { loadLookupMaps } from '../lib/lookup-maps.js';
 import { BertEmbedder } from '../lib/nlp/bert-embedder.js';
-import { PriorityEngineAnchorsDAO } from '../daos/children/ticket.nlp.dao.js';
+import { PriorityEngineAnchorsDAO } from '../daos/children/ticket-nlp.dao.js';
 import { AnalyticsContainer } from '../containers/analytics.container.js';
 import { createAnalyticsRoutes } from '../routes/analytics.routes.js';
 import { RATE_PROFILE_ENDPOINTS, SLA_ENDPOINTS } from '../../shared/constants/endpoints.js';
@@ -28,8 +28,8 @@ import { SlaContainer } from '../containers/sla.container.js';
 import { createSlaRoutes } from '../routes/sla.routes.js';
 import { EmailService } from '../services/email/email.service.js';
 import { NotificationService } from '../services/notification/notification.service.js';
-import { NotificationTypesDAO } from '../daos/children/notification.types.dao.js';
-import { UserNotificationPreferencesDAO } from '../daos/children/users.domain.dao.js';
+import { NotificationTypesDAO } from '../daos/children/notification-types.dao.js';
+import { UserNotificationPreferencesDAO } from '../daos/children/users-domain.dao.js';
 
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */

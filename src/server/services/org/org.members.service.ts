@@ -3,9 +3,9 @@ import type { TransactionContext } from '../../daos/base/types.js';
 import type {
   OrganizationMembersDAO,
   OrganizationsDAO,
-} from '../../daos/children/organizations.domain.dao.js';
+} from '../../daos/children/organizations-domain.dao.js';
 import type { OrgRolesDAO, RolesDAO } from '../../daos/children/roles-domain.dao.js';
-import type { UsersDAO } from '../../daos/children/users.domain.dao.js';
+import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { OrganizationId, UserId } from '../../database/types/ids.js';
 import type { Organization, OrganizationMember } from '../../database/types/tables.js';
 import type { OrgRBACService } from '../rbac/org.rbac.service.js';

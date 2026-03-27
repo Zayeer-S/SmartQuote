@@ -2,10 +2,10 @@ import type { Knex } from 'knex';
 import {
   OrganizationsDAO,
   OrganizationMembersDAO,
-} from '../daos/children/organizations.domain.dao.js';
+} from '../daos/children/organizations-domain.dao.js';
 import { OrgPermissionsDAO } from '../daos/children/permissions-domain.dao.js';
 import { RolesDAO, OrgRolesDAO } from '../daos/children/roles-domain.dao.js';
-import { UsersDAO } from '../daos/children/users.domain.dao.js';
+import { UsersDAO } from '../daos/children/users-domain.dao.js';
 import type { RBACService } from '../services/rbac/rbac.service.js';
 import { OrgRBACService } from '../services/rbac/org.rbac.service.js';
 import { OrgService } from '../services/org/org.service.js';

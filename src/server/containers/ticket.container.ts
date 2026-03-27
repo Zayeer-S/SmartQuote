@@ -3,9 +3,9 @@ import {
   TicketAttachmentsDAO,
   TicketCommentsDAO,
   TicketsDAO,
-} from '../daos/children/tickets.domain.dao.js';
-import { UsersDAO } from '../daos/children/users.domain.dao.js';
-import { QuotesDAO } from '../daos/children/quotes.domain.dao.js';
+} from '../daos/children/tickets-domain.dao.js';
+import { UsersDAO } from '../daos/children/users-domain.dao.js';
+import { QuotesDAO } from '../daos/children/quotes-domain.dao.js';
 import { TicketService } from '../services/ticket/ticket.service.js';
 import { CommentService } from '../services/ticket/comment.service.js';
 import { AttachmentService } from '../services/ticket/attachment.service.js';
@@ -19,8 +19,8 @@ import {
   TicketEmbeddingsDAO,
   TicketPriorityRulesDAO,
   TicketPriorityThresholdsDAO,
-} from '../daos/children/ticket.nlp.dao.js';
-import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
+} from '../daos/children/ticket-nlp.dao.js';
+import { OrganizationMembersDAO } from '../daos/children/organizations-domain.dao.js';
 import type { StorageService } from '../services/storage/storage.service.js';
 import { LocalStorageService } from '../services/storage/local.storage.service.js';
 import { S3StorageService } from '../services/storage/s3.storage.service.js';

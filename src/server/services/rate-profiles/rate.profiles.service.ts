@@ -1,5 +1,5 @@
 import { PERMISSIONS } from '../../../shared/constants/lookup-values.js';
-import type { RateProfilesDAO } from '../../daos/children/rate.profiles.dao.js';
+import type { RateProfilesDAO } from '../../daos/children/rate-profiles.dao.js';
 import type {
   BusinessImpactId,
   RateProfileId,

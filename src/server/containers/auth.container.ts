@@ -3,13 +3,13 @@ import { AuthController } from '../controllers/auth.controller.js';
 import { PermissionsDAO } from '../daos/children/permissions-domain.dao.js';
 import { RolesDAO } from '../daos/children/roles-domain.dao.js';
 import { SessionsDAO } from '../daos/children/sessions.dao.js';
-import { UsersDAO } from '../daos/children/users.domain.dao.js';
+import { UsersDAO } from '../daos/children/users-domain.dao.js';
 import { AuthService } from '../services/auth/auth.service.js';
 import { PasswordService } from '../services/auth/password.service.js';
 import { SessionService } from '../services/auth/session.service.js';
 import { RBACService } from '../services/rbac/rbac.service.js';
 import { authConfig, passwordConfig } from '../config/auth-config.js';
-import { OrganizationMembersDAO } from '../daos/children/organizations.domain.dao.js';
+import { OrganizationMembersDAO } from '../daos/children/organizations-domain.dao.js';
 
 export class AuthContainer {
   public readonly usersDAO: UsersDAO;

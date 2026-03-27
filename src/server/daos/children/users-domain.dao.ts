@@ -6,7 +6,7 @@ import { User, UserNotificationPreference } from '../../database/types/tables';
 import { NotificationTypeId, RoleId, UserId } from '../../database/types/ids';
 import { LINK_TABLES, LOOKUP_TABLES, MAIN_TABLES } from '../../database/config/table-names';
 import { QueryOptions } from '../base/types';
-import { CompositeKeyDAO } from '../base/composite.key.dao';
+import { CompositeKeyDAO } from '../base/composite-key.dao';
 
 export class UsersDAO extends DeletableDAO<User, UserId> {
   constructor(db: Knex) {

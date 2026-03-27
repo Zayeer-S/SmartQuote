@@ -1,6 +1,6 @@
 import { NOTIFICATION_TYPES } from '../../../shared/constants/lookup-values.js';
-import type { NotificationTypesDAO } from '../../daos/children/notification.types.dao.js';
-import { UserNotificationPreferencesDAO } from '../../daos/children/users.domain.dao.js';
+import type { NotificationTypesDAO } from '../../daos/children/notification-types.dao.js';
+import { UserNotificationPreferencesDAO } from '../../daos/children/users-domain.dao.js';
 import type { UserId } from '../../database/types/ids.js';
 import type { EmailService } from '../email/email.service.js';
 import { NOTIFICATION_ERROR_MSGS, NotificationError } from './notification.errors.js';

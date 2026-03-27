@@ -2,7 +2,7 @@ import type { TicketPriorityId } from '../../database/types/ids.js';
 import {
   TicketPriorityRulesDAO,
   TicketPriorityThresholdsDAO,
-} from '../../daos/children/ticket.nlp.dao.js';
+} from '../../daos/children/ticket-nlp.dao.js';
 import type { BertEmbedder } from '../../lib/nlp/bert-embedder.js';
 import {
   SMARTQUOTE_CONFIG_KEYS,

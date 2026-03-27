@@ -1,8 +1,8 @@
 import { PERMISSIONS, TICKET_STATUSES } from '../../../shared/constants';
 import type { Knex } from 'knex';
 import type { GetManyOptions, InsertData, TransactionContext } from '../../daos/base/types.js';
-import type { TicketsDAO } from '../../daos/children/tickets.domain.dao.js';
-import type { UsersDAO } from '../../daos/children/users.domain.dao.js';
+import type { TicketsDAO } from '../../daos/children/tickets-domain.dao.js';
+import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { OrganizationId, TicketId, UserId } from '../../database/types/ids.js';
 import type { Ticket, TicketWithDetails } from '../../database/types/tables.js';
 import type { RBACService } from '../rbac/rbac.service.js';
@@ -16,7 +16,7 @@ import type {
 import type { TicketPriorityEngine } from './ticket.priority.engine.js';
 import type { AttachmentService } from './attachment.service.js';
 import type { IncomingFile } from '../storage/storage.service.types.js';
-import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
+import { OrganizationMembersDAO } from '../../daos/children/organizations-domain.dao.js';
 import type { TicketSimilarityService } from './ticket.similarity.service.js';
 import type { NotificationService } from '../notification/notification.service.js';
 

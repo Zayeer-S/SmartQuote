@@ -8,7 +8,7 @@ import { ATTACHMENT_CONFIG } from '../../../shared/constants/index.js';
 import type { FileStorageType } from '../../../shared/constants/lookup-values.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { StorageError } from '../storage/storage.errors.js';
-import { TicketAttachmentsDAO } from '../../daos/children/tickets.domain.dao.js';
+import { TicketAttachmentsDAO } from '../../daos/children/tickets-domain.dao.js';
 
 export interface AttachmentMeta {
   originalName: string;

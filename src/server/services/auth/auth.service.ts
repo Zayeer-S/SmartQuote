@@ -9,8 +9,8 @@ import type {
   CreateUserResponse,
 } from '../../../shared/contracts/user-contracts.js';
 import type { TransactionContext } from '../../daos/base/types.js';
-import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
-import type { UsersDAO } from '../../daos/children/users.domain.dao.js';
+import { OrganizationMembersDAO } from '../../daos/children/organizations-domain.dao.js';
+import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { RoleId, UserId } from '../../database/types/ids.js';
 import { AUTH_ERROR_MSGS, AuthError, PasswordValidationError } from './auth.errors.js';
 import type { PasswordService } from './password.service.js';

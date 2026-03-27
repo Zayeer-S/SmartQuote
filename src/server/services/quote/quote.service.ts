@@ -2,9 +2,9 @@ import type {
   QuoteApprovalsDAO,
   QuoteDetailRevisionsDAO,
   QuotesDAO,
-} from '../../daos/children/quotes.domain.dao.js';
-import type { TicketsDAO } from '../../daos/children/tickets.domain.dao.js';
-import type { UsersDAO } from '../../daos/children/users.domain.dao.js';
+} from '../../daos/children/quotes-domain.dao.js';
+import type { TicketsDAO } from '../../daos/children/tickets-domain.dao.js';
+import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { RBACService } from '../rbac/rbac.service.js';
 import type {
   Quote,
@@ -32,7 +32,7 @@ import type {
 import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket.errors.js';
 import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
-import { OrganizationMembersDAO } from '../../daos/children/organizations.domain.dao.js';
+import { OrganizationMembersDAO } from '../../daos/children/organizations-domain.dao.js';
 
 export interface CreateManualQuoteData {
   estimated_hours_minimum: number;
