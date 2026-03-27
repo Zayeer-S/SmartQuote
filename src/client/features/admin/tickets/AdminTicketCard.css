@@ -1,0 +1,24 @@
+/* card base, admin-ticket-card-*, and admin-ticket-card-badge-unassigned
+   are all defined in styles/cards.css */
+
+/* SLA badge variants -- kept here as they are ticket-domain-specific */
+.badge-sla-ok {
+  background-color: var(--color-feedback-success-bg);
+  color: var(--color-feedback-success-text);
+}
+
+.badge-sla-breached {
+  background-color: var(--color-feedback-error-bg);
+  color: var(--color-feedback-error-text);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+[data-theme='dark'] .badge-sla-ok {
+  background-color: var(--color-feedback-success-bg);
+  color: var(--color-feedback-success-text);
+}
+
+[data-theme='dark'] .badge-sla-breached {
+  background-color: var(--color-feedback-error-bg);
+  color: var(--color-feedback-error-text);
+}

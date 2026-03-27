@@ -1,0 +1,423 @@
+/* ==========================================================================
+   Sidebar.css
+   Shared sidebar styles used by CustomerLayout and AdminLayout.
+
+   Local tokens (no globals equivalent):
+     --_gradient-start: #100235 -- deep navy brand color
+     --_gradient-mid:   #1d0a4a -- mid-purple brand color
+     --_gradient-end:   #67236a -- dark magenta-purple brand color
+   If these start appearing in other components, promote to globals as
+   --color-accent-secondary-navy, etc.
+   ========================================================================== */
+
+/* ==========================================================================
+   Sidebar width tokens -- consumed by layout files for grid-template-columns.
+   Change here to resize everywhere.
+   ========================================================================== */
+:root {
+  --sidebar-width-expanded: 240px;
+  --sidebar-width-collapsed: 64px;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+.sidebar {
+  --_gradient-start: #100235;
+  --_gradient-mid: #1d0a4a;
+  --_gradient-end: #67236a;
+
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width-expanded);
+  min-height: 100vh;
+  height: 100vh;
+  flex-shrink: 0;
+  background: linear-gradient(
+    180deg,
+    var(--_gradient-start) 0%,
+    var(--_gradient-mid) 60%,
+    var(--_gradient-end) 100%
+  );
+  padding: var(--space-7) var(--space-3);
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width var(--transition-slow);
+}
+
+.sidebar--collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+/* ==========================================================================
+   Brand
+   ========================================================================== */
+.sidebar-brand {
+  padding: 0 var(--space-2);
+  margin-bottom: var(--space-10);
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sidebar-logo-link {
+  display: block;
+  line-height: 1;
+}
+
+.sidebar-logo-link img {
+  max-width: 130px;
+}
+
+.sidebar-wordmark {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-black);
+  color: var(--color-white);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sidebar-wordmark-dot {
+  color: var(--color-accent-secondary-razzmatazz);
+}
+
+.sidebar-portal-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  margin-top: var(--space-1);
+  display: block;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Nav
+   ========================================================================== */
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sidebar-nav li {
+  display: contents;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semi-bold);
+  font-family: var(--font-primary);
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.sidebar-link:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sidebar-link--active {
+  background-color: rgba(216, 0, 107, 0.15);
+  color: var(--color-white);
+  border-left-color: var(--color-accent-secondary-razzmatazz);
+}
+
+.sidebar-link--active:hover {
+  background-color: rgba(216, 0, 107, 0.15);
+}
+
+.sidebar-link-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.sidebar-link--active .sidebar-link-icon,
+.sidebar-link:hover .sidebar-link-icon {
+  opacity: 1;
+}
+
+.sidebar-link-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Collapsed: center icons, hide labels */
+.sidebar--collapsed .sidebar-link {
+  justify-content: center;
+  padding: var(--space-2);
+  border-left-color: transparent;
+  border-bottom: 3px solid transparent;
+}
+
+.sidebar--collapsed .sidebar-link--active {
+  border-bottom-color: var(--color-accent-secondary-razzmatazz);
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: auto;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1);
+}
+
+.sidebar-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-primary-light),
+    var(--color-accent-secondary-razzmatazz)
+  );
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.sidebar-user-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-subtitle {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-logout {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: var(--font-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semi-bold);
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.sidebar-logout:hover {
+  background-color: rgba(216, 0, 107, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(216, 0, 107, 0.25);
+}
+
+.sidebar--collapsed .sidebar-logout {
+  justify-content: center;
+  padding: var(--space-2);
+}
+
+/* ==========================================================================
+   Collapse toggle -- desktop only
+   Pinned to the right edge of the sidebar, vertically centered.
+   ========================================================================== */
+.sidebar-toggle {
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--_gradient-mid);
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: var(--z-sticky);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.sidebar-toggle:hover {
+  background-color: var(--color-accent-primary);
+  color: var(--color-white);
+  border-color: transparent;
+}
+
+.sidebar-toggle-icon {
+  transition: transform var(--transition-slow);
+  flex-shrink: 0;
+}
+
+.sidebar-toggle-icon--flipped {
+  transform: rotate(180deg);
+}
+
+/* ==========================================================================
+   Dark theme
+   Gradient deepens; everything else inherits correctly from globals.
+   ========================================================================== */
+[data-theme='dark'] .sidebar {
+  --_gradient-start: #0a001e;
+  --_gradient-mid: #100235;
+  --_gradient-end: #3d1244;
+}
+
+/* ==========================================================================
+   Responsive -- mobile: horizontal top bar
+   ========================================================================== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    min-height: unset;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+    background: linear-gradient(90deg, var(--_gradient-start), var(--_gradient-end));
+    overflow-x: auto;
+    overflow-y: visible;
+    transition: none;
+  }
+
+  /* Collapsed class has no effect on mobile -- always full bar */
+  .sidebar--collapsed {
+    width: 100%;
+  }
+
+  .sidebar-brand {
+    margin-bottom: 0;
+    min-height: unset;
+  }
+
+  .sidebar-portal-label {
+    display: none;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    flex: 1;
+    gap: var(--space-1);
+    overflow-x: auto;
+  }
+
+  .sidebar-link {
+    padding: var(--space-2) var(--space-2);
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .sidebar-link--active {
+    border-left: none;
+    border-bottom-color: var(--color-accent-secondary-razzmatazz);
+  }
+
+  /* Collapsed state on mobile: still show labels */
+  .sidebar--collapsed .sidebar-link {
+    justify-content: flex-start;
+    padding: var(--space-2) var(--space-2);
+    border-bottom: 3px solid transparent;
+    border-left: none;
+  }
+
+  .sidebar--collapsed .sidebar-link--active {
+    border-bottom-color: var(--color-accent-secondary-razzmatazz);
+  }
+
+  .sidebar-link-label {
+    display: block;
+  }
+
+  .sidebar-footer {
+    flex-direction: row;
+    align-items: center;
+    padding-top: 0;
+    border-top: none;
+    margin-top: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    padding-left: var(--space-3);
+  }
+
+  .sidebar-user-info {
+    display: none;
+  }
+
+  .sidebar-logout {
+    width: auto;
+    padding: var(--space-2) var(--space-2);
+  }
+
+  /* Hide desktop collapse toggle on mobile */
+  .sidebar-toggle {
+    display: none;
+  }
+}

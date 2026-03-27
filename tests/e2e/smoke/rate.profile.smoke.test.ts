@@ -1,45 +1,26 @@
 import { test, expect, type Page } from '@playwright/test';
 
-const SETTINGS_URL = '/admin/settings';
+const RATE_PROFILES_URL = '/admin/rate-profiles';
 
-async function openSettingsPage(page: Page): Promise<void> {
-  await page.goto(SETTINGS_URL);
-  await expect(page.getByTestId('admin-settings-page')).toBeVisible();
+async function openRateProfilesPage(page: Page): Promise<void> {
+  await page.goto(RATE_PROFILES_URL);
+  await expect(page.getByTestId('admin-rate-profiles-page')).toBeVisible();
   await expect(page.getByTestId('rate-profiles-loading-row')).toBeHidden();
 }
 
 test.describe('Rate profile editing', () => {
   test.beforeEach(async ({ page }) => {
-    await openSettingsPage(page);
+    await openRateProfilesPage(page);
   });
 
-  test('settings page loads and rate profiles table is populated', async ({ page }) => {
+  test('rate profiles page loads and table is populated', async ({ page }) => {
     const table = page.getByTestId('rate-profiles-table');
     await expect(table).toBeVisible();
     await expect(page.getByTestId('rate-profiles-empty-row')).toBeHidden();
     await expect(page.getByTestId('rate-profiles-error-row')).toBeHidden();
   });
 
-  test('clicking a row opens the edit modal pre-populated with the profile values', async ({
-    page,
-  }) => {
-    const firstRow = page.locator('[data-testid^="rate-row-"]').first();
-    await firstRow.click();
-
-    await expect(page.getByTestId('rate-profile-modal')).toBeVisible();
-
-    await expect(page.locator('.rpm-summary-chip').first()).toBeVisible();
-
-    const bhInput = page.locator('#rpm-bh-rate');
-    const val = await bhInput.inputValue();
-    expect(val).not.toBe('');
-    expect(Number(val)).toBeGreaterThan(0);
-
-    await page.getByTestId('rpm-close-btn').click();
-    await expect(page.getByTestId('rate-profile-modal')).toBeHidden();
-  });
-
-  test('valid edit succeeds: shows success banner, hides Save button, updated value appears in table', async ({
+  test('clicking a row expands the inline edit row pre-populated with the profile values', async ({
     page,
   }) => {
     const firstRow = page.locator('[data-testid^="rate-row-"]').first();
@@ -47,20 +28,41 @@ test.describe('Rate profile editing', () => {
     const profileId = rowTestId?.replace('rate-row-', '') ?? '';
 
     await firstRow.click();
-    await expect(page.getByTestId('rate-profile-modal')).toBeVisible();
 
-    const bhInput = page.locator('#rpm-bh-rate');
+    const editRow = page.getByTestId(`rate-profile-edit-row-${profileId}`);
+    await expect(editRow).toBeVisible();
+
+    await expect(editRow.locator('.rate-profile-chip').first()).toBeVisible();
+
+    const bhInput = page.locator(`#rp-bh-${profileId}`);
+    const val = await bhInput.inputValue();
+    expect(val).not.toBe('');
+    expect(Number(val)).toBeGreaterThan(0);
+
+    // Clicking the same row again collapses the edit row
+    await firstRow.click();
+    await expect(editRow).toBeHidden();
+  });
+
+  test('valid edit succeeds: edit row closes and updated value appears in table', async ({
+    page,
+  }) => {
+    const firstRow = page.locator('[data-testid^="rate-row-"]').first();
+    const rowTestId = await firstRow.getAttribute('data-testid');
+    const profileId = rowTestId?.replace('rate-row-', '') ?? '';
+
+    await firstRow.click();
+
+    const editRow = page.getByTestId(`rate-profile-edit-row-${profileId}`);
+    await expect(editRow).toBeVisible();
+
+    const bhInput = page.locator(`#rp-bh-${profileId}`);
     await bhInput.clear();
     await bhInput.fill('777');
 
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await editRow.getByRole('button', { name: 'Save Changes' }).click();
 
-    await expect(page.locator('.rpm-submit-success')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Save Changes' })).toBeHidden();
-
-    await page.getByRole('button', { name: 'Close', exact: true }).click();
-    await expect(page.getByTestId('rate-profile-modal')).toBeHidden();
-
+    await expect(editRow).toBeHidden();
     await expect(page.getByTestId(`rate-business-${profileId}`)).toContainText('777');
   });
 });

@@ -3,9 +3,8 @@ export const CLIENT_ROUTES = {
   CANT_ACCESS_ACCOUNT: '/cannot',
   CUSTOMER: {
     ROOT: '/customer',
-    TICKETS: '/customer/tickets',
     TICKET: (id = ':ticketId') => `/customer/tickets/${id}`,
-    NEW_TICKET: '/customer/tickets/new',
+    ORG_MEMBERS: `/customer/org/members`,
     SETTINGS: '/customer/settings',
   },
   ADMIN: {
@@ -15,8 +14,13 @@ export const CLIENT_ROUTES = {
     QUOTES: '/admin/quotes',
     QUOTE: (ticketId = ':ticketId', quoteId = ':quoteId') =>
       `/admin/tickets/${ticketId}/quotes/${quoteId}`,
+    ORGANIZATIONS: (orgId = `:orgId`) => `/admin/org/${orgId}`,
+    ORGANIZATION_MEMBERS: (orgId = ':orgId') => `/admin/org/${orgId}/members`,
     ANALYTICS: '/admin/analytics',
     SLA_POLICIES: '/admin/sla-policies',
+    RATE_PROFILES: '/admin/rate-profiles',
+    USER_MANAGEMENT: '/admin/user-management',
+    SYSTEM_CONFIG: '/admin/system-config',
     SETTINGS: '/admin/settings',
   },
 } as const;

@@ -12,8 +12,7 @@ const VALID_TICKET = {
   usersAffected: '5',
 };
 
-const NEW_TICKET_URL = '/customer/tickets/new';
-const TICKETS_URL = '/customer/tickets';
+const DASHBOARD_URL = '/customer';
 
 const FIXTURES_DIR = path.join(__dirname, '../../fixtures');
 const FIXTURE_PDF = path.join(FIXTURES_DIR, 'sample.pdf');
@@ -27,6 +26,14 @@ const ATTACHMENT_HAPPY_PATH_CASES = [
   { label: 'PNG', fixture: FIXTURE_PNG },
 ];
 
+async function openNewTicketModal(page: Page): Promise<void> {
+  await page.goto(DASHBOARD_URL);
+  await expect(page.getByTestId('dashboard-page')).toBeVisible();
+  await page.getByTestId('open-new-ticket-modal-btn').click();
+  await expect(page.getByTestId('new-ticket-modal')).toBeVisible();
+  await expect(page.getByTestId('submit-ticket-form')).toBeVisible();
+}
+
 async function fillRequiredFields(page: Page): Promise<void> {
   await page.getByTestId('field-title').fill(VALID_TICKET.title);
   await page.getByTestId('field-description').fill(VALID_TICKET.description);
@@ -36,15 +43,14 @@ async function fillRequiredFields(page: Page): Promise<void> {
 
 test.describe('Ticket submission', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(NEW_TICKET_URL);
-    await expect(page.getByTestId('new-ticket-page')).toBeVisible();
+    await openNewTicketModal(page);
   });
 
-  test('valid submission succeeds and redirects to tickets list', async ({ page }) => {
+  test('valid submission succeeds and shows success state in modal', async ({ page }) => {
     await fillRequiredFields(page);
     await page.getByTestId('submit-ticket-btn').click();
 
-    await expect(page).toHaveURL(new RegExp(TICKETS_URL));
+    await expect(page.getByTestId('ticket-submit-success')).toBeVisible();
   });
 
   for (const { label, fixture } of ATTACHMENT_HAPPY_PATH_CASES) {
@@ -55,7 +61,7 @@ test.describe('Ticket submission', () => {
       await expect(page.getByTestId('attachment-count')).toBeVisible();
 
       await page.getByTestId('submit-ticket-btn').click();
-      await expect(page).toHaveURL(new RegExp(TICKETS_URL));
+      await expect(page.getByTestId('ticket-submit-success')).toBeVisible();
     });
   }
 

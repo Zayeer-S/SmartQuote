@@ -24,19 +24,24 @@ const LoginPage: React.FC = () => {
   return (
     <main className="login-container" data-testid="login-page">
       <aside className="login-panel-brand" aria-hidden="true">
-        <span className="brand">Smartquote</span>
+        <img
+          src="src\client\components\icons\giacom-logo.webp"
+          width={200}
+          height={36}
+          alt="Giacom logo"
+        ></img>
         <div className="login-panel-brand-body">
           <p className="login-panel-tagline">
-            SmartQuote: <em>A Faster Quoting System</em>
+            SmartQuote
+            <br />
           </p>
           <p className="login-panel-meta">© {new Date().getFullYear()} Giacom</p>
         </div>
       </aside>
 
-      {/* ── Middle panel ── */}
       <section className="login-card" aria-labelledby="login-heading">
         <h1 id="login-heading" className="login-title">
-          Welcome
+          Welcome back
         </h1>
         <p className="login-subtitle">Sign in to your account to continue</p>
 
@@ -119,8 +124,8 @@ const LoginPage: React.FC = () => {
 
             <a
               href={CLIENT_ROUTES.CANT_ACCESS_ACCOUNT}
-              className="forgot-link"
-              data-testid="forgot-password-link"
+              className="cant-access-link"
+              data-testid="cant-access-link"
             >
               Can't access your account?
             </a>
@@ -138,7 +143,6 @@ const LoginPage: React.FC = () => {
         </form>
       </section>
 
-      {/* ── Right panel — empty breathing room ── */}
       <div className="login-panel-right" aria-hidden="true" />
     </main>
   );

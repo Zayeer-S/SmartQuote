@@ -1,0 +1,231 @@
+/* ==========================================================================
+   CARDS
+   Base card primitive + all variants. Import once in main.tsx.
+   Never define card-* structural styles in components.
+
+   Composition model:
+     <article class="card">...</article>
+     <article class="card card-padded">...</article>
+     <article class="card ticket-card">...</article>
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Base -- shared structure for every card variant
+   -------------------------------------------------------------------------- */
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-strong);
+}
+
+/* Padding modifier -- add when card needs internal spacing */
+.card-padded {
+  padding: var(--space-5) var(--space-6);
+}
+
+/* --------------------------------------------------------------------------
+   Customer ticket card
+   -- TODO: tailor colors, layout, and hover behavior per design
+   -------------------------------------------------------------------------- */
+.ticket-card {
+  padding: var(--space-4);
+}
+
+.ticket-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-strong);
+}
+
+.ticket-card-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.ticket-card-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-2);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.ticket-card-title a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.ticket-card-title a:hover {
+  color: var(--color-interactive);
+}
+
+.ticket-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.ticket-card-meta-item {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.ticket-card-meta-divider {
+  width: 3px;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Admin ticket card
+   -- TODO: tailor colors, layout, and hover behavior per design
+   -------------------------------------------------------------------------- */
+.admin-ticket-card {
+  padding: var(--space-4) var(--space-5);
+}
+
+.admin-ticket-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-strong);
+}
+
+.admin-ticket-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.admin-ticket-card-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.admin-ticket-card-badge-unassigned {
+  background-color: var(--color-warning-bg);
+  color: var(--color-feedback-warning-text);
+}
+
+.admin-ticket-card-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-tight);
+  margin-bottom: var(--space-2);
+}
+
+.admin-ticket-card-title a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.admin-ticket-card-title a:hover {
+  color: var(--color-interactive);
+}
+
+.admin-ticket-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.admin-ticket-card-meta span + span::before {
+  content: '\00B7';
+  margin-right: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Stat card
+   -- TODO: tailor colors, layout, and hover behavior per design
+   -------------------------------------------------------------------------- */
+.stats-overview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-subtle);
+  min-width: 160px;
+}
+
+.stat-card-value {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: 1;
+}
+
+.stat-card-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme overrides
+   -------------------------------------------------------------------------- */
+[data-theme='dark'] .card {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .card:hover {
+  border-color: var(--color-border-strong);
+}
+
+[data-theme='dark'] .ticket-card-title a:hover,
+[data-theme='dark'] .admin-ticket-card-title a:hover {
+  color: var(--color-interactive);
+}
+
+[data-theme='dark'] .ticket-card-meta-item,
+[data-theme='dark'] .admin-ticket-card-meta {
+  color: var(--color-text-muted);
+}
+
+[data-theme='dark'] .admin-ticket-card-badge-unassigned {
+  background-color: var(--color-feedback-warning-bg);
+  color: var(--color-feedback-warning-text);
+}
+
+[data-theme='dark'] .stat-card {
+  background-color: var(--color-surface-raised);
+}
+
+[data-theme='dark'] .stat-card-value {
+  color: var(--color-text-primary);
+}
