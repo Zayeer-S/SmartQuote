@@ -14,8 +14,9 @@ export const CLIENT_ROUTES = {
     QUOTES: '/admin/quotes',
     QUOTE: (ticketId = ':ticketId', quoteId = ':quoteId') =>
       `/admin/tickets/${ticketId}/quotes/${quoteId}`,
-    ORGANIZATIONS: (orgId = `:orgId`) => `/admin/org/${orgId}`,
-    ORGANIZATION_MEMBERS: (orgId = ':orgId') => `/admin/org/${orgId}/members`,
+    ORGANIZATIONS_LIST: '/admin/organizations',
+    ORGANIZATIONS: (orgId = ':orgId') => `/admin/organizations/${orgId}`,
+    ORGANIZATION_MEMBERS: (orgId = ':orgId') => `/admin/organizations/${orgId}/members`,
     ANALYTICS: '/admin/analytics',
     SLA_POLICIES: '/admin/sla-policies',
     RATE_PROFILES: '/admin/rate-profiles',

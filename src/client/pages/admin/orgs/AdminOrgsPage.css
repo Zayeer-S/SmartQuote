@@ -1,0 +1,96 @@
+.admin-orgs-page {
+  padding: var(--space-8) var(--space-10);
+  max-width: 900px;
+}
+
+.admin-orgs-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.admin-orgs-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-1);
+}
+
+.admin-orgs-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   List
+   --------------------------------------------------------------------------- */
+
+.admin-orgs-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.admin-orgs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+}
+
+.admin-orgs-row-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.admin-orgs-row-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-orgs-row-status {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi-bold);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-orgs-row-status--active {
+  background-color: var(--color-feedback-success-bg);
+  color: var(--color-feedback-success-text);
+}
+
+.admin-orgs-row-status--inactive {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+}
+
+.admin-orgs-row-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Modal footer
+   --------------------------------------------------------------------------- */
+
+.admin-orgs-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}

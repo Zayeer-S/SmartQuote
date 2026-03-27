@@ -34,13 +34,7 @@ const ADMIN_NAV_ITEMS: SidebarNavItem[] = [
     testId: 'nav-analytics',
   },
   {
-    to: CLIENT_ROUTES.ADMIN.ORGANIZATION_MEMBERS(),
-    label: 'Organisation Members',
-    icon: <IconOrganisation />,
-    testId: 'nav-organisation-members',
-  },
-  {
-    to: CLIENT_ROUTES.ADMIN.ORGANIZATIONS(),
+    to: CLIENT_ROUTES.ADMIN.ORGANIZATIONS_LIST,
     label: 'Organisations',
     icon: <IconOrganisation />,
     testId: 'nav-organisations',
@@ -105,7 +99,7 @@ const AdminLayout: React.FC = () => {
       <Sidebar
         navItems={ADMIN_NAV_ITEMS}
         brand={{
-          portalLabel: 'Customer Portal',
+          portalLabel: 'Admin Portal',
           logoSrc: 'src/client/components/icons/giacom-logo.webp',
         }}
         user={sidebarUser}

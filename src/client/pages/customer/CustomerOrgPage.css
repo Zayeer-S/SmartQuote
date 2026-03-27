@@ -1,0 +1,76 @@
+.customer-org-page {
+  padding: var(--space-8) var(--space-10);
+  max-width: 900px;
+}
+
+.customer-org-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+
+.customer-org-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-1);
+}
+
+.customer-org-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Members list
+   --------------------------------------------------------------------------- */
+
+.customer-org-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.customer-org-member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+}
+
+.customer-org-member-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.customer-org-member-row-userid {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-org-member-row-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Modal footer
+   --------------------------------------------------------------------------- */
+
+.customer-org-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}

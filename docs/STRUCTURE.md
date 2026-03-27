@@ -43,7 +43,7 @@ smartquote/
 │   │   │   └── env.frontend.ts
 │   │   ├── constants/
 │   │   │   └── client.routes.ts
-│   │   ├── context/
+│   │   ├── contexts/
 │   │   │   ├── auth/
 │   │   │   │   ├── auth.context.types.ts
 │   │   │   │   └── AuthContext.ts
