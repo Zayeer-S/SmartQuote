@@ -22,3 +22,12 @@ export const CLIENT_ROUTES = {
     SETTINGS: '/admin/settings',
   },
 } as const;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DeepValues<T> = T extends (...args: any) => infer R
+  ? R
+  : T extends object
+    ? DeepValues<T[keyof T]>
+    : T;
+
+export type ClientRouteTypes = DeepValues<typeof CLIENT_ROUTES>;

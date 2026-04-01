@@ -1,8 +1,9 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { CLIENT_ROUTES } from '../../../constants/client.routes.js';
 import './AdminTicketDetailPage.css';
 import BaseTicketDetail from '../../../features/shared/BaseTicketDetail.js';
+import Breadcrumb from '../../../components/Breadcrumb.js';
 
 const AdminTicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
@@ -17,21 +18,11 @@ const AdminTicketDetailPage: React.FC = () => {
 
   return (
     <div className="admin-page" data-testid="admin-ticket-detail-page">
-      <nav className="breadcrumb" aria-label="Breadcrumb">
-        <Link
-          className="breadcrumb-link"
-          to={CLIENT_ROUTES.ADMIN.ROOT}
-          data-testid="breadcrumb-tickets"
-        >
-          Home
-        </Link>
-        <span className="breadcrumb-sep" aria-hidden="true">
-          /
-        </span>
-        <span className="breadcrumb-current" aria-current="page">
-          Ticket Detail
-        </span>
-      </nav>
+      <Breadcrumb
+        route={CLIENT_ROUTES.ADMIN.ROOT}
+        previousPage="Home"
+        currentPage="Ticket Detail"
+      />
 
       <BaseTicketDetail ticketId={ticketId} />
     </div>
