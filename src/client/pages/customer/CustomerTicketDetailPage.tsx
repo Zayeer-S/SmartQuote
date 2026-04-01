@@ -6,7 +6,7 @@ import Breadcrumb from '../../components/Breadcrumb.js';
 import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
 
-type CustomerTabs = 'details';
+type CustomerTabs = 'details' | 'comments';
 
 const CUSTOMER_TABS: TabNavItem<CustomerTabs>[] = [{ key: 'details', label: 'Details' }];
 
@@ -34,7 +34,7 @@ const CustomerTicketDetailPage: React.FC = () => {
 
       <TabNav tabs={CUSTOMER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <TicketDetailCard ticketId={ticketId} />
+      {activeTab === 'details' && <TicketDetailCard ticketId={ticketId} />}
     </div>
   );
 };
