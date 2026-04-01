@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { CLIENT_ROUTES } from '../../../constants/client.routes.js';
-import AdminTicketDetail from '../../../features/admin/tickets/AdminTicketDetail.js';
 import './AdminTicketDetailPage.css';
+import BaseTicketDetail from '../../../features/shared/BaseTicketDetail.js';
 
 const AdminTicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
@@ -23,7 +23,7 @@ const AdminTicketDetailPage: React.FC = () => {
           to={CLIENT_ROUTES.ADMIN.ROOT}
           data-testid="breadcrumb-tickets"
         >
-          Tickets
+          Home
         </Link>
         <span className="breadcrumb-sep" aria-hidden="true">
           /
@@ -33,7 +33,7 @@ const AdminTicketDetailPage: React.FC = () => {
         </span>
       </nav>
 
-      <AdminTicketDetail ticketId={ticketId} />
+      <BaseTicketDetail ticketId={ticketId} />
     </div>
   );
 };
