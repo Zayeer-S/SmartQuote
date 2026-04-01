@@ -186,9 +186,6 @@ smartquote/
 │   │   │   │   │   ├── AdminOrgsMembersPage.tsx
 │   │   │   │   │   ├── AdminOrgsPage.css
 │   │   │   │   │   └── AdminOrgsPage.tsx
-│   │   │   │   ├── quote/
-│   │   │   │   │   ├── AdminQuoteDetailPage.css
-│   │   │   │   │   └── AdminQuoteDetailPage.tsx
 │   │   │   │   ├── rate-profiles/
 │   │   │   │   │   ├── AdminRateProfilesPage.css
 │   │   │   │   │   └── AdminRateProfilesPage.tsx
@@ -200,9 +197,7 @@ smartquote/
 │   │   │   │   │   └── AdminSystemConfigPage.tsx
 │   │   │   │   ├── tickets/
 │   │   │   │   │   ├── AdminTicketDetailPage.css
-│   │   │   │   │   ├── AdminTicketDetailPage.tsx
-│   │   │   │   │   ├── AdminTicketsPage.css
-│   │   │   │   │   └── AdminTicketsPage.tsx
+│   │   │   │   │   └── AdminTicketDetailPage.tsx
 │   │   │   │   └── user-management/
 │   │   │   │       ├── AdminUserManagementPage.css
 │   │   │   │       └── AdminUserManagementPage.tsx
