@@ -1,9 +1,5 @@
 /* card and card-padded base styles are in styles/cards.css */
 
-.ticket-detail {
-  max-width: 900px;
-}
-
 .ticket-detail-back {
   display: inline-flex;
   align-items: center;

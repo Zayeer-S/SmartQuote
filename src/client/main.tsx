@@ -12,7 +12,7 @@ import { ThemeProvider } from './context/ThemeContext.js';
 import { AUTH_ROLES } from '../shared/constants';
 import CustomerLayout from './pages/customer/CustomerLayout.js';
 import CustomerDashboardPage from './pages/customer/CustomerDashboardPage.js';
-import TicketDetailPage from './pages/customer/TicketDetailPage.js';
+import CustomerTicketDetailPage from './pages/customer/TicketDetailPage.js';
 import SettingsPage from './pages/shared/SettingsPage.js';
 import AdminLayout from './pages/admin/AdminLayout.js';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.js';
@@ -82,7 +82,10 @@ createRoot(document.getElementById('root')!).render(
                 <Route element={<ProtectedRoute allowedRoles={[AUTH_ROLES.CUSTOMER]} />}>
                   <Route path={CLIENT_ROUTES.CUSTOMER.ROOT} element={<CustomerLayout />}>
                     <Route index element={<CustomerDashboardPage />} />
-                    <Route path={CLIENT_ROUTES.CUSTOMER.TICKET()} element={<TicketDetailPage />} />
+                    <Route
+                      path={CLIENT_ROUTES.CUSTOMER.TICKET()}
+                      element={<CustomerTicketDetailPage />}
+                    />
                     <Route path={CLIENT_ROUTES.CUSTOMER.SETTINGS} element={<SettingsPage />} />
                   </Route>
                 </Route>

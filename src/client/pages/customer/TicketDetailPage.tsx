@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import TicketDetailCard from '../../features/shared/TicketDetailCard.js';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import Breadcrumb from '../../components/Breadcrumb.js';
 import TicketTitle from '../../features/shared/TicketTitle.js';
+import TabNav, { TabNavItem } from '../../components/TabNav.js';
 
-const TicketDetailPage: React.FC = () => {
+type CustomerTabs = 'details';
+
+const CUSTOMER_TABS: TabNavItem<CustomerTabs>[] = [{ key: 'details', label: 'Details' }];
+
+const CustomerTicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
+  const [activeTab, setActiveTab] = useState<CustomerTabs>('details');
 
   if (!ticketId) {
     return (
@@ -25,9 +31,12 @@ const TicketDetailPage: React.FC = () => {
       />
 
       <TicketTitle ticketId={ticketId} />
+
+      <TabNav tabs={CUSTOMER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+
       <TicketDetailCard ticketId={ticketId} />
     </div>
   );
 };
 
-export default TicketDetailPage;
+export default CustomerTicketDetailPage;

@@ -4,6 +4,7 @@
   min-height: 100vh;
   background-color: var(--color-bg-subtle);
   transition: grid-template-columns var(--transition-slow);
+  width: 1250px;
 }
 
 .customer-layout--sidebar-collapsed {

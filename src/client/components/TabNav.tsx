@@ -33,7 +33,9 @@ function TabNav<T extends string>({
                   onTabChange(tab.key);
                 }}
                 data-testid={`tab-nav-btn-${tab.key}`}
-              ></button>
+              >
+                {tab.label}
+              </button>
             </li>
           );
         })}
