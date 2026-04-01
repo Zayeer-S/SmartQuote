@@ -1,6 +1,5 @@
 import React from 'react';
 import { UseGetTicketReturn } from '../../hooks/tickets/useGetTicket';
-import { UseListQuotesReturn } from '../../hooks/quotes/useListQuote';
 import { getCurrentLocalDateString } from '../../lib/utils/format-timestamps';
 import AttachmentList from './AttachmentList';
 import './TicketDetailCard.css';
@@ -8,12 +7,11 @@ import './TicketDetailCard.css';
 export interface TicketDetailProps {
   ticketId: string;
   ticket: UseGetTicketReturn;
-  quotes: UseListQuotesReturn;
 }
 
-const TicketDetailCard: React.FC<TicketDetailProps> = ({ ticketId, ticket, quotes }) => {
-  const isLoading = ticket.loading || quotes.loading;
-  const error = ticket.error ?? quotes.error;
+const TicketDetailCard: React.FC<TicketDetailProps> = ({ ticketId, ticket }) => {
+  const isLoading = ticket.loading;
+  const error = ticket.error;
 
   if (isLoading) {
     return (

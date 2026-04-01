@@ -114,7 +114,7 @@ const AdminTicketDetailPage: React.FC = () => {
               )}
               {!ticketLoading && !ticketError && (
                 <>
-                  <TicketDetailCard ticketId={ticketId} ticket={ticket} quotes={quotes} />
+                  <TicketDetailCard ticketId={ticketId} ticket={ticket} />
                   <AssignTicketForm
                     ticketData={ticketData}
                     adminUsers={adminData}
