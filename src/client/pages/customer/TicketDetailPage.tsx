@@ -19,7 +19,7 @@ const TicketDetailPage: React.FC = () => {
       <nav className="breadcrumb" aria-label="Breadcrumb">
         <Link
           className="breadcrumb-link"
-          to={CLIENT_ROUTES.ADMIN.ROOT}
+          to={CLIENT_ROUTES.CUSTOMER.ROOT}
           data-testid="breadcrumb-tickets"
         >
           Home
