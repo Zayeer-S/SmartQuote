@@ -12,7 +12,6 @@ import {
 import type { SlaStatusResponse } from '../../../../shared/contracts/sla-contracts.js';
 import type { UserListItem } from '../../../../shared/contracts/user-contracts.js';
 import AssignTicketForm from './AssignTicketForm.js';
-import AdminQuotePanel from '../quotes/AdminQuotePanel.js';
 import TicketCommentThread from '../../shared/TicketCommentThread.js';
 import AttachmentList from '../../shared/AttachmentList.js';
 import SimilarTicketsPanel from './SimilarTicketsPanel.js';
@@ -340,17 +339,6 @@ const AdminTicketDetail: React.FC<AdminTicketDetailProps> = ({ ticketId }) => {
           Attachments
         </h2>
         <AttachmentList ticketId={ticketId} attachments={t.attachments} />
-      </section>
-
-      <section className="admin-detail-section" aria-labelledby="quote-section-heading">
-        <AdminQuotePanel
-          ticketId={ticketId}
-          quotes={quotes.data?.quotes ?? []}
-          onQuoteMutated={() => {
-            loadTicket();
-            void quotes.execute(ticketId);
-          }}
-        />
       </section>
 
       {/* -- Similar Tickets -- */}

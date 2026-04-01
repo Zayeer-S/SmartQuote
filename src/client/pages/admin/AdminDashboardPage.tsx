@@ -3,10 +3,11 @@ import { useAuth } from '../../hooks/contexts/useAuth.js';
 import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAdminTicketFilters, slaUrgencyKey } from '../../hooks/useAdminTicketFilters.js';
 import StatsOverview from '../../features/shared/StatsOverview.js';
-import AdminTicketList from '../../features/admin/tickets/AdminTicketList.js';
 import AdminTicketFilters from '../../features/admin/tickets/AdminTicketFilters.js';
 import TicketPagination from '../../features/collate/TicketPagination.js';
 import './AdminDashboardPage.css';
+import BaseTicketList from '../../features/shared/BaseTicketList.js';
+import AdminTicketCard from '../../features/admin/tickets/AdminTicketCard.js';
 
 const PRIORITY_ORDER: Record<string, number> = { P1: 1, P2: 2, P3: 3, P4: 4 };
 
@@ -102,7 +103,14 @@ const AdminDashboardPage: React.FC = () => {
           onClear={clearFilters}
         />
 
-        <AdminTicketList tickets={filteredTickets} loading={loading} error={error} />
+        <BaseTicketList
+          tickets={filteredTickets}
+          renderItem={(ticket) => <AdminTicketCard ticket={ticket} />}
+          loading={loading}
+          error={error}
+          emptyMessage="No tickets have been submitted yet."
+          testIdPrefix="admin-tickets"
+        />
 
         <TicketPagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </section>

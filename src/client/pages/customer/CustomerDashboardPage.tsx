@@ -3,10 +3,11 @@ import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
 import StatsOverview from '../../features/shared/StatsOverview.js';
 import TicketStatusChart from '../../features/admin/analytics/TicketStatusChart.js';
-import TicketList from '../../features/customer/ticket/TicketList.js';
 import Modal from '../../components/Modal.js';
 import SubmitTicketForm from '../../features/customer/dashboard/SubmitTicketForm.js';
 import './CustomerDashboardPage.css';
+import BaseTicketList from '../../features/shared/BaseTicketList.js';
+import CustomerTicketCard from '../../features/customer/ticket/CustomerTicketCard.js';
 
 const CustomerDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -72,7 +73,14 @@ const CustomerDashboardPage: React.FC = () => {
           </button>
         </div>
 
-        <TicketList tickets={allTickets} loading={loading} error={error} />
+        <BaseTicketList
+          tickets={allTickets}
+          renderItem={(ticket) => <CustomerTicketCard ticket={ticket} />}
+          loading={loading}
+          error={error}
+          emptyMessage="You have no tickets yet."
+          testIdPrefix="tickets"
+        />
       </section>
 
       <Modal
