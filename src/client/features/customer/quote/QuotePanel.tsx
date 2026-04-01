@@ -20,8 +20,13 @@ const QuotePanel: React.FC<QuotePanelProps> = ({ ticketId, quote }) => {
 
       <dl className="quote-panel-dl">
         <div>
-          <dt>Estimated Cost</dt>
+          <dt>Estimated Total Cost</dt>
           <dd data-testid="quote-estimated-cost">{formatCurrency(quote.estimatedCost)}</dd>
+        </div>
+
+        <div>
+          <dt>Fixed Costs</dt>
+          <dd data-testid="quote-fixed-cost">{formatCurrency(quote.fixedCost)}</dd>
         </div>
 
         <div>
@@ -35,29 +40,6 @@ const QuotePanel: React.FC<QuotePanelProps> = ({ ticketId, quote }) => {
           <dt>Resolution Time</dt>
           <dd data-testid="quote-resolution-time">{quote.estimatedResolutionTime} hrs</dd>
         </div>
-
-        {quote.fixedCost > 0 && (
-          <div>
-            <dt>Fixed Cost</dt>
-            <dd data-testid="quote-fixed-cost">{formatCurrency(quote.fixedCost)}</dd>
-          </div>
-        )}
-
-        <div>
-          <dt>Effort</dt>
-          <dd className="quote-panel-dd-sm" data-testid="quote-effort-level">
-            {quote.quoteEffortLevel}
-          </dd>
-        </div>
-
-        {quote.quoteConfidenceLevel !== null && (
-          <div>
-            <dt>Confidence</dt>
-            <dd className="quote-panel-dd-sm" data-testid="quote-confidence-level">
-              {quote.quoteConfidenceLevel}
-            </dd>
-          </div>
-        )}
       </dl>
 
       <QuoteActions ticketId={ticketId} quoteId={quote.id} />
