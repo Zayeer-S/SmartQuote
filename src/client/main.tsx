@@ -54,7 +54,6 @@ createRoot(document.getElementById('root')!).render(
                 >
                   <Route path={CLIENT_ROUTES.ADMIN.ROOT} element={<AdminLayout />}>
                     <Route index element={<AdminDashboardPage />} />
-                    <Route path={CLIENT_ROUTES.ADMIN.TICKETS} element={<AdminDashboardPage />} />
                     <Route
                       path={CLIENT_ROUTES.ADMIN.TICKET()}
                       element={<AdminTicketDetailPage />}

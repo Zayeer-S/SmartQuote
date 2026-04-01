@@ -16,10 +16,10 @@ import './AdminLayout.css';
 
 const ADMIN_NAV_ITEMS: SidebarNavItem[] = [
   {
-    to: CLIENT_ROUTES.ADMIN.TICKETS,
-    label: 'Tickets',
-    icon: <IconTickets />,
-    testId: 'nav-tickets',
+    to: CLIENT_ROUTES.ADMIN.ROOT,
+    label: 'Home',
+    icon: <IconTickets />, // TODO CHANGE
+    testId: 'nav-home',
   },
   {
     to: CLIENT_ROUTES.ADMIN.ANALYTICS,
