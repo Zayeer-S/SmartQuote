@@ -1,8 +1,9 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import BaseTicketDetail from '../../features/shared/BaseTicketDetail.js';
+import TicketDetailCard from '../../features/shared/TicketDetailCard.js';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import Breadcrumb from '../../components/Breadcrumb.js';
+import TicketTitle from '../../features/shared/TicketTitle.js';
 
 const TicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
@@ -23,7 +24,8 @@ const TicketDetailPage: React.FC = () => {
         currentPage="Ticket Detail"
       />
 
-      <BaseTicketDetail ticketId={ticketId} />
+      <TicketTitle ticketId={ticketId} />
+      <TicketDetailCard ticketId={ticketId} />
     </div>
   );
 };

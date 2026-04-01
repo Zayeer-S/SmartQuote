@@ -2,19 +2,14 @@ import React, { useEffect } from 'react';
 import { useGetTicket } from '../../hooks/tickets/useGetTicket';
 import { useListQuotes } from '../../hooks/quotes/useListQuote';
 import { getCurrentLocalDateString } from '../../lib/utils/format-timestamps';
-import {
-  getPriorityBadgeClass,
-  getSlaBadgeClass,
-  getStatusBadgeClass,
-} from '../../lib/utils/badge-utils';
 import AttachmentList from './AttachmentList';
-import './BaseTicketDetail.css';
+import './TicketDetailCard.css';
 
 export interface TicketDetailProps {
   ticketId: string;
 }
 
-const BaseTicketDetail: React.FC<TicketDetailProps> = ({ ticketId }) => {
+const TicketDetailCard: React.FC<TicketDetailProps> = ({ ticketId }) => {
   const ticket = useGetTicket();
   const quotes = useListQuotes();
 
@@ -58,29 +53,6 @@ const BaseTicketDetail: React.FC<TicketDetailProps> = ({ ticketId }) => {
 
   return (
     <div className="ticket-detail" data-testid="ticket-detail">
-      <div className="ticket-detail-header">
-        <h1 className="ticket-detail-title" data-testid="ticket-title">
-          {t.title}
-        </h1>
-        <div className="ticket-detail-badges">
-          <span className={getStatusBadgeClass(t.ticketStatus)} data-testid="ticket-status">
-            {t.ticketStatus}
-          </span>
-          <span className={getPriorityBadgeClass(t.ticketPriority)} data-testid="ticket-priority">
-            {t.ticketPriority}
-          </span>
-          {t.slaStatus !== null && (
-            <span
-              className={getSlaBadgeClass(t.slaStatus.deadlineBreached)}
-              data-testid="ticket-sla-badge-header"
-              title={t.slaStatus.policyName}
-            >
-              {t.slaStatus.deadlineBreached ? 'SLA Breached' : 'SLA OK'}
-            </span>
-          )}
-        </div>
-      </div>
-
       <section
         className="card card-padded ticket-detail-section"
         aria-labelledby="ticket-info-heading"
@@ -134,4 +106,4 @@ const BaseTicketDetail: React.FC<TicketDetailProps> = ({ ticketId }) => {
   );
 };
 
-export default BaseTicketDetail;
+export default TicketDetailCard;
