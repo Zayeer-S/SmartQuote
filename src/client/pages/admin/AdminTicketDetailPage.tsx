@@ -15,6 +15,7 @@ import AdminQuoteApproval from '../../features/admin/quotes/AdminQuoteApproval.j
 import AdminQuoteRevisions from '../../features/admin/quotes/AdminQuoteRevisions.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 import type { QuoteWithApprovalResponse } from '../../../shared/contracts/quote-contracts.js';
+import '../../styles/TicketDetailLayout.css';
 
 type AdminTab = 'details' | 'quote' | 'revision';
 

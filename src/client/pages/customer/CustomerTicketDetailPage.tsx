@@ -6,6 +6,7 @@ import Breadcrumb from '../../components/Breadcrumb.js';
 import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
 import TicketDetailSidePanel from '../../features/shared/TicketDetailSidePanel.js';
+import '../../styles/TicketDetailLayout.css';
 
 type CustomerTab = 'details' | 'quote' | 'revision';
 
