@@ -1,13 +1,4 @@
-/* ==========================================================================
-   AdminLayout.css
-   Grid shell only -- sidebar styles live in Sidebar.css.
-
-   NOTE: .breadcrumb and .admin-table styles live here temporarily.
-   These are shared UI patterns and should be extracted to their own files
-   (e.g. Breadcrumb.css, AdminTable.css) once those components are isolated.
-   ========================================================================== */
-
-.admin-layout {
+.layout {
   display: grid;
   grid-template-columns: var(--sidebar-width-expanded) 1fr;
   min-height: 100vh;
@@ -16,49 +7,15 @@
   width: 1250px;
 }
 
-.admin-layout--sidebar-collapsed {
+.layout--sidebar-collapsed {
   grid-template-columns: var(--sidebar-width-collapsed) 1fr;
 }
 
-.admin-main {
+.layout-main {
   overflow-y: auto;
   padding: var(--space-10) var(--space-12);
   background-color: var(--color-bg-subtle);
   min-height: 100vh;
-}
-
-/* ==========================================================================
-   Breadcrumb -- TODO: extract to Breadcrumb.css when component is isolated
-   ========================================================================== */
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
-  flex-wrap: wrap;
-}
-
-.breadcrumb-link {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-.breadcrumb-link:hover {
-  color: var(--color-interactive-hover);
-}
-
-.breadcrumb-sep {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  user-select: none;
-}
-
-.breadcrumb-current {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-medium);
 }
 
 /* ==========================================================================
@@ -103,8 +60,8 @@
   align-items: center;
 }
 
-[data-theme='dark'] .admin-layout,
-[data-theme='dark'] .admin-main {
+[data-theme='dark'] .layout,
+[data-theme='dark'] .layout-main {
   background-color: var(--color-bg);
 }
 
@@ -122,25 +79,21 @@
   background-color: var(--color-surface-raised);
 }
 
-[data-theme='dark'] .breadcrumb-current {
-  color: var(--color-text-primary);
-}
-
 @media (max-width: 1024px) {
-  .admin-layout,
-  .admin-layout--sidebar-collapsed {
+  .layout,
+  .layout--sidebar-collapsed {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
   }
 
-  .admin-main {
+  .layout-main {
     min-height: auto;
     padding: var(--space-6) var(--space-4);
   }
 }
 
 @media (max-width: 768px) {
-  .admin-main {
+  .layout-main {
     padding: var(--space-6) var(--space-4);
   }
 }

@@ -1,11 +1,8 @@
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/contexts/useAuth.js';
-import { useSidebar } from '../../hooks/contexts/useSidebar.js';
-import Sidebar, { type SidebarNavItem } from '../../components/Sidebar.js';
+import { type SidebarNavItem } from '../../components/Sidebar.js';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import { IconDashboard, IconOrganisation, IconSettings } from '../../components/icons/MiscIcons.js';
-import './CustomerLayout.css';
+import BaseLayout from '../../features/shared/BaseLayout.js';
 
 const CUSTOMER_NAV_ITEMS: SidebarNavItem[] = [
   {
@@ -30,43 +27,13 @@ const CUSTOMER_NAV_ITEMS: SidebarNavItem[] = [
 ];
 
 const CustomerLayout: React.FC = () => {
-  const { user, logout } = useAuth();
-  const { isCollapsed } = useSidebar();
-  const navigate = useNavigate();
-
-  const handleLogout = async (): Promise<void> => {
-    await logout();
-    void navigate(CLIENT_ROUTES.LOGIN);
-  };
-
-  const sidebarUser = user
-    ? {
-        fullName: [user.firstName, user.middleName, user.lastName].filter(Boolean).join(' '),
-      }
-    : null;
-
   return (
-    <div
-      className={['customer-layout', isCollapsed ? 'customer-layout--sidebar-collapsed' : '']
-        .filter(Boolean)
-        .join(' ')}
-      data-testid="customer-layout"
-    >
-      <Sidebar
-        navItems={CUSTOMER_NAV_ITEMS}
-        brand={{
-          portalLabel: 'Customer Portal',
-          logoSrc: 'src/client/components/icons/giacom-logo.webp',
-        }}
-        user={sidebarUser}
-        ariaLabel="Customer navigation"
-        testId="customer-sidebar"
-        onLogout={() => void handleLogout()}
-      />
-      <main className="customer-main" data-testid="customer-main">
-        <Outlet />
-      </main>
-    </div>
+    <BaseLayout
+      sidebarNavItems={CUSTOMER_NAV_ITEMS}
+      portalLabel="Customer"
+      ariaLabel="customer"
+      testId="customer"
+    />
   );
 };
 

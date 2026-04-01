@@ -5,10 +5,15 @@ import Breadcrumb from '../../components/Breadcrumb.js';
 import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
 import TicketDetailCard from '../../features/shared/TicketDetailCard.js';
+import TicketDetailSidePanel from '../../features/shared/TicketDetailSidePanel.js';
 
-type AdminTab = 'details' | 'comments';
+type AdminTab = 'details' | 'quote' | 'revision';
 
-const ADMIN_TABS: TabNavItem<AdminTab>[] = [{ key: 'details', label: 'Details' }];
+const ADMIN_TABS: TabNavItem<AdminTab>[] = [
+  { key: 'details', label: 'Details' },
+  { key: 'quote', label: 'Quote' },
+  { key: 'revision', label: 'Revise Quote' },
+];
 
 const AdminTicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
@@ -23,7 +28,7 @@ const AdminTicketDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="admin-page" data-testid="admin-ticket-detail-page">
+    <div className="admin-page ticket-detail-page" data-testid="admin-ticket-detail-page">
       <Breadcrumb
         route={CLIENT_ROUTES.ADMIN.ROOT}
         previousPage="Home"
@@ -32,9 +37,14 @@ const AdminTicketDetailPage: React.FC = () => {
 
       <TicketTitle ticketId={ticketId} />
 
-      <TabNav tabs={ADMIN_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="ticket-detail-layout" data-testid="ticket-detail-layout">
+        <div className="ticket-detail-main" data-testid="ticket-detail-main">
+          <TabNav tabs={ADMIN_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+          {activeTab === 'details' && <TicketDetailCard ticketId={ticketId} />}
+        </div>
 
-      {activeTab === 'details' && <TicketDetailCard ticketId={ticketId} />}
+        <TicketDetailSidePanel ticketId={ticketId} tabs={['comments', 'similar']} />
+      </div>
     </div>
   );
 };

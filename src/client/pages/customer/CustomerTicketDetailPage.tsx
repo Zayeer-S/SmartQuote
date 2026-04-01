@@ -5,14 +5,15 @@ import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import Breadcrumb from '../../components/Breadcrumb.js';
 import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
+import TicketDetailSidePanel from '../../features/shared/TicketDetailSidePanel.js';
 
-type CustomerTabs = 'details' | 'comments';
+type CustomerTab = 'details' | 'quote' | 'revision';
 
-const CUSTOMER_TABS: TabNavItem<CustomerTabs>[] = [{ key: 'details', label: 'Details' }];
+const CUSTOMER_TABS: TabNavItem<CustomerTab>[] = [{ key: 'details', label: 'Details' }];
 
 const CustomerTicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
-  const [activeTab, setActiveTab] = useState<CustomerTabs>('details');
+  const [activeTab, setActiveTab] = useState<CustomerTab>('details');
 
   if (!ticketId) {
     return (
@@ -23,7 +24,8 @@ const CustomerTicketDetailPage: React.FC = () => {
   }
 
   return (
-    <div data-testid="ticket-detail-page">
+    <div className="ticket-detail-page" data-testid="ticket-detail-page">
+      {/* Breadcrumb spans full width above the two-column split */}
       <Breadcrumb
         route={CLIENT_ROUTES.CUSTOMER.ROOT}
         previousPage="Home"
@@ -32,9 +34,14 @@ const CustomerTicketDetailPage: React.FC = () => {
 
       <TicketTitle ticketId={ticketId} />
 
-      <TabNav tabs={CUSTOMER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="ticket-detail-layout" data-testid="ticket-detail-layout">
+        <div className="ticket-detail-main" data-testid="ticket-detail-main">
+          <TabNav tabs={CUSTOMER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+          {activeTab === 'details' && <TicketDetailCard ticketId={ticketId} />}
+        </div>
 
-      {activeTab === 'details' && <TicketDetailCard ticketId={ticketId} />}
+        <TicketDetailSidePanel ticketId={ticketId} tabs={['comments']} />
+      </div>
     </div>
   );
 };
