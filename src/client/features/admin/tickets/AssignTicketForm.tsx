@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useAssignTicket } from '../../../hooks/tickets/useAssignTicket.js';
 import type { UserListItem } from '../../../../shared/contracts/user-contracts.js';
 import './AssignTicketForm.css';
+import { UseGetTicketReturn } from '../../../hooks/tickets/useGetTicket.js';
 
 interface AssignTicketFormProps {
-  ticketId: string;
-  currentAssigneeId: string | null;
-  adminUsers: UserListItem[];
+  ticketData: UseGetTicketReturn['data'];
+  adminUsers: UserListItem[] | null;
   onAssigned: () => void;
 }
 
@@ -15,18 +15,31 @@ function fullName(user: UserListItem): string {
 }
 
 const AssignTicketForm: React.FC<AssignTicketFormProps> = ({
-  ticketId,
-  currentAssigneeId,
+  ticketData,
   adminUsers,
   onAssigned,
 }) => {
   const [selectedId, setSelectedId] = useState('');
   const { execute, loading, error } = useAssignTicket();
 
+  if (!ticketData) {
+    return (
+      <p
+        className="feedback-error"
+        role="alert"
+        data-testid="admin-ticket-detail-page-no-ticket-data"
+      >
+        No ticket data.
+      </p>
+    );
+  }
+
+  const currentAssigneeId = ticketData.assignedToUserId;
+
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!selectedId) return;
-    void execute(ticketId, { assigneeId: selectedId }).then(() => {
+    void execute(ticketData.id, { assigneeId: selectedId }).then(() => {
       onAssigned();
     });
   };
@@ -58,11 +71,13 @@ const AssignTicketForm: React.FC<AssignTicketFormProps> = ({
             <option value="" disabled>
               Assign...
             </option>
-            {adminUsers.map((user) => (
-              <option key={user.id} value={user.id}>
-                {fullName(user)} ({user.email})
-              </option>
-            ))}
+            {adminUsers
+              ? adminUsers.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {fullName(user)} ({user.email})
+                  </option>
+                ))
+              : 'No employee accounts found'}
           </select>
         </div>
 

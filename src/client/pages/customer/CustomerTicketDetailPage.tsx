@@ -6,7 +6,8 @@ import Breadcrumb from '../../components/Breadcrumb.js';
 import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
 import TicketDetailSidePanel from '../../features/shared/TicketDetailSidePanel.js';
-import '../../styles/TicketDetailLayout.css';
+import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
+import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 
 type CustomerTab = 'details' | 'quote' | 'revision';
 
@@ -15,6 +16,9 @@ const CUSTOMER_TABS: TabNavItem<CustomerTab>[] = [{ key: 'details', label: 'Deta
 const CustomerTicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
   const [activeTab, setActiveTab] = useState<CustomerTab>('details');
+
+  const ticket = useGetTicket();
+  const quotes = useListQuotes();
 
   if (!ticketId) {
     return (
@@ -38,7 +42,9 @@ const CustomerTicketDetailPage: React.FC = () => {
       <div className="ticket-detail-layout" data-testid="ticket-detail-layout">
         <div className="ticket-detail-main" data-testid="ticket-detail-main">
           <TabNav tabs={CUSTOMER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
-          {activeTab === 'details' && <TicketDetailCard ticketId={ticketId} />}
+          {activeTab === 'details' && (
+            <TicketDetailCard ticketId={ticketId} ticket={ticket} quotes={quotes} />
+          )}
         </div>
 
         <TicketDetailSidePanel ticketId={ticketId} tabs={['comments']} />

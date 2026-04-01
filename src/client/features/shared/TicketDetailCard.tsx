@@ -1,24 +1,17 @@
-import React, { useEffect } from 'react';
-import { useGetTicket } from '../../hooks/tickets/useGetTicket';
-import { useListQuotes } from '../../hooks/quotes/useListQuote';
+import React from 'react';
+import { UseGetTicketReturn } from '../../hooks/tickets/useGetTicket';
+import { UseListQuotesReturn } from '../../hooks/quotes/useListQuote';
 import { getCurrentLocalDateString } from '../../lib/utils/format-timestamps';
 import AttachmentList from './AttachmentList';
 import './TicketDetailCard.css';
 
 export interface TicketDetailProps {
   ticketId: string;
+  ticket: UseGetTicketReturn;
+  quotes: UseListQuotesReturn;
 }
 
-const TicketDetailCard: React.FC<TicketDetailProps> = ({ ticketId }) => {
-  const ticket = useGetTicket();
-  const quotes = useListQuotes();
-
-  useEffect(() => {
-    void ticket.execute(ticketId);
-    void quotes.execute(ticketId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticketId]);
-
+const TicketDetailCard: React.FC<TicketDetailProps> = ({ ticketId, ticket, quotes }) => {
   const isLoading = ticket.loading || quotes.loading;
   const error = ticket.error ?? quotes.error;
 

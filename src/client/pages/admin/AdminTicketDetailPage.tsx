@@ -15,7 +15,9 @@ import AdminQuoteApproval from '../../features/admin/quotes/AdminQuoteApproval.j
 import AdminQuoteRevisions from '../../features/admin/quotes/AdminQuoteRevisions.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 import type { QuoteWithApprovalResponse } from '../../../shared/contracts/quote-contracts.js';
-import '../../styles/TicketDetailLayout.css';
+import AssignTicketForm from '../../features/admin/tickets/AssignTicketForm.js';
+import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
+import { useListEmployeeUsers } from '../../hooks/useListEmployeeUsers.js';
 
 type AdminTab = 'details' | 'quote' | 'revision';
 
@@ -33,12 +35,30 @@ function resolveLatestQuote(quotes: QuoteWithApprovalResponse[]): QuoteWithAppro
 const AdminTicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
   const [activeTab, setActiveTab] = useState<AdminTab>('details');
-  const { data, loading, error, execute: fetchQuotes } = useListQuotes();
+  const ticket = useGetTicket();
+  const quotes = useListQuotes();
+  const adminUsers = useListEmployeeUsers();
 
-  const latestQuote = data ? resolveLatestQuote(data.quotes) : null;
+  const { data: adminData, execute: fetchAdmins } = adminUsers;
+  const {
+    data: ticketData,
+    loading: ticketLoading,
+    error: ticketError,
+    execute: fetchTickets,
+  } = ticket;
+  const {
+    data: quoteData,
+    loading: quoteLoading,
+    error: quoteError,
+    execute: fetchQuotes,
+  } = quotes;
+
+  const latestQuote = quoteData ? resolveLatestQuote(quoteData.quotes) : null;
 
   useEffect(() => {
     if (ticketId) void fetchQuotes(ticketId);
+    if (ticketId) void fetchTickets(ticketId);
+    void fetchAdmins();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId]);
 
@@ -54,6 +74,18 @@ const AdminTicketDetailPage: React.FC = () => {
     );
   }
 
+  if (!ticketData) {
+    return (
+      <p className="feedback-error" role="alert" data-testid="admin-ticket-detail-page-no-id">
+        No ticket data found.
+      </p>
+    );
+  }
+
+  const loadTicket = (): void => {
+    void ticket.execute(ticketId);
+  };
+
   return (
     <div className="admin-page ticket-detail-page" data-testid="admin-ticket-detail-page">
       <Breadcrumb
@@ -68,21 +100,44 @@ const AdminTicketDetailPage: React.FC = () => {
         <div className="ticket-detail-main" data-testid="ticket-detail-main">
           <TabNav tabs={ADMIN_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
 
-          {activeTab === 'details' && <TicketDetailCard ticketId={ticketId} />}
+          {activeTab === 'details' && (
+            <>
+              {ticketLoading && (
+                <p className="loading-text" data-testid="quote-loading">
+                  Loading ticket details...
+                </p>
+              )}
+              {ticketError && (
+                <p className="feedback-error" role="alert" data-testid="ticket-error">
+                  {ticketError}
+                </p>
+              )}
+              {!ticketLoading && !ticketError && (
+                <>
+                  <TicketDetailCard ticketId={ticketId} ticket={ticket} quotes={quotes} />
+                  <AssignTicketForm
+                    ticketData={ticketData}
+                    adminUsers={adminData}
+                    onAssigned={loadTicket}
+                  />
+                </>
+              )}
+            </>
+          )}
 
           {activeTab === 'quote' && (
             <>
-              {loading && (
+              {quoteLoading && (
                 <p className="loading-text" data-testid="quote-loading">
                   Loading quote...
                 </p>
               )}
-              {error && (
+              {quoteError && (
                 <p className="feedback-error" role="alert" data-testid="quote-error">
-                  {error}
+                  {quoteError}
                 </p>
               )}
-              {!loading && !error && (
+              {!quoteLoading && !quoteError && (
                 <>
                   <AdminCreateQuoteForm
                     ticketId={ticketId}
@@ -106,17 +161,17 @@ const AdminTicketDetailPage: React.FC = () => {
 
           {activeTab === 'revision' && (
             <>
-              {loading && (
+              {quoteLoading && (
                 <p className="loading-text" data-testid="quote-loading-revision">
                   Loading quote...
                 </p>
               )}
-              {error && (
+              {quoteError && (
                 <p className="feedback-error" role="alert" data-testid="quote-error-revision">
-                  {error}
+                  {quoteError}
                 </p>
               )}
-              {!loading && !error && latestQuote && (
+              {!quoteLoading && !quoteError && latestQuote && (
                 <>
                   <AdminUpdateQuoteForm
                     ticketId={ticketId}
@@ -126,9 +181,9 @@ const AdminTicketDetailPage: React.FC = () => {
                   <AdminQuoteRevisions ticketId={ticketId} latestQuote={latestQuote} />
                 </>
               )}
-              {!loading && !error && !latestQuote && (
+              {!quoteLoading && !quoteError && !latestQuote && (
                 <p className="loading-text" data-testid="no-quote-for-revision">
-                  No quote exists yet. Create one from the Quote tab first.
+                  No quote exists yet.
                 </p>
               )}
             </>

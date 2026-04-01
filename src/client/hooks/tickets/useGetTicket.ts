@@ -8,7 +8,7 @@ interface UseGetTicketState {
   error: string | null;
 }
 
-interface UseGetTicketReturn extends UseGetTicketState {
+export interface UseGetTicketReturn extends UseGetTicketState {
   execute: (ticketId: string) => Promise<void>;
 }
 

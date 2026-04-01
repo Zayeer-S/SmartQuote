@@ -1,0 +1,20 @@
+.ticket-detail-layout {
+  display: grid;
+  grid-template-columns: 70% 1fr;
+  gap: var(--space-6);
+  align-items: start;
+  margin-top: var(--space-4);
+}
+
+.ticket-detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0; /* prevent grid blowout from long content */
+}
+
+@media (max-width: 1024px) {
+  .ticket-detail-layout {
+    grid-template-columns: 1fr;
+  }
+}
