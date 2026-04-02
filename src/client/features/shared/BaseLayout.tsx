@@ -4,6 +4,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/contexts/useAuth';
 import { useSidebar } from '../../hooks/contexts/useSidebar';
 import { CLIENT_ROUTES } from '../../constants/client.routes';
+import giacomLogo from '../../components/icons/giacom-logo.webp';
 import './BaseLayout.css';
 
 export interface BaseLayoutProps {
@@ -45,7 +46,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
         navItems={sidebarNavItems}
         brand={{
           portalLabel: `${portalLabel} Portal`,
-          logoSrc: 'src/client/components/icons/giacom-logo.webp',
+          logoSrc: giacomLogo,
         }}
         user={sidebarUser}
         ariaLabel={`${ariaLabel} navigation`}
