@@ -32,6 +32,10 @@
   padding: var(--space-5) var(--space-6);
 }
 
+.card-padded-reduced {
+  padding: var(--space-3) var(--space-3);
+}
+
 /* --------------------------------------------------------------------------
    Customer ticket card
    -- TODO: tailor colors, layout, and hover behavior per design

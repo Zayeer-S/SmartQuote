@@ -45,59 +45,60 @@ const AssignTicketForm: React.FC<AssignTicketFormProps> = ({
   };
 
   return (
-    <form
-      className="assign-ticket-form"
-      onSubmit={handleSubmit}
-      aria-label="Assign ticket"
-      data-testid="assign-ticket-form"
-    >
-      <div className="assign-ticket-form-row">
-        <div className="field-group assign-ticket-field">
-          <label className="field-label" htmlFor="assignee-select">
-            Assignee
-          </label>
-          <select
-            className="field-input"
-            id="assignee-select"
-            value={selectedId}
-            onChange={(e) => {
-              setSelectedId(e.target.value);
-            }}
-            required
-            disabled={loading}
-            aria-required="true"
-            data-testid="assignee-select"
+    <>
+      <h3 id="assign-ticket-heading">Assign Ticket</h3>
+      <form
+        className="card card-padded-reduced assign-ticket-form"
+        onSubmit={handleSubmit}
+        aria-label="Assign ticket"
+        data-testid="assign-ticket-form"
+      >
+        <div className="assign-ticket-form-row">
+          <div className="field-group assign-ticket-field">
+            <select
+              className="field-input assign"
+              id="assignee-select"
+              value={selectedId}
+              onChange={(e) => {
+                setSelectedId(e.target.value);
+              }}
+              required
+              disabled={loading}
+              aria-required="true"
+              aria-labelledby="assign-ticket-heading"
+              data-testid="assignee-select"
+            >
+              <option value="" disabled>
+                Assign...
+              </option>
+              {adminUsers
+                ? adminUsers.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {fullName(user)} ({user.email})
+                    </option>
+                  ))
+                : 'No employee accounts found'}
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary  assign-ticket-submit"
+            disabled={loading || !selectedId}
+            aria-busy={loading}
+            data-testid="assign-submit-btn"
           >
-            <option value="" disabled>
-              Assign...
-            </option>
-            {adminUsers
-              ? adminUsers.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {fullName(user)} ({user.email})
-                  </option>
-                ))
-              : 'No employee accounts found'}
-          </select>
+            {loading ? 'Assigning...' : currentAssigneeId ? 'Reassign' : 'Assign...'}
+          </button>
         </div>
 
-        <button
-          type="submit"
-          className="btn btn-primary btn-sm assign-ticket-submit"
-          disabled={loading || !selectedId}
-          aria-busy={loading}
-          data-testid="assign-submit-btn"
-        >
-          {loading ? 'Assigning...' : currentAssigneeId ? 'Reassign' : 'Assign'}
-        </button>
-      </div>
-
-      {error && (
-        <p className="feedback-error" role="alert" data-testid="assign-error">
-          {error}
-        </p>
-      )}
-    </form>
+        {error && (
+          <p className="feedback-error" role="alert" data-testid="assign-error">
+            {error}
+          </p>
+        )}
+      </form>
+    </>
   );
 };
 
