@@ -61,12 +61,12 @@ const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
       data-testid="comment-thread"
     >
       <h2 className="admin-detail-section-heading" id="comments-heading">
-        Comments
+        Messages
       </h2>
 
       {list.loading && (
         <p className="loading-text" data-testid="comments-loading">
-          Loading comments...
+          Loading messages...
         </p>
       )}
 
@@ -78,7 +78,7 @@ const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
 
       {!list.loading && comments.length === 0 && (
         <p className="loading-text" data-testid="comments-empty">
-          No comments yet.
+          No messages yet.
         </p>
       )}
 
@@ -155,7 +155,7 @@ const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
 
           <div className="field-group add-comment-text-field">
             <label className="field-label" htmlFor="comment-text">
-              Comment
+              Message
             </label>
             <textarea
               className="field-textarea"
@@ -193,7 +193,7 @@ const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
           aria-busy={add.loading}
           data-testid="add-comment-btn"
         >
-          {add.loading ? 'Posting...' : 'Post Comment'}
+          {add.loading ? 'Sending...' : 'Send a message'}
         </button>
       </form>
     </section>
