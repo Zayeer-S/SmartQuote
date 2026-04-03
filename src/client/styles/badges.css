@@ -48,6 +48,12 @@
   border-color: color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
 }
 
+.badge-unassigned {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-amber) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-amber) 75%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-accent-secondary-amber) 50%, transparent);
+}
+
 .badge-in-progress {
   background-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 12%, transparent);
   color: var(--color-accent-secondary-indigo);
@@ -127,17 +133,24 @@
 
 [data-theme='dark'] .badge-open {
   background-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, transparent);
-  color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 80%, var(--color-white));
+  color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, var(--color-white));
 }
 
 [data-theme='dark'] .badge-assigned {
   background-color: color-mix(in srgb, var(--color-accent-primary-light) 20%, transparent);
-  color: var(--color-accent-primary-light);
+  color: color-mix(in (srgb), var(--color-accent-primary-light) 80%, var(--color-white));
+  border-color: color-mix(in srgb, var(--color-accent-primary) 90%, transparent);
+}
+
+[data-theme='dark'] .badge-unassigned {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-amber) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-amber) 40%, var(--color-white));
+  border-color: color-mix(in srgb, var(--color-accent-secondary-amber) 50%, transparent);
 }
 
 [data-theme='dark'] .badge-in-progress {
   background-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 20%, transparent);
-  color: color-mix(in srgb, var(--color-accent-secondary-indigo) 80%, var(--color-white));
+  color: color-mix(in srgb, var(--color-accent-secondary-indigo) 20%, var(--color-white));
 }
 
 [data-theme='dark'] .badge-closed {
@@ -148,10 +161,10 @@
 
 [data-theme='dark'] .badge-p3 {
   background-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 20%, transparent);
-  color: color-mix(in srgb, var(--color-accent-secondary-indigo) 80%, var(--color-white));
+  color: color-mix(in srgb, var(--color-accent-secondary-indigo) 20%, var(--color-white));
 }
 
 [data-theme='dark'] .badge-p4 {
   background-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, transparent);
-  color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 80%, var(--color-white));
+  color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, var(--color-white));
 }

@@ -28,7 +28,7 @@ const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
       extraBadges={
         <>
           <span
-            className={`badge ${isAssigned ? 'badge-assigned' : 'admin-ticket-card-badge-unassigned'}`}
+            className={`badge ${isAssigned ? 'badge-assigned' : 'badge-unassigned'}`}
             data-testid="ticket-assigned-badge"
           >
             {isAssigned ? 'Assigned' : 'Unassigned'}

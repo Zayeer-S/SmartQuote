@@ -125,11 +125,6 @@
   flex-wrap: wrap;
 }
 
-.admin-ticket-card-badge-unassigned {
-  background-color: var(--color-warning-bg);
-  color: var(--color-feedback-warning-text);
-}
-
 .admin-ticket-card-title {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semi-bold);
