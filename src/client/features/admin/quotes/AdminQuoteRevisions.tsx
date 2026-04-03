@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGetRevisionHistory } from '../../../hooks/quotes/useGetRevisionHistory.js';
 import type { QuoteWithApprovalResponse } from '../../../../shared/contracts/quote-contracts.js';
-import { fmt } from './AdminQuotePanel.types.js';
+import { getTimestamp } from '../../../lib/utils/formatters.js';
 
 interface AdminQuoteRevisionsProps {
   ticketId: string;
@@ -70,7 +70,7 @@ const AdminQuoteRevisions: React.FC<AdminQuoteRevisionsProps> = ({ ticketId, lat
                       {rev.fieldName}
                     </span>
                     <span className="revision-date" data-testid={`revision-date-${String(rev.id)}`}>
-                      {fmt.date(rev.createdAt)}
+                      {getTimestamp(rev.createdAt)}
                     </span>
                     <span className="revision-user" data-testid={`revision-user-${String(rev.id)}`}>
                       {rev.changedByUserId}

@@ -78,18 +78,3 @@ export function isPending(status: QuoteApprovalStatus | null): boolean {
 export function isEditable(status: QuoteApprovalStatus | null): boolean {
   return status !== QUOTE_APPROVAL_STATUSES.PENDING;
 }
-
-// ─── Formatters ───────────────────────────────────────────────────────────────
-
-export const fmt = {
-  currency: (n: number) =>
-    new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(n),
-  date: (s: string) =>
-    new Date(s).toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-};
