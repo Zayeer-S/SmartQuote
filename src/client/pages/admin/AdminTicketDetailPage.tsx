@@ -5,7 +5,7 @@ import Breadcrumb from '../../components/Breadcrumb.js';
 import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
 import TicketDetailCard from '../../features/shared/TicketDetailCard.js';
-import TicketDetailSidePanel from '../../features/shared/TicketDetailSidePanel.js';
+import TicketDetailSidePanel from '../../features/shared/side-panels/TicketDetailSidePanel.js';
 import AdminQuoteDetail from '../../features/shared/QuoteDetail.js';
 import {
   AdminCreateQuoteForm,

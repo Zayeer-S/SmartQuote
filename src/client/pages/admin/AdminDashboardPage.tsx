@@ -2,9 +2,9 @@ import React, { useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
 import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAdminTicketFilters, slaUrgencyKey } from '../../hooks/useAdminTicketFilters.js';
-import StatsOverview from '../../features/shared/StatsOverview.js';
 import AdminTicketFilters from '../../features/admin/tickets/AdminTicketFilters.js';
 import TicketPagination from '../../features/collate/TicketPagination.js';
+import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
 import './AdminDashboardPage.css';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
 import AdminTicketCard from '../../features/admin/tickets/AdminTicketCard.js';
@@ -73,47 +73,44 @@ const AdminDashboardPage: React.FC = () => {
         <div className="admin-dashboard-line" />
       </div>
 
-      {!loading && !error && (
-        <div className="admin-dashboard-stats">
-          <span className="admin-dashboard-stats-title">Overview</span>
-          <StatsOverview tickets={allTickets} />
-        </div>
-      )}
+      <div className="dashboard-layout">
+        <section aria-labelledby="admin-tickets-heading">
+          <div className="admin-dashboard-section-header">
+            <h2 className="admin-dashboard-section-title" id="admin-tickets-heading">
+              Tickets
+            </h2>
+          </div>
 
-      <section aria-labelledby="admin-tickets-heading">
-        <div className="admin-dashboard-section-header">
-          <h2 className="admin-dashboard-section-title" id="admin-tickets-heading">
-            Tickets
-          </h2>
-        </div>
+          <AdminTicketFilters
+            search={search}
+            onSearchChange={setSearch}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            typeFilter={typeFilter}
+            onTypeChange={setTypeFilter}
+            slaBreachFilter={slaBreachFilter}
+            onSlaBreachChange={setSlaBreachFilter}
+            createdAfter={createdAfter}
+            onCreatedAfterChange={setCreatedAfter}
+            createdBefore={createdBefore}
+            onCreatedBeforeChange={setCreatedBefore}
+            onClear={clearFilters}
+          />
 
-        <AdminTicketFilters
-          search={search}
-          onSearchChange={setSearch}
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-          typeFilter={typeFilter}
-          onTypeChange={setTypeFilter}
-          slaBreachFilter={slaBreachFilter}
-          onSlaBreachChange={setSlaBreachFilter}
-          createdAfter={createdAfter}
-          onCreatedAfterChange={setCreatedAfter}
-          createdBefore={createdBefore}
-          onCreatedBeforeChange={setCreatedBefore}
-          onClear={clearFilters}
-        />
+          <BaseTicketList
+            tickets={filteredTickets}
+            renderItem={(ticket) => <AdminTicketCard ticket={ticket} />}
+            loading={loading}
+            error={error}
+            emptyMessage="No tickets have been submitted yet."
+            testIdPrefix="admin-tickets"
+          />
 
-        <BaseTicketList
-          tickets={filteredTickets}
-          renderItem={(ticket) => <AdminTicketCard ticket={ticket} />}
-          loading={loading}
-          error={error}
-          emptyMessage="No tickets have been submitted yet."
-          testIdPrefix="admin-tickets"
-        />
+          <TicketPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        </section>
 
-        <TicketPagination page={page} totalPages={totalPages} onPageChange={setPage} />
-      </section>
+        {!loading && !error && <DashboardSidePanel tickets={allTickets} />}
+      </div>
     </div>
   );
 };

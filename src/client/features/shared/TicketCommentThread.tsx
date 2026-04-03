@@ -60,10 +60,6 @@ const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
       aria-labelledby="comments-heading"
       data-testid="comment-thread"
     >
-      <h2 className="admin-detail-section-heading" id="comments-heading">
-        Messages
-      </h2>
-
       {list.loading && (
         <p className="loading-text" data-testid="comments-loading">
           Loading messages...

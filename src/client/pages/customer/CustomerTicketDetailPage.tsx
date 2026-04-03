@@ -5,7 +5,7 @@ import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import Breadcrumb from '../../components/Breadcrumb.js';
 import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
-import TicketDetailSidePanel from '../../features/shared/TicketDetailSidePanel.js';
+import TicketDetailSidePanel from '../../features/shared/side-panels/TicketDetailSidePanel.js';
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import QuotePanel from '../../features/customer/quote/QuotePanel.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';

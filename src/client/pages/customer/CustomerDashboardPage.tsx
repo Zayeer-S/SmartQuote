@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
-import StatsOverview from '../../features/shared/StatsOverview.js';
-import TicketStatusChart from '../../features/admin/analytics/TicketStatusChart.js';
 import Modal from '../../components/Modal.js';
 import SubmitTicketForm from '../../features/customer/dashboard/SubmitTicketForm.js';
+import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
 import './CustomerDashboardPage.css';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
 import CustomerTicketCard from '../../features/customer/ticket/CustomerTicketCard.js';
@@ -45,43 +44,36 @@ const CustomerDashboardPage: React.FC = () => {
   return (
     <div className="dashboard-page" data-testid="dashboard-page">
       <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
-
       <div className="dashboard-line" />
 
-      {!loading && !error && (
-        <div className="card dashboard-overview" data-testid="dashboard-overview">
-          <TicketStatusChart tickets={allTickets} />
-          {allTickets.length > 0 && (
-            <div className="dashboard-overview-divider" aria-hidden="true" />
-          )}
-          <StatsOverview tickets={allTickets} />
-        </div>
-      )}
+      <div className="dashboard-layout">
+        <section aria-labelledby="tickets-heading">
+          <div className="dashboard-section-header">
+            <h2 className="dashboard-section-title" id="tickets-heading">
+              My Tickets
+            </h2>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleOpenModal}
+              data-testid="open-new-ticket-modal-btn"
+            >
+              + New Ticket
+            </button>
+          </div>
 
-      <section className="dashboard-section" aria-labelledby="tickets-heading">
-        <div className="dashboard-section-header">
-          <h2 className="dashboard-section-title" id="tickets-heading">
-            My Tickets
-          </h2>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleOpenModal}
-            data-testid="open-new-ticket-modal-btn"
-          >
-            + New Ticket
-          </button>
-        </div>
+          <BaseTicketList
+            tickets={allTickets}
+            renderItem={(ticket) => <CustomerTicketCard ticket={ticket} />}
+            loading={loading}
+            error={error}
+            emptyMessage="You have no tickets yet."
+            testIdPrefix="tickets"
+          />
+        </section>
 
-        <BaseTicketList
-          tickets={allTickets}
-          renderItem={(ticket) => <CustomerTicketCard ticket={ticket} />}
-          loading={loading}
-          error={error}
-          emptyMessage="You have no tickets yet."
-          testIdPrefix="tickets"
-        />
-      </section>
+        {!loading && !error && <DashboardSidePanel tickets={allTickets} />}
+      </div>
 
       <Modal
         isOpen={modalOpen}

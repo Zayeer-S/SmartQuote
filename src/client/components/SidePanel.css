@@ -1,4 +1,4 @@
-.ticket-detail-side-panel {
+.side-panel {
   display: flex;
   flex-direction: column;
   background-color: var(--color-surface);
@@ -58,7 +58,7 @@
 
 /* -- Dark theme -- */
 
-[data-theme='dark'] .ticket-detail-side-panel {
+[data-theme='dark'] .side-panel {
   background-color: var(--color-surface);
   border-color: var(--color-border);
 }

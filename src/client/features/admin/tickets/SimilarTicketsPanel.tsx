@@ -95,9 +95,6 @@ const SimilarTicketsPanel: React.FC<SimilarTicketsPanelProps> = ({ ticketId }) =
       data-testid="similar-tickets-panel"
     >
       <div className="similar-tickets-panel-header">
-        <h2 className="admin-detail-section-heading" id="similar-tickets-heading">
-          Similar Past Tickets
-        </h2>
         <button
           type="button"
           className="btn btn-secondary btn-sm"

@@ -17,20 +17,6 @@
   margin-bottom: var(--space-3);
 }
 
-.admin-dashboard-stats {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.admin-dashboard-stats-title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semi-bold);
-  color: var(--color-text-muted);
-  letter-spacing: var(--letter-spacing-wide);
-  text-transform: uppercase;
-}
-
 .admin-dashboard-section-header {
   display: flex;
   align-items: center;
