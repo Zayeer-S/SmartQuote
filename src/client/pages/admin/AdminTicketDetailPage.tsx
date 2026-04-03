@@ -56,8 +56,10 @@ const AdminTicketDetailPage: React.FC = () => {
   const latestQuote = quoteData ? resolveLatestQuote(quoteData.quotes) : null;
 
   useEffect(() => {
-    if (ticketId) void fetchQuotes(ticketId);
-    if (ticketId) void fetchTickets(ticketId);
+    if (ticketId) {
+      void fetchQuotes(ticketId);
+      void fetchTickets(ticketId);
+    }
     void fetchAdmins();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId]);
@@ -70,14 +72,6 @@ const AdminTicketDetailPage: React.FC = () => {
     return (
       <p className="feedback-error" role="alert" data-testid="admin-ticket-detail-page-no-id">
         No ticket ID provided.
-      </p>
-    );
-  }
-
-  if (!ticketData) {
-    return (
-      <p className="feedback-error" role="alert" data-testid="admin-ticket-detail-page-no-id">
-        No ticket data found.
       </p>
     );
   }
@@ -112,7 +106,7 @@ const AdminTicketDetailPage: React.FC = () => {
                   {ticketError}
                 </p>
               )}
-              {!ticketLoading && !ticketError && (
+              {!ticketLoading && !ticketError && ticketData && (
                 <>
                   <TicketDetailCard ticketId={ticketId} ticket={ticket} />
                   <AssignTicketForm
