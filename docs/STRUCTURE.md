@@ -6,7 +6,7 @@ smartquote/
 │   └── workflows/
 │       ├── cd.yml
 │       ├── ci-e2e.yml
-│       └── ci-unit-integaration.yml
+│       └── ci-unit-integration.yml
 │
 ├── .husky/pre-commit/                              # Lint-staged
 │
@@ -26,18 +26,24 @@ smartquote/
 │   ├── client/
 │   │   ├── main.tsx
 │   │   ├── components/                             # Pure reusable UI elements; must not know about APIs, auths, or domain concepts
+│   │   │   ├── Breadcrumb.css
+│   │   │   ├── Breadcrumb.tsx
 │   │   │   ├── Modal.css
 │   │   │   ├── Modal.tsx
 │   │   │   ├── ProtectedRoute.tsx
 │   │   │   ├── Sidebar.css
 │   │   │   ├── Sidebar.tsx
+│   │   │   ├── SidePanel.css
+│   │   │   ├── SidePanel.tsx
+│   │   │   ├── TabNav.css
+│   │   │   ├── TabNav.tsx
 │   │   │   └── icons/
 │   │   │       ├── giacom-logo-webp.ts
 │   │   │       ├── MiscIcons.ts
 │   │   │       └── LoginIcons.tsx
 │   │   ├── config/env.frontend.ts                  # Environment and config values only; no runtime logic
 │   │   ├── constants/client.routes.ts
-│   │   ├── contexts/
+│   │   ├── contexts/                               # Define types, hooks of context seperately for fast refresh
 │   │   │   ├── auth.context.types.ts
 │   │   │   ├── AuthContext.ts
 │   │   │   ├── sidebar.context.types.ts
@@ -53,15 +59,16 @@ smartquote/
 │   │   │   │   │   ├── TicketStatusChart.tsx
 │   │   │   │   │   └── TicketVolumeChart.tsx
 │   │   │   │   ├── quotes/
-│   │   │   │   │   ├── AdminQuotePanel.css
-│   │   │   │   │   └── AdminQuotePanel.tsx
+│   │   │   │   │   ├── AdminQuoteApproval.tsx
+│   │   │   │   │   ├── AdminQuoteEditor.tsx
+│   │   │   │   │   ├── AdminQuotePanel.tsx
+│   │   │   │   │   ├── AdminQuotePanel.types.ts
+│   │   │   │   │   └── AdminQuoteRevisions.tsx
 │   │   │   │   └── tickets/
 │   │   │   │       ├── AdminTicketCard.css
 │   │   │   │       ├── AdminTicketCard.tsx
-│   │   │   │       ├── AdminTicketDetail.css
-│   │   │   │       ├── AdminTicketDetail.tsx
-│   │   │   │       ├── AdminTicketList.css
-│   │   │   │       ├── AdminTicketList.tsx
+│   │   │   │       ├── AdminTicketFilters.css
+│   │   │   │       ├── AdminTicketFilters.tsx
 │   │   │   │       ├── AssignTicketForm.css
 │   │   │   │       ├── AssignTicketForm.tsx
 │   │   │   │       ├── SimilarTicketsPanel.css
@@ -72,33 +79,37 @@ smartquote/
 │   │   │   │   ├── TicketPagination.css
 │   │   │   │   └── TicketPagination.tsx
 │   │   │   ├── customer/
+│   │   │   │   ├── CustomerTicketCard.tsx
 │   │   │   │   ├── dashboard/
 │   │   │   │   │   ├── SubmitTicketForm.css
 │   │   │   │   │   └── SubmitTicketForm.tsx
-│   │   │   │   ├── quote/
-│   │   │   │   │   ├── QuoteActions.css
-│   │   │   │   │   ├── QuoteActions.tsx
-│   │   │   │   │   ├── QuotePanel.css
-│   │   │   │   │   └── QuotePanel.tsx
-│   │   │   │   └── tickets/
-│   │   │   │       ├── CustomerTicketCard.tsx
-│   │   │   │       ├── CustomerTicketDetail.css
-│   │   │   │       ├── CustomerTicketDetail.tsx
-│   │   │   │       ├── TicketCommentThread.css
-│   │   │   │       ├── TicketCommentThread.tsx
-│   │   │   │       ├── TicketList.css
-│   │   │   │       └── TicketList.tsx
+│   │   │   │   └── quote/
+│   │   │   │       ├── QuoteActions.css
+│   │   │   │       ├── QuoteActions.tsx
+│   │   │   │       └── CustomerQuotePanel.tsx
 │   │   │   └── shared/
 │   │   │       ├── AttachmentList.css
 │   │   │       ├── AttachmentList.tsx
+│   │   │       ├── BaseLayout.css
+│   │   │       ├── BaseLayout.tsx
 │   │   │       ├── BaseTicketCard.css
 │   │   │       ├── BaseTicketCard.tsx
 │   │   │       ├── BaseTicketList.css
 │   │   │       ├── BaseTicketList.tsx
+│   │   │       ├── QuoteDetail.tsx
 │   │   │       ├── StatsOverview.css
 │   │   │       ├── StatsOverview.tsx
-│   │   │       ├── TicketCommentTimeline.css
-│   │   │       └── TicketCommentTimeline.tsx
+│   │   │       ├── TicketCommentThread.css
+│   │   │       ├── TicketCommentThread.tsx
+│   │   │       ├── TicketDetailCard.css
+│   │   │       ├── TicketDetailCard.tsx
+│   │   │       ├── TicketDetailSidePanel.css
+│   │   │       ├── TicketDetailSidePanel.tsx
+│   │   │       ├── TicketTitle.css
+│   │   │       ├── TicketTitle.tsx
+│   │   │       └── side-panels/                    # Wrappers around SidePanel component
+│   │   │           ├── DashboardSidePanel.tsx
+│   │   │           └── TicketDetailSidePanel.tsx
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules. All context hooks
 │   │   │   ├── useLogin.ts
 │   │   │   ├── useTicketFilters.ts
@@ -173,11 +184,15 @@ smartquote/
 │   │   │   └── utils/                              # Generic helpers only; if it knows about e.g. tickets, it doesn't belong here
 │   │   │       ├── badge-utils.ts                  # Make lookup maps for XTicketCard and XTicketDetail files
 │   │   │       ├── export-csv.ts
-│   │   │       └── export-pdf.ts
+│   │   │       ├── export-pdf.ts
+│   │   │       ├── formatters.ts                   # Use this for timestamp and currency formatting (can easily swap out locales through this)
+│   │   │       └── resolve-assignee-names.ts
 │   │   ├── pages/                                  # Route level composition (no logic, only assemble features)
 │   │   │   ├── admin/
-│   │   │   │   ├── AdminLayout.css
+│   │   │   │   ├── AdminDashboardPage.css
+│   │   │   │   ├── AdminDashboardPage.tsx
 │   │   │   │   ├── AdminLayout.tsx
+│   │   │   │   ├── AdminTicketDetailPage.tsx
 │   │   │   │   ├── analytics/
 │   │   │   │   │   ├── AdminAnalyticsPage.css
 │   │   │   │   │   └── AdminAnalyticsPage.tsx
@@ -195,21 +210,16 @@ smartquote/
 │   │   │   │   ├── system-config/
 │   │   │   │   │   ├── AdminSystemConfigPage.css
 │   │   │   │   │   └── AdminSystemConfigPage.tsx
-│   │   │   │   ├── tickets/
-│   │   │   │   │   ├── AdminTicketDetailPage.css
-│   │   │   │   │   └── AdminTicketDetailPage.tsx
 │   │   │   │   └── user-management/
 │   │   │   │       ├── AdminUserManagementPage.css
 │   │   │   │       └── AdminUserManagementPage.tsx
 │   │   │   ├── customer/
-│   │   │   │   ├── CustomerLayout.css
+│   │   │   │   ├── CustomerDashboardPage.css
+│   │   │   │   ├── CustomerDashboardPage.tsx
 │   │   │   │   ├── CustomerLayout.tsx
-│   │   │   │   ├── CustomerSettingsPage.css
-│   │   │   │   ├── CustomerSettingsPage.tsx
-│   │   │   │   ├── DashboardPage.css
-│   │   │   │   ├── DashboardPage.tsx
-│   │   │   │   ├── TicketDetailPage.tsx
-│   │   │   │   └── TicketsPage.tsx
+│   │   │   │   ├── CustomerOrgPage.css
+│   │   │   │   ├── CustomerOrgPage.tsx
+│   │   │   │   └── CustomerTicketDetailPage.tsx
 │   │   │   ├── misc/
 │   │   │   │   ├── CantAccessPage.css
 │   │   │   │   ├── CantAccessPage.tsx
@@ -223,10 +233,12 @@ smartquote/
 │   │   │       ├── SettingsPage.css
 │   │   │       └── SettingsPage.tsx
 │   │   └── styles/
+│   │       ├── badges.css
 │   │       ├── buttons.css
 │   │       ├── cards.css
 │   │       ├── forms.css
-│   │       └── globals.css
+│   │       ├── globals.css
+│   │       └── QuotePanel.css
 │   │
 │   ├── server/
 │   │   ├── bootstrap/                              # Application startup and dependency wiring, no where else creates services.
