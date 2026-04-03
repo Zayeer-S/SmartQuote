@@ -1,6 +1,6 @@
 import React from 'react';
 import { UseGetTicketReturn } from '../../hooks/tickets/useGetTicket';
-import { getCurrentLocalDateString } from '../../lib/utils/format-timestamps';
+import { getDate } from '../../lib/utils/formatters';
 import AttachmentList from './AttachmentList';
 import './TicketDetailCard.css';
 
@@ -39,8 +39,8 @@ const TicketDetailCard: React.FC<TicketDetailProps> = ({ ticketId, ticket }) => 
 
   const t = ticket.data;
 
-  const formattedDeadline = getCurrentLocalDateString(t.deadline);
-  const formattedCreated = getCurrentLocalDateString(t.createdAt);
+  const formattedDeadline = getDate(t.deadline);
+  const formattedCreated = getDate(t.createdAt);
 
   return (
     <div className="ticket-detail" data-testid="ticket-detail">

@@ -6,18 +6,17 @@ import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
 import TicketDetailCard from '../../features/shared/TicketDetailCard.js';
 import TicketDetailSidePanel from '../../features/shared/side-panels/TicketDetailSidePanel.js';
-import AdminQuoteDetail from '../../features/shared/QuoteDetail.js';
 import {
   AdminCreateQuoteForm,
   AdminUpdateQuoteForm,
 } from '../../features/admin/quotes/AdminQuoteEditor.js';
-import AdminQuoteApproval from '../../features/admin/quotes/AdminQuoteApproval.js';
 import AdminQuoteRevisions from '../../features/admin/quotes/AdminQuoteRevisions.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 import type { QuoteWithApprovalResponse } from '../../../shared/contracts/quote-contracts.js';
 import AssignTicketForm from '../../features/admin/tickets/AssignTicketForm.js';
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import { useListEmployeeUsers } from '../../hooks/useListEmployeeUsers.js';
+import AdminQuotePanel from '../../features/admin/quotes/AdminQuotePanel.js';
 
 type AdminTab = 'details' | 'quote' | 'revision';
 
@@ -140,11 +139,10 @@ const AdminTicketDetailPage: React.FC = () => {
                   />
                   {latestQuote && (
                     <>
-                      <AdminQuoteDetail quote={latestQuote} />
-                      <AdminQuoteApproval
+                      <AdminQuotePanel
                         ticketId={ticketId}
-                        latestQuote={latestQuote}
-                        onQuoteMutated={handleQuoteMutated}
+                        quote={latestQuote}
+                        handleQuoteMutated={handleQuoteMutated}
                       />
                     </>
                   )}

@@ -7,7 +7,7 @@ import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
 import TicketDetailSidePanel from '../../features/shared/side-panels/TicketDetailSidePanel.js';
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
-import QuotePanel from '../../features/customer/quote/QuotePanel.js';
+import CustomerQuotePanel from '../../features/customer/quote/CustomerQuotePanel.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 
 type CustomerTab = 'details' | 'quote' | 'revision';
@@ -63,7 +63,7 @@ const CustomerTicketDetailPage: React.FC = () => {
           {activeTab === 'details' && <TicketDetailCard ticketId={ticketId} ticket={ticket} />}
           {activeTab === 'quote' &&
             (latestQuote ? (
-              <QuotePanel ticketId={ticketId} quote={latestQuote} />
+              <CustomerQuotePanel ticketId={ticketId} quote={latestQuote} />
             ) : (
               <p className="empty-state-message" data-testid="no-quote">
                 No quote has been generated yet.

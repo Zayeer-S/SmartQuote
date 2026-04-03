@@ -1,6 +1,7 @@
 import React from 'react';
 import type { QuoteWithApprovalResponse } from '../../../../shared/contracts/quote-contracts.js';
-import { APPROVAL_STATUS_BADGE, fmt } from './AdminQuotePanel.types.js';
+import { APPROVAL_STATUS_BADGE } from './AdminQuotePanel.types.js';
+import { getCurrency, getTimestamp } from '../../../lib/utils/formatters.js';
 
 interface AdminQuoteDetailProps {
   quote: QuoteWithApprovalResponse;
@@ -27,17 +28,17 @@ const AdminQuoteDetail: React.FC<AdminQuoteDetailProps> = ({ quote }) => {
         <dl className="admin-detail-dl">
           <div className="admin-detail-dl-row">
             <dt>Estimated Cost</dt>
-            <dd data-testid="quote-estimated-cost">{fmt.currency(quote.estimatedCost)}</dd>
+            <dd data-testid="quote-estimated-cost">{getCurrency(quote.estimatedCost)}</dd>
           </div>
           <div className="admin-detail-dl-row">
             <dt>Fixed Cost</dt>
-            <dd data-testid="quote-fixed-cost">{fmt.currency(quote.fixedCost)}</dd>
+            <dd data-testid="quote-fixed-cost">{getCurrency(quote.fixedCost)}</dd>
           </div>
           <div className="admin-detail-dl-row">
             <dt>Final Cost</dt>
             <dd data-testid="quote-final-cost">
               {quote.finalCost != null ? (
-                fmt.currency(quote.finalCost)
+                getCurrency(quote.finalCost)
               ) : (
                 <em className="admin-detail-unassigned">Not set</em>
               )}
@@ -56,7 +57,7 @@ const AdminQuoteDetail: React.FC<AdminQuoteDetailProps> = ({ quote }) => {
           </div>
           <div className="admin-detail-dl-row">
             <dt>Hourly Rate</dt>
-            <dd data-testid="quote-hourly-rate">{fmt.currency(quote.hourlyRate)}/hr</dd>
+            <dd data-testid="quote-hourly-rate">{getCurrency(quote.hourlyRate)}/hr</dd>
           </div>
 
           <div className="admin-detail-dl-row">
@@ -76,11 +77,11 @@ const AdminQuoteDetail: React.FC<AdminQuoteDetailProps> = ({ quote }) => {
 
           <div className="admin-detail-dl-row">
             <dt>Created</dt>
-            <dd data-testid="quote-created-at">{fmt.date(quote.createdAt)}</dd>
+            <dd data-testid="quote-created-at">{getTimestamp(quote.createdAt)}</dd>
           </div>
           <div className="admin-detail-dl-row">
             <dt>Last Updated</dt>
-            <dd data-testid="quote-updated-at">{fmt.date(quote.updatedAt)}</dd>
+            <dd data-testid="quote-updated-at">{getTimestamp(quote.updatedAt)}</dd>
           </div>
         </dl>
       </div>
