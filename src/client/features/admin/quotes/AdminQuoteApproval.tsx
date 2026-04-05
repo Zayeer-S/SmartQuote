@@ -5,6 +5,7 @@ import { useRejectQuote } from '../../../hooks/quotes/useRejectQuote.js';
 import { useQuotePermissions } from '../../../hooks/auth/useQuotePermissions.js';
 import type { QuoteWithApprovalResponse } from '../../../../shared/contracts/quote-contracts.js';
 import { isSubmittable, isPending } from './AdminQuotePanel.types.js';
+import './AdminQuoteApproval.css';
 
 interface AdminQuoteApprovalProps {
   ticketId: string;
@@ -53,11 +54,11 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
 
   return (
     <section aria-label="Quote approval" data-testid="admin-quote-approval-section">
-      <div className="admin-quote-actions" data-testid="admin-quote-approval-actions">
+      <div className="admin-quote-approval" data-testid="admin-quote-approval-actions">
         {showSubmit && (
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-primary"
             onClick={handleSubmitForApproval}
             disabled={submitForApproval.loading}
             aria-busy={submitForApproval.loading}
@@ -70,7 +71,7 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
         {showApprove && (
           <button
             type="button"
-            className="btn btn-primary btn-sm"
+            className="btn btn-primary"
             onClick={handleApprove}
             disabled={approveQuote.loading}
             aria-busy={approveQuote.loading}
@@ -83,7 +84,7 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
         {showReject && (
           <button
             type="button"
-            className={`btn btn-sm ${showRejectForm ? 'btn-ghost' : 'btn-danger'}`}
+            className={`btn ${showRejectForm ? 'btn-ghost' : 'btn-danger'}`}
             onClick={() => {
               setShowRejectForm((prev) => !prev);
             }}
@@ -112,13 +113,11 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
 
       {showRejectForm && (
         <form
-          className="admin-quote-subpanel"
+          className="admin-quote-reject"
           onSubmit={handleRejectSubmit}
           aria-label="Reject quote"
           data-testid="reject-quote-form"
         >
-          <h3 className="admin-quote-subpanel-heading">Reject Quote</h3>
-
           <div className="field-group">
             <label className="field-label" htmlFor="rq-notes">
               Rejection Reason
@@ -130,7 +129,7 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
               onChange={(e) => {
                 setRejectionNotes(e.target.value);
               }}
-              placeholder="Required -- explain why this quote is being rejected"
+              placeholder="Explain why this quote is being rejected..."
               required
               disabled={rejectQuote.loading}
               rows={3}
@@ -141,7 +140,7 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
 
           <button
             type="submit"
-            className="btn btn-danger btn-sm"
+            className="btn btn-danger"
             disabled={rejectQuote.loading || !rejectionNotes.trim()}
             aria-busy={rejectQuote.loading}
             data-testid="reject-quote-submit-btn"

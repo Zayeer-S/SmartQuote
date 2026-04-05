@@ -1,8 +1,8 @@
 import React from 'react';
 import type { QuoteWithApprovalResponse } from '../../../../shared/contracts/quote-contracts.js';
 import { getCurrency, getTimestamp } from '../../../lib/utils/formatters.js';
-import '../../../styles/QuotePanel.css';
 import AdminQuoteApproval from './AdminQuoteApproval.js';
+import '../../../styles/QuotePanel.css';
 
 interface QuotePanelProps {
   ticketId: string;

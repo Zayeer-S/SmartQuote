@@ -11,6 +11,7 @@ import {
   isEditable,
 } from './AdminQuotePanel.types.js';
 import type { UpdateQuoteFormState } from './AdminQuotePanel.types.js';
+import './AdminQuoteEditor.css';
 
 // ─── Create ───────────────────────────────────────────────────────────────────
 
@@ -66,10 +67,10 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
 
   return (
     <section aria-label="Create quote" data-testid="admin-create-quote-section">
-      <div className="admin-quote-actions" data-testid="admin-create-quote-actions">
+      <div className="admin-quote-editor-actions" data-testid="admin-create-quote-actions">
         <button
           type="button"
-          className="btn btn-primary btn-sm"
+          className="btn btn-primary"
           onClick={handleGenerate}
           disabled={generate.loading}
           aria-busy={generate.loading}
@@ -80,7 +81,7 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
 
         <button
           type="button"
-          className={`btn btn-sm ${showForm ? 'btn-ghost' : 'btn-secondary'}`}
+          className={`btn ${showForm ? 'btn-ghost' : 'btn-secondary'}`}
           onClick={() => {
             setShowForm((prev) => !prev);
           }}
@@ -103,12 +104,12 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
 
       {showForm && (
         <form
-          className="admin-quote-subpanel"
+          className="admin-quote-create-panel"
           onSubmit={handleManualSubmit}
           aria-label="Create manual quote"
           data-testid="manual-quote-form"
         >
-          <h3 className="admin-quote-subpanel-heading">Create Manual Quote</h3>
+          <h3>Create Manual Quote</h3>
 
           <div className="admin-quote-form-grid">
             <div className="field-group">
@@ -230,7 +231,7 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
 
           <button
             type="submit"
-            className="btn btn-primary btn-sm"
+            className="btn btn-primary"
             disabled={createManual.loading}
             aria-busy={createManual.loading}
             data-testid="manual-quote-submit-btn"
@@ -259,7 +260,6 @@ export const AdminUpdateQuoteForm: React.FC<AdminUpdateQuoteFormProps> = ({
   const { canUpdate } = useQuotePermissions();
   const updateQuote = useUpdateQuote();
 
-  const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<UpdateQuoteFormState>({});
   const [reason, setReason] = useState('');
 
@@ -351,154 +351,138 @@ export const AdminUpdateQuoteForm: React.FC<AdminUpdateQuoteFormProps> = ({
       .then(() => {
         setForm({});
         setReason('');
-        setShowForm(false);
         onSuccess();
       });
   };
 
   return (
     <section aria-label="Update quote" data-testid="admin-update-quote-section">
-      <div className="admin-quote-actions" data-testid="admin-update-quote-actions">
-        <button
-          type="button"
-          className={`btn btn-sm ${showForm ? 'btn-ghost' : 'btn-secondary'}`}
-          onClick={() => {
-            setShowForm((prev) => !prev);
-          }}
-          data-testid="toggle-update-quote-btn"
-        >
-          {showForm ? 'Cancel' : 'Update Quote'}
-        </button>
-      </div>
-
       {updateQuote.error && (
         <p className="feedback-error" role="alert" data-testid="update-quote-error">
           {updateQuote.error}
         </p>
       )}
 
-      {showForm && (
-        <form
-          className="admin-quote-subpanel"
-          onSubmit={handleSubmit}
-          aria-label="Update quote"
-          data-testid="update-quote-form"
-        >
-          <h3 className="admin-quote-subpanel-heading">
-            Update Quote <span className="admin-quote-version">v{latestQuote.version}</span>
-          </h3>
-          <p className="admin-quote-subpanel-hint">
-            Only fill in the fields you want to change. Fields matching the current value will not
-            be submitted.
-          </p>
+      <form
+        className="admin-quote-edit-panel"
+        onSubmit={handleSubmit}
+        aria-label="Update quote"
+        data-testid="update-quote-form"
+      >
+        <h3 className="admin-quote-edit-subpanel-heading">
+          Update Quote <span className="admin-quote-version">v{latestQuote.version}</span>
+        </h3>
+        <p className="admin-quote-edit-subpanel-hint">
+          Only fill in the fields you want to change. Fields matching the current value will not be
+          submitted.
+        </p>
 
-          <div className="admin-quote-form-grid">
-            <div className="field-group">
-              <label className="field-label" htmlFor="uq-hours-min">
-                Min Hours
-              </label>
-              <input
-                className="field-input"
-                id="uq-hours-min"
-                name="estimatedHoursMinimum"
-                type="number"
-                min={0}
-                placeholder={String(latestQuote.estimatedHoursMinimum)}
-                value={form.estimatedHoursMinimum ?? ''}
-                onChange={handleFieldChange}
-                disabled={updateQuote.loading}
-                data-testid="uq-hours-min"
-              />
-            </div>
-
-            <div className="field-group">
-              <label className="field-label" htmlFor="uq-hours-max">
-                Max Hours
-              </label>
-              <input
-                className="field-input"
-                id="uq-hours-max"
-                name="estimatedHoursMaximum"
-                type="number"
-                min={0}
-                placeholder={String(latestQuote.estimatedHoursMaximum)}
-                value={form.estimatedHoursMaximum ?? ''}
-                onChange={handleFieldChange}
-                disabled={updateQuote.loading}
-                data-testid="uq-hours-max"
-              />
-            </div>
-
-            <div className="field-group">
-              <label className="field-label" htmlFor="uq-rate">
-                Hourly Rate (GBP)
-              </label>
-              <input
-                className="field-input"
-                id="uq-rate"
-                name="hourlyRate"
-                type="number"
-                min={0}
-                step="0.01"
-                placeholder={String(latestQuote.hourlyRate)}
-                value={form.hourlyRate ?? ''}
-                onChange={handleFieldChange}
-                disabled={updateQuote.loading}
-                data-testid="uq-rate"
-              />
-            </div>
-
-            <div className="field-group">
-              <label className="field-label" htmlFor="uq-fixed-cost">
-                Fixed Cost (GBP)
-              </label>
-              <input
-                className="field-input"
-                id="uq-fixed-cost"
-                name="fixedCost"
-                type="number"
-                min={0}
-                step="0.01"
-                placeholder={String(latestQuote.fixedCost)}
-                value={form.fixedCost ?? ''}
-                onChange={handleFieldChange}
-                disabled={updateQuote.loading}
-                data-testid="uq-fixed-cost"
-              />
-            </div>
-          </div>
-
+        <div className="admin-quote-form-grid">
           <div className="field-group">
-            <label className="field-label" htmlFor="uq-reason">
-              Reason for Change
+            <label className="field-label" htmlFor="uq-hours-min">
+              Min Hours
             </label>
-            <textarea
-              className="field-textarea"
-              id="uq-reason"
-              value={reason}
-              onChange={(e) => {
-                setReason(e.target.value);
-              }}
-              placeholder="Required -- describe what changed and why"
-              required
+            <input
+              className="field-input"
+              id="uq-hours-min"
+              name="estimatedHoursMinimum"
+              type="number"
+              min={0}
+              placeholder={String(latestQuote.estimatedHoursMinimum)}
+              value={form.estimatedHoursMinimum ?? ''}
+              onChange={handleFieldChange}
               disabled={updateQuote.loading}
-              rows={3}
-              aria-required="true"
-              data-testid="uq-reason"
+              data-testid="uq-hours-min"
             />
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary btn-sm"
-            disabled={updateQuote.loading || !reason.trim() || !hasValidChanges()}
-            aria-busy={updateQuote.loading}
-            data-testid="update-quote-submit-btn"
-          >
-            {updateQuote.loading ? 'Saving...' : 'Save Changes'}
-          </button>
-        </form>
-      )}
+          <div className="field-group">
+            <label className="field-label" htmlFor="uq-hours-max">
+              Max Hours
+            </label>
+            <input
+              className="field-input"
+              id="uq-hours-max"
+              name="estimatedHoursMaximum"
+              type="number"
+              min={0}
+              placeholder={String(latestQuote.estimatedHoursMaximum)}
+              value={form.estimatedHoursMaximum ?? ''}
+              onChange={handleFieldChange}
+              disabled={updateQuote.loading}
+              data-testid="uq-hours-max"
+            />
+          </div>
+
+          <div className="field-group">
+            <label className="field-label" htmlFor="uq-rate">
+              Hourly Rate (GBP)
+            </label>
+            <input
+              className="field-input"
+              id="uq-rate"
+              name="hourlyRate"
+              type="number"
+              min={0}
+              step="0.01"
+              placeholder={String(latestQuote.hourlyRate)}
+              value={form.hourlyRate ?? ''}
+              onChange={handleFieldChange}
+              disabled={updateQuote.loading}
+              data-testid="uq-rate"
+            />
+          </div>
+
+          <div className="field-group">
+            <label className="field-label" htmlFor="uq-fixed-cost">
+              Fixed Cost (GBP)
+            </label>
+            <input
+              className="field-input"
+              id="uq-fixed-cost"
+              name="fixedCost"
+              type="number"
+              min={0}
+              step="0.01"
+              placeholder={String(latestQuote.fixedCost)}
+              value={form.fixedCost ?? ''}
+              onChange={handleFieldChange}
+              disabled={updateQuote.loading}
+              data-testid="uq-fixed-cost"
+            />
+          </div>
+        </div>
+
+        <div className="field-group">
+          <label className="field-label" htmlFor="uq-reason">
+            Reason for Change
+          </label>
+          <textarea
+            className="field-textarea"
+            id="uq-reason"
+            value={reason}
+            onChange={(e) => {
+              setReason(e.target.value);
+            }}
+            placeholder="Described what changed and why..."
+            required
+            disabled={updateQuote.loading}
+            rows={3}
+            aria-required="true"
+            data-testid="uq-reason"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={updateQuote.loading || !reason.trim() || !hasValidChanges()}
+          aria-busy={updateQuote.loading}
+          data-testid="update-quote-submit-btn"
+        >
+          {updateQuote.loading ? 'Saving...' : 'Save Changes'}
+        </button>
+      </form>
     </section>
   );
 };
