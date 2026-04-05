@@ -56,19 +56,20 @@ export const CONFIDENCE_OPTIONS: { value: QuoteConfidenceLevel; label: string }[
   { value: QUOTE_CONFIDENCE_LEVELS.HIGH, label: QUOTE_CONFIDENCE_LEVELS.HIGH },
 ];
 
-// ─── Badge map ────────────────────────────────────────────────────────────────
-
 export const APPROVAL_STATUS_BADGE: Record<QuoteApprovalStatus, string> = {
   [QUOTE_APPROVAL_STATUSES.PENDING]: 'badge badge-in-progress',
   [QUOTE_APPROVAL_STATUSES.APPROVED]: 'badge badge-resolved',
-  [QUOTE_APPROVAL_STATUSES.REJECTED]: 'badge badge-cancelled',
+  [QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER]: 'badge badge-cancelled',
+  [QUOTE_APPROVAL_STATUSES.REJECTED_BY_CUSTOMER]: 'badge badge-cancelled',
   [QUOTE_APPROVAL_STATUSES.REVISED]: 'badge badge-neutral',
 };
 
-// ─── Derived status helpers ───────────────────────────────────────────────────
-
 export function isSubmittable(status: QuoteApprovalStatus | null): boolean {
-  return status === null || status === QUOTE_APPROVAL_STATUSES.REJECTED;
+  return (
+    status === null ||
+    status === QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER ||
+    status === QUOTE_APPROVAL_STATUSES.REJECTED_BY_CUSTOMER
+  );
 }
 
 export function isPending(status: QuoteApprovalStatus | null): boolean {

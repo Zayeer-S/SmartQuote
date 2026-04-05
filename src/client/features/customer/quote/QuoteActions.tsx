@@ -13,7 +13,7 @@ interface QuoteActionsProps {
 
 const SETTLED_STATUSES: QuoteApprovalStatus[] = [
   QUOTE_APPROVAL_STATUSES.APPROVED,
-  QUOTE_APPROVAL_STATUSES.REJECTED,
+  QUOTE_APPROVAL_STATUSES.REJECTED_BY_CUSTOMER,
 ];
 
 const QuoteActions: React.FC<QuoteActionsProps> = ({ ticketId, quoteId, approvalStatus }) => {
