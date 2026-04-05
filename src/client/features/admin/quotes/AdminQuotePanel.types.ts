@@ -76,6 +76,18 @@ export function isPending(status: QuoteApprovalStatus | null): boolean {
   return status === QUOTE_APPROVAL_STATUSES.PENDING;
 }
 
+export function isCreatable(status: QuoteApprovalStatus | null): boolean {
+  return (
+    status === null ||
+    status === QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER ||
+    status === QUOTE_APPROVAL_STATUSES.REJECTED_BY_CUSTOMER
+  );
+}
+
 export function isEditable(status: QuoteApprovalStatus | null): boolean {
-  return status !== QUOTE_APPROVAL_STATUSES.PENDING;
+  return (
+    status !== null &&
+    status !== QUOTE_APPROVAL_STATUSES.PENDING &&
+    status !== QUOTE_APPROVAL_STATUSES.APPROVED
+  );
 }

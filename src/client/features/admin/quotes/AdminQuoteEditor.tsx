@@ -9,6 +9,7 @@ import {
   CONFIDENCE_OPTIONS,
   INITIAL_CREATE_FORM,
   isEditable,
+  isCreatable,
 } from './AdminQuotePanel.types.js';
 import type { UpdateQuoteFormState } from './AdminQuotePanel.types.js';
 import './AdminQuoteEditor.css';
@@ -33,9 +34,8 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
   const [form, setForm] = useState(INITIAL_CREATE_FORM);
 
   const status = latestQuote?.approvalStatus ?? null;
-  const quoteIsEditable = !latestQuote || isEditable(status);
-
-  if (!canCreate || !quoteIsEditable) return null;
+  const quoteIsCreatable = isCreatable(status);
+  if (!canCreate || !quoteIsCreatable) return null;
 
   const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
