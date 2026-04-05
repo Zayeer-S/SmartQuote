@@ -262,8 +262,6 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
   );
 };
 
-// ─── Update ───────────────────────────────────────────────────────────────────
-
 interface AdminUpdateQuoteFormProps {
   ticketId: string;
   latestQuote: QuoteWithApprovalResponse;
@@ -285,8 +283,15 @@ export const AdminUpdateQuoteForm: React.FC<AdminUpdateQuoteFormProps> = ({
 
   if (!canUpdate || !quoteIsEditable) return null;
 
-  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+  const handleIntegerFieldChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
+    if (checkIntegerInput(value)) return;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDecimalFieldChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
+    if (checkDecimalInput(value)) return;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -404,11 +409,13 @@ export const AdminUpdateQuoteForm: React.FC<AdminUpdateQuoteFormProps> = ({
               className="field-input"
               id="uq-hours-min"
               name="estimatedHoursMinimum"
-              type="number"
+              type="text"
+              inputMode="numeric"
               min={0}
+              maxLength={4}
               placeholder={String(latestQuote.estimatedHoursMinimum)}
               value={form.estimatedHoursMinimum ?? ''}
-              onChange={handleFieldChange}
+              onChange={handleIntegerFieldChange}
               disabled={updateQuote.loading}
               data-testid="uq-hours-min"
             />
@@ -422,11 +429,13 @@ export const AdminUpdateQuoteForm: React.FC<AdminUpdateQuoteFormProps> = ({
               className="field-input"
               id="uq-hours-max"
               name="estimatedHoursMaximum"
-              type="number"
+              type="text"
+              inputMode="numeric"
               min={0}
+              maxLength={4}
               placeholder={String(latestQuote.estimatedHoursMaximum)}
               value={form.estimatedHoursMaximum ?? ''}
-              onChange={handleFieldChange}
+              onChange={handleIntegerFieldChange}
               disabled={updateQuote.loading}
               data-testid="uq-hours-max"
             />
@@ -440,12 +449,14 @@ export const AdminUpdateQuoteForm: React.FC<AdminUpdateQuoteFormProps> = ({
               className="field-input"
               id="uq-rate"
               name="hourlyRate"
-              type="number"
+              type="text"
+              inputMode="numeric"
               min={0}
+              maxLength={4}
               step="0.01"
               placeholder={String(latestQuote.hourlyRate)}
               value={form.hourlyRate ?? ''}
-              onChange={handleFieldChange}
+              onChange={handleDecimalFieldChange}
               disabled={updateQuote.loading}
               data-testid="uq-rate"
             />
@@ -459,12 +470,14 @@ export const AdminUpdateQuoteForm: React.FC<AdminUpdateQuoteFormProps> = ({
               className="field-input"
               id="uq-fixed-cost"
               name="fixedCost"
-              type="number"
+              type="text"
+              inputMode="numeric"
               min={0}
+              maxLength={5}
               step="0.01"
               placeholder={String(latestQuote.fixedCost)}
               value={form.fixedCost ?? ''}
-              onChange={handleFieldChange}
+              onChange={handleDecimalFieldChange}
               disabled={updateQuote.loading}
               data-testid="uq-fixed-cost"
             />
