@@ -59,10 +59,13 @@ smartquote/
 │   │   │   │   │   ├── TicketStatusChart.tsx
 │   │   │   │   │   └── TicketVolumeChart.tsx
 │   │   │   │   ├── quotes/
+│   │   │   │   │   ├── AdminQuoteApproval.css
 │   │   │   │   │   ├── AdminQuoteApproval.tsx
+│   │   │   │   │   ├── AdminQuoteEditor.css
 │   │   │   │   │   ├── AdminQuoteEditor.tsx
 │   │   │   │   │   ├── AdminQuotePanel.tsx
 │   │   │   │   │   ├── AdminQuotePanel.types.ts
+│   │   │   │   │   ├── AdminQuoteRevisions.css
 │   │   │   │   │   └── AdminQuoteRevisions.tsx
 │   │   │   │   └── tickets/
 │   │   │   │       ├── AdminTicketCard.css
@@ -103,8 +106,6 @@ smartquote/
 │   │   │       ├── TicketCommentThread.tsx
 │   │   │       ├── TicketDetailCard.css
 │   │   │       ├── TicketDetailCard.tsx
-│   │   │       ├── TicketDetailSidePanel.css
-│   │   │       ├── TicketDetailSidePanel.tsx
 │   │   │       ├── TicketTitle.css
 │   │   │       ├── TicketTitle.tsx
 │   │   │       └── side-panels/                    # Wrappers around SidePanel component
@@ -186,6 +187,7 @@ smartquote/
 │   │   │       ├── export-csv.ts
 │   │   │       ├── export-pdf.ts
 │   │   │       ├── formatters.ts                   # Use this for timestamp and currency formatting (can easily swap out locales through this)
+│   │   │       ├── input-utils.ts
 │   │   │       └── resolve-assignee-names.ts
 │   │   ├── pages/                                  # Route level composition (no logic, only assemble features)
 │   │   │   ├── admin/
