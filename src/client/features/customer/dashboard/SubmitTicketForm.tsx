@@ -14,7 +14,7 @@ import type {
 } from '../../../../shared/constants/lookup-values.js';
 import type { CreateTicketRequest } from '../../../../shared/contracts/ticket-contracts.js';
 import './SubmitTicketForm.css';
-import { checkNumberInput, toTitleCase } from '../../../lib/utils/input-utils.js';
+import { checkIntegerInput, toTitleCase } from '../../../lib/utils/input-utils.js';
 
 interface SubmitTicketFormProps {
   onSuccess: () => void;
@@ -121,7 +121,7 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ): void => {
     const { name, value } = e.target;
-    if (name === 'usersImpacted' && checkNumberInput(value)) return;
+    if (name === 'usersImpacted' && checkIntegerInput(value)) return;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 

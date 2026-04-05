@@ -12,8 +12,7 @@ import {
 } from './AdminQuotePanel.types.js';
 import type { UpdateQuoteFormState } from './AdminQuotePanel.types.js';
 import './AdminQuoteEditor.css';
-
-// ─── Create ───────────────────────────────────────────────────────────────────
+import { checkDecimalInput, checkIntegerInput } from '../../../lib/utils/input-utils.js';
 
 interface AdminCreateQuoteFormProps {
   ticketId: string;
@@ -40,6 +39,18 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
 
   const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleIntegerFieldChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
+    if (checkIntegerInput(value)) return;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDecimalFieldChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
+    if (checkDecimalInput(value)) return;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -120,11 +131,13 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
                 className="field-input"
                 id="mq-hours-min"
                 name="estimatedHoursMinimum"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 min={0}
                 value={form.estimatedHoursMinimum}
-                onChange={handleFieldChange}
+                onChange={handleIntegerFieldChange}
                 required
+                placeholder="Minimum expected hours for quote"
                 disabled={createManual.loading}
                 data-testid="mq-hours-min"
               />
@@ -138,11 +151,13 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
                 className="field-input"
                 id="mq-hours-max"
                 name="estimatedHoursMaximum"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 min={0}
                 value={form.estimatedHoursMaximum}
-                onChange={handleFieldChange}
+                onChange={handleIntegerFieldChange}
                 required
+                placeholder="Maximum expected hours for quote"
                 disabled={createManual.loading}
                 data-testid="mq-hours-max"
               />
@@ -156,11 +171,12 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
                 className="field-input"
                 id="mq-rate"
                 name="hourlyRate"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 min={0}
                 step="0.01"
                 value={form.hourlyRate}
-                onChange={handleFieldChange}
+                onChange={handleDecimalFieldChange}
                 required
                 disabled={createManual.loading}
                 data-testid="mq-rate"
@@ -175,12 +191,14 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
                 className="field-input"
                 id="mq-fixed-cost"
                 name="fixedCost"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 min={0}
                 step="0.01"
                 value={form.fixedCost}
-                onChange={handleFieldChange}
+                onChange={handleDecimalFieldChange}
                 required
+                placeholder="Special or one-off costs"
                 disabled={createManual.loading}
                 data-testid="mq-fixed-cost"
               />

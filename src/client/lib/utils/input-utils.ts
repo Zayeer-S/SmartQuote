@@ -1,6 +1,9 @@
-export function checkNumberInput(value: string): string | null {
-  if (value !== '' && !/^\d+$/.test(value)) return value;
-  return null;
+export function checkIntegerInput(value: string): boolean {
+  return value !== '' && !/^\d+$/.test(value);
+}
+
+export function checkDecimalInput(value: string): boolean {
+  return value !== '' && !/^\d*\.?\d*$/.test(value);
 }
 
 export function toTitleCase(value: string): string {
