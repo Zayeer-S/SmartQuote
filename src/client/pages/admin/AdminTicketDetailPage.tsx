@@ -91,7 +91,12 @@ const AdminTicketDetailPage: React.FC = () => {
 
       <div className="ticket-detail-layout" data-testid="ticket-detail-layout">
         <div className="ticket-detail-main" data-testid="ticket-detail-main">
-          <TabNav tabs={ADMIN_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+          <TabNav
+            tabs={ADMIN_TABS}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            isCentered={false}
+          />
 
           {activeTab === 'details' && (
             <>

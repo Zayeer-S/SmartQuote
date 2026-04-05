@@ -18,6 +18,10 @@
   -ms-overflow-style: none;
 }
 
+.tab-nav--centered .tab-nav-list {
+  justify-content: center;
+}
+
 .tab-nav-list::-webkit-scrollbar {
   display: none;
 }

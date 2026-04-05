@@ -10,15 +10,21 @@ interface TabNavProps<T extends string> {
   tabs: TabNavItem<T>[];
   activeTab: T;
   onTabChange: (key: T) => void;
+  isCentered: boolean;
 }
 
 function TabNav<T extends string>({
   tabs,
   activeTab,
   onTabChange,
+  isCentered,
 }: TabNavProps<T>): React.ReactElement {
   return (
-    <nav className="tab-nav" aria-label="Section navigation" data-testid="tab-nav">
+    <nav
+      className={`tab-nav ${isCentered ? 'tab-nav--centered' : ''}`}
+      aria-label="Section navigation"
+      data-testid="tab-nav"
+    >
       <ul className="tab-nav-list" role="tablist">
         {tabs.map((tab) => {
           const isActive = tab.key === activeTab;

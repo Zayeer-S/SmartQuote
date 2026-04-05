@@ -59,7 +59,12 @@ const CustomerTicketDetailPage: React.FC = () => {
 
       <div className="ticket-detail-layout" data-testid="ticket-detail-layout">
         <div className="ticket-detail-main" data-testid="ticket-detail-main">
-          <TabNav tabs={CUSTOMER_TABS} activeTab={activeTab} onTabChange={setActiveTab} />
+          <TabNav
+            tabs={CUSTOMER_TABS}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            isCentered={false}
+          />
           {activeTab === 'details' && <TicketDetailCard ticketId={ticketId} ticket={ticket} />}
           {activeTab === 'quote' &&
             (latestQuote ? (
