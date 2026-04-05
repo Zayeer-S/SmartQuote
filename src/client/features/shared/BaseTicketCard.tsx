@@ -1,6 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { getStatusBadgeClass, getPriorityBadgeClass } from '../../lib/utils/badge-utils.js';
+import {
+  getStatusBadgeClass,
+  getPriorityBadgeClass,
+  getQuoteApprovalBadgeClass,
+} from '../../lib/utils/badge-utils.js';
 import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
 import './BaseTicketCard.css';
 
@@ -20,6 +24,14 @@ export interface BaseTicketCardProps {
   metaItems: React.ReactNode;
 }
 
+const QUOTE_STATUS_LABEL: Record<string, string> = {
+  Pending: 'Quote Approval Pending',
+  Approved: 'Quote Approved',
+  'Rejected By Manager': 'Quote Rejected',
+  'Rejected By Customer': 'Quote Rejected',
+  Revised: 'Quote Revised',
+};
+
 const BaseTicketCard: React.FC<BaseTicketCardProps> = ({
   ticket,
   linkTo,
@@ -29,6 +41,11 @@ const BaseTicketCard: React.FC<BaseTicketCardProps> = ({
   extraBadges,
   metaItems,
 }) => {
+  const quoteLabel =
+    ticket.quoteStatus !== null
+      ? (QUOTE_STATUS_LABEL[ticket.quoteStatus] ?? ticket.quoteStatus)
+      : 'Quote Needed';
+
   return (
     <article className={`card ${variantClass}`} data-testid={testId}>
       <div className="ticket-card-base-badges">
@@ -40,6 +57,12 @@ const BaseTicketCard: React.FC<BaseTicketCardProps> = ({
           data-testid="ticket-priority"
         >
           {ticket.ticketPriority}
+        </span>
+        <span
+          className={getQuoteApprovalBadgeClass(ticket.quoteStatus)}
+          data-testid="ticket-quote-status"
+        >
+          {quoteLabel}
         </span>
         {extraBadges}
       </div>

@@ -126,6 +126,7 @@ export interface TicketWithDetails extends Ticket {
   ticket_status_name: string;
   ticket_priority_name: string;
   organization_name: string;
+  quote_approval_status_name: string | null;
 }
 
 export interface QuoteApproval extends BaseAuditRows {

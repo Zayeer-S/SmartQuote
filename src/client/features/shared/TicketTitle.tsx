@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import {
   getPriorityBadgeClass,
+  getQuoteApprovalBadgeClass,
   getSlaBadgeClass,
   getStatusBadgeClass,
 } from '../../lib/utils/badge-utils';
@@ -11,7 +12,15 @@ export interface TicketTitleProps {
   ticketId: string;
 }
 
-const TicketTitle: React.FC<TicketTitleProps> = ({ ticketId: ticketId }) => {
+const QUOTE_STATUS_LABEL: Record<string, string> = {
+  Pending: 'Quote Approval Pending',
+  Approved: 'Quote Approved',
+  'Rejected By Manager': 'Quote Rejected',
+  'Rejected By Customer': 'Quote Rejected',
+  Revised: 'Quote Revised',
+};
+
+const TicketTitle: React.FC<TicketTitleProps> = ({ ticketId }) => {
   const ticket = useGetTicket();
 
   useEffect(() => {
@@ -48,6 +57,9 @@ const TicketTitle: React.FC<TicketTitleProps> = ({ ticketId: ticketId }) => {
 
   const t = ticket.data;
 
+  const quoteLabel =
+    t.quoteStatus !== null ? (QUOTE_STATUS_LABEL[t.quoteStatus] ?? t.quoteStatus) : 'Quote Needed';
+
   return (
     <div className="ticket-detail-header">
       <h1 className="ticket-detail-title" data-testid="ticket-title">
@@ -59,6 +71,12 @@ const TicketTitle: React.FC<TicketTitleProps> = ({ ticketId: ticketId }) => {
         </span>
         <span className={getPriorityBadgeClass(t.ticketPriority)} data-testid="ticket-priority">
           {t.ticketPriority}
+        </span>
+        <span
+          className={getQuoteApprovalBadgeClass(t.quoteStatus)}
+          data-testid="ticket-quote-status"
+        >
+          {quoteLabel}
         </span>
         {t.slaStatus !== null && (
           <span

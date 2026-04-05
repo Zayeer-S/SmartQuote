@@ -122,6 +122,36 @@
   font-weight: var(--font-weight-bold);
 }
 
+.badge-quote-needed {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-amber) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-amber) 75%, var(--color-black));
+  border-color: color-mix(in srgb, var(--color-accent-secondary-amber) 50%, transparent);
+}
+
+.badge-quote-pending {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 12%, transparent);
+  color: var(--color-accent-secondary-indigo);
+  border-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 30%, transparent);
+}
+
+.badge-quote-approved {
+  background-color: var(--color-feedback-success-bg);
+  color: var(--color-feedback-success-text);
+  border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
+}
+
+.badge-quote-rejected {
+  background-color: var(--color-feedback-error-bg);
+  color: var(--color-feedback-error-text);
+  border-color: color-mix(in srgb, var(--color-error) 40%, transparent);
+}
+
+.badge-quote-revised {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 12%, transparent);
+  color: var(--color-accent-secondary-deep-teal);
+  border-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 30%, transparent);
+}
+
 /* --------------------------------------------------------------------------
    Dark theme overrides
    -------------------------------------------------------------------------- */
@@ -165,6 +195,22 @@
 }
 
 [data-theme='dark'] .badge-p4 {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, var(--color-white));
+}
+
+[data-theme='dark'] .badge-quote-needed {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-amber) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-amber) 40%, var(--color-white));
+  border-color: color-mix(in srgb, var(--color-accent-secondary-amber) 50%, transparent);
+}
+
+[data-theme='dark'] .badge-quote-pending {
+  background-color: color-mix(in srgb, var(--color-accent-secondary-indigo) 20%, transparent);
+  color: color-mix(in srgb, var(--color-accent-secondary-indigo) 20%, var(--color-white));
+}
+
+[data-theme='dark'] .badge-quote-revised {
   background-color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, transparent);
   color: color-mix(in srgb, var(--color-accent-secondary-deep-teal) 20%, var(--color-white));
 }
