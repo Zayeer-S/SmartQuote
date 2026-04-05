@@ -2,7 +2,6 @@ import React, { type ReactNode } from 'react';
 import type { TicketSummaryResponse } from '../../../shared/contracts/ticket-contracts.js';
 import { useTicketFilters } from '../../hooks/useTicketFilters.js';
 import TicketFilters from '../collate/TicketFilters.js';
-import TicketPagination from '../collate/TicketPagination.js';
 import './BaseTicketList.css';
 
 interface BaseTicketListProps<T extends TicketSummaryResponse> {
@@ -31,9 +30,6 @@ function BaseTicketList<T extends TicketSummaryResponse>({
     setStatusFilter,
     typeFilter,
     setTypeFilter,
-    page,
-    setPage,
-    totalPages,
     clearFilters,
   } = useTicketFilters(tickets);
 
@@ -89,8 +85,6 @@ function BaseTicketList<T extends TicketSummaryResponse>({
           ))}
         </ul>
       )}
-
-      <TicketPagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }
