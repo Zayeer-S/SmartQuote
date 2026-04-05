@@ -98,13 +98,13 @@ const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
       )}
 
       {list.loading && (
-        <p className="loading-text" data-testid="comments-loading">
+        <p className="loading-text comment-selection" data-testid="comments-loading">
           Loading messages...
         </p>
       )}
 
       {list.error && (
-        <p className="feedback-error" role="alert" data-testid="comments-error">
+        <p className="feedback-error comment-selection" role="alert" data-testid="comments-error">
           {list.error}
         </p>
       )}
