@@ -14,6 +14,7 @@ import type {
 } from '../../../../shared/constants/lookup-values.js';
 import type { CreateTicketRequest } from '../../../../shared/contracts/ticket-contracts.js';
 import './SubmitTicketForm.css';
+import { checkNumberInput, toTitleCase } from '../../../lib/utils/input-utils.js';
 
 interface SubmitTicketFormProps {
   onSuccess: () => void;
@@ -69,9 +70,24 @@ const PHASE_LABEL: Record<SubmitPhase, string> = {
   uploading: 'Uploading files...',
 };
 
+const TITLE_MAX = 100;
+const DESCRIPTION_MAX = 1000;
+
+const TITLE_MIN = 20;
+const DESCRIPTION_MIN = 50;
+
 function validateForm(form: FormState): string | null {
-  if (!form.title.trim()) return 'Title is required.';
-  if (!form.description.trim()) return 'Description is required.';
+  const trimmedTitle = form.title.trim();
+  const trimmedDesc = form.description.trim();
+
+  if (!trimmedTitle) return 'Title is required.';
+  if (trimmedTitle.length < TITLE_MIN)
+    return `Title must be at least ${String(TITLE_MIN)} characters.`;
+
+  if (trimmedTitle) if (!trimmedDesc) return 'Description is required.';
+  if (trimmedDesc.length < DESCRIPTION_MIN)
+    return `Description must be at least ${String(DESCRIPTION_MIN)} characters.`;
+
   if (!form.deadline) return 'Deadline is required.';
 
   const today = new Date().toISOString().split('T')[0];
@@ -105,8 +121,12 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ): void => {
     const { name, value } = e.target;
-    if (name === 'usersImpacted' && value !== '' && !/^\d+$/.test(value)) return;
+    if (name === 'usersImpacted' && checkNumberInput(value)) return;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTitleBlur = (): void => {
+    setForm((prev) => ({ ...prev, title: toTitleCase(prev.title) }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -173,7 +193,10 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
     >
       <div className="field-group">
         <label className="field-label" htmlFor="title">
-          Title
+          Title{' '}
+          <span className="field-label-hint" aria-live="polite">
+            {form.title.length}/{TITLE_MAX}
+          </span>
         </label>
         <input
           id="title"
@@ -182,6 +205,7 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
           className="field-input"
           value={form.title}
           onChange={handleChange}
+          onBlur={handleTitleBlur}
           placeholder="Brief summary of the issue"
           required
           disabled={loading}
@@ -192,7 +216,10 @@ const SubmitTicketForm: React.FC<SubmitTicketFormProps> = ({ onSuccess }) => {
 
       <div className="field-group">
         <label className="field-label" htmlFor="description">
-          Description
+          Description{' '}
+          <span className="field-label-hint" aria-live="polite">
+            {form.description.length}/{DESCRIPTION_MAX}
+          </span>
         </label>
         <textarea
           id="description"
