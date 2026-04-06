@@ -1,1 +1,76 @@
-/** TODO INSUFFICIENT PERMISSIONS PAGE */
+.insufficient-permissions-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-subtle);
+  padding: var(--space-8);
+  font-family: var(--font-primary);
+}
+
+.insufficient-permissions-card {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--space-12) var(--space-14);
+  border-radius: var(--radius-2xl);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-xl);
+}
+
+.insufficient-permissions-logo {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-light);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  color: var(--color-interactive);
+  margin-bottom: var(--space-8);
+  display: block;
+}
+
+.insufficient-permissions-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-4);
+}
+
+.insufficient-permissions-body {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-8);
+}
+
+.insufficient-permissions-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-interactive);
+  transition: opacity var(--transition-fast);
+}
+
+.insufficient-permissions-back:hover {
+  opacity: 0.75;
+}
+
+[data-theme='dark'] .insufficient-permissions-page {
+  background-color: var(--color-bg);
+}
+
+[data-theme='dark'] .insufficient-permissions-card {
+  background-color: var(--color-surface-raised);
+  box-shadow: none;
+  border: 1px solid var(--color-border);
+}
+
+[data-theme='dark'] .insufficient-permissions-title {
+  color: var(--color-text-primary);
+}
+
+[data-theme='dark'] .insufficient-permissions-body {
+  color: var(--color-text-secondary);
+}

@@ -191,7 +191,6 @@ smartquote/
 │   │   │       └── resolve-assignee-names.ts
 │   │   ├── pages/                                  # Route level composition (no logic, only assemble features)
 │   │   │   ├── admin/
-│   │   │   │   ├── AdminDashboardPage.css
 │   │   │   │   ├── AdminDashboardPage.tsx
 │   │   │   │   ├── AdminLayout.tsx
 │   │   │   │   ├── AdminTicketDetailPage.tsx
@@ -216,7 +215,6 @@ smartquote/
 │   │   │   │       ├── AdminUserManagementPage.css
 │   │   │   │       └── AdminUserManagementPage.tsx
 │   │   │   ├── customer/
-│   │   │   │   ├── CustomerDashboardPage.css
 │   │   │   │   ├── CustomerDashboardPage.tsx
 │   │   │   │   ├── CustomerLayout.tsx
 │   │   │   │   ├── CustomerOrgPage.css
@@ -225,8 +223,8 @@ smartquote/
 │   │   │   ├── misc/
 │   │   │   │   ├── CantAccessPage.css
 │   │   │   │   ├── CantAccessPage.tsx
-│   │   │   │   ├── InsufficientPermissionsPage.css # STUBS: TODO
-│   │   │   │   ├── InsufficientPermissionPage.tsx  # STUBS: TODO
+│   │   │   │   ├── InsufficientPermissionsPage.css
+│   │   │   │   ├── InsufficientPermissionPage.tsx
 │   │   │   │   ├── LoginPage.css
 │   │   │   │   ├── LoginPage.tsx
 │   │   │   │   ├── NotFoundPage.css
@@ -238,6 +236,7 @@ smartquote/
 │   │       ├── badges.css
 │   │       ├── buttons.css
 │   │       ├── cards.css
+│   │       ├── DashboardPage.css
 │   │       ├── forms.css
 │   │       ├── globals.css
 │   │       └── QuotePanel.css

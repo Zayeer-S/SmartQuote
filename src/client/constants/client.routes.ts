@@ -1,6 +1,7 @@
 export const CLIENT_ROUTES = {
   LOGIN: '/login',
   CANT_ACCESS_ACCOUNT: '/cannot',
+  INSUFFICIENT_PERMISSIONS: '/insufficient-permissions',
   CUSTOMER: {
     ROOT: '/customer',
     TICKET: (id = ':ticketId') => `/customer/tickets/${id}`,
