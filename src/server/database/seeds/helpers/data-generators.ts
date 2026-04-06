@@ -309,7 +309,7 @@ export async function generateQuoteApprovals(
       {
         approved_by_user_id: managerId,
         user_role: AUTH_ROLES.MANAGER,
-        approval_status_id: lookupIds.approvalStatuses[QUOTE_APPROVAL_STATUSES.REJECTED],
+        approval_status_id: lookupIds.approvalStatuses[QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER],
         comment: 'Too high - please revise with more detailed breakdown.',
         approved_at: yesterday,
       },

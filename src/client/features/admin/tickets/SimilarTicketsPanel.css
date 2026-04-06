@@ -6,7 +6,7 @@
 }
 
 /* Override heading margin when it sits in a flex row */
-.similar-tickets-panel-header .admin-detail-section-heading {
+.similar-tickets-panel-header {
   margin-bottom: 0;
 }
 

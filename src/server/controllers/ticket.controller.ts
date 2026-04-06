@@ -35,6 +35,7 @@ import type { LookupResolver } from '../lib/lookup-resolver.js';
 import type { IncomingFile } from '../services/storage/storage.service.types.js';
 import type { QuoteWithApproval } from '../database/types/tables.js';
 import { backEnv } from '../config/env.backend.js';
+import { QuoteApprovalStatus } from '../../shared/constants/lookup-values.js';
 
 /** Shape attached to req by the parseAttachment middleware in ticket.routes.ts */
 interface RequestWithIncomingFile extends Request {
@@ -343,6 +344,8 @@ export class TicketController {
       ...this.mapTicket(ticket),
       organizationName: ticket.organization_name,
       slaStatus,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      quoteStatus: (ticket.quote_approval_status_name as QuoteApprovalStatus) ?? null,
     };
   }
 
@@ -356,6 +359,8 @@ export class TicketController {
       organizationName: ticket.organization_name,
       attachments: attachments.map((a) => this.mapAttachment(a)),
       slaStatus,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      quoteStatus: (ticket.quote_approval_status_name as QuoteApprovalStatus) ?? null,
     };
   }
 

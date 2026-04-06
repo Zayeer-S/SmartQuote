@@ -12,12 +12,11 @@ import { ThemeProvider } from './context/ThemeContext.js';
 import { AUTH_ROLES } from '../shared/constants';
 import CustomerLayout from './pages/customer/CustomerLayout.js';
 import CustomerDashboardPage from './pages/customer/CustomerDashboardPage.js';
-import TicketDetailPage from './pages/customer/TicketDetailPage.js';
+import CustomerTicketDetailPage from './pages/customer/CustomerTicketDetailPage.js';
 import SettingsPage from './pages/shared/SettingsPage.js';
 import AdminLayout from './pages/admin/AdminLayout.js';
-import AdminTicketsPage from './pages/admin/tickets/AdminTicketsPage.js';
-import AdminTicketDetailPage from './pages/admin/tickets/AdminTicketDetailPage.js';
-import AdminQuoteDetailPage from './pages/admin/quote/AdminQuoteDetailPage.js';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage.js';
+import AdminTicketDetailPage from './pages/admin/AdminTicketDetailPage.js';
 import AdminAnalyticsPage from './pages/admin/analytics/AdminAnalyticsPage.js';
 import AdminSLAPoliciesPage from './pages/admin/sla/AdminSLAPoliciesPage.js';
 import AdminRateProfilesPage from './pages/admin/rate-profiles/AdminRateProfilesPage.js';
@@ -54,13 +53,11 @@ createRoot(document.getElementById('root')!).render(
                   }
                 >
                   <Route path={CLIENT_ROUTES.ADMIN.ROOT} element={<AdminLayout />}>
-                    <Route index element={<AdminTicketsPage />} />
-                    <Route path={CLIENT_ROUTES.ADMIN.TICKETS} element={<AdminTicketsPage />} />
+                    <Route index element={<AdminDashboardPage />} />
                     <Route
                       path={CLIENT_ROUTES.ADMIN.TICKET()}
                       element={<AdminTicketDetailPage />}
                     />
-                    <Route path={CLIENT_ROUTES.ADMIN.QUOTE()} element={<AdminQuoteDetailPage />} />
                     <Route path={CLIENT_ROUTES.ADMIN.ANALYTICS} element={<AdminAnalyticsPage />} />
                     <Route
                       path={CLIENT_ROUTES.ADMIN.SLA_POLICIES}
@@ -85,7 +82,10 @@ createRoot(document.getElementById('root')!).render(
                 <Route element={<ProtectedRoute allowedRoles={[AUTH_ROLES.CUSTOMER]} />}>
                   <Route path={CLIENT_ROUTES.CUSTOMER.ROOT} element={<CustomerLayout />}>
                     <Route index element={<CustomerDashboardPage />} />
-                    <Route path={CLIENT_ROUTES.CUSTOMER.TICKET()} element={<TicketDetailPage />} />
+                    <Route
+                      path={CLIENT_ROUTES.CUSTOMER.TICKET()}
+                      element={<CustomerTicketDetailPage />}
+                    />
                     <Route path={CLIENT_ROUTES.CUSTOMER.SETTINGS} element={<SettingsPage />} />
                   </Route>
                 </Route>

@@ -8,7 +8,7 @@ interface UseListQuotesState {
   error: string | null;
 }
 
-interface UseListQuotesReturn extends UseListQuotesState {
+export interface UseListQuotesReturn extends UseListQuotesState {
   execute: (ticketId: string) => Promise<void>;
 }
 

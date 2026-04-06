@@ -1,0 +1,17 @@
+.admin-quote-approval {
+  display: flex;
+  align-items: center;
+  gap: 0px var(--space-2);
+  flex-wrap: wrap;
+}
+
+.admin-quote-reject {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}

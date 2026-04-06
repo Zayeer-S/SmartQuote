@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import { useLogin } from '../../hooks/useLogin.js';
 import { EyeIcon, EyeOffIcon } from '../../components/icons/LoginIcons.js';
+import giacomLogo from '../../components/icons/giacom-logo.webp';
 import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
@@ -24,12 +25,7 @@ const LoginPage: React.FC = () => {
   return (
     <main className="login-container" data-testid="login-page">
       <aside className="login-panel-brand" aria-hidden="true">
-        <img
-          src="src\client\components\icons\giacom-logo.webp"
-          width={200}
-          height={36}
-          alt="Giacom logo"
-        ></img>
+        <img src={giacomLogo} width={200} height={36} alt="Giacom logo"></img>
         <div className="login-panel-brand-body">
           <p className="login-panel-tagline">
             SmartQuote

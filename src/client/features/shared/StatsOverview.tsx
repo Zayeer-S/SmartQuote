@@ -5,6 +5,7 @@ import './StatsOverview.css';
 
 interface StatsOverviewProps {
   tickets: TicketResponse[];
+  direction?: 'row' | 'column';
 }
 
 type StatCardColor = 'purple' | 'razzmatazz' | 'amber';
@@ -29,14 +30,16 @@ const OPEN_STATUSES: string[] = [
   TICKET_STATUSES.IN_PROGRESS,
 ];
 
-const StatsOverview: React.FC<StatsOverviewProps> = ({ tickets }) => {
+const StatsOverview: React.FC<StatsOverviewProps> = ({ tickets, direction = 'column' }) => {
   const total = tickets.length;
   const open = tickets.filter((t) => OPEN_STATUSES.includes(t.ticketStatus)).length;
   const resolved = tickets.filter((t) => t.ticketStatus === TICKET_STATUSES.RESOLVED).length;
 
   return (
     <div
-      className="stats-overview"
+      className={['stats-overview', direction === 'row' ? 'stats-overview--row' : '']
+        .filter(Boolean)
+        .join(' ')}
       aria-label="Ticket overview statistics"
       data-testid="stats-overview"
     >

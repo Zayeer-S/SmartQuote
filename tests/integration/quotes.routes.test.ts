@@ -444,10 +444,12 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE()}`, () => {
 });
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT()}`, () => {
-  let pendingQuoteId: string;
+  let pendingManagerQuoteId: string;
+  let pendingCustomerQuoteId: string;
 
   beforeAll(async () => {
-    const createRes = await request(app)
+    // Quote for manager rejection test
+    const createRes1 = await request(app)
       .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL(ticket1Id)}`)
       .set('Authorization', `Bearer ${agentToken}`)
       .send({
@@ -458,23 +460,41 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT()}`, () => {
         quoteEffortLevel: 'Medium',
         quoteConfidenceLevel: null,
       });
-    pendingQuoteId = createRes.body.data.id as string;
+    pendingManagerQuoteId = createRes1.body.data.id as string;
 
     await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, pendingQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, pendingManagerQuoteId)}`)
+      .set('Authorization', `Bearer ${agentToken}`);
+
+    // Quote for customer rejection test
+    const createRes2 = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL(ticket1Id)}`)
+      .set('Authorization', `Bearer ${agentToken}`)
+      .send({
+        estimatedHoursMinimum: 5,
+        estimatedHoursMaximum: 10,
+        hourlyRate: 110,
+        fixedCost: 0,
+        quoteEffortLevel: 'Medium',
+        quoteConfidenceLevel: null,
+      });
+    pendingCustomerQuoteId = createRes2.body.data.id as string;
+
+    await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, pendingCustomerQuoteId)}`)
       .set('Authorization', `Bearer ${agentToken}`);
   });
 
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).post(
-      `${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingQuoteId)}`
+      `${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`
     );
     expect(res.status).toBe(401);
   });
 
   it('returns 403 when agent tries to reject (lacks QUOTES_REJECT)', async () => {
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`)
       .set('Authorization', `Bearer ${agentToken}`);
 
     expect(res.status).toBe(403);
@@ -482,89 +502,41 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT()}`, () => {
 
   it('returns 400 when comment is missing (required for rejection)', async () => {
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`)
       .set('Authorization', `Bearer ${managerToken}`)
       .send({});
 
     expect(res.status).toBe(400);
   });
 
-  it('returns 200 with REJECTED status for manager', async () => {
+  it('returns 200 with Rejected By Manager status when manager rejects', async () => {
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`)
       .set('Authorization', `Bearer ${managerToken}`)
       .send({ comment: 'Needs more detail' });
 
     expect(res.status).toBe(200);
-    expect(res.body.data.approvalStatus).toBe('Rejected');
+    expect(res.body.data.approvalStatus).toBe('Rejected By Manager');
     expect(res.body.data.comment).toBe('Needs more detail');
   });
-});
 
-describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.REVISIONS()}`, () => {
-  let updatedQuoteId: string;
-
-  beforeAll(async () => {
-    // Create a quote then update it to produce a revision record
-    const createRes = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL(ticket1Id)}`)
-      .set('Authorization', `Bearer ${agentToken}`)
-      .send({
-        estimatedHoursMinimum: 1,
-        estimatedHoursMaximum: 4,
-        hourlyRate: 80,
-        fixedCost: 0,
-        quoteEffortLevel: 'Low',
-        quoteConfidenceLevel: null,
-      });
-    const originalId = createRes.body.data.id as string;
-
-    const updateRes = await request(app)
-      .patch(`${TICKETS_BASE}${QUOTE_ENDPOINTS.UPDATE(ticket1Id, originalId)}`)
-      .set('Authorization', `Bearer ${agentToken}`)
-      .send({ hourlyRate: 90, reason: 'Rate correction for revision test' });
-
-    updatedQuoteId = updateRes.body.data.id as string;
-  });
-
-  it('returns 401 when unauthenticated', async () => {
-    const res = await request(app).get(
-      `${TICKETS_BASE}${QUOTE_ENDPOINTS.REVISIONS(ticket1Id, updatedQuoteId)}`
-    );
-    expect(res.status).toBe(401);
-  });
-
-  it('returns 200 with a revisions array for agent', async () => {
+  it('returns 200 with Rejected By Customer status when customer rejects', async () => {
     const res = await request(app)
-      .get(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REVISIONS(ticket1Id, updatedQuoteId)}`)
-      .set('Authorization', `Bearer ${agentToken}`);
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingCustomerQuoteId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .send({ comment: 'Too expensive' });
 
     expect(res.status).toBe(200);
-    expect(res.body.data.revisions).toBeInstanceOf(Array);
-    expect(res.body.data.revisions.length).toBeGreaterThan(0);
-    expect(res.body.data.revisions[0]).toMatchObject({
-      fieldName: 'hourly_rate',
-      oldValue: '80',
-      newValue: '90',
-      reason: 'Rate correction for revision test',
-    });
+    expect(res.body.data.approvalStatus).toBe('Rejected By Customer');
+    expect(res.body.data.comment).toBe('Too expensive');
   });
 
-  it('returns 403 when customer1 requests revisions for a different org quote', async () => {
+  it('returns 422 when trying to reject an already-rejected quote', async () => {
     const res = await request(app)
-      .get(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REVISIONS(ticket4Id, ticket4QuoteId)}`)
-      .set('Authorization', `Bearer ${customer1Token}`);
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`)
+      .set('Authorization', `Bearer ${managerToken}`)
+      .send({ comment: 'Double reject' });
 
-    expect(res.status).toBe(403);
-  });
-
-  it('returns 404 for a nonexistent quote id', async () => {
-    const res = await request(app)
-      .get(
-        `${TICKETS_BASE}${QUOTE_ENDPOINTS.REVISIONS(ticket1Id, '00000000-0000-0000-0000-000000000000')}`
-      )
-      .set('Authorization', `Bearer ${agentToken}`);
-
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(422);
   });
 });

@@ -398,7 +398,7 @@ ol {
 .loading-text {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  animation: pulse 1.5s ease-in-out infinite;
+  animation: pulse 4s ease-in-out infinite;
 }
 
 @keyframes pulse {

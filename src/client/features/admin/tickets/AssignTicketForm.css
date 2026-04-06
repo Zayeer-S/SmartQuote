@@ -1,5 +1,5 @@
 .assign-ticket-form {
-  max-width: 480px;
+  width: 100%;
 }
 
 .assign-ticket-form-row {
@@ -10,11 +10,16 @@
 
 .assign-ticket-field {
   flex: 1;
+}
+
+.assign-ticket-form-row .field-group {
   margin-bottom: 0;
+}
+
+.assign-ticket-field-input {
+  width: 80% !important;
 }
 
 .assign-ticket-submit {
   flex-shrink: 0;
-  /* Align button baseline with input */
-  margin-bottom: 1px;
 }

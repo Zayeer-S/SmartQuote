@@ -4,7 +4,7 @@ import { USERS } from '../../constants/test.user.credentials';
 
 const API_BASE = 'http://localhost:3000';
 const SLA_PAGE_URL = '/admin/sla-policies';
-const TICKETS_URL = '/admin/tickets';
+const TICKETS_URL = '/admin';
 
 async function getAdminToken(ctx: APIRequestContext): Promise<string> {
   const res = await ctx.post(`${API_BASE}/api/auth/login`, {
@@ -247,8 +247,6 @@ test.describe('SLA breach indicator on ticket list and detail', () => {
     ctx = await request.newContext({ baseURL: API_BASE });
     adminToken = await getAdminToken(ctx);
 
-    // Create a ticket with a past deadline belonging to an org that has an SLA policy.
-    // We log in as customer1 because their org (org1) has the seeded policy.
     const loginRes = await ctx.post(`${API_BASE}/api/auth/login`, {
       data: { email: USERS.CUSTOMER1_DIFF_ORG.EMAIL, password: USERS.CUSTOMER1_DIFF_ORG.PASSWORD },
     });
@@ -264,7 +262,8 @@ test.describe('SLA breach indicator on ticket list and detail', () => {
 
   test('breached ticket shows SLA Breached badge on the ticket list', async ({ page }) => {
     await page.goto(TICKETS_URL);
-    await expect(page.getByTestId('admin-tickets-container')).toBeVisible();
+    // admin-tickets-list is rendered by BaseTicketList with testIdPrefix="admin-tickets"
+    await expect(page.getByTestId('admin-tickets-list')).toBeVisible();
 
     const card = page.getByTestId(`admin-ticket-card-${breachedTicketId}`);
     await expect(card).toBeVisible();
@@ -276,7 +275,7 @@ test.describe('SLA breach indicator on ticket list and detail', () => {
 
   test('non-breached ticket shows SLA OK badge on the ticket list', async ({ page }) => {
     await page.goto(TICKETS_URL);
-    await expect(page.getByTestId('admin-tickets-container')).toBeVisible();
+    await expect(page.getByTestId('admin-tickets-list')).toBeVisible();
 
     const okBadges = page.locator('[data-testid="ticket-sla-badge"]:has-text("SLA OK")');
     await expect(okBadges.first()).toBeVisible();
@@ -284,10 +283,12 @@ test.describe('SLA breach indicator on ticket list and detail', () => {
 
   test('breached ticket detail page shows SLA section with breach status', async ({ page }) => {
     await page.goto(`/admin/tickets/${breachedTicketId}`);
-    await expect(page.getByTestId('admin-ticket-detail')).toBeVisible();
+    await expect(page.getByTestId('admin-ticket-detail-page')).toBeVisible();
+    // SlaStatus is rendered inside the details tab after ticketData loads --
+    // wait for TicketDetailCard to confirm the tab content is ready
+    await expect(page.getByTestId('ticket-detail')).toBeVisible();
 
     await expect(page.getByTestId('sla-section')).toBeVisible();
-
     await expect(page.getByTestId('sla-policy-name')).toBeVisible();
 
     const breachBadge = page.getByTestId('sla-breach-badge');
@@ -299,7 +300,7 @@ test.describe('SLA breach indicator on ticket list and detail', () => {
 
   test('SLA targets table is visible on detail page with all 4 severities', async ({ page }) => {
     await page.goto(`/admin/tickets/${breachedTicketId}`);
-    await expect(page.getByTestId('sla-section')).toBeVisible();
+    await expect(page.getByTestId('ticket-detail')).toBeVisible();
 
     const table = page.getByTestId('sla-targets-table');
     await expect(table).toBeVisible();
@@ -321,8 +322,8 @@ test.describe('SLA breach indicator on ticket list and detail', () => {
     const ticketRes = await noOrgCtx.post(`${API_BASE}/api/tickets/`, {
       headers: { Authorization: `Bearer ${noOrgToken}` },
       data: {
-        title: 'No SLA ticket',
-        description: 'Customer with no org and no user SLA',
+        title: 'No SLA ticket for smoke test',
+        description: 'Customer with no org -- verifying no SLA section appears on detail page.',
         ticketType: TICKET_TYPES.SUPPORT,
         ticketSeverity: TICKET_SEVERITIES.LOW,
         businessImpact: BUSINESS_IMPACTS.MINOR,
@@ -335,7 +336,9 @@ test.describe('SLA breach indicator on ticket list and detail', () => {
     await noOrgCtx.dispose();
 
     await page.goto(`/admin/tickets/${noSlaTicketId}`);
-    await expect(page.getByTestId('admin-ticket-detail')).toBeVisible();
+    await expect(page.getByTestId('admin-ticket-detail-page')).toBeVisible();
+    // Wait for ticket content to load before asserting absence of sla-section
+    await expect(page.getByTestId('ticket-detail')).toBeVisible();
     await expect(page.getByTestId('sla-section')).toBeHidden();
   });
 });

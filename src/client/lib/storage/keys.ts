@@ -8,4 +8,7 @@ export const KEYS = {
   TICKET_FILTER_STATUS: 'tickets:filter_status',
   TICKET_FILTER_TYPE: 'tickets:filter_type',
   TICKET_PAGE_SIZE: 'tickets:page_size',
+  ADMIN_TICKET_FILTER_SLA_BREACH: 'tickets:admin_filter_sla_breach',
+  ADMIN_TICKET_FILTER_CREATED_AFTER: 'tickets:admin_filter_created_after',
+  ADMIN_TICKET_FILTER_CREATED_BEFORE: 'tickets:admin_filter_created_before',
 } as const;

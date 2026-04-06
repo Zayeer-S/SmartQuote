@@ -6,8 +6,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const VALID_TICKET = {
-  title: 'Smoke test ticket',
-  description: 'Verifying ticket submission works E2E',
+  title: 'Smoke test ticket submission',
+  description: 'Verifying that the end-to-end ticket submission flow works correctly.',
   deadline: '2099-12-31',
   usersAffected: '5',
 };

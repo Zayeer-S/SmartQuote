@@ -1,6 +1,7 @@
 export const CLIENT_ROUTES = {
   LOGIN: '/login',
   CANT_ACCESS_ACCOUNT: '/cannot',
+  INSUFFICIENT_PERMISSIONS: '/insufficient-permissions',
   CUSTOMER: {
     ROOT: '/customer',
     TICKET: (id = ':ticketId') => `/customer/tickets/${id}`,
@@ -9,11 +10,8 @@ export const CLIENT_ROUTES = {
   },
   ADMIN: {
     ROOT: '/admin',
-    TICKETS: '/admin/tickets',
     TICKET: (id = ':ticketId') => `/admin/tickets/${id}`,
-    QUOTES: '/admin/quotes',
-    QUOTE: (ticketId = ':ticketId', quoteId = ':quoteId') =>
-      `/admin/tickets/${ticketId}/quotes/${quoteId}`,
+    // TODO
     ORGANIZATIONS_LIST: '/admin/organizations',
     ORGANIZATIONS: (orgId = ':orgId') => `/admin/organizations/${orgId}`,
     ORGANIZATION_MEMBERS: (orgId = ':orgId') => `/admin/organizations/${orgId}/members`,
@@ -25,3 +23,12 @@ export const CLIENT_ROUTES = {
     SETTINGS: '/admin/settings',
   },
 } as const;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DeepValues<T> = T extends (...args: any) => infer R
+  ? R
+  : T extends object
+    ? DeepValues<T[keyof T]>
+    : T;
+
+export type ClientRouteTypes = DeepValues<typeof CLIENT_ROUTES>;

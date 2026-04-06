@@ -1,0 +1,24 @@
+.ticket-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.ticket-detail-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--space-2);
+  line-height: var(--line-height-tight);
+}
+
+.ticket-detail-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}

@@ -4,7 +4,11 @@ import type { RBACService } from '../rbac/rbac.service.js';
 import type { QuoteApproval } from '../../database/types/tables.js';
 import type { QuoteApprovalId, QuoteId, UserId } from '../../database/types/ids.js';
 import type { InsertData, TransactionContext } from '../../daos/base/types.js';
-import { PERMISSIONS, QUOTE_APPROVAL_STATUSES } from '../../../shared/constants/lookup-values.js';
+import {
+  AUTH_ROLES,
+  PERMISSIONS,
+  QUOTE_APPROVAL_STATUSES,
+} from '../../../shared/constants/lookup-values.js';
 import { ForbiddenError } from '../ticket/ticket.errors.js';
 import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
@@ -164,6 +168,14 @@ export class QuoteApprovalService {
     );
     if (!canReject) throw new ForbiddenError(QUOTE_ERROR_MSGS.FORBIDDEN);
 
+    const actor = await this.usersDAO.findWithRole(actorId, options);
+    if (!actor) throw new QuoteError(QUOTE_ERROR_MSGS.USER_NOT_FOUND, 404);
+
+    const rejectionStatus =
+      actor.role.name === AUTH_ROLES.CUSTOMER
+        ? QUOTE_APPROVAL_STATUSES.REJECTED_BY_CUSTOMER
+        : QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER;
+
     const quote = await this.quotesDAO.getById(quoteId, options);
     if (!quote) throw new QuoteError(QUOTE_ERROR_MSGS.NOT_FOUND, 404);
     if (!quote.quote_approval_id) throw new QuoteError(QUOTE_ERROR_MSGS.NOT_PENDING, 422);
@@ -179,7 +191,7 @@ export class QuoteApprovalService {
     await this.quoteApprovalsDAO.update(
       { id: quote.quote_approval_id },
       {
-        approval_status_id: this.lookup.quoteApprovalStatusId(QUOTE_APPROVAL_STATUSES.REJECTED),
+        approval_status_id: this.lookup.quoteApprovalStatusId(rejectionStatus),
         comment,
         approved_at: new Date(),
       },

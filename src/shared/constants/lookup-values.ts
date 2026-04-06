@@ -170,7 +170,8 @@ export type QuoteCreator = (typeof QUOTE_CREATORS)[keyof typeof QUOTE_CREATORS];
 export const QUOTE_APPROVAL_STATUSES = {
   PENDING: 'Pending',
   APPROVED: 'Approved',
-  REJECTED: 'Rejected',
+  REJECTED_BY_MANAGER: 'Rejected By Manager',
+  REJECTED_BY_CUSTOMER: 'Rejected By Customer',
   REVISED: 'Revised',
 } as const;
 

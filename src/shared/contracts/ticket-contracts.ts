@@ -2,6 +2,7 @@ import type {
   BusinessImpact,
   CommentType,
   FileStorageType,
+  QuoteApprovalStatus,
   TicketPriority,
   TicketSeverity,
   TicketStatus,
@@ -66,6 +67,8 @@ export interface TicketSummaryResponse extends TicketResponse {
   organizationName: string;
   /** Null when the ticket's org/user has no active SLA policy */
   slaStatus: SlaStatusResponse | null;
+  /** Null when no quote exists for this ticket */
+  quoteStatus: QuoteApprovalStatus | null;
 }
 
 export interface AttachmentResponse {
@@ -85,8 +88,9 @@ export interface TicketDetailResponse extends TicketResponse {
   attachments: AttachmentResponse[];
   /** Null when the ticket's org/user has no active SLA policy */
   slaStatus: SlaStatusResponse | null;
+  /** Null when no quote exists for this ticket */
+  quoteStatus: QuoteApprovalStatus | null;
 }
-
 export interface ListTicketsResponse {
   tickets: TicketSummaryResponse[];
 }

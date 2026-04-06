@@ -1,0 +1,138 @@
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width-expanded) 1fr;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-bg-subtle);
+  transition: grid-template-columns var(--transition-slow);
+}
+
+.layout--sidebar-collapsed {
+  grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+}
+
+.layout-main {
+  overflow-y: auto;
+  padding: var(--space-10) var(--space-12);
+  background-color: var(--color-bg-subtle);
+  min-height: 100vh;
+}
+
+.ticket-detail-layout {
+  display: grid;
+  grid-template-columns: 70% 1fr;
+  gap: var(--space-6);
+  align-items: start;
+  margin-top: var(--space-4);
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-6);
+  align-items: start;
+  margin-top: var(--space-4);
+}
+
+.ticket-detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* ==========================================================================
+   Admin table -- TODO: extract to AdminTable.css when component is isolated
+   ========================================================================== */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.admin-table th {
+  text-align: left;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr:hover td {
+  background-color: var(--color-bg-subtle);
+}
+
+.admin-table-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+[data-theme='dark'] .layout,
+[data-theme='dark'] .layout-main {
+  background-color: var(--color-bg);
+}
+
+[data-theme='dark'] .admin-table th {
+  color: var(--color-text-secondary);
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme='dark'] .admin-table td {
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme='dark'] .admin-table tbody tr:hover td {
+  background-color: var(--color-surface-raised);
+}
+
+@media (max-width: 1024px) {
+  .layout,
+  .layout--sidebar-collapsed {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .layout-main {
+    min-height: auto;
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .ticket-detail-layout {
+    grid-template-columns: 65% 1fr; /* give side panel a bit more room before full collapse */
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr 260px;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout-main {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .ticket-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+}

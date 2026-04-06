@@ -225,6 +225,9 @@ export class TicketsDAO extends DeletableDAO<Ticket, TicketId> {
     const impacts = LOOKUP_TABLES.BUSINESS_IMPACTS;
     const statuses = LOOKUP_TABLES.TICKET_STATUSES;
     const priorities = LOOKUP_TABLES.TICKET_PRIORITIES;
+    const quotes = MAIN_TABLES.QUOTES;
+    const approvals = MAIN_TABLES.QUOTE_APPROVALS;
+    const approvalStatuses = LOOKUP_TABLES.QUOTE_APPROVAL_STATUSES;
 
     let query = this.getQuery(options)
       .select(
@@ -234,14 +237,29 @@ export class TicketsDAO extends DeletableDAO<Ticket, TicketId> {
         `${impacts}.name as business_impact_name`,
         `${statuses}.name as ticket_status_name`,
         `${priorities}.name as ticket_priority_name`,
-        `${org}.name as organization_name`
+        `${org}.name as organization_name`,
+        `${approvalStatuses}.name as quote_approval_status_name`
       )
       .leftJoin(types, `${t}.ticket_type_id`, `${types}.id`)
       .leftJoin(severities, `${t}.ticket_severity_id`, `${severities}.id`)
       .leftJoin(impacts, `${t}.business_impact_id`, `${impacts}.id`)
       .leftJoin(statuses, `${t}.ticket_status_id`, `${statuses}.id`)
       .leftJoin(priorities, `${t}.ticket_priority_id`, `${priorities}.id`)
-      .leftJoin(org, `${t}.organization_id`, `${org}.id`);
+      .leftJoin(org, `${t}.organization_id`, `${org}.id`)
+      // Lateral join: pick the highest-version non-deleted quote per ticket,
+      // then follow its approval chain to resolve the approval status name.
+      .joinRaw(
+        `LEFT JOIN LATERAL (
+        SELECT quote_approval_id
+        FROM ${quotes}
+        WHERE ticket_id = ${t}.id
+          AND deleted_at IS NULL
+        ORDER BY version DESC
+        LIMIT 1
+      ) latest_quote ON true`
+      )
+      .leftJoin(approvals, 'latest_quote.quote_approval_id', `${approvals}.id`)
+      .leftJoin(approvalStatuses, `${approvals}.approval_status_id`, `${approvalStatuses}.id`);
 
     query = this.applyFilters(query, options);
 

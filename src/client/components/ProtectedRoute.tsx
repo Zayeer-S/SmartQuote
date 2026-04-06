@@ -19,7 +19,7 @@ const ProtectedRoute: React.FC<Props> = ({ allowedRoles }) => {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role.name)) {
-    return <Navigate to={CLIENT_ROUTES.LOGIN} replace />;
+    return <Navigate to={CLIENT_ROUTES.INSUFFICIENT_PERMISSIONS} replace />;
   }
 
   return <Outlet />;

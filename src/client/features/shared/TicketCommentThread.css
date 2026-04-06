@@ -4,6 +4,15 @@
   gap: var(--space-6);
 }
 
+/* Tab strip shown only for admins */
+.comment-thread-tabs {
+  margin-bottom: calc(-1 * var(--space-3));
+}
+
+.comment-selection {
+  padding-top: var(--space-2);
+}
+
 .comment-list {
   list-style: none;
   display: flex;
@@ -90,22 +99,25 @@
 
 .add-comment-form {
   display: flex;
-  flex-direction: column;
+  align-items: stretch;
   gap: var(--space-3);
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border);
 }
 
-.add-comment-form-controls {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: var(--space-4);
-  align-items: start;
+.add-comment-form .field-textarea {
+  flex: 1;
+  min-height: unset;
+  height: 42px;
+  resize: none;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
 }
 
-.add-comment-type-field,
-.add-comment-text-field {
-  margin-bottom: 0;
+.add-comment-form .btn {
+  flex-shrink: 0;
+  align-self: stretch;
+  height: auto;
 }
 
 /* -- Dark theme -- */
@@ -151,10 +163,4 @@
 
 [data-theme='dark'] .add-comment-form {
   border-top-color: var(--color-border);
-}
-
-@media (max-width: 768px) {
-  .add-comment-form-controls {
-    grid-template-columns: 1fr;
-  }
 }
