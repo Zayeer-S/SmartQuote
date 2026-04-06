@@ -17,6 +17,7 @@ import AssignTicketForm from '../../features/admin/tickets/AssignTicketForm.js';
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import { useListEmployeeUsers } from '../../hooks/useListEmployeeUsers.js';
 import AdminQuotePanel from '../../features/admin/quotes/AdminQuotePanel.js';
+import SlaStatus from '../../features/admin/tickets/SlaStatus.js';
 
 type AdminTab = 'details' | 'quote' | 'revision';
 
@@ -113,6 +114,7 @@ const AdminTicketDetailPage: React.FC = () => {
               {!ticketLoading && !ticketError && ticketData && (
                 <>
                   <TicketDetailCard ticketId={ticketId} ticket={ticket} />
+                  <SlaStatus slaStatus={ticketData.slaStatus} />
                   <AssignTicketForm
                     ticketData={ticketData}
                     adminUsers={adminData}

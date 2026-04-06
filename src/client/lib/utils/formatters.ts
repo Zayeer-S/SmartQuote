@@ -19,6 +19,18 @@ export function getTimestamp(time: string): string {
   });
 }
 
+export function getHours(hours: number): string {
+  if (hours < 1) {
+    return `${String(Math.round(hours * 60))} min`;
+  }
+  if (hours % 1 === 0) {
+    return `${String(hours)} hr${hours === 1 ? '' : 's'}`;
+  }
+  const wholeHours = Math.floor(hours);
+  const minutes = Math.round((hours - wholeHours) * 60);
+  return `${String(wholeHours)} hr ${String(minutes)} min`;
+}
+
 export function getCurrency(amount: number): string {
   return new Intl.NumberFormat(CURR_LOCALE, { style: 'currency', currency: CURR_CURRENCY }).format(
     amount

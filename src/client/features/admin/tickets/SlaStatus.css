@@ -1,0 +1,89 @@
+.sla-section-heading {
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  padding: var(--space-4) var(--space-5) 0;
+}
+
+.sla-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0 var(--space-5) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sla-detail-policy-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+}
+
+.sla-detail-current-target {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2) var(--space-8);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sla-detail-dl-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sla-detail-dl-row dt {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.sla-detail-dl-row dd {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* Targets table */
+.sla-targets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.sla-targets-table thead tr {
+  border-top: 1px solid var(--color-border);
+}
+
+.sla-targets-table th {
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semi-bold);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  text-align: left;
+}
+
+.sla-targets-table td {
+  padding: var(--space-2) var(--space-5);
+  color: var(--color-text-primary);
+}
+
+.sla-targets-table tbody tr {
+  border-top: 1px solid var(--color-border);
+  transition: background-color var(--transition-fast);
+}
+
+.sla-targets-table tbody tr:hover {
+  background-color: var(--color-bg-subtle);
+}
+
+/* -- Dark theme -- */
+
+[data-theme='dark'] .sla-targets-table tbody tr:hover {
+  background-color: var(--color-surface-raised);
+}
