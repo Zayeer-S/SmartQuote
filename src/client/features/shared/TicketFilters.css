@@ -1,51 +1,63 @@
-.admin-ticket-filters {
+.ticket-filters {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
   margin-bottom: var(--space-6);
 }
 
-.admin-ticket-filters-row {
+.ticket-filters-row {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
 }
 
-.admin-ticket-filters-date-group {
+.ticket-filters-search {
+  flex: 1;
+  min-width: 180px;
+}
+
+.ticket-filters-select {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.ticket-filters-date-group {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   flex-shrink: 0;
 }
 
-.admin-ticket-filters-date-label {
+.ticket-filters-date-label {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   white-space: nowrap;
 }
 
-.admin-ticket-filters-date-input {
+.ticket-filters-date-input {
   width: 148px;
   flex-shrink: 0;
 }
 
-.admin-ticket-filters-sla-select {
-  width: 160px;
-  flex-shrink: 0;
-}
-
 @media (max-width: 700px) {
-  .admin-ticket-filters-date-group {
+  .ticket-filters-date-group {
     width: 100%;
   }
 
-  .admin-ticket-filters-date-input {
+  .ticket-filters-date-input {
     flex: 1;
     width: auto;
   }
+}
 
-  .admin-ticket-filters-sla-select {
+@media (max-width: 540px) {
+  .ticket-filters-search {
+    width: 100%;
+    flex: unset;
+  }
+
+  .ticket-filters-select {
     width: calc(50% - var(--space-1));
   }
 }

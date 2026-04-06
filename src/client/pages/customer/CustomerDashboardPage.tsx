@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
+import { useTicketFilters } from '../../hooks/useTicketFilters.js';
 import Modal from '../../components/Modal.js';
 import SubmitTicketForm from '../../features/customer/dashboard/SubmitTicketForm.js';
+import TicketFilters from '../../features/shared/TicketFilters.js';
+import TicketPagination from '../../features/collate/TicketPagination.js';
 import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
-import './CustomerDashboardPage.css';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
 import CustomerTicketCard from '../../features/customer/ticket/CustomerTicketCard.js';
+import './CustomerDashboardPage.css';
 
 const CustomerDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -41,6 +44,20 @@ const CustomerDashboardPage: React.FC = () => {
   const allTickets = data?.tickets ?? [];
   const firstName = user?.firstName ?? '';
 
+  const {
+    filteredTickets,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    typeFilter,
+    setTypeFilter,
+    page,
+    setPage,
+    totalPages,
+    clearFilters,
+  } = useTicketFilters(allTickets);
+
   return (
     <div className="dashboard-page" data-testid="dashboard-page">
       <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
@@ -62,14 +79,26 @@ const CustomerDashboardPage: React.FC = () => {
             </button>
           </div>
 
+          <TicketFilters
+            search={search}
+            onSearchChange={setSearch}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            typeFilter={typeFilter}
+            onTypeChange={setTypeFilter}
+            onClear={clearFilters}
+          />
+
           <BaseTicketList
-            tickets={allTickets}
+            tickets={filteredTickets}
             renderItem={(ticket) => <CustomerTicketCard ticket={ticket} />}
             loading={loading}
             error={error}
             emptyMessage="You have no tickets yet."
             testIdPrefix="tickets"
           />
+
+          <TicketPagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </section>
 
         {!loading && !error && <DashboardSidePanel tickets={allTickets} />}

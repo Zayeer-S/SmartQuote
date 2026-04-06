@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
 import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAdminTicketFilters, slaUrgencyKey } from '../../hooks/useAdminTicketFilters.js';
-import AdminTicketFilters from '../../features/admin/tickets/AdminTicketFilters.js';
+import TicketFilters from '../../features/shared/TicketFilters.js';
 import TicketPagination from '../../features/collate/TicketPagination.js';
 import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
 import './AdminDashboardPage.css';
@@ -81,7 +81,7 @@ const AdminDashboardPage: React.FC = () => {
             </h2>
           </div>
 
-          <AdminTicketFilters
+          <TicketFilters
             search={search}
             onSearchChange={setSearch}
             statusFilter={statusFilter}
