@@ -75,7 +75,9 @@ smartquote/
 │   │   │   │       ├── AssignTicketForm.css
 │   │   │   │       ├── AssignTicketForm.tsx
 │   │   │   │       ├── SimilarTicketsPanel.css
-│   │   │   │       └── SimilarTicketsPanel.tsx
+│   │   │   │       ├── SimilarTicketsPanel.tsx
+│   │   │   │       ├── SlaStatus.css
+│   │   │   │       └── SlaStatus.tsx
 │   │   │   ├── collate/
 │   │   │   │   ├── TicketFilters.css
 │   │   │   │   ├── TicketFilters.tsx

@@ -50,14 +50,14 @@ test.describe('Customer role', () => {
     await expect(page).toHaveURL(/\/customer\/settings/);
   });
 
-  test('is redirected away from /admin to /login', async ({ page }) => {
+  test('is redirected away from /admin to /insufficient-permissions', async ({ page }) => {
     await page.goto('/admin');
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page).toHaveURL(/\/insufficient-permissions/);
   });
 
-  test('is redirected away from /admin/settings to /login', async ({ page }) => {
+  test('is redirected away from /admin/settings to /insufficient-permissions', async ({ page }) => {
     await page.goto('/admin/settings');
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page).toHaveURL(/\/insufficient-permissions/);
   });
 });
 
@@ -80,8 +80,8 @@ test.describe('Admin role', () => {
     await expect(page).toHaveURL(/\/admin\/settings/);
   });
 
-  test('is redirected away from /customer to /login', async ({ page }) => {
+  test('is redirected away from /customer to /insufficient-permissions', async ({ page }) => {
     await page.goto('/customer');
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page).toHaveURL(/\/insufficient-permissions/);
   });
 });
