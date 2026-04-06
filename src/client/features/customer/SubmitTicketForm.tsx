@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { useCreateTicket } from '../../../hooks/tickets/useCreateTicket.js';
-import { ticketAPI } from '../../../lib/api/ticket.api.js';
+import { useCreateTicket } from '../../hooks/tickets/useCreateTicket.js';
+import { ticketAPI } from '../../lib/api/ticket.api.js';
 import {
   TICKET_TYPES,
   TICKET_SEVERITIES,
   BUSINESS_IMPACTS,
   ATTACHMENT_CONFIG,
-} from '../../../../shared/constants/lookup-values.js';
+} from '../../../shared/constants/lookup-values.js';
 import type {
   TicketType,
   TicketSeverity,
   BusinessImpact,
-} from '../../../../shared/constants/lookup-values.js';
-import type { CreateTicketRequest } from '../../../../shared/contracts/ticket-contracts.js';
+} from '../../../shared/constants/lookup-values.js';
+import type { CreateTicketRequest } from '../../../shared/contracts/ticket-contracts.js';
 import './SubmitTicketForm.css';
-import { checkIntegerInput, toTitleCase } from '../../../lib/utils/input-utils.js';
+import { checkIntegerInput, toTitleCase } from '../../lib/utils/input-utils.js';
 
 interface SubmitTicketFormProps {
   onSuccess: () => void;
@@ -73,7 +73,7 @@ const PHASE_LABEL: Record<SubmitPhase, string> = {
 const TITLE_MAX = 100;
 const DESCRIPTION_MAX = 1000;
 
-const TITLE_MIN = 20;
+const TITLE_MIN = 15;
 const DESCRIPTION_MIN = 50;
 
 function validateForm(form: FormState): string | null {

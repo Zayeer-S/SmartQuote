@@ -3,12 +3,12 @@ import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
 import { useTicketFilters } from '../../hooks/useTicketFilters.js';
 import Modal from '../../components/Modal.js';
-import SubmitTicketForm from '../../features/customer/dashboard/SubmitTicketForm.js';
+import SubmitTicketForm from '../../features/customer/SubmitTicketForm.js';
 import TicketFilters from '../../features/shared/TicketFilters.js';
 import TicketPagination from '../../features/collate/TicketPagination.js';
 import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
-import CustomerTicketCard from '../../features/customer/ticket/CustomerTicketCard.js';
+import CustomerTicketCard from '../../features/customer/CustomerTicketCard.js';
 import '../../styles/DashboardPage.css';
 
 const CustomerDashboardPage: React.FC = () => {

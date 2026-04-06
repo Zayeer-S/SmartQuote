@@ -82,14 +82,12 @@ smartquote/
 │   │   │   │   ├── TicketPagination.css
 │   │   │   │   └── TicketPagination.tsx
 │   │   │   ├── customer/
+│   │   │   │   ├── CustomerQuotePanel.tsx
 │   │   │   │   ├── CustomerTicketCard.tsx
-│   │   │   │   ├── dashboard/
-│   │   │   │   │   ├── SubmitTicketForm.css
-│   │   │   │   │   └── SubmitTicketForm.tsx
-│   │   │   │   └── quote/
-│   │   │   │       ├── QuoteActions.css
-│   │   │   │       ├── QuoteActions.tsx
-│   │   │   │       └── CustomerQuotePanel.tsx
+│   │   │   │   ├── QuoteActions.css
+│   │   │   │   ├── QuoteActions.tsx
+│   │   │   │   ├── SubmitTicketForm.css
+│   │   │   │   └── SubmitTicketForm.tsx
 │   │   │   └── shared/
 │   │   │       ├── AttachmentList.css
 │   │   │       ├── AttachmentList.tsx

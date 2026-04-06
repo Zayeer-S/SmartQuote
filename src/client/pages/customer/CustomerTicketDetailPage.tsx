@@ -7,7 +7,7 @@ import TicketTitle from '../../features/shared/TicketTitle.js';
 import TabNav, { TabNavItem } from '../../components/TabNav.js';
 import TicketDetailSidePanel from '../../features/shared/side-panels/TicketDetailSidePanel.js';
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
-import CustomerQuotePanel from '../../features/customer/quote/CustomerQuotePanel.js';
+import CustomerQuotePanel from '../../features/customer/CustomerQuotePanel.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 
 type CustomerTab = 'details' | 'quote' | 'revision';
