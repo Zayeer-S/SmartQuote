@@ -5,9 +5,9 @@ import { useAdminTicketFilters, slaUrgencyKey } from '../../hooks/useAdminTicket
 import TicketFilters from '../../features/shared/TicketFilters.js';
 import TicketPagination from '../../features/collate/TicketPagination.js';
 import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
-import './AdminDashboardPage.css';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
 import AdminTicketCard from '../../features/admin/tickets/AdminTicketCard.js';
+import '../../styles/DashboardPage.css';
 
 const PRIORITY_ORDER: Record<string, number> = { P1: 1, P2: 2, P3: 3, P4: 4 };
 
@@ -67,16 +67,16 @@ const AdminDashboardPage: React.FC = () => {
   const firstName = user?.firstName ?? '';
 
   return (
-    <div className="admin-dashboard-page" data-testid="admin-dashboard-page">
+    <div className="dashboard-page" data-testid="dashboard-page">
       <div>
-        <h1 className="admin-dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
-        <div className="admin-dashboard-line" />
+        <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
+        <div className="dashboard-line" />
       </div>
 
       <div className="dashboard-layout">
-        <section aria-labelledby="admin-tickets-heading">
-          <div className="admin-dashboard-section-header">
-            <h2 className="admin-dashboard-section-title" id="admin-tickets-heading">
+        <section aria-labelledby="tickets-heading">
+          <div className="dashboard-section-header">
+            <h2 className="dashboard-section-title" id="tickets-heading">
               Tickets
             </h2>
           </div>

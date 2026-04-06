@@ -9,7 +9,7 @@ import TicketPagination from '../../features/collate/TicketPagination.js';
 import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
 import CustomerTicketCard from '../../features/customer/ticket/CustomerTicketCard.js';
-import './CustomerDashboardPage.css';
+import '../../styles/DashboardPage.css';
 
 const CustomerDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -60,8 +60,10 @@ const CustomerDashboardPage: React.FC = () => {
 
   return (
     <div className="dashboard-page" data-testid="dashboard-page">
-      <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
-      <div className="dashboard-line" />
+      <div>
+        <h1 className="dashboard-heading">Welcome back{firstName ? `, ${firstName}` : ''}</h1>
+        <div className="dashboard-line" />
+      </div>
 
       <div className="dashboard-layout">
         <section aria-labelledby="tickets-heading">
