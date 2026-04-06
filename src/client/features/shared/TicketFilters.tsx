@@ -130,7 +130,7 @@ const TicketFilters: React.FC<TicketFiltersProps> = ({
             aria-label="Filter by SLA breach status"
             data-testid="admin-filter-sla-breach"
           >
-            <option value="">All SLA statuses</option>
+            <option value="">All SLA</option>
             <option value="breached">Breached</option>
             <option value="ok">Within SLA</option>
           </select>

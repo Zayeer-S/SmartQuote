@@ -19,7 +19,6 @@
 
 .ticket-filters-select {
   width: auto;
-  min-width: 100px;
   flex: 1;
 }
 
@@ -37,11 +36,7 @@
 }
 
 .ticket-filters-date-input {
-  width: 130px;
-}
-
-.ticket-filters .btn-ghost {
-  margin-left: auto;
+  width: 110px;
 }
 
 @media (max-width: 700px) {
