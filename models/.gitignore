@@ -178,3 +178,8 @@ pyrightconfig.json
 
 data/
 output/
+handler/artifacts/
+
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
