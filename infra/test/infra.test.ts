@@ -45,7 +45,9 @@ describe('DatabaseStack', () => {
     it('has an S3 gateway endpoint', () => {
       dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
         VpcEndpointType: 'Gateway',
-        ServiceName: Match.stringLikeRegexp('s3'),
+        ServiceName: Match.objectLike({
+          'Fn::Join': Match.arrayWith([Match.arrayWith([Match.stringLikeRegexp('s3')])]),
+        }),
       });
     });
 
