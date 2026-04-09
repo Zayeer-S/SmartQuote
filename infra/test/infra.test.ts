@@ -38,8 +38,8 @@ describe('DatabaseStack', () => {
   });
 
   describe('VPC endpoints', () => {
-    it('has exactly 3 VPC endpoints (S3 gateway, Secrets Manager interface, Bedrock interface)', () => {
-      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 3);
+    it('has exactly 4 VPC endpoints (S3 gateway, Secrets Manager interface, Bedrock interface, Lambda interface)', () => {
+      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 4);
     });
 
     it('has an S3 gateway endpoint', () => {
@@ -62,6 +62,13 @@ describe('DatabaseStack', () => {
       dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
         VpcEndpointType: 'Interface',
         ServiceName: Match.stringLikeRegexp('bedrock-runtime'),
+      });
+    });
+
+    it('has a Lambda interface endpoint', () => {
+      dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+        VpcEndpointType: 'Interface',
+        ServiceName: Match.stringLikeRegexp('lambda'),
       });
     });
   });
@@ -137,6 +144,37 @@ describe('AppStack', () => {
     ({ appTemplate } = buildStacks());
   });
 
+  describe('ML Lambda', () => {
+    it('has the correct function name from config', () => {
+      appTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        FunctionName: infraConfig.mlLambda.functionName,
+      });
+    });
+
+    it('has the correct memory size from config', () => {
+      appTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        FunctionName: infraConfig.mlLambda.functionName,
+        MemorySize: infraConfig.mlLambda.memoryMb,
+      });
+    });
+
+    it('has the correct timeout from config', () => {
+      appTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        FunctionName: infraConfig.mlLambda.functionName,
+        Timeout: infraConfig.mlLambda.timeoutSeconds,
+      });
+    });
+
+    it('has MODEL_DIR environment variable set from config', () => {
+      appTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        FunctionName: infraConfig.mlLambda.functionName,
+        Environment: {
+          Variables: Match.objectLike({ MODEL_DIR: infraConfig.mlLambda.modelDir }),
+        },
+      });
+    });
+  });
+
   describe('API Lambda', () => {
     it('has the correct function name from config', () => {
       appTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -173,6 +211,7 @@ describe('AppStack', () => {
         'BCRYPT_SALT_ROUNDS',
         'MAX_LOGIN_ATTEMPTS',
         'LOGIN_RATE_LIMIT_WINDOW_MINUTES',
+        'ML_QUOTE_LAMBDA_FUNCTION_NAME',
       ];
 
       const functions = appTemplate.findResources('AWS::Lambda::Function', {
@@ -196,12 +235,36 @@ describe('AppStack', () => {
       });
     });
 
+    it('has ML_QUOTE_LAMBDA_FUNCTION_NAME set to the ML Lambda function name', () => {
+      appTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        FunctionName: infraConfig.lambda.functionName,
+        Environment: {
+          Variables: Match.objectLike({
+            ML_QUOTE_LAMBDA_FUNCTION_NAME: infraConfig.mlLambda.functionName,
+          }),
+        },
+      });
+    });
+
     it('has Bedrock InvokeModel permission', () => {
       appTemplate.hasResourceProperties('AWS::IAM::Policy', {
         PolicyDocument: {
           Statement: Match.arrayWith([
             Match.objectLike({
               Action: 'bedrock:InvokeModel',
+              Effect: 'Allow',
+            }),
+          ]),
+        },
+      });
+    });
+
+    it('has lambda:InvokeFunction permission on the ML Lambda', () => {
+      appTemplate.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+          Statement: Match.arrayWith([
+            Match.objectLike({
+              Action: 'lambda:InvokeFunction',
               Effect: 'Allow',
             }),
           ]),
@@ -278,6 +341,10 @@ describe('AppStack', () => {
 
     it('outputs ApiGatewayUrl', () => {
       appTemplate.hasOutput('ApiGatewayUrl', {});
+    });
+
+    it('outputs MlQuoteFunctionName', () => {
+      appTemplate.hasOutput('MlQuoteFunctionName', {});
     });
   });
 });
