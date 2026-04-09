@@ -225,6 +225,12 @@ export class QuoteEngineService {
     return newQuote;
   }
 
+  async getTicket(ticketId: TicketId, options?: TransactionContext): Promise<Ticket> {
+    const ticket = await this.ticketsDAO.getById(ticketId, options);
+    if (!ticket) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
+    return ticket;
+  }
+
   /**
    * Find the highest-priority active calculation rule that matches the ticket's
    * severity, business impact, and users_impacted range.
