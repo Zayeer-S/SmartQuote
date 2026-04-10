@@ -44,3 +44,17 @@ aws lambda invoke \
   --payload '{"embedding":[...],"features":{"ticket_type_id":1,"ticket_severity_id":3,"business_impact_id":3,"users_impacted":50,"deadline_offset_days":2.5,"is_after_hours":0}}' \
   response.json
 ```
+
+# Gotchas
+
+**esbuild cache stale after source changes**
+
+CDK uses esbuild to bundle the Lambda. esbuild caches aggressively -- if you fix a bug in server code and redeploy but the Lambda still exhibits the old behaviour, the cache may be serving a stale bundle.
+
+Force a clean rebuild:
+```bash
+bashrm -rf ~/.cache/esbuild
+touch src/server/bootstrap/lambda.handler.ts
+npm run infra:deploy-all
+```
+`touch` updates the entry file's mtime, which is enough to invalidate the cache and force a fresh bundle.
