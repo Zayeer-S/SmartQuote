@@ -1,9 +1,7 @@
-version: "3.8"
-
 services:
   postgres:
-    image: postgres:16-alpine
-    container_name: prototype-postgres
+    image: postgres:17
+    container_name: smartquote-local-database
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -22,27 +20,8 @@ services:
     networks:
       - app-network
 
-  redis:
-    image: redis:7-alpine
-    container_name: prototype-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - app-network
-
 volumes:
   postgres-data:
-    driver: local
-  redis-data:
     driver: local
 
 networks:

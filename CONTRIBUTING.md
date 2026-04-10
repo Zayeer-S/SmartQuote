@@ -2,26 +2,13 @@
 
 ## Getting Started
 
-Run these commands in order:
-
-```bash
-npm install
-npm run setup          # Install deps, run migrations, and seed database
-npm run dev:full       # Start both client and server in dev mode
-```
+Refer to local development setup in [README.md](./README.md)
 
 ## Development Workflow
 
-### Manual Quality Checks
-
-```bash
-npm run validate       # Run all checks (lint, type-check, tests)
-npm run check          # Lint, type-check, and format check
-```
-
 ## Architecture Rules
 
-- Consult STRUCTURE.md in docs to understand the architectural rules
+- TODO
 
 ## Key Principles
 
@@ -48,21 +35,11 @@ npm run check          # Lint, type-check, and format check
 
 ## Database Workflow
 
-```bash
-npm run db:migrate                        # Run pending migrations
-npm run db:migrate:rollback               # Rollback last batch
-npm run db:reset                          # Fresh database (rollback all + migrate + seed)
-```
+Refer to [database guide](docs/guides/DB.md) for useful commands
 
 ## Testing
 
-```bash
-npm run test           # Run unit tests in watch mode
-npm run test:run       # Run unit tests once
-npm run test:coverage  # Generate coverage report
-npm run test:e2e       # Run Playwright E2E tests
-npm run test:e2e:ui    # Run E2E tests with UI
-```
+Refer to [testing guide](docs/guides/TESTS.md) for useful commands
 
 ## Questions
 

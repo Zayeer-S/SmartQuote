@@ -4,10 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "vite",
     "dev:server": "tsx watch src/server/bootstrap/server.ts",
-    "dev:full": "concurrently \"npm run dev\" \"npm run dev:server\"",
-    "dev:full:setup": "npm run dev:full && npm run db:reset",
     "build": "tsc -b && vite build",
     "build:server": "tsc --project tsconfig.server.json --noEmit",
     "build:client": "vite build",
@@ -44,6 +43,7 @@
     "test:e2e:debug": "playwright test --debug",
     "test:all": "npm run test:unit:run && npm run test:integration:run && npm run test:e2e",
     "test:coverage": "npm run test:unit:coverage && npm run test:integration:coverage",
+    "test:infra": "cd infra && npx jest test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
@@ -60,11 +60,11 @@
     "docker:prod:run": "docker run -p 3000:3000 --env-file .env.local prototype:latest",
     "clean": "rm -rf dist node_modules/.vite",
     "clean:all": "rm -rf dist node_modules node_modules/.vite",
-    "setup": "npm install && npm run db:migrate && npm run db:seed",
     "ci:test": "npm run lint && npm run type-check && npm run test:run && npm run test:e2e",
     "ci:build": "npm run build:all",
     "validate": "npm run check && npm run test:run",
-    "prepare": "husky"
+    "prepare": "husky",
+    "setup": "npm i && npm audit fix --force && cp .env.example .env.local && docker-compose up -d && db:reset"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1015.0",

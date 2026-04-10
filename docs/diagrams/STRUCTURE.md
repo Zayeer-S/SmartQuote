@@ -11,8 +11,16 @@ smartquote/
 ├── .husky/pre-commit/                              # Lint-staged
 │
 ├── docs/
-│   ├── STRUCTURE.md
-│   └── TEAM_GUIDE.md
+│   ├── diagrams/
+│   │   ├── ERD.png
+│   │   ├── ERD.xml
+│   │   └── STRUCTURE.md
+│   └── guides/
+│       ├── CICD.md
+│       ├── DB.md
+│       ├── INFRA.md
+│       ├── ML.md
+│       └── TESTS.md
 │
 ├── infra/                                          # CDK - only include custom files here
 │   ├── bin/infra.ts

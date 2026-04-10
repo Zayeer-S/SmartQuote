@@ -1,81 +1,156 @@
-# Contributing to SmartQuote
+# SmartQuote
 
-## Getting Started
+Intelligent quoting system for support and incident tickets, built for Giacom.
 
-# Install Node and PgAdmin4
-- https://nodejs.org/en/download
-- https://www.pgadmin.org/download/
+Customers submit support, incident, or enhancement tickets. The system automatically generates cost and time estimates using a rule-based engine augmented by an XGBoost ML model. Admins review both estimates, approve or adjust quotes, and manage the full ticket lifecycle.
 
-# Run these commands in order:
+Live: https://smartquote.zayeer.dev
 
-```bash
-npm install
-npm run setup          # Install deps, run migrations, and seed database
-npm run dev:full       # Start both client and server in dev mode
+---
+
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [Repository Structure](#repository-structure)
+- [Local Development](#local-development)
+- [Environment Variables](#environment-variables)
+- [Running Tests](#running-tests)
+- [Deployment](#deployment)
+- [ML Model](#ml-model)
+- [CI/CD](#cicd)
+
+---
+
+## Tech Stack
+
+| Layer                  | Technology                                             |
+| ---------------------- | ------------------------------------------------------ |
+| Frontend               | React, TypeScript, Vite                                |
+| Backend                | Node.js 22, Express, TypeScript                        |
+| Database               | PostgreSQL 16 (AWS RDS)                                |
+| Infrastructure         | AWS CDK (TypeScript)                                   |
+| Compute                | AWS Lambda (Node.js zip + Python container)            |
+| CDN                    | AWS CloudFront                                         |
+| Storage                | AWS S3                                                 |
+| Embeddings             | AWS Bedrock (Titan Text Embeddings V2)                 |
+| ML Runtime             | XGBoost + scikit-learn (Python 3.12, Lambda container) |
+| DNS                    | Cloudflare                                             |
+| CI/CD                  | GitHub Actions                                         |
+| E2E Tests              | Playwright                                             |
+| Unit/Integration Tests | Vitest                                                 |
+
+---
+
+## Repository Structure
+
+```
+smartquote/
+├── .github/workflows/      # CI (unit/integration + E2E) and CD pipelines
+├── .github/actions/        # Reusable workflow actions
+├── docs/                   # Project documentation
+├── infra/                  # AWS CDK infrastructure (TypeScript)
+│   ├── lib/app-stack.ts    # Main stack: Lambda, API Gateway, CloudFront, S3
+│   ├── lib/database-stack.ts # VPC, RDS, security groups, VPC endpoints
+│   ├── lib/config.ts       # Single source of truth for all infra config values
+│   └── test/infra.test.ts  # CDK assertion tests
+├── models/                 # ML model training pipeline (Python)
+│   ├── scripts/            # Synthetic data generation
+│   ├── notebooks/          # Jupyter training notebook
+│   ├── data/               # Generated CSV (gitignored)
+│   ├── output/             # Trained .pkl artifacts (gitignored)
+│   └── handler/            # Python Lambda handler + Dockerfile
+├── src/
+│   ├── client/             # React frontend
+│   │   ├── components/     # Pure reusable UI (no domain knowledge)
+│   │   ├── features/       # Domain-scoped UI behaviour
+│   │   ├── hooks/          # Thin API adapter hooks
+│   │   ├── lib/api/        # API call layer (only place that knows endpoints)
+│   │   └── pages/          # Route-level composition (no logic)
+│   ├── server/             # Express backend
+│   │   ├── bootstrap/      # App startup, Lambda handlers
+│   │   ├── containers/     # Dependency injection wiring
+│   │   ├── controllers/    # HTTP request/response only
+│   │   ├── daos/           # Database access only
+│   │   ├── services/       # All business logic
+│   │   └── validators/     # Input shape validation (Zod)
+│   └── shared/             # Contracts and constants shared by client + server
+│       ├── contracts/      # TypeScript DTO types (frontend/backend stay in sync)
+│       └── constants/      # Lookup values and API endpoints
+└── tests/
+    ├── e2e/                # Playwright smoke tests
+    ├── integration/        # Route-level integration tests (Vitest)
+    └── unit/               # Service-level unit tests (Vitest)
 ```
 
-## Development Workflow
+---
 
-### Manual Quality Checks
+## Local Development Setup
 
-```bash
-npm run validate       # Run all checks (lint, type-check, tests)
-npm run check          # Lint, type-check, and format check
-```
+### Prerequisites
 
-## Architecture Rules
+- Node.js 22
+- Python 3.12 + pip (only needed if working on the ML model)
+- Docker (for the local PostgreSQL instance)
+- pgAdmin4 (for the local PostgreSQL instance if not using Docker)
 
-- Consult STRUCTURE.md in docs to understand the architectural rules
+### Setup
 
-## Key Principles
-
-### 1. DRY (Don't Repeat Yourself)
-
-- Extract repeated logic into utilities, services, or components
-- Never copy-paste business rules
-
-### 2. Single Responsibility
-
-- Each module does only one thing
-- If a file has multiple concerns, split it
-
-### 3. Config as Single Source of Truth
-
-- All config values in their own files
-- No hardcoded values scattered throughout code
-- Import from config
-
-### 4. No Quick Workarounds
-
-- Fix root causes, not symptoms
-- If something feels hacky, it probably is - discuss alternatives
-
-## Database Workflow
+## Docker Setup
 
 ```bash
-npm run db:migrate                        # Run pending migrations
-npm run db:migrate:rollback               # Rollback last batch
-npm run db:reset                          # Fresh database (rollback all + migrate + seed)
+# 1. Install dependencies, audit, copy env file, start the local database, and run migrations
+npm run setup
+
+# 2. Fill in .env.local (see Environment Variables section below)
+
+# 3. Start the dev server (frontend + backend concurrently)
+npm run dev
 ```
 
-## Testing
+## Non-Docker Setup
 
 ```bash
-npm run test           # Run unit tests in watch mode
-npm run test:run       # Run unit tests once
-npm run test:coverage  # Generate coverage report
-npm run test:e2e       # Run Playwright E2E tests
-npm run test:e2e:ui    # Run E2E tests with UI
+# 1. Install dependencies, audit, copy env file, start the local database, and run migrations
+npm i && npm audit fix --force && cp .env.example .env.local
+
+# 2. Fill in .env.local (see Environment Variables section below)
+
+# 3. Follow [database guide in docs folder](docs/guides/DB.md) for pgAdmin4 setup
+
+# 4. Start the dev server (frontend + backend concurrently)
+npm run dev
 ```
 
-## Questions
+The app will be available at http://localhost:5173. The API runs at http://localhost:3000.
 
-If unsure where code belongs, ask:
+---
 
-1. Does it make HTTP calls? => `lib/api/` (client) or `controllers/` (server)
-2. Is it a business rule? => `services/`
-3. Is it a database query? => `daos/`
-4. Is it pure UI? => `components/`
-5. Does it know about domain concepts? => Not in `lib/utils/`
+## Environment Variables
 
-When in doubt, open a discussion before implementing.
+All variables are defined in `.env.example`. Copy to `.env.local` for local development. `.env.example` is already populated with dummy examples.
+
+Note: In production, `DB_SECRET_ARN` and `APP_SECRET_ARN` are used instead of plain DB credentials. Secrets are fetched from AWS Secrets Manager at Lambda cold start.
+
+---
+
+## Running Tests
+
+Refer to [testing guide](docs/guides/TESTS.md)
+
+---
+
+## Deployment/Infrastructure
+
+Refer to [infrastructure guide](docs/guides/INFRA.md)
+
+---
+
+## ML Model
+
+Refer to [ML guide](docs/guides/ML.md)
+
+---
+
+## CI/CD
+
+Refer to [CI/CD guide](docs/guides/CICD.md)
