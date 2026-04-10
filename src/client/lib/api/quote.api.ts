@@ -1,6 +1,7 @@
 import type {
   ApproveQuoteRequest,
   CreateManualQuoteRequest,
+  GenerateQuoteResponse,
   ListQuotesResponse,
   ListRevisionsResponse,
   QuoteApprovalResponse,
@@ -28,12 +29,14 @@ export const quoteAPI = {
   },
 
   /**
-   * Auto-generate a quote for a ticket using the quote engine
+   * Auto-generate a quote for a ticket using the rule engine + ML estimator.
+   * Returns both outputs; the rule-based quote is persisted, the ML estimate
+   * is display-only until an admin applies it.
    * @param ticketId Parent ticket ID
-   * @returns The generated quote
+   * @returns Rule-based quote and optional ML estimate
    */
-  async generateQuote(ticketId: string): Promise<QuoteResponse> {
-    const response = await httpClient.post<ApiResponse<QuoteResponse>>(
+  async generateQuote(ticketId: string): Promise<GenerateQuoteResponse> {
+    const response = await httpClient.post<ApiResponse<GenerateQuoteResponse>>(
       ticketBase + QUOTE_ENDPOINTS.GENERATE(ticketId)
     );
     return extractData(response);
@@ -73,7 +76,7 @@ export const quoteAPI = {
    * Update a quote's fields
    * @param ticketId Parent ticket ID
    * @param quoteId Target quote ID
-   * @param payload Fields to update — reason is mandatory
+   * @param payload Fields to update -- reason is mandatory
    * @returns Updated quote
    */
   async updateQuote(
@@ -124,7 +127,7 @@ export const quoteAPI = {
    * Reject a quote
    * @param ticketId Parent ticket ID
    * @param quoteId Target quote ID
-   * @param payload Rejection comment — mandatory
+   * @param payload Rejection comment -- mandatory
    * @returns Approval record
    */
   async rejectQuote(

@@ -1,5 +1,8 @@
 import React from 'react';
-import type { QuoteWithApprovalResponse } from '../../../../shared/contracts/quote-contracts.js';
+import type {
+  MLQuoteEstimate,
+  QuoteWithApprovalResponse,
+} from '../../../../shared/contracts/quote-contracts.js';
 import { getCurrency, getTimestamp } from '../../../lib/utils/formatters.js';
 import AdminQuoteApproval from './AdminQuoteApproval.js';
 import '../../../styles/QuotePanel.css';
@@ -7,16 +10,23 @@ import '../../../styles/QuotePanel.css';
 interface QuotePanelProps {
   ticketId: string;
   quote: QuoteWithApprovalResponse;
+  mlEstimate: MLQuoteEstimate | null;
   handleQuoteMutated: () => void;
 }
 
-const AdminQuotePanel: React.FC<QuotePanelProps> = ({ ticketId, quote, handleQuoteMutated }) => {
+const AdminQuotePanel: React.FC<QuotePanelProps> = ({
+  ticketId,
+  quote,
+  mlEstimate,
+  handleQuoteMutated,
+}) => {
   return (
     <section className="card quote-panel" aria-labelledby="quote-heading" data-testid="quote-panel">
       <h2 className="quote-panel-title" id="quote-heading">
         Quote v{quote.version}
       </h2>
 
+      <p className="quote-panel-source-label quote-panel-source-label--rule">Rule-based estimate</p>
       <dl className="quote-panel-dl">
         <div>
           <dt>Estimated Total Cost</dt>
@@ -75,10 +85,11 @@ const AdminQuotePanel: React.FC<QuotePanelProps> = ({ ticketId, quote, handleQuo
 
         <div>
           <dt>Approved At</dt>
-          {quote.approvedAt && (
+          {quote.approvedAt ? (
             <dd data-testid="quote-approved-at">{getTimestamp(quote.approvedAt)}</dd>
-          )}{' '}
-          {!quote.approvedAt && <dd data-testid="quote-approved-at">Not approved yet</dd>}
+          ) : (
+            <dd data-testid="quote-approved-at">Not approved yet</dd>
+          )}
         </div>
 
         <div>
@@ -91,6 +102,43 @@ const AdminQuotePanel: React.FC<QuotePanelProps> = ({ ticketId, quote, handleQuo
           <dd data-testid="quote-created-at">{getTimestamp(quote.createdAt)}</dd>
         </div>
       </dl>
+
+      {mlEstimate !== null && (
+        <div className="quote-panel-ml" data-testid="quote-ml-estimate">
+          <p className="quote-panel-source-label quote-panel-source-label--ml">
+            ML estimate
+            <span className="quote-panel-ml-confidence" data-testid="quote-ml-confidence">
+              {Math.round(mlEstimate.priorityConfidence * 100)}% priority confidence
+            </span>
+          </p>
+          <dl className="quote-panel-dl quote-panel-dl--ml">
+            <div>
+              <dt>Estimated Cost</dt>
+              <dd data-testid="quote-ml-estimated-cost">{getCurrency(mlEstimate.estimatedCost)}</dd>
+            </div>
+
+            <div>
+              <dt>Hours Range</dt>
+              <dd data-testid="quote-ml-hours">
+                {mlEstimate.estimatedHoursMinimum}–{mlEstimate.estimatedHoursMaximum} hrs
+              </dd>
+            </div>
+
+            <div>
+              <dt>Suggested Priority</dt>
+              <dd data-testid="quote-ml-suggested-priority">
+                {mlEstimate.suggestedTicketPriority}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      )}
+
+      {mlEstimate === null && (
+        <p className="quote-panel-ml-unavailable" data-testid="quote-ml-unavailable">
+          ML estimate unavailable -- ticket embedding may still be processing.
+        </p>
+      )}
 
       {quote.approvalComment && (
         <div className="quote-panel-approval-comment" data-testid="approval-comment">

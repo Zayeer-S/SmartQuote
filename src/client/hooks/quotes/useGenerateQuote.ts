@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { quoteAPI } from '../../lib/api/quote.api.js';
-import type { QuoteResponse } from '../../../shared/contracts/quote-contracts.js';
+import type { GenerateQuoteResponse } from '../../../shared/contracts/quote-contracts.js';
 
 interface UseGenerateQuoteState {
-  data: QuoteResponse | null;
+  data: GenerateQuoteResponse | null;
   loading: boolean;
   error: string | null;
 }
 
 interface UseGenerateQuoteReturn extends UseGenerateQuoteState {
-  execute: (ticketId: string) => Promise<void>;
+  execute: (ticketId: string) => Promise<GenerateQuoteResponse | null>;
 }
 
 export function useGenerateQuote(): UseGenerateQuoteReturn {
@@ -19,13 +19,15 @@ export function useGenerateQuote(): UseGenerateQuoteReturn {
     error: null,
   });
 
-  async function execute(ticketId: string): Promise<void> {
+  async function execute(ticketId: string): Promise<GenerateQuoteResponse | null> {
     setState({ data: null, loading: true, error: null });
     try {
       const data = await quoteAPI.generateQuote(ticketId);
       setState({ data, loading: false, error: null });
+      return data;
     } catch (err) {
       setState({ data: null, loading: false, error: (err as Error).message });
+      return null;
     }
   }
 
