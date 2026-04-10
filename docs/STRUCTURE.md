@@ -16,11 +16,28 @@ smartquote/
 │
 ├── infra/                                          # CDK - only include custom files here
 │   ├── bin/infra.ts
-│   └── lib/
-│       ├── app-stack.ts
-│       ├── certificate-stack.ts
-│       ├── config.ts
-│       └── database-stack.ts
+│   ├── lib/
+│   │   ├── app-stack.ts
+│   │   ├── certificate-stack.ts
+│   │   ├── config.ts
+│   │   └── database-stack.ts
+│   └── test/infra.test.ts                          # CDK assertion tests
+│
+├── models/
+│   ├── .venv/
+│   ├── .gitignore
+│   ├── requirements.txt
+│   ├── handler/
+│   │   ├── app.py                                  # Lambda entry point
+│   │   ├── Dockerfile
+│   │   └── artifacts
+│   │       ├── pca.pkl
+│   │       ├── regressor.pkl
+│   │       ├── classifier.pkl
+│   │       └── model_meta.json
+│   └── notebooks/
+│       ├── xgboost_quote_estimator.ipynb
+│       └── generate_synthetic_data.py
 │
 ├── src/
 │   ├── client/
@@ -122,7 +139,7 @@ smartquote/
 │   │   │   │   ├── useQuotePermissions.ts
 │   │   │   │   ├── useTicketPermissions.ts
 │   │   │   │   └── useUserPermissions.ts
-│   │   │   ├── context/                                 All context hooks
+│   │   │   ├── context/                            # All context hooks
 │   │   │   │   ├── useAuth.ts
 │   │   │   │   ├── useSidebar.ts
 │   │   │   │   └── useTheme.ts
@@ -176,7 +193,7 @@ smartquote/
 │   │   │   │   ├── http-client.ts
 │   │   │   │   ├── org.api.ts
 │   │   │   │   ├── quote.api.ts
-│   │   │   │   ├── rate.profile.api.ts
+│   │   │   │   ├── rate-profile.api.ts
 │   │   │   │   ├── sla.api.ts
 │   │   │   │   └── ticket.api.ts
 │   │   │   ├── storage/                            # Browser persistence tokens
@@ -337,7 +354,7 @@ smartquote/
 │   │   │   ├── analytics.routes.ts
 │   │   │   ├── auth.routes.ts
 │   │   │   ├── org.routes.ts
-│   │   │   ├── rate.profiles.routes.ts
+│   │   │   ├── rate-profiles.routes.ts
 │   │   │   └── ticket.routes.ts
 │   │   ├── services/                               # All business rules/workflows here; nothing else enforces domain behaviour. No HTTP here.
 │   │   │   ├── analytics/
@@ -367,6 +384,7 @@ smartquote/
 │   │   │   │   ├── org.service.ts
 │   │   │   │   └── org.service.types.ts
 │   │   │   ├── quote/
+│   │   │   │   ├── ml-quote.service.ts
 │   │   │   │   ├── quote-approval.service.ts
 │   │   │   │   ├── quote-engine.service.ts
 │   │   │   │   ├── quote.errors.ts

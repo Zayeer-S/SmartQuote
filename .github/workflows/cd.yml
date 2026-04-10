@@ -49,6 +49,10 @@ jobs:
         working-directory: infra
         run: npm ci
 
+      - name: Run infra tests
+        working-directory: infra
+        run: npx jest test
+
       - name: Deploy database stack
         working-directory: infra
         run: npx cdk deploy SmartQuoteDatabaseStack --require-approval never

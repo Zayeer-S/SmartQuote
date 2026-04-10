@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib/core';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import { OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -39,6 +40,34 @@ export class AppStack extends cdk.Stack {
       cdk.Fn.importValue('LambdaSecurityGroupId')
     );
 
+    const mlEcrRepo = ecr.Repository.fromRepositoryName(
+      this,
+      'MlQuoteEcrRepo',
+      infraConfig.mlLambda.ecrRepoName
+    );
+
+    const mlFunction = new lambda.DockerImageFunction(this, 'MlQuoteFunction', {
+      functionName: infraConfig.mlLambda.functionName,
+      code: lambda.DockerImageCode.fromEcr(mlEcrRepo, {
+        tagOrDigest: infraConfig.mlLambda.imageTag,
+      }),
+      memorySize: infraConfig.mlLambda.memoryMb,
+      timeout: cdk.Duration.seconds(infraConfig.mlLambda.timeoutSeconds),
+      vpc: databaseStack.vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [lambdaSecurityGroup],
+      environment: {
+        MODEL_DIR: infraConfig.mlLambda.modelDir,
+      },
+    });
+
+    new cdk.CfnOutput(this, 'MlQuoteFunctionName', {
+      value: mlFunction.functionName,
+      description:
+        'ML quote Lambda -- invoke manually to smoke test: aws lambda invoke --function-name smartquote-ml-quote --region eu-west-2 --payload ... response.json',
+    });
+
+    // ── API Lambda (Node.js zip) ───────────────────────────────────────────
     const apiFunction = new lambdaNodejs.NodejsFunction(this, 'ApiFunction', {
       functionName: infraConfig.lambda.functionName,
       entry: path.join(__dirname, '../../', infraConfig.lambda.entryPoint),
@@ -83,6 +112,7 @@ export class AppStack extends cdk.Stack {
         APP_SECRET_ARN: appSecret.secretArn,
         AWS_S3_BUCKET: infraConfig.attachments.bucketName,
         ATTACHMENT_PRESIGN_EXPIRY_SECONDS: String(infraConfig.attachments.presignExpirySeconds),
+        ML_QUOTE_LAMBDA_FUNCTION_NAME: mlFunction.functionName,
       },
     });
 
@@ -105,6 +135,11 @@ export class AppStack extends cdk.Stack {
       })
     );
 
+    // Allow apiFunction to invoke the ML Lambda.
+    // grantInvoke adds lambda:InvokeFunction on mlFunction's ARN to apiFunction's role.
+    mlFunction.grantInvoke(apiFunction);
+
+    // ── Migrate Lambda ─────────────────────────────────────────────────────
     // Invoked manually via AWS CLI when migrations need to run.
     // Lives in the same VPC as RDS so it can reach the private DB endpoint.
     const migrateFunction = new lambdaNodejs.NodejsFunction(this, 'MigrateFunction', {
@@ -164,6 +199,7 @@ export class AppStack extends cdk.Stack {
         'Invoke this Lambda to run DB migrations: aws lambda invoke --function-name smartquote-migrate --region eu-west-2 response.json',
     });
 
+    // ── Seed Lambda ────────────────────────────────────────────────────────
     // Invoked manually via AWS CLI to populate the database with seed data.
     const seedFunction = new lambdaNodejs.NodejsFunction(this, 'SeedFunction', {
       functionName: 'smartquote-seed',
@@ -223,6 +259,7 @@ export class AppStack extends cdk.Stack {
         'Invoke this Lambda to seed the database: aws lambda invoke --function-name smartquote-seed --region eu-west-2 response.json',
     });
 
+    // ── API Gateway ────────────────────────────────────────────────────────
     const api = new apigateway.LambdaRestApi(this, 'ApiGateway', {
       handler: apiFunction,
       proxy: true,
@@ -245,6 +282,7 @@ export class AppStack extends cdk.Stack {
       },
     });
 
+    // ── Frontend (S3 + CloudFront) ─────────────────────────────────────────
     const frontendBucket = new s3.Bucket(this, 'FrontendBucket', {
       bucketName: infraConfig.s3.bucketName,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,

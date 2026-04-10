@@ -18,6 +18,9 @@ import { QuoteApprovalService } from '../services/quote/quote-approval.service.j
 import { QuoteController } from '../controllers/quote.controller.js';
 import { OrganizationMembersDAO } from '../daos/children/organizations-domain.dao.js';
 import type { NotificationService } from '../services/notification/notification.service.js';
+import { MLQuoteService } from '../services/quote/ml-quote.service.js';
+import { TicketEmbeddingsDAO } from '../daos/children/ticket-nlp.dao.js';
+import { backEnv } from '../config/env.backend.js';
 
 export class QuoteContainer {
   public readonly ticketsDAO: TicketsDAO;
@@ -27,10 +30,12 @@ export class QuoteContainer {
   public readonly rateProfilesDAO: RateProfilesDAO;
   public readonly quoteCalculationRulesDAO: QuoteCalculationRulesDAO;
   public readonly usersDAO: UsersDAO;
+  public readonly ticketEmbeddingsDAO: TicketEmbeddingsDAO;
 
   public readonly quoteService: QuoteService;
   public readonly quoteEngineService: QuoteEngineService;
   public readonly quoteApprovalService: QuoteApprovalService;
+  public readonly mlQuoteService: MLQuoteService;
 
   public readonly quoteController: QuoteController;
 
@@ -48,6 +53,7 @@ export class QuoteContainer {
     this.rateProfilesDAO = new RateProfilesDAO(db);
     this.quoteCalculationRulesDAO = new QuoteCalculationRulesDAO(db);
     this.usersDAO = new UsersDAO(db);
+    this.ticketEmbeddingsDAO = new TicketEmbeddingsDAO(db);
 
     this.quoteService = new QuoteService(
       this.quotesDAO,
@@ -68,6 +74,11 @@ export class QuoteContainer {
       rbacService,
       lookup,
       notificationService
+    );
+
+    this.mlQuoteService = new MLQuoteService(
+      this.ticketEmbeddingsDAO,
+      backEnv.ML_QUOTE_LAMBDA_FUNCTION_NAME
     );
 
     this.quoteApprovalService = new QuoteApprovalService(

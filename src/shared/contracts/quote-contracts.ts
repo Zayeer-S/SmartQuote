@@ -90,3 +90,36 @@ export interface QuoteRevisionResponse {
 export interface ListRevisionsResponse {
   revisions: QuoteRevisionResponse[];
 }
+
+/**
+ * ML-derived quote estimate returned alongside the rule-based quote.
+ * Null fields indicate the estimate is unavailable (no embedding yet,
+ * Lambda cold-start failure, etc.).
+ */
+export interface MLQuoteEstimate {
+  estimatedHoursMinimum: number;
+  estimatedHoursMaximum: number;
+  estimatedCost: number;
+  /** Priority name resolved server-side (e.g. "P1"). */
+  suggestedTicketPriority: TicketPriority;
+  /**
+   * Max class probability from the XGBoost classifier (0-1).
+   * Low value = model is uncertain between adjacent priority classes.
+   */
+  priorityConfidence: number;
+}
+
+/**
+ * Response shape for the auto-generate quote endpoint.
+ * Both outputs are returned so the admin can compare and choose which to apply.
+ * Only the rule-based quote is persisted to the DB at generation time.
+ */
+export interface GenerateQuoteResponse {
+  /** Persisted quote from the rule-based engine. */
+  ruleBased: QuoteResponse;
+  /**
+   * ML estimate. Null if the ticket has no embedding yet or the Lambda failed.
+   * Display-only -- nothing is persisted from this until an admin applies it.
+   */
+  mlEstimate: MLQuoteEstimate | null;
+}

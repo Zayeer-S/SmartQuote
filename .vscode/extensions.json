@@ -4,6 +4,7 @@
     "esbenp.prettier-vscode",
     "ms-playwright.playwright",
     "vitest.explorer",
-    "ms-vscode-remote.remote-containers"
+    "ms-vscode-remote.remote-containers",
+    "charliermarsh.ruff"
   ]
 }

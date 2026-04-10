@@ -71,6 +71,14 @@ export class DatabaseStack extends cdk.Stack {
       subnets: [{ subnetType: ec2.SubnetType.PRIVATE_ISOLATED }],
     });
 
+    // Lambda service endpoint -- required so apiFunction (in PRIVATE_ISOLATED)
+    // can invoke the ML Lambda via the AWS SDK without internet access.
+    this.vpc.addInterfaceEndpoint('LambdaEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.LAMBDA,
+      subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [lambdaSecurityGroup],
+    });
+
     // Export Lambda SG so AppStack can attach it to the function
     new cdk.CfnOutput(this, 'LambdaSecurityGroupId', {
       value: lambdaSecurityGroup.securityGroupId,

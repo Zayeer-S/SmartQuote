@@ -39,6 +39,22 @@ export const infraConfig = {
     host: '0.0.0.0',
   },
 
+  mlLambda: {
+    functionName: 'smartquote-ml-quote',
+    /** ECR repository that holds the ML container image */
+    ecrRepoName: 'smartquote-ml-quote',
+    /**
+     * Image tag used at runtime. On first deploy the repo will be empty so
+     * the ML Lambda will fail to create -- push an image tagged 'latest'
+     * then redeploy to complete the setup.
+     */
+    imageTag: 'latest',
+    memoryMb: 1024,
+    timeoutSeconds: 29,
+    /** Path inside the container where model artifacts are mounted */
+    modelDir: '/opt/ml',
+  },
+
   s3: {
     bucketName: 'smartquote-frontend',
     /** Path to built frontend assets, relative to repo root */

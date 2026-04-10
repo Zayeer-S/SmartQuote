@@ -3,7 +3,10 @@ import { useGenerateQuote } from '../../../hooks/quotes/useGenerateQuote.js';
 import { useCreateManualQuote } from '../../../hooks/quotes/useCreateManualQuote.js';
 import { useUpdateQuote } from '../../../hooks/quotes/useUpdateQuote.js';
 import { useQuotePermissions } from '../../../hooks/auth/useQuotePermissions.js';
-import type { QuoteWithApprovalResponse } from '../../../../shared/contracts/quote-contracts.js';
+import type {
+  MLQuoteEstimate,
+  QuoteWithApprovalResponse,
+} from '../../../../shared/contracts/quote-contracts.js';
 import {
   EFFORT_OPTIONS,
   CONFIDENCE_OPTIONS,
@@ -19,12 +22,14 @@ interface AdminCreateQuoteFormProps {
   ticketId: string;
   latestQuote: QuoteWithApprovalResponse | null;
   onSuccess: () => void;
+  onGenerated: (mlEstimate: MLQuoteEstimate | null) => void;
 }
 
 export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
   ticketId,
   latestQuote,
   onSuccess,
+  onGenerated,
 }) => {
   const { canCreate } = useQuotePermissions();
   const generate = useGenerateQuote();
@@ -55,7 +60,10 @@ export const AdminCreateQuoteForm: React.FC<AdminCreateQuoteFormProps> = ({
   };
 
   const handleGenerate = (): void => {
-    void generate.execute(ticketId).then(onSuccess);
+    void generate.execute(ticketId).then((result) => {
+      onGenerated(result?.mlEstimate ?? null);
+      onSuccess();
+    });
   };
 
   const handleManualSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
