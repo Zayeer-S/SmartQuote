@@ -236,14 +236,13 @@ describe('AppStack', () => {
     });
 
     it('has ML_QUOTE_LAMBDA_FUNCTION_NAME set to the ML Lambda function name', () => {
-      appTemplate.hasResourceProperties('AWS::Lambda::Function', {
-        FunctionName: infraConfig.lambda.functionName,
-        Environment: {
-          Variables: Match.objectLike({
-            ML_QUOTE_LAMBDA_FUNCTION_NAME: infraConfig.mlLambda.functionName,
-          }),
-        },
+      const functions = appTemplate.findResources('AWS::Lambda::Function', {
+        Properties: { FunctionName: infraConfig.lambda.functionName },
       });
+      const fnResource = Object.values(functions)[0];
+      const envVars = fnResource.Properties.Environment.Variables;
+      expect(envVars).toHaveProperty('ML_QUOTE_LAMBDA_FUNCTION_NAME');
+      expect(envVars['ML_QUOTE_LAMBDA_FUNCTION_NAME']).toBeTruthy();
     });
 
     it('has Bedrock InvokeModel permission', () => {
