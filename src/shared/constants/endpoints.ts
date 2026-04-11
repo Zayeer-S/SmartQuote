@@ -12,6 +12,11 @@ export const ADMIN_ENDPOINTS = {
   USERS: '/users',
 } as const;
 
+export const USER_ENDPOINTS = {
+  BASE: '/users',
+  MY_NOTIFICATION_PREFERENCES: '/me/notifications',
+} as const;
+
 export const TICKET_ENDPOINTS = {
   BASE: '/tickets',
   LIST: '/',

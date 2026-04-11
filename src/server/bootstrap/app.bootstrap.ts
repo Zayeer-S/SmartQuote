@@ -23,13 +23,15 @@ import { BertEmbedder } from '../lib/nlp/bert-embedder.js';
 import { PriorityEngineAnchorsDAO } from '../daos/children/ticket-nlp.dao.js';
 import { AnalyticsContainer } from '../containers/analytics.container.js';
 import { createAnalyticsRoutes } from '../routes/analytics.routes.js';
-import { RATE_PROFILE_ENDPOINTS, SLA_ENDPOINTS } from '../../shared/constants/endpoints.js';
+import {
+  RATE_PROFILE_ENDPOINTS,
+  SLA_ENDPOINTS,
+  USER_ENDPOINTS,
+} from '../../shared/constants/endpoints.js';
 import { SlaContainer } from '../containers/sla.container.js';
 import { createSlaRoutes } from '../routes/sla.routes.js';
-import { EmailService } from '../services/email/email.service.js';
-import { NotificationService } from '../services/notification/notification.service.js';
-import { NotificationTypesDAO } from '../daos/children/notification-types.dao.js';
-import { UserNotificationPreferencesDAO } from '../daos/children/users-domain.dao.js';
+import { NotificationContainer } from '../containers/notification.container.js';
+import { createUserRoutes } from '../routes/user.routes.js';
 
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
@@ -124,13 +126,7 @@ export async function bootstrapApplication(
     adminContainer.rbacService,
     authContainer.orgMembersDAO
   );
-
-  const emailService = new EmailService();
-  const notificationService = new NotificationService(
-    emailService,
-    new UserNotificationPreferencesDAO(db),
-    new NotificationTypesDAO(db)
-  );
+  const notificationContainer = new NotificationContainer(db);
 
   const ticketContainer = new TicketContainer(
     db,
@@ -139,14 +135,14 @@ export async function bootstrapApplication(
     lookupResolver,
     embedder,
     slaContainer.slaService,
-    notificationService
+    notificationContainer.notificationService
   );
   const quoteContainer = new QuoteContainer(
     db,
     adminContainer.rbacService,
     lookupResolver,
     authContainer.orgMembersDAO,
-    notificationService
+    notificationContainer.notificationService
   );
   const orgContainer = new OrgContainer(
     db,
@@ -199,6 +195,10 @@ export async function bootstrapApplication(
       authContainer.authService,
       adminContainer.rbacService
     )
+  );
+  app.use(
+    `/api${USER_ENDPOINTS.BASE}`,
+    createUserRoutes(notificationContainer.notificationController, authContainer.authService)
   );
 
   app.get('/health', (_req, res) => {

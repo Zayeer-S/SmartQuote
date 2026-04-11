@@ -1,6 +1,12 @@
 import { NOTIFICATION_TYPES } from '../../../shared/constants/lookup-values.js';
+import type {
+  GetNotificationPreferencesResponse,
+  UpdateNotificationPreferencesRequest,
+  UpdateNotificationPreferencesResponse,
+} from '../../../shared/contracts/notification-contracts.js';
 import type { NotificationTypesDAO } from '../../daos/children/notification-types.dao.js';
 import { UserNotificationPreferencesDAO } from '../../daos/children/users-domain.dao.js';
+import type { NotificationTypeId } from '../../database/types/ids.js';
 import type { UserId } from '../../database/types/ids.js';
 import type { EmailService } from '../email/email.service.js';
 import { NOTIFICATION_ERROR_MSGS, NotificationError } from './notification.errors.js';
@@ -57,6 +63,48 @@ export class NotificationService {
     return this.dispatchIfEnabled(data.userId as UserId, NOTIFICATION_TYPES.TICKET_RESOLVED, () =>
       this.emailService.sendTicketResolved(data)
     );
+  }
+
+  /**
+   * Get all notification preferences for a user.
+   * Returns all known notification types with enabled flag based on DB rows.
+   */
+  async getPreferences(userId: UserId): Promise<GetNotificationPreferencesResponse> {
+    const [allTypes, enabledIds] = await Promise.all([
+      this.notificationTypesDAO.getAll(),
+      this.userNotificationPreferencesDAO.getEnabledNotificationTypes(userId),
+    ]);
+
+    const enabledSet = new Set(enabledIds);
+
+    const preferences = allTypes.map((type) => ({
+      notificationTypeId: type.id as unknown as number,
+      notificationTypeName: type.name,
+      enabled: enabledSet.has(type.id),
+    }));
+
+    return { preferences };
+  }
+
+  /**
+   * Replace a user's notification preferences with the provided set.
+   * Any type not in enabledNotificationTypeIds is treated as disabled.
+   */
+  async updatePreferences(
+    userId: UserId,
+    body: UpdateNotificationPreferencesRequest
+  ): Promise<UpdateNotificationPreferencesResponse> {
+    await this.userNotificationPreferencesDAO.setPreferences(
+      userId,
+      body.enabledNotificationTypeIds as unknown as NotificationTypeId[]
+    );
+
+    const updated = await this.getPreferences(userId);
+
+    return {
+      preferences: updated.preferences,
+      message: 'Notification preferences updated successfully',
+    };
   }
 
   /**
