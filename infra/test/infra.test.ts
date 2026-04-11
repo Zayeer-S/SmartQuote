@@ -38,8 +38,8 @@ describe('DatabaseStack', () => {
   });
 
   describe('VPC endpoints', () => {
-    it('has exactly 4 VPC endpoints (S3 gateway, Secrets Manager interface, Bedrock interface, Lambda interface)', () => {
-      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 4);
+    it('has exactly 5 VPC endpoints (S3 gateway, Secrets Manager interface, Bedrock interface, Lambda interface, Simple Email Service interface)', () => {
+      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 5);
     });
 
     it('has an S3 gateway endpoint', () => {
@@ -69,6 +69,13 @@ describe('DatabaseStack', () => {
       dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
         VpcEndpointType: 'Interface',
         ServiceName: Match.stringLikeRegexp('lambda'),
+      });
+    });
+
+    it('has a Simple Email Service interface endpoint', () => {
+      dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+        VpcEndpointType: 'Interface',
+        ServiceName: Match.stringLikeRegexp('Ses'),
       });
     });
   });
