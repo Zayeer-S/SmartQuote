@@ -1,7 +1,7 @@
 import type { OrganizationId, UserId } from '../../database/types/ids.js';
 
 export interface AddMemberData {
-  targetUserId: UserId;
+  targetEmail: string;
   orgId: OrganizationId;
 }
 

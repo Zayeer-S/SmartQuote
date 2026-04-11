@@ -7,7 +7,7 @@ import type {
 import type { OrgRolesDAO, RolesDAO } from '../../daos/children/roles-domain.dao.js';
 import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { OrganizationId, UserId } from '../../database/types/ids.js';
-import type { Organization, OrganizationMember } from '../../database/types/tables.js';
+import type { Organization, OrganizationMemberWithUser } from '../../database/types/tables.js';
 import type { OrgRBACService } from '../rbac/org-rbac.service.js';
 import {
   OrgError,
@@ -49,7 +49,7 @@ export class OrgMembersService {
    * a customer already belonging to any org (including this one) is rejected.
    * New members are always assigned the MEMBER org role.
    *
-   * @param data Target user and org
+   * @param data Target user email and org
    * @param actorId User performing the action
    * @param options Optional transaction context
    * @returns Created membership row
@@ -61,7 +61,7 @@ export class OrgMembersService {
     data: AddMemberData,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<OrganizationMember> {
+  ): Promise<OrganizationMemberWithUser> {
     const canManage = await this.orgRBACService.hasOrgPermission(
       actorId,
       data.orgId,
@@ -73,7 +73,7 @@ export class OrgMembersService {
     const org = await this.orgsDAO.getById(data.orgId, options);
     if (!org) throw new OrgError(ORG_ERROR_MSGS.NOT_FOUND, 404);
 
-    const target = await this.usersDAO.getById(data.targetUserId, options);
+    const target = await this.usersDAO.findByEmail(data.targetEmail, options);
     if (!target) throw new OrgError(ORG_MEMBERS_ERROR_MSGS.TARGET_NOT_FOUND, 404);
 
     // Resolve the customer role ID to compare against the target's role_id
@@ -83,7 +83,7 @@ export class OrgMembersService {
     }
 
     // Single-org constraint: customers may not belong to more than one org
-    const existingMemberships = await this.orgMembersDAO.findByUser(data.targetUserId, options);
+    const existingMemberships = await this.orgMembersDAO.findByUser(target.id, options);
 
     if (existingMemberships && existingMemberships.length > 0) {
       const alreadyInThisOrg = existingMemberships.some((m) => m.organization_id === data.orgId);
@@ -97,14 +97,21 @@ export class OrgMembersService {
     const memberOrgRole = await this.orgRolesDAO.findByName(ORG_ROLES.MEMBER, options);
     if (!memberOrgRole) throw new OrgError('Member org role not found', 500);
 
-    return this.orgMembersDAO.create(
+    await this.orgMembersDAO.create(
       {
         organization_id: data.orgId,
-        user_id: data.targetUserId,
+        user_id: target.id,
         org_role_id: memberOrgRole.id,
       },
       options
     );
+
+    // Return the enriched projection so the controller can map user fields
+    const created = await this.orgMembersDAO.findByOrganizationWithUsers(data.orgId, options);
+    const membership = created?.find((m) => m.user_id === target.id);
+    if (!membership) throw new OrgError('Failed to retrieve created membership', 500);
+
+    return membership;
   }
 
   /**
@@ -148,7 +155,7 @@ export class OrgMembersService {
   }
 
   /**
-   * List all members of an org.
+   * List all members of an org, enriched with user identity fields.
    *
    * Requires org:view_members for the given org. System admins/managers
    * are handled transparently by OrgRBACService.
@@ -156,7 +163,7 @@ export class OrgMembersService {
    * @param orgId Org to list members for
    * @param actorId User performing the action
    * @param options Optional transaction context
-   * @returns Array of membership rows
+   * @returns Array of enriched membership projections
    * @throws OrgForbiddenError if actor lacks org:view_members in this org
    * @throws OrgError if org not found
    */
@@ -164,7 +171,7 @@ export class OrgMembersService {
     orgId: OrganizationId,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<OrganizationMember[] | null> {
+  ): Promise<OrganizationMemberWithUser[] | null> {
     const canView = await this.orgRBACService.hasOrgPermission(
       actorId,
       orgId,
@@ -176,7 +183,7 @@ export class OrgMembersService {
     const org = await this.orgsDAO.getById(orgId, options);
     if (!org) throw new OrgError(ORG_ERROR_MSGS.NOT_FOUND, 404);
 
-    return await this.orgMembersDAO.findByOrganization(orgId, options);
+    return this.orgMembersDAO.findByOrganizationWithUsers(orgId, options);
   }
 
   /**

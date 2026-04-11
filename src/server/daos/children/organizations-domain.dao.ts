@@ -1,7 +1,11 @@
 import { Knex } from 'knex';
-import { LINK_TABLES, LOOKUP_TABLES } from '../../database/config/table-names';
+import { LINK_TABLES, LOOKUP_TABLES, MAIN_TABLES } from '../../database/config/table-names';
 import { OrganizationId, UserId } from '../../database/types/ids';
-import { Organization, OrganizationMember } from '../../database/types/tables';
+import {
+  Organization,
+  OrganizationMember,
+  OrganizationMemberWithUser,
+} from '../../database/types/tables';
 import { ActivatableDAO } from '../base/activatable.dao';
 import { CompositeKeyDAO } from '../base/composite-key.dao';
 import { QueryOptions } from '../base/types';
@@ -71,6 +75,39 @@ export class OrganizationMembersDAO extends CompositeKeyDAO<OrganizationMember> 
     options?: QueryOptions
   ): Promise<OrganizationMember[] | null> {
     return this.getMany({ organization_id: organizationId }, options);
+  }
+
+  /**
+   * Get all memberships for an org, joined with user identity fields.
+   *
+   * @param organizationId
+   * @param options
+   * @returns Array of OrganizationMemberWithUser projections, or null if none found
+   */
+  async findByOrganizationWithUsers(
+    organizationId: OrganizationId,
+    options?: QueryOptions
+  ): Promise<OrganizationMemberWithUser[] | null> {
+    const db = options?.trx ?? this.db;
+
+    const rows = await db(LINK_TABLES.ORGANIZATION_MEMBERS)
+      .select(
+        `${LINK_TABLES.ORGANIZATION_MEMBERS}.*`,
+        `${MAIN_TABLES.USERS}.email as user_email`,
+        `${MAIN_TABLES.USERS}.first_name as user_first_name`,
+        `${MAIN_TABLES.USERS}.last_name as user_last_name`
+      )
+      .join(
+        MAIN_TABLES.USERS,
+        `${LINK_TABLES.ORGANIZATION_MEMBERS}.user_id`,
+        `${MAIN_TABLES.USERS}.id`
+      )
+      .where(`${LINK_TABLES.ORGANIZATION_MEMBERS}.organization_id`, organizationId);
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!rows || rows.length === 0) return null;
+
+    return rows as OrganizationMemberWithUser[];
   }
 
   /**

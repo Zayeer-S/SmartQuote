@@ -16,7 +16,11 @@ import type {
   OrgResponse,
 } from '../../shared/contracts/org-contracts.js';
 import type { OrganizationId, UserId } from '../database/types/ids.js';
-import type { Organization, OrganizationMember } from '../database/types/tables.js';
+import type {
+  Organization,
+  OrganizationMember,
+  OrganizationMemberWithUser,
+} from '../database/types/tables.js';
 import type { OrgService } from '../services/org/org.service.js';
 import type { OrgMembersService } from '../services/org/org-members.service.js';
 
@@ -109,12 +113,9 @@ export class OrgController {
         actor.id as UserId
       );
 
-      let response: ListOrgMembersResponse | null;
-      if (members)
-        response = {
-          members: members.map((m) => this.mapMember(m)),
-        };
-      else response = null;
+      const response: ListOrgMembersResponse | null = members
+        ? { members: members.map((m) => this.mapMember(m)) }
+        : null;
 
       success(res, response, 200);
     } catch (err: unknown) {
@@ -131,7 +132,7 @@ export class OrgController {
       const member = await this.orgMembersService.addMember(
         {
           orgId: params.orgId as OrganizationId,
-          targetUserId: body.userId as UserId,
+          targetEmail: body.email,
         },
         actor.id as UserId
       );
@@ -183,10 +184,17 @@ export class OrgController {
     };
   }
 
-  private mapMember(member: OrganizationMember): OrgMemberResponse {
+  private mapMember(member: OrganizationMember | OrganizationMemberWithUser): OrgMemberResponse {
+    const withUser = member as OrganizationMemberWithUser;
     return {
       organizationId: member.organization_id as string,
       userId: member.user_id as string,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      email: withUser.user_email ?? '',
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      firstName: withUser.user_first_name ?? '',
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      lastName: withUser.user_last_name ?? '',
       orgRoleId: member.org_role_id as unknown as number,
       createdAt: member.created_at.toISOString(),
       updatedAt: member.updated_at.toISOString(),

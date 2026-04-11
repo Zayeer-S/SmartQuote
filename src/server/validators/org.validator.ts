@@ -28,7 +28,7 @@ export const orgIdParamSchema = z.object({
 export type OrgIdParam = z.infer<typeof orgIdParamSchema>;
 
 export const addOrgMemberSchema = z.object({
-  userId: z.uuid('User ID must be a valid UUID'),
+  email: z.email('Must be a valid email address'),
 });
 
 export type AddOrgMemberInput = z.infer<typeof addOrgMemberSchema>;
