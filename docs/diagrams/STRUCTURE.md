@@ -498,6 +498,7 @@ smartquote/
 ├── .dockerignore
 ├── .env.example
 ├── .env.local
+├── .env.test
 ├── .gitignore
 ├── .prettierignore
 ├── .prettiererc
