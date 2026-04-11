@@ -147,10 +147,13 @@ smartquote/
 │   │   │   │   ├── useQuotePermissions.ts
 │   │   │   │   ├── useTicketPermissions.ts
 │   │   │   │   └── useUserPermissions.ts
-│   │   │   ├── context/                            # All context hooks
+│   │   │   ├── contexts/                            # All context hooks
 │   │   │   │   ├── useAuth.ts
 │   │   │   │   ├── useSidebar.ts
 │   │   │   │   └── useTheme.ts
+│   │   │   ├── notifications/
+│   │   │   │   ├── useGetNotificationPreferences.ts
+│   │   │   │   └── useUpdateNotificationPreferences.ts
 │   │   │   ├── org/
 │   │   │   │   ├── useAddOrgMembers.ts
 │   │   │   │   ├── useCreateOrg.ts
@@ -199,6 +202,7 @@ smartquote/
 │   │   │   │   ├── analytics.api.ts
 │   │   │   │   ├── auth.api.ts
 │   │   │   │   ├── http-client.ts
+│   │   │   │   ├── notification-api.ts
 │   │   │   │   ├── org.api.ts
 │   │   │   │   ├── quote.api.ts
 │   │   │   │   ├── rate-profile.api.ts
@@ -285,6 +289,7 @@ smartquote/
 │   │   │   ├── admin.container.ts
 │   │   │   ├── analytics.container.ts
 │   │   │   ├── auth.container.ts
+│   │   │   ├── notification.container.ts
 │   │   │   ├── org.container.ts
 │   │   │   ├── quote.container.ts
 │   │   │   ├── rate-profiles.container.ts
@@ -294,6 +299,7 @@ smartquote/
 │   │   │   ├── admin.controller.ts
 │   │   │   ├── analytics.controller.ts
 │   │   │   ├── auth.controller.ts
+│   │   │   ├── notification.controller.ts
 │   │   │   ├── org.controller.ts
 │   │   │   ├── quote.controller.ts
 │   │   │   ├── rate-profiles.controller.ts
@@ -362,7 +368,8 @@ smartquote/
 │   │   │   ├── auth.routes.ts
 │   │   │   ├── org.routes.ts
 │   │   │   ├── rate-profiles.routes.ts
-│   │   │   └── ticket.routes.ts
+│   │   │   ├── ticket.routes.ts
+│   │   │   └── user.routes.ts
 │   │   ├── services/                               # All business rules/workflows here; nothing else enforces domain behaviour. No HTTP here.
 │   │   │   ├── analytics/
 │   │   │   │   ├── analytics.errors.ts
@@ -425,6 +432,7 @@ smartquote/
 │   │   └── validators/                             # Input shape validation only; must not access database or services.
 │   │       ├── analytics.validator.ts
 │   │       ├── auth.validator.ts
+│   │       ├── notification.validator.ts
 │   │       ├── org.validator.ts
 │   │       ├── quote.validator.ts
 │   │       ├── rate-profile.validator.ts
@@ -441,6 +449,7 @@ smartquote/
 │       └── contracts/                              # Define all DTO types here so frontend/backend share to prevent drift
 │           ├── analytics-contracts.ts
 │           ├── auth-contracts.ts
+│           ├── notification-contracts.ts
 │           ├── org-contracts.ts
 │           ├── quote-contracts.ts
 │           ├── rate-profile-contracts.ts
@@ -479,6 +488,7 @@ smartquote/
 │   │   └── setup.server.ts
 │   ├── integration/
 │   │   ├── auth.routes.test.ts
+│   │   ├── email.service.test.ts
 │   │   ├── quote.routes.test.ts
 │   │   ├── rate.profiles.routes.test.ts
 │   │   ├── sla.routes.test.ts
@@ -486,13 +496,14 @@ smartquote/
 │   ├── unit/
 │   │   └── server/
 │   │       ├── auth.service.test.ts
+│   │       ├── notification.service.test.ts
 │   │       ├── password.service.test.ts
 │   │       ├── quote.engine.service.test.ts
 │   │       ├── quote.service.test.ts
 │   │       └── session.service.test.ts
 │   └── utils/
 │       ├── mock.daos.ts
-│       ├── mock.services.ts
+│       └── mock.services.ts
 │
 ├── .dockerignore
 ├── .env.example
