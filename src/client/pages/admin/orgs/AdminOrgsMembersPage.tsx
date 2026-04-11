@@ -8,7 +8,7 @@ import { useRemoveOrgMember } from '../../../hooks/org/useRemoveOrgMember.js';
 import { useOrgPermissions } from '../../../hooks/auth/useOrgPermissions.js';
 import { CLIENT_ROUTES } from '../../../constants/client.routes.js';
 import type { OrgMemberResponse } from '../../../../shared/contracts/org-contracts.js';
-import './AdminOrgMembersPage.css';
+import './AdminOrgsMembersPage.css';
 
 // ---------------------------------------------------------------------------
 // Add member modal
