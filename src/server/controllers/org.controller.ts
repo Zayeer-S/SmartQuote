@@ -7,6 +7,7 @@ import {
   orgIdParamSchema,
   orgMemberParamSchema,
   updateOrgSchema,
+  updateMemberRoleSchema,
 } from '../validators/org.validator.js';
 import { success, error } from '../lib/respond.js';
 import type {
@@ -14,6 +15,7 @@ import type {
   ListOrgsResponse,
   OrgMemberResponse,
   OrgResponse,
+  UpdateMemberRoleRequest,
 } from '../../shared/contracts/org-contracts.js';
 import type { OrganizationId, UserId } from '../database/types/ids.js';
 import type {
@@ -157,6 +159,27 @@ export class OrgController {
       );
 
       success(res, { message: 'Member removed successfully' }, 200);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
+  updateMemberRole = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const actor = (req as AuthenticatedRequest).user;
+      const params = validateOrThrow(orgMemberParamSchema, req.params);
+      const body = validateOrThrow(updateMemberRoleSchema, req.body) as UpdateMemberRoleRequest;
+
+      const member = await this.orgMembersService.updateMemberRole(
+        {
+          orgId: params.orgId as OrganizationId,
+          targetUserId: params.userId as UserId,
+          newRole: body.role,
+        },
+        actor.id as UserId
+      );
+
+      success(res, this.mapMember(member), 200);
     } catch (err: unknown) {
       handleError(res, err);
     }

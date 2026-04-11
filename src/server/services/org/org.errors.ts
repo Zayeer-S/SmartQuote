@@ -29,4 +29,6 @@ export const ORG_MEMBERS_ERROR_MSGS = {
   ALREADY_MEMBER_THIS_ORG: 'User is already a member of this organization',
   ALREADY_MEMBER_OTHER_ORG: 'Customer already belongs to another organization',
   NOT_A_MEMBER: 'User is not a member of this organization',
+  SELF_DEMOTION_FORBIDDEN: 'You cannot demote yourself from Manager',
+  ROLE_ALREADY_ASSIGNED: 'Member already has this org role',
 } as const;

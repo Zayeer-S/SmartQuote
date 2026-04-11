@@ -9,13 +9,18 @@ import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { OrganizationId, UserId } from '../../database/types/ids.js';
 import type { Organization, OrganizationMemberWithUser } from '../../database/types/tables.js';
 import type { OrgRBACService } from '../rbac/org-rbac.service.js';
+import type { RBACService } from '../rbac/rbac.service.js';
 import {
   OrgError,
   OrgForbiddenError,
   ORG_ERROR_MSGS,
   ORG_MEMBERS_ERROR_MSGS,
 } from './org.errors.js';
-import type { AddMemberData, RemoveMemberData } from './org-members.service.types.js';
+import type {
+  AddMemberData,
+  RemoveMemberData,
+  UpdateMemberRoleData,
+} from './org-members.service.types.js';
 
 export class OrgMembersService {
   private orgMembersDAO: OrganizationMembersDAO;
@@ -24,6 +29,7 @@ export class OrgMembersService {
   private rolesDAO: RolesDAO;
   orgRolesDAO: OrgRolesDAO;
   private orgRBACService: OrgRBACService;
+  private rbacService: RBACService;
 
   constructor(
     orgMembersDAO: OrganizationMembersDAO,
@@ -31,7 +37,8 @@ export class OrgMembersService {
     usersDAO: UsersDAO,
     rolesDAO: RolesDAO,
     orgRolesDAO: OrgRolesDAO,
-    orgRBACService: OrgRBACService
+    orgRBACService: OrgRBACService,
+    rbacService: RBACService
   ) {
     this.orgMembersDAO = orgMembersDAO;
     this.orgsDAO = orgsDAO;
@@ -39,6 +46,7 @@ export class OrgMembersService {
     this.rolesDAO = rolesDAO;
     this.orgRolesDAO = orgRolesDAO;
     this.orgRBACService = orgRBACService;
+    this.rbacService = rbacService;
   }
 
   /**
@@ -203,6 +211,63 @@ export class OrgMembersService {
 
     return this.orgsDAO.getById(memberships[0].organization_id, options);
   }
-}
 
-// TODO ADD FUNC TO ADD/REMOVE ORG MANAGER STATUS
+  /**
+   * Promote or demote a member's org role (MEMBER <-> MANAGER).
+   *
+   * Only system-privileged actors (ORGANIZATIONS_READ) may change org roles.
+   * Self-demotion is blocked: an actor may not demote themselves to MEMBER.
+   *
+   * @param data Target user, org, and desired new role
+   * @param actorId User performing the action
+   * @param options Optional transaction context
+   * @returns Updated enriched membership projection
+   * @throws OrgForbiddenError if actor lacks ORGANIZATIONS_READ, or attempts self-demotion
+   * @throws OrgError if org not found, or target is not a member of this org
+   */
+  async updateMemberRole(
+    data: UpdateMemberRoleData,
+    actorId: UserId,
+    options?: TransactionContext
+  ): Promise<OrganizationMemberWithUser> {
+    const isSystemPrivileged = await this.rbacService.hasPermission(
+      actorId,
+      PERMISSIONS.ORGANIZATIONS_READ,
+      options
+    );
+    if (!isSystemPrivileged) throw new OrgForbiddenError(ORG_ERROR_MSGS.FORBIDDEN);
+
+    if (actorId === data.targetUserId && data.newRole === ORG_ROLES.MEMBER) {
+      throw new OrgForbiddenError(ORG_MEMBERS_ERROR_MSGS.SELF_DEMOTION_FORBIDDEN);
+    }
+
+    const org = await this.orgsDAO.getById(data.orgId, options);
+    if (!org) throw new OrgError(ORG_ERROR_MSGS.NOT_FOUND, 404);
+
+    const membership = await this.orgMembersDAO.findMembership(
+      data.targetUserId,
+      data.orgId,
+      options
+    );
+    if (!membership) throw new OrgError(ORG_MEMBERS_ERROR_MSGS.NOT_A_MEMBER, 404);
+
+    const newOrgRole = await this.orgRolesDAO.findByName(data.newRole, options);
+    if (!newOrgRole) throw new OrgError(`Org role '${data.newRole}' not found`, 500);
+
+    if (membership.org_role_id === newOrgRole.id) {
+      throw new OrgError(ORG_MEMBERS_ERROR_MSGS.ROLE_ALREADY_ASSIGNED, 422);
+    }
+
+    await this.orgMembersDAO.update(
+      { organization_id: data.orgId, user_id: data.targetUserId },
+      { org_role_id: newOrgRole.id },
+      options
+    );
+
+    const updated = await this.orgMembersDAO.findByOrganizationWithUsers(data.orgId, options);
+    const updatedMembership = updated?.find((m) => m.user_id === data.targetUserId);
+    if (!updatedMembership) throw new OrgError('Failed to retrieve updated membership', 500);
+
+    return updatedMembership;
+  }
+}

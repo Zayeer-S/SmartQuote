@@ -42,7 +42,8 @@ export class OrgContainer {
       this.usersDAO,
       this.rolesDAO,
       this.orgRolesDAO,
-      this.orgRBACService
+      this.orgRBACService,
+      rbacService
     );
 
     this.orgController = new OrgController(this.orgService, this.orgMembersService);

@@ -39,3 +39,7 @@ export const orgMemberParamSchema = z.object({
 });
 
 export type OrgMemberParam = z.infer<typeof orgMemberParamSchema>;
+
+export const updateMemberRoleSchema = z.object({
+  role: z.enum(['Member', 'Manager']),
+});
