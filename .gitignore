@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/react,node,redis
-# Edit at https://www.toptal.com/developers/gitignore?templates=react,node,redis
+# Created by https://www.toptal.com/developers/gitignore/api/react,node
+# Edit at https://www.toptal.com/developers/gitignore?templates=react,node
 
 ### Node ###
 # Logs
@@ -154,12 +154,7 @@ psd
 thumb
 sketch
 
-### Redis ###
-# Ignore redis binary dump (dump.rdb) files
-
-*.rdb
-
-# End of https://www.toptal.com/developers/gitignore/api/react,node,redis
+# End of https://www.toptal.com/developers/gitignore/api/react,node
 
 # loc counter
 .VSCodeCounter
