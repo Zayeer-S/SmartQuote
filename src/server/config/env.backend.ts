@@ -48,10 +48,6 @@ const envSchema = z.object({
     .optional()
     .transform((val) => (val === '' || val === undefined ? 300 : Number(val))),
 
-  REDIS_HOST: optionalStr,
-  REDIS_PORT: optionalNum,
-  REDIS_PASSWORD: optionalStr,
-
   SMTP_HOST: optionalStr,
   SMTP_PORT: optionalNum,
   SMTP_SECURE: optionalBool,

@@ -281,7 +281,6 @@ smartquote/
 │   │   │   ├── email-config.ts
 │   │   │   ├── env.backend.ts
 │   │   │   └── index.ts
-│   │   │   └── redis-config.ts
 │   │   ├── containers/                             # Construct controllers by injecting dependencies; no business behaviour
 │   │   │   ├── admin.container.ts
 │   │   │   ├── analytics.container.ts
