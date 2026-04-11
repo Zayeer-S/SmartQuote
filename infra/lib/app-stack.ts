@@ -128,6 +128,13 @@ export class AppStack extends cdk.Stack {
 
     apiFunction.addToRolePolicy(
       new iam.PolicyStatement({
+        actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+        resources: ['*'],
+      })
+    );
+
+    apiFunction.addToRolePolicy(
+      new iam.PolicyStatement({
         actions: ['bedrock:InvokeModel'],
         resources: [
           `arn:aws:bedrock:${this.region}::foundation-model/amazon.titan-embed-text-v2:0`,

@@ -11,6 +11,7 @@ import {
   QuoteCalculationRulesDAO,
   QuotesDAO,
 } from '../../../../src/server/daos/children/quotes-domain.dao';
+import { NotificationTypesDAO } from '../../../../src/server/daos/children/notification-types.dao';
 
 export function makeMockUsersDAO(): UsersDAO {
   return {
@@ -81,4 +82,12 @@ export function makeMockUserNotificationPreferencesDAO(): UserNotificationPrefer
     setPreferences: vi.fn(),
     getEnabledNotificationTypes: vi.fn(),
   } as unknown as UserNotificationPreferencesDAO;
+}
+
+export function makeMockNotificationTypesDAO(): NotificationTypesDAO {
+  return {
+    getOne: vi.fn(),
+    findByName: vi.fn(),
+    getAll: vi.fn(),
+  } as unknown as NotificationTypesDAO;
 }
