@@ -52,10 +52,6 @@ export class DatabaseStack extends cdk.Stack {
       'Allow Postgres from Lambda'
     );
 
-    // Allows Lambda in isolated subnets to reach AWS services without
-    // internet access -- no NAT Gateway needed.
-
-    // Secrets Manager -- Lambda fetches DB + app secrets at cold start
     this.vpc.addInterfaceEndpoint('SecretsManagerEndpoint', {
       service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
       subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
@@ -71,21 +67,23 @@ export class DatabaseStack extends cdk.Stack {
       subnets: [{ subnetType: ec2.SubnetType.PRIVATE_ISOLATED }],
     });
 
-    // Lambda service endpoint -- required so apiFunction (in PRIVATE_ISOLATED)
-    // can invoke the ML Lambda via the AWS SDK without internet access.
     this.vpc.addInterfaceEndpoint('LambdaEndpoint', {
       service: ec2.InterfaceVpcEndpointAwsService.LAMBDA,
       subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       securityGroups: [lambdaSecurityGroup],
     });
 
-    // Export Lambda SG so AppStack can attach it to the function
+    this.vpc.addInterfaceEndpoint('SesEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.SES,
+      subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [lambdaSecurityGroup],
+    });
+
     new cdk.CfnOutput(this, 'LambdaSecurityGroupId', {
       value: lambdaSecurityGroup.securityGroupId,
       exportName: 'LambdaSecurityGroupId',
     });
 
-    // ── RDS credentials ────────────────────────────────────────────────────
     this.dbSecret = new secretsmanager.Secret(this, 'DbSecret', {
       secretName: infraConfig.db.secretName,
       generateSecretString: {
