@@ -13,16 +13,22 @@ import type {
 export class EmailService {
   private transporter: Transporter | null;
 
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: emailConfig.smtp.host,
-      port: emailConfig.smtp.port,
-      secure: emailConfig.smtp.secure,
-      auth: {
-        user: emailConfig.smtp.auth.user,
-        pass: emailConfig.smtp.auth.pass,
-      },
-    });
+  constructor(transporter?: Transporter) {
+    if (transporter) {
+      this.transporter = transporter;
+    } else if (emailConfig.enabled) {
+      this.transporter = nodemailer.createTransport({
+        host: emailConfig.smtp.host,
+        port: emailConfig.smtp.port,
+        secure: emailConfig.smtp.secure,
+        auth: {
+          user: emailConfig.smtp.auth.user,
+          pass: emailConfig.smtp.auth.pass,
+        },
+      });
+    } else {
+      this.transporter = null;
+    }
   }
 
   async sendTicketReceived(data: NotifyTicketReceivedData): Promise<NotificationResult> {
@@ -54,7 +60,7 @@ export class EmailService {
     subject: string;
     html: string;
   }): Promise<NotificationResult> {
-    if (!this.transporter) return { success: true, messageId: 'email-skipped-in-dev' };
+    if (!this.transporter) return { success: true, messageId: 'email-skipped' };
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
