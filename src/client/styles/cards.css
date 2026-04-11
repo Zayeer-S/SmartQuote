@@ -36,10 +36,6 @@
   padding: var(--space-3) var(--space-3);
 }
 
-/* --------------------------------------------------------------------------
-   Customer ticket card
-   -- TODO: tailor colors, layout, and hover behavior per design
-   -------------------------------------------------------------------------- */
 .ticket-card {
   padding: var(--space-4);
 }
@@ -98,10 +94,6 @@
   flex-shrink: 0;
 }
 
-/* --------------------------------------------------------------------------
-   Admin ticket card
-   -- TODO: tailor colors, layout, and hover behavior per design
-   -------------------------------------------------------------------------- */
 .admin-ticket-card {
   padding: var(--space-4) var(--space-5);
 }
@@ -157,10 +149,6 @@
   color: var(--color-text-muted);
 }
 
-/* --------------------------------------------------------------------------
-   Stat card
-   -- TODO: tailor colors, layout, and hover behavior per design
-   -------------------------------------------------------------------------- */
 .stats-overview {
   display: flex;
   flex-direction: column;

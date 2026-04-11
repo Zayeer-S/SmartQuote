@@ -2,7 +2,6 @@ import { afterAll, beforeAll } from 'vitest';
 import knex, { type Knex } from 'knex';
 import { getConfig } from '../../src/server/config/database-config';
 
-// TODO ADD TEST DB
 if (process.env.NODE_ENV !== 'test') {
   throw new Error('[integration setup] NODE_ENV must be "test" when running integration tests.');
 }

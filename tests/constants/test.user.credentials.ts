@@ -1,4 +1,3 @@
-// TODO ADD ORGANIZATION_ID
 export const ROLE_IDS = {
   CUSTOMER: 1,
   AGENT: 2,
