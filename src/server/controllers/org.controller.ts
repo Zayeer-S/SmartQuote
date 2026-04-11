@@ -115,9 +115,9 @@ export class OrgController {
         actor.id as UserId
       );
 
-      const response: ListOrgMembersResponse | null = members
-        ? { members: members.map((m) => this.mapMember(m)) }
-        : null;
+      const response: ListOrgMembersResponse = {
+        members: (members ?? []).map((m) => this.mapMember(m)),
+      };
 
       success(res, response, 200);
     } catch (err: unknown) {

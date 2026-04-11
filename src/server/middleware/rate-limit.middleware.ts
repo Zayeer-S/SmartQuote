@@ -23,15 +23,3 @@ export const loginRateLimiter = makeRateLimiter({
   skipSuccessfulRequests: false,
   skipFailedRequests: false,
 });
-
-export const apiRateLimiter = makeRateLimiter({
-  windowMs: authRateLimitConfig.api.windowMs,
-  max: authRateLimitConfig.api.maxAttempts,
-  message: {
-    success: false,
-    data: null,
-    error: 'Too many requests. Please try again later.',
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
