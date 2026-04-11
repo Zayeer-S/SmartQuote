@@ -5,6 +5,7 @@ import type {
   ListOrgsResponse,
   OrgMemberResponse,
   OrgResponse,
+  UpdateMemberRoleRequest,
   UpdateOrgRequest,
 } from '../../../shared/contracts/org-contracts.js';
 import { ORG_ENDPOINTS } from '../../../shared/constants/endpoints.js';
@@ -69,5 +70,17 @@ export const orgAPI = {
 
   async removeMember(orgId: string, userId: string): Promise<void> {
     await httpClient.delete(base + ORG_ENDPOINTS.REMOVE_MEMBER(orgId, userId));
+  },
+
+  async updateMemberRole(
+    orgId: string,
+    userId: string,
+    data: UpdateMemberRoleRequest
+  ): Promise<OrgMemberResponse> {
+    const response = await httpClient.patch<ApiResponse<OrgMemberResponse>>(
+      base + ORG_ENDPOINTS.UPDATE_MEMBER_ROLE(orgId, userId),
+      data
+    );
+    return extractData(response);
   },
 };
