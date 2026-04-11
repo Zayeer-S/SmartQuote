@@ -1,7 +1,8 @@
 import * as dotenv from 'dotenv';
 import z from 'zod';
 
-dotenv.config({ path: '.env.local' });
+const envFile = process.env.NODE_ENV === 'test' ? '.env.ci' : '.env.local';
+dotenv.config({ path: envFile });
 
 const optionalStr = z
   .union([z.string(), z.undefined()])
