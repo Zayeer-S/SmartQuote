@@ -9,7 +9,7 @@ interface UseAddOrgMemberState {
 }
 
 interface UseAddOrgMemberReturn extends UseAddOrgMemberState {
-  execute: (orgId: string, userId: string) => Promise<void>;
+  execute: (orgId: string, email: string) => Promise<void>;
 }
 
 export function useAddOrgMember(): UseAddOrgMemberReturn {
@@ -19,10 +19,10 @@ export function useAddOrgMember(): UseAddOrgMemberReturn {
     error: null,
   });
 
-  async function execute(orgId: string, userId: string): Promise<void> {
+  async function execute(orgId: string, email: string): Promise<void> {
     setState({ data: null, loading: true, error: null });
     try {
-      const data = await orgAPI.addMember(orgId, { userId });
+      const data = await orgAPI.addMember(orgId, { email });
       setState({ data, loading: false, error: null });
     } catch (err) {
       setState({ data: null, loading: false, error: (err as Error).message });

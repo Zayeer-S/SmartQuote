@@ -22,17 +22,17 @@ interface AddMemberModalProps {
 }
 
 const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdded, orgId }) => {
-  const [userId, setUserId] = useState('');
+  const [email, setEmail] = useState('');
   const { execute, loading, error } = useAddOrgMember();
 
   const handleClose = (): void => {
-    setUserId('');
+    setEmail('');
     onClose();
   };
 
   const handleSubmit = async (): Promise<void> => {
-    if (!userId.trim()) return;
-    await execute(orgId, userId.trim());
+    if (!email.trim()) return;
+    await execute(orgId, email.trim());
     if (!error) {
       onAdded();
       handleClose();
@@ -42,20 +42,20 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdde
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Add member" testId="add-member-modal">
       <div className="field-group">
-        <label className="field-label" htmlFor="add-member-userid-input">
-          User ID
+        <label className="field-label" htmlFor="add-member-email-input">
+          Email
         </label>
         <input
-          id="add-member-userid-input"
+          id="add-member-email-input"
           className="field-input"
-          type="text"
-          placeholder="Enter user ID"
-          value={userId}
+          type="email"
+          placeholder="user@example.com"
+          value={email}
           onChange={(e) => {
-            setUserId(e.target.value);
+            setEmail(e.target.value);
           }}
           disabled={loading}
-          data-testid="add-member-userid-input"
+          data-testid="add-member-email-input"
         />
       </div>
       {error && (
@@ -78,7 +78,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdde
           onClick={() => {
             void handleSubmit();
           }}
-          disabled={loading || !userId.trim()}
+          disabled={loading || !email.trim()}
           data-testid="add-member-submit-btn"
         >
           {loading ? 'Adding...' : 'Add'}
@@ -123,7 +123,7 @@ const RemoveMemberModal: React.FC<RemoveMemberModalProps> = ({
       title="Remove member"
       description={
         member
-          ? `Are you sure you want to remove user "${member.userId}" from this organisation?`
+          ? `Are you sure you want to remove ${member.firstName} ${member.lastName} (${member.email}) from this organisation?`
           : undefined
       }
       testId="remove-member-modal"
@@ -254,11 +254,13 @@ const AdminOrgMembersPage: React.FC = () => {
               key={member.userId}
               className="card admin-org-members-row"
               role="listitem"
-              data-testid={`member-row-${member.userId}`}
+              data-testid={`member-row-${member.email}`}
             >
               <div className="admin-org-members-row-info">
-                <span className="admin-org-members-row-userid">{member.userId}</span>
-                <span className="admin-org-members-row-meta">Role ID: {member.orgRoleId}</span>
+                <span className="admin-org-members-row-name">
+                  {member.firstName} {member.lastName}
+                </span>
+                <span className="admin-org-members-row-email">{member.email}</span>
               </div>
               {canDelete && (
                 <button
@@ -267,7 +269,7 @@ const AdminOrgMembersPage: React.FC = () => {
                   onClick={() => {
                     setRemoveTarget(member);
                   }}
-                  data-testid={`remove-member-btn-${member.userId}`}
+                  data-testid={`remove-member-btn-${member.email}`}
                 >
                   Remove
                 </button>
