@@ -5,14 +5,13 @@ import { useGetOrg } from '../../../hooks/org/useGetOrg.js';
 import { useListOrgMembers } from '../../../hooks/org/useListOrgMembers.js';
 import { useAddOrgMember } from '../../../hooks/org/useAddOrgMembers.js';
 import { useRemoveOrgMember } from '../../../hooks/org/useRemoveOrgMember.js';
+import { useUpdateMemberRole } from '../../../hooks/org/useUpdateMemberRole.js';
 import { useOrgPermissions } from '../../../hooks/auth/useOrgPermissions.js';
 import { CLIENT_ROUTES } from '../../../constants/client.routes.js';
+import { ORG_ROLES } from '../../../../shared/constants/lookup-values.js';
+import type { OrgRoleName } from '../../../../shared/constants/lookup-values.js';
 import type { OrgMemberResponse } from '../../../../shared/contracts/org-contracts.js';
-import './AdminOrgMembersPage.css';
-
-// ---------------------------------------------------------------------------
-// Add member modal
-// ---------------------------------------------------------------------------
+import './AdminOrgsMembersPage.css';
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -22,18 +21,18 @@ interface AddMemberModalProps {
 }
 
 const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdded, orgId }) => {
-  const [userId, setUserId] = useState('');
+  const [email, setEmail] = useState('');
   const { execute, loading, error } = useAddOrgMember();
 
   const handleClose = (): void => {
-    setUserId('');
+    setEmail('');
     onClose();
   };
 
   const handleSubmit = async (): Promise<void> => {
-    if (!userId.trim()) return;
-    await execute(orgId, userId.trim());
-    if (!error) {
+    if (!email.trim()) return;
+    const err = await execute(orgId, email.trim());
+    if (!err) {
       onAdded();
       handleClose();
     }
@@ -42,20 +41,20 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdde
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Add member" testId="add-member-modal">
       <div className="field-group">
-        <label className="field-label" htmlFor="add-member-userid-input">
-          User ID
+        <label className="field-label" htmlFor="add-member-email-input">
+          Email
         </label>
         <input
-          id="add-member-userid-input"
+          id="add-member-email-input"
           className="field-input"
-          type="text"
-          placeholder="Enter user ID"
-          value={userId}
+          type="email"
+          placeholder="user@example.com"
+          value={email}
           onChange={(e) => {
-            setUserId(e.target.value);
+            setEmail(e.target.value);
           }}
           disabled={loading}
-          data-testid="add-member-userid-input"
+          data-testid="add-member-email-input"
         />
       </div>
       {error && (
@@ -69,6 +68,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdde
           className="btn btn-secondary"
           onClick={handleClose}
           disabled={loading}
+          data-testid="cancel-btn"
         >
           Cancel
         </button>
@@ -78,7 +78,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdde
           onClick={() => {
             void handleSubmit();
           }}
-          disabled={loading || !userId.trim()}
+          disabled={loading || !email.trim()}
           data-testid="add-member-submit-btn"
         >
           {loading ? 'Adding...' : 'Add'}
@@ -87,10 +87,6 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdde
     </Modal>
   );
 };
-
-// ---------------------------------------------------------------------------
-// Remove member modal
-// ---------------------------------------------------------------------------
 
 interface RemoveMemberModalProps {
   member: OrgMemberResponse | null;
@@ -109,8 +105,8 @@ const RemoveMemberModal: React.FC<RemoveMemberModalProps> = ({
 
   const handleConfirm = async (): Promise<void> => {
     if (!member) return;
-    await execute(orgId, member.userId);
-    if (!error) {
+    const err = await execute(orgId, member.userId);
+    if (!err) {
       onRemoved();
       onClose();
     }
@@ -123,7 +119,7 @@ const RemoveMemberModal: React.FC<RemoveMemberModalProps> = ({
       title="Remove member"
       description={
         member
-          ? `Are you sure you want to remove user "${member.userId}" from this organisation?`
+          ? `Are you sure you want to remove ${member.firstName} ${member.lastName} (${member.email}) from this organisation?`
           : undefined
       }
       testId="remove-member-modal"
@@ -134,7 +130,13 @@ const RemoveMemberModal: React.FC<RemoveMemberModalProps> = ({
         </p>
       )}
       <div className="admin-org-members-modal-actions">
-        <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={onClose}
+          disabled={loading}
+          data-testid="cancel-btn"
+        >
           Cancel
         </button>
         <button
@@ -153,9 +155,74 @@ const RemoveMemberModal: React.FC<RemoveMemberModalProps> = ({
   );
 };
 
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
+interface UpdateMemberRoleModalProps {
+  member: OrgMemberResponse | null;
+  orgId: string;
+  onClose: () => void;
+  onUpdated: () => void;
+}
+
+const UpdateMemberRoleModal: React.FC<UpdateMemberRoleModalProps> = ({
+  member,
+  orgId,
+  onClose,
+  onUpdated,
+}) => {
+  const { execute, loading, error } = useUpdateMemberRole();
+
+  if (!member) return null;
+
+  const isManager = member.orgRoleId === 2; // resolved against seed: Manager=2, Member=1
+  const newRole: OrgRoleName = isManager ? ORG_ROLES.MEMBER : ORG_ROLES.MANAGER;
+  const actionLabel = isManager ? 'Demote to Member' : 'Promote to Manager';
+
+  const handleConfirm = async (): Promise<void> => {
+    const err = await execute(orgId, member.userId, newRole);
+    if (!err) {
+      onUpdated();
+      onClose();
+    }
+  };
+
+  return (
+    <Modal
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      isOpen={member !== null}
+      onClose={onClose}
+      title={actionLabel}
+      description={`${member.firstName} ${member.lastName} (${member.email}) will be changed from ${isManager ? 'Manager' : 'Member'} to ${newRole}.`}
+      testId="update-member-role-modal"
+    >
+      {error && (
+        <p className="feedback-error" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="admin-org-members-modal-actions">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={onClose}
+          disabled={loading}
+          data-testid="cancel-btn"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            void handleConfirm();
+          }}
+          disabled={loading}
+          data-testid="update-member-role-confirm-btn"
+        >
+          {loading ? 'Updating...' : actionLabel}
+        </button>
+      </div>
+    </Modal>
+  );
+};
 
 const AdminOrgMembersPage: React.FC = () => {
   const { orgId } = useParams<{ orgId: string }>();
@@ -174,6 +241,7 @@ const AdminOrgMembersPage: React.FC = () => {
 
   const [showAdd, setShowAdd] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<OrgMemberResponse | null>(null);
+  const [roleTarget, setRoleTarget] = useState<OrgMemberResponse | null>(null);
 
   useEffect(() => {
     if (!orgId) return;
@@ -254,24 +322,46 @@ const AdminOrgMembersPage: React.FC = () => {
               key={member.userId}
               className="card admin-org-members-row"
               role="listitem"
-              data-testid={`member-row-${member.userId}`}
+              data-testid={`member-row-${member.email}`}
             >
               <div className="admin-org-members-row-info">
-                <span className="admin-org-members-row-userid">{member.userId}</span>
-                <span className="admin-org-members-row-meta">Role ID: {member.orgRoleId}</span>
+                <span className="admin-org-members-row-name">
+                  {member.firstName} {member.lastName}
+                </span>
+                <span className="admin-org-members-row-email">{member.email}</span>
               </div>
-              {canDelete && (
-                <button
-                  type="button"
-                  className="btn btn-outline-danger btn-sm"
-                  onClick={() => {
-                    setRemoveTarget(member);
-                  }}
-                  data-testid={`remove-member-btn-${member.userId}`}
+              <div className="admin-org-members-row-actions">
+                <span
+                  className={`badge ${member.orgRoleId === 2 ? 'badge--manager' : 'badge--member'}`}
+                  data-testid={`member-role-badge-${member.email}`}
                 >
-                  Remove
-                </button>
-              )}
+                  {member.orgRoleId === 2 ? ORG_ROLES.MANAGER : ORG_ROLES.MEMBER}
+                </span>
+                {canUpdate && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => {
+                      setRoleTarget(member);
+                    }}
+                    data-testid={`update-member-role-btn-${member.email}`}
+                  >
+                    {member.orgRoleId === 2 ? 'Demote' : 'Promote'}
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={() => {
+                      setRemoveTarget(member);
+                    }}
+                    data-testid={`remove-member-btn-${member.email}`}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -294,6 +384,16 @@ const AdminOrgMembersPage: React.FC = () => {
           setRemoveTarget(null);
         }}
         onRemoved={() => {
+          void fetchMembers(orgId);
+        }}
+      />
+      <UpdateMemberRoleModal
+        member={roleTarget}
+        orgId={orgId}
+        onClose={() => {
+          setRoleTarget(null);
+        }}
+        onUpdated={() => {
           void fetchMembers(orgId);
         }}
       />

@@ -10,7 +10,6 @@ import {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthState['user']>(null);
-  // TODO MAYBE REFACTOR
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
   const [permissions, setPermissions] = useState<AuthState['permissions']>(new Set());
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments

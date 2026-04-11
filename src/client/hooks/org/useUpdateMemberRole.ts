@@ -1,28 +1,29 @@
 import { useState } from 'react';
 import { orgAPI } from '../../lib/api/org.api.js';
 import type { OrgMemberResponse } from '../../../shared/contracts/org-contracts.js';
+import type { OrgRoleName } from '../../../shared/constants/lookup-values.js';
 
-interface UseAddOrgMemberState {
+interface UseUpdateMemberRoleState {
   data: OrgMemberResponse | null;
   loading: boolean;
   error: string | null;
 }
 
-interface UseAddOrgMemberReturn extends UseAddOrgMemberState {
-  execute: (orgId: string, email: string) => Promise<string | null>;
+interface UseUpdateMemberRoleReturn extends UseUpdateMemberRoleState {
+  execute: (orgId: string, userId: string, role: OrgRoleName) => Promise<string | null>;
 }
 
-export function useAddOrgMember(): UseAddOrgMemberReturn {
-  const [state, setState] = useState<UseAddOrgMemberState>({
+export function useUpdateMemberRole(): UseUpdateMemberRoleReturn {
+  const [state, setState] = useState<UseUpdateMemberRoleState>({
     data: null,
     loading: false,
     error: null,
   });
 
-  async function execute(orgId: string, email: string): Promise<string | null> {
+  async function execute(orgId: string, userId: string, role: OrgRoleName): Promise<string | null> {
     setState({ data: null, loading: true, error: null });
     try {
-      const data = await orgAPI.addMember(orgId, { email });
+      const data = await orgAPI.updateMemberRole(orgId, userId, { role });
       setState({ data, loading: false, error: null });
       return null;
     } catch (err) {

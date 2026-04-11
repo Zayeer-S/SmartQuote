@@ -23,6 +23,7 @@ export function createOrgRoutes(orgController: OrgController, authService: AuthS
   router.get(ORG_ENDPOINTS.LIST_MEMBERS(), orgController.listMembers);
   router.post(ORG_ENDPOINTS.ADD_MEMBER(), orgController.addMember);
   router.delete(ORG_ENDPOINTS.REMOVE_MEMBER(), orgController.removeMember);
+  router.patch(ORG_ENDPOINTS.UPDATE_MEMBER_ROLE(), orgController.updateMemberRole);
 
   return router;
 }

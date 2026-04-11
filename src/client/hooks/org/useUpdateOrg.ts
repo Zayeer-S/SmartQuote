@@ -9,7 +9,7 @@ interface UseUpdateOrgState {
 }
 
 interface UseUpdateOrgReturn extends UseUpdateOrgState {
-  execute: (orgId: string, payload: UpdateOrgRequest) => Promise<void>;
+  execute: (orgId: string, payload: UpdateOrgRequest) => Promise<string | null>;
 }
 
 export function useUpdateOrg(): UseUpdateOrgReturn {
@@ -19,13 +19,16 @@ export function useUpdateOrg(): UseUpdateOrgReturn {
     error: null,
   });
 
-  async function execute(orgId: string, payload: UpdateOrgRequest): Promise<void> {
+  async function execute(orgId: string, payload: UpdateOrgRequest): Promise<string | null> {
     setState({ data: null, loading: true, error: null });
     try {
       const data = await orgAPI.updateOrg(orgId, payload);
       setState({ data, loading: false, error: null });
+      return null;
     } catch (err) {
-      setState({ data: null, loading: false, error: (err as Error).message });
+      const message = (err as Error).message;
+      setState({ data: null, loading: false, error: message });
+      return message;
     }
   }
 

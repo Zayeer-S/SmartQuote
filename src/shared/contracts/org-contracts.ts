@@ -9,6 +9,9 @@ export interface OrgResponse {
 export interface OrgMemberResponse {
   organizationId: string;
   userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
   orgRoleId: number;
   createdAt: string;
   updatedAt: string;
@@ -24,7 +27,11 @@ export interface UpdateOrgRequest {
 }
 
 export interface AddOrgMemberRequest {
-  userId: string;
+  email: string;
+}
+
+export interface UpdateMemberRoleRequest {
+  role: 'Member' | 'Manager';
 }
 
 export interface ListOrgsResponse {

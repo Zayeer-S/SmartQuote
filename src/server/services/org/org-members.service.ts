@@ -7,15 +7,20 @@ import type {
 import type { OrgRolesDAO, RolesDAO } from '../../daos/children/roles-domain.dao.js';
 import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { OrganizationId, UserId } from '../../database/types/ids.js';
-import type { Organization, OrganizationMember } from '../../database/types/tables.js';
+import type { Organization, OrganizationMemberWithUser } from '../../database/types/tables.js';
 import type { OrgRBACService } from '../rbac/org-rbac.service.js';
+import type { RBACService } from '../rbac/rbac.service.js';
 import {
   OrgError,
   OrgForbiddenError,
   ORG_ERROR_MSGS,
   ORG_MEMBERS_ERROR_MSGS,
 } from './org.errors.js';
-import type { AddMemberData, RemoveMemberData } from './org-members.service.types.js';
+import type {
+  AddMemberData,
+  RemoveMemberData,
+  UpdateMemberRoleData,
+} from './org-members.service.types.js';
 
 export class OrgMembersService {
   private orgMembersDAO: OrganizationMembersDAO;
@@ -24,6 +29,7 @@ export class OrgMembersService {
   private rolesDAO: RolesDAO;
   orgRolesDAO: OrgRolesDAO;
   private orgRBACService: OrgRBACService;
+  private rbacService: RBACService;
 
   constructor(
     orgMembersDAO: OrganizationMembersDAO,
@@ -31,7 +37,8 @@ export class OrgMembersService {
     usersDAO: UsersDAO,
     rolesDAO: RolesDAO,
     orgRolesDAO: OrgRolesDAO,
-    orgRBACService: OrgRBACService
+    orgRBACService: OrgRBACService,
+    rbacService: RBACService
   ) {
     this.orgMembersDAO = orgMembersDAO;
     this.orgsDAO = orgsDAO;
@@ -39,6 +46,7 @@ export class OrgMembersService {
     this.rolesDAO = rolesDAO;
     this.orgRolesDAO = orgRolesDAO;
     this.orgRBACService = orgRBACService;
+    this.rbacService = rbacService;
   }
 
   /**
@@ -49,7 +57,7 @@ export class OrgMembersService {
    * a customer already belonging to any org (including this one) is rejected.
    * New members are always assigned the MEMBER org role.
    *
-   * @param data Target user and org
+   * @param data Target user email and org
    * @param actorId User performing the action
    * @param options Optional transaction context
    * @returns Created membership row
@@ -61,7 +69,7 @@ export class OrgMembersService {
     data: AddMemberData,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<OrganizationMember> {
+  ): Promise<OrganizationMemberWithUser> {
     const canManage = await this.orgRBACService.hasOrgPermission(
       actorId,
       data.orgId,
@@ -73,7 +81,7 @@ export class OrgMembersService {
     const org = await this.orgsDAO.getById(data.orgId, options);
     if (!org) throw new OrgError(ORG_ERROR_MSGS.NOT_FOUND, 404);
 
-    const target = await this.usersDAO.getById(data.targetUserId, options);
+    const target = await this.usersDAO.findByEmail(data.targetEmail, options);
     if (!target) throw new OrgError(ORG_MEMBERS_ERROR_MSGS.TARGET_NOT_FOUND, 404);
 
     // Resolve the customer role ID to compare against the target's role_id
@@ -83,7 +91,7 @@ export class OrgMembersService {
     }
 
     // Single-org constraint: customers may not belong to more than one org
-    const existingMemberships = await this.orgMembersDAO.findByUser(data.targetUserId, options);
+    const existingMemberships = await this.orgMembersDAO.findByUser(target.id, options);
 
     if (existingMemberships && existingMemberships.length > 0) {
       const alreadyInThisOrg = existingMemberships.some((m) => m.organization_id === data.orgId);
@@ -97,14 +105,21 @@ export class OrgMembersService {
     const memberOrgRole = await this.orgRolesDAO.findByName(ORG_ROLES.MEMBER, options);
     if (!memberOrgRole) throw new OrgError('Member org role not found', 500);
 
-    return this.orgMembersDAO.create(
+    await this.orgMembersDAO.create(
       {
         organization_id: data.orgId,
-        user_id: data.targetUserId,
+        user_id: target.id,
         org_role_id: memberOrgRole.id,
       },
       options
     );
+
+    // Return the enriched projection so the controller can map user fields
+    const created = await this.orgMembersDAO.findByOrganizationWithUsers(data.orgId, options);
+    const membership = created?.find((m) => m.user_id === target.id);
+    if (!membership) throw new OrgError('Failed to retrieve created membership', 500);
+
+    return membership;
   }
 
   /**
@@ -148,7 +163,7 @@ export class OrgMembersService {
   }
 
   /**
-   * List all members of an org.
+   * List all members of an org, enriched with user identity fields.
    *
    * Requires org:view_members for the given org. System admins/managers
    * are handled transparently by OrgRBACService.
@@ -156,7 +171,7 @@ export class OrgMembersService {
    * @param orgId Org to list members for
    * @param actorId User performing the action
    * @param options Optional transaction context
-   * @returns Array of membership rows
+   * @returns Array of enriched membership projections
    * @throws OrgForbiddenError if actor lacks org:view_members in this org
    * @throws OrgError if org not found
    */
@@ -164,7 +179,7 @@ export class OrgMembersService {
     orgId: OrganizationId,
     actorId: UserId,
     options?: TransactionContext
-  ): Promise<OrganizationMember[] | null> {
+  ): Promise<OrganizationMemberWithUser[] | null> {
     const canView = await this.orgRBACService.hasOrgPermission(
       actorId,
       orgId,
@@ -176,7 +191,7 @@ export class OrgMembersService {
     const org = await this.orgsDAO.getById(orgId, options);
     if (!org) throw new OrgError(ORG_ERROR_MSGS.NOT_FOUND, 404);
 
-    return await this.orgMembersDAO.findByOrganization(orgId, options);
+    return this.orgMembersDAO.findByOrganizationWithUsers(orgId, options);
   }
 
   /**
@@ -196,6 +211,63 @@ export class OrgMembersService {
 
     return this.orgsDAO.getById(memberships[0].organization_id, options);
   }
-}
 
-// TODO ADD FUNC TO ADD/REMOVE ORG MANAGER STATUS
+  /**
+   * Promote or demote a member's org role (MEMBER <-> MANAGER).
+   *
+   * Only system-privileged actors (ORGANIZATIONS_READ) may change org roles.
+   * Self-demotion is blocked: an actor may not demote themselves to MEMBER.
+   *
+   * @param data Target user, org, and desired new role
+   * @param actorId User performing the action
+   * @param options Optional transaction context
+   * @returns Updated enriched membership projection
+   * @throws OrgForbiddenError if actor lacks ORGANIZATIONS_READ, or attempts self-demotion
+   * @throws OrgError if org not found, or target is not a member of this org
+   */
+  async updateMemberRole(
+    data: UpdateMemberRoleData,
+    actorId: UserId,
+    options?: TransactionContext
+  ): Promise<OrganizationMemberWithUser> {
+    const isSystemPrivileged = await this.rbacService.hasPermission(
+      actorId,
+      PERMISSIONS.ORGANIZATIONS_READ,
+      options
+    );
+    if (!isSystemPrivileged) throw new OrgForbiddenError(ORG_ERROR_MSGS.FORBIDDEN);
+
+    if (actorId === data.targetUserId && data.newRole === ORG_ROLES.MEMBER) {
+      throw new OrgForbiddenError(ORG_MEMBERS_ERROR_MSGS.SELF_DEMOTION_FORBIDDEN);
+    }
+
+    const org = await this.orgsDAO.getById(data.orgId, options);
+    if (!org) throw new OrgError(ORG_ERROR_MSGS.NOT_FOUND, 404);
+
+    const membership = await this.orgMembersDAO.findMembership(
+      data.targetUserId,
+      data.orgId,
+      options
+    );
+    if (!membership) throw new OrgError(ORG_MEMBERS_ERROR_MSGS.NOT_A_MEMBER, 404);
+
+    const newOrgRole = await this.orgRolesDAO.findByName(data.newRole, options);
+    if (!newOrgRole) throw new OrgError(`Org role '${data.newRole}' not found`, 500);
+
+    if (membership.org_role_id === newOrgRole.id) {
+      throw new OrgError(ORG_MEMBERS_ERROR_MSGS.ROLE_ALREADY_ASSIGNED, 422);
+    }
+
+    await this.orgMembersDAO.update(
+      { organization_id: data.orgId, user_id: data.targetUserId },
+      { org_role_id: newOrgRole.id },
+      options
+    );
+
+    const updated = await this.orgMembersDAO.findByOrganizationWithUsers(data.orgId, options);
+    const updatedMembership = updated?.find((m) => m.user_id === data.targetUserId);
+    if (!updatedMembership) throw new OrgError('Failed to retrieve updated membership', 500);
+
+    return updatedMembership;
+  }
+}

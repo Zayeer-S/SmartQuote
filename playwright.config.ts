@@ -9,6 +9,7 @@ const SESSION_SMOKE_FILES = [
   '**/smoke/customer.comment.smoke.test.ts',
   '**/smoke/rate.profile.smoke.test.ts',
   '**/smoke/sla.smoke.test.ts',
+  '**/smoke/org.smoke.test.ts',
 ];
 
 export default defineConfig({
@@ -74,6 +75,7 @@ export default defineConfig({
         '**/smoke/admin.comment.smoke.test.ts',
         '**/smoke/rate.profile.smoke.test.ts',
         '**/smoke/sla.smoke.test.ts',
+        '**/smoke/org.smoke.test.ts',
       ],
       dependencies: ['admin-setup'],
       use: {
@@ -106,13 +108,13 @@ export default defineConfig({
   webServer: [
     {
       command:
-        'cross-env NODE_ENV=test npm run db:migrate && npm run db:seed && cross-env NODE_ENV=test npm run dev:server',
+        'cross-env NODE_ENV=test npm run db:reset && cross-env NODE_ENV=test npm run dev:server',
       url: 'http://localhost:3000/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: 'npm run dev',
+      command: 'npm run dev:client',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,

@@ -17,7 +17,7 @@ import type {
 } from './ticket-priority-engine.service.types.js';
 import type { Knex } from 'knex';
 
-// TODO
+// TODO MOVE
 interface ConfigRow {
   key: string;
   value: string;

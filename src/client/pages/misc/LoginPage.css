@@ -305,7 +305,6 @@
     border-radius: var(--radius-none);
   }
 
-  /** TODO ADD LOGO*/
   .login-card::before {
     display: block;
     font-family: var(--font-display);

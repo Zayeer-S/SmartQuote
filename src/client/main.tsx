@@ -18,6 +18,8 @@ import AdminLayout from './pages/admin/AdminLayout.js';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.js';
 import AdminTicketDetailPage from './pages/admin/AdminTicketDetailPage.js';
 import AdminAnalyticsPage from './pages/admin/analytics/AdminAnalyticsPage.js';
+import AdminOrgsPage from './pages/admin/orgs/AdminOrgsPage.js';
+import AdminOrgsMembersPage from './pages/admin/orgs/AdminOrgsMembersPage.js';
 import AdminSLAPoliciesPage from './pages/admin/sla/AdminSLAPoliciesPage.js';
 import AdminRateProfilesPage from './pages/admin/rate-profiles/AdminRateProfilesPage.js';
 import AdminUserManagementPage from './pages/admin/user-management/AdminUserManagementPage.js';
@@ -59,6 +61,14 @@ createRoot(document.getElementById('root')!).render(
                       element={<AdminTicketDetailPage />}
                     />
                     <Route path={CLIENT_ROUTES.ADMIN.ANALYTICS} element={<AdminAnalyticsPage />} />
+                    <Route
+                      path={CLIENT_ROUTES.ADMIN.ORGANIZATIONS_LIST}
+                      element={<AdminOrgsPage />}
+                    />
+                    <Route
+                      path={CLIENT_ROUTES.ADMIN.ORGANIZATION_MEMBERS()}
+                      element={<AdminOrgsMembersPage />}
+                    />
                     <Route
                       path={CLIENT_ROUTES.ADMIN.SLA_POLICIES}
                       element={<AdminSLAPoliciesPage />}

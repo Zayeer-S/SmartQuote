@@ -213,6 +213,13 @@ export interface OrganizationMember extends BaseAuditRows {
   org_role_id: OrgRoleId;
 }
 
+/** Join projection, returned by OrganizationMembersDAO.findByOrganizationWithUsers */
+export interface OrganizationMemberWithUser extends OrganizationMember {
+  user_email: string;
+  user_first_name: string;
+  user_last_name: string;
+}
+
 export interface UserNotificationPreference extends BaseAuditRows {
   user_id: UserId;
   notification_type_id: NotificationTypeId;

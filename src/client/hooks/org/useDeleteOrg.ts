@@ -7,7 +7,7 @@ interface UseDeleteOrgState {
 }
 
 interface UseDeleteOrgReturn extends UseDeleteOrgState {
-  execute: (orgId: string) => Promise<void>;
+  execute: (orgId: string) => Promise<string | null>;
 }
 
 export function useDeleteOrg(): UseDeleteOrgReturn {
@@ -16,13 +16,16 @@ export function useDeleteOrg(): UseDeleteOrgReturn {
     error: null,
   });
 
-  async function execute(orgId: string): Promise<void> {
+  async function execute(orgId: string): Promise<string | null> {
     setState({ loading: true, error: null });
     try {
       await orgAPI.deleteOrg(orgId);
       setState({ loading: false, error: null });
+      return null;
     } catch (err) {
-      setState({ loading: false, error: (err as Error).message });
+      const message = (err as Error).message;
+      setState({ loading: false, error: message });
+      return message;
     }
   }
 
