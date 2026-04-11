@@ -10,10 +10,6 @@ import { CLIENT_ROUTES } from '../../../constants/client.routes.js';
 import type { OrgMemberResponse } from '../../../../shared/contracts/org-contracts.js';
 import './AdminOrgsMembersPage.css';
 
-// ---------------------------------------------------------------------------
-// Add member modal
-// ---------------------------------------------------------------------------
-
 interface AddMemberModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -32,8 +28,8 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdde
 
   const handleSubmit = async (): Promise<void> => {
     if (!email.trim()) return;
-    await execute(orgId, email.trim());
-    if (!error) {
+    const err = await execute(orgId, email.trim());
+    if (!err) {
       onAdded();
       handleClose();
     }
@@ -69,6 +65,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdde
           className="btn btn-secondary"
           onClick={handleClose}
           disabled={loading}
+          data-testid="cancel-btn"
         >
           Cancel
         </button>
@@ -88,10 +85,6 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose, onAdde
   );
 };
 
-// ---------------------------------------------------------------------------
-// Remove member modal
-// ---------------------------------------------------------------------------
-
 interface RemoveMemberModalProps {
   member: OrgMemberResponse | null;
   orgId: string;
@@ -109,8 +102,8 @@ const RemoveMemberModal: React.FC<RemoveMemberModalProps> = ({
 
   const handleConfirm = async (): Promise<void> => {
     if (!member) return;
-    await execute(orgId, member.userId);
-    if (!error) {
+    const err = await execute(orgId, member.userId);
+    if (!err) {
       onRemoved();
       onClose();
     }
@@ -134,7 +127,13 @@ const RemoveMemberModal: React.FC<RemoveMemberModalProps> = ({
         </p>
       )}
       <div className="admin-org-members-modal-actions">
-        <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={onClose}
+          disabled={loading}
+          data-testid="cancel-btn"
+        >
           Cancel
         </button>
         <button
@@ -152,10 +151,6 @@ const RemoveMemberModal: React.FC<RemoveMemberModalProps> = ({
     </Modal>
   );
 };
-
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
 
 const AdminOrgMembersPage: React.FC = () => {
   const { orgId } = useParams<{ orgId: string }>();

@@ -7,7 +7,7 @@ interface UseRemoveOrgMemberState {
 }
 
 interface UseRemoveOrgMemberReturn extends UseRemoveOrgMemberState {
-  execute: (orgId: string, userId: string) => Promise<void>;
+  execute: (orgId: string, userId: string) => Promise<string | null>;
 }
 
 export function useRemoveOrgMember(): UseRemoveOrgMemberReturn {
@@ -16,13 +16,16 @@ export function useRemoveOrgMember(): UseRemoveOrgMemberReturn {
     error: null,
   });
 
-  async function execute(orgId: string, userId: string): Promise<void> {
+  async function execute(orgId: string, userId: string): Promise<string | null> {
     setState({ loading: true, error: null });
     try {
       await orgAPI.removeMember(orgId, userId);
       setState({ loading: false, error: null });
+      return null;
     } catch (err) {
-      setState({ loading: false, error: (err as Error).message });
+      const message = (err as Error).message;
+      setState({ loading: false, error: message });
+      return message;
     }
   }
 

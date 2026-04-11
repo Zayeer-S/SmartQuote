@@ -472,6 +472,7 @@ smartquote/
 │   │   │   ├── admin.comment.smoke.test.ts
 │   │   │   ├── auth.smoke.test.ts
 │   │   │   ├── customer.comment.smoke.test.ts
+│   │   │   ├── org.smoke.test.ts
 │   │   │   ├── rate.profile.smoke.test.ts
 │   │   │   ├── sla.smoke.test.ts
 │   │   │   └── ticket.smoke.test.ts

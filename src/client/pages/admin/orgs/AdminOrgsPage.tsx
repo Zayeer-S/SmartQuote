@@ -10,10 +10,6 @@ import { CLIENT_ROUTES } from '../../../constants/client.routes.js';
 import type { OrgResponse } from '../../../../shared/contracts/org-contracts.js';
 import './AdminOrgsPage.css';
 
-// ---------------------------------------------------------------------------
-// Create modal
-// ---------------------------------------------------------------------------
-
 interface CreateOrgModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -31,8 +27,8 @@ const CreateOrgModal: React.FC<CreateOrgModalProps> = ({ isOpen, onClose, onCrea
 
   const handleSubmit = async (): Promise<void> => {
     if (!name.trim()) return;
-    await execute({ name: name.trim() });
-    if (!error) {
+    const err = await execute({ name: name.trim() });
+    if (!err) {
       onCreated();
       handleClose();
     }
@@ -73,6 +69,7 @@ const CreateOrgModal: React.FC<CreateOrgModalProps> = ({ isOpen, onClose, onCrea
           className="btn btn-secondary"
           onClick={handleClose}
           disabled={loading}
+          data-testid="cancel-btn"
         >
           Cancel
         </button>
@@ -92,10 +89,6 @@ const CreateOrgModal: React.FC<CreateOrgModalProps> = ({ isOpen, onClose, onCrea
   );
 };
 
-// ---------------------------------------------------------------------------
-// Edit modal
-// ---------------------------------------------------------------------------
-
 interface EditOrgModalProps {
   org: OrgResponse | null;
   onClose: () => void;
@@ -108,8 +101,8 @@ const EditOrgModal: React.FC<EditOrgModalProps> = ({ org, onClose, onUpdated }) 
 
   const handleSubmit = async (): Promise<void> => {
     if (!org || !name.trim()) return;
-    await execute(org.id, { name: name.trim() });
-    if (!error) {
+    const err = await execute(org.id, { name: name.trim() });
+    if (!err) {
       onUpdated();
       onClose();
     }
@@ -144,7 +137,13 @@ const EditOrgModal: React.FC<EditOrgModalProps> = ({ org, onClose, onUpdated }) 
         </p>
       )}
       <div className="admin-orgs-modal-actions">
-        <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={onClose}
+          disabled={loading}
+          data-testid="cancel-btn"
+        >
           Cancel
         </button>
         <button
@@ -163,10 +162,6 @@ const EditOrgModal: React.FC<EditOrgModalProps> = ({ org, onClose, onUpdated }) 
   );
 };
 
-// ---------------------------------------------------------------------------
-// Delete modal
-// ---------------------------------------------------------------------------
-
 interface DeleteOrgModalProps {
   org: OrgResponse | null;
   onClose: () => void;
@@ -178,8 +173,8 @@ const DeleteOrgModal: React.FC<DeleteOrgModalProps> = ({ org, onClose, onDeleted
 
   const handleConfirm = async (): Promise<void> => {
     if (!org) return;
-    await execute(org.id);
-    if (!error) {
+    const err = await execute(org.id);
+    if (!err) {
       onDeleted();
       onClose();
     }
@@ -201,7 +196,13 @@ const DeleteOrgModal: React.FC<DeleteOrgModalProps> = ({ org, onClose, onDeleted
         </p>
       )}
       <div className="admin-orgs-modal-actions">
-        <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={onClose}
+          disabled={loading}
+          data-testid="cancel-btn"
+        >
           Cancel
         </button>
         <button
@@ -219,10 +220,6 @@ const DeleteOrgModal: React.FC<DeleteOrgModalProps> = ({ org, onClose, onDeleted
     </Modal>
   );
 };
-
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
 
 const AdminOrgsPage: React.FC = () => {
   const navigate = useNavigate();

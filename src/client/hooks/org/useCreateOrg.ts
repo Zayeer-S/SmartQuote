@@ -9,7 +9,7 @@ interface UseCreateOrgState {
 }
 
 interface UseCreateOrgReturn extends UseCreateOrgState {
-  execute: (payload: CreateOrgRequest) => Promise<void>;
+  execute: (payload: CreateOrgRequest) => Promise<string | null>;
 }
 
 export function useCreateOrg(): UseCreateOrgReturn {
@@ -19,13 +19,16 @@ export function useCreateOrg(): UseCreateOrgReturn {
     error: null,
   });
 
-  async function execute(payload: CreateOrgRequest): Promise<void> {
+  async function execute(payload: CreateOrgRequest): Promise<string | null> {
     setState({ data: null, loading: true, error: null });
     try {
       const data = await orgAPI.createOrg(payload);
       setState({ data, loading: false, error: null });
+      return null;
     } catch (err) {
-      setState({ data: null, loading: false, error: (err as Error).message });
+      const message = (err as Error).message;
+      setState({ data: null, loading: false, error: message });
+      return message;
     }
   }
 
