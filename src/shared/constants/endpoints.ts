@@ -45,6 +45,7 @@ export const ORG_ENDPOINTS = {
   LIST_MEMBERS: (orgId = ':orgId') => `/${orgId}/members`,
   ADD_MEMBER: (orgId = ':orgId') => `/${orgId}/members`,
   REMOVE_MEMBER: (orgId = ':orgId', userId = ':userId') => `/${orgId}/members/${userId}`,
+  UPDATE_MEMBER_ROLE: (orgId = ':orgId', userId = ':userId') => `/${orgId}/members/${userId}/role`,
 } as const;
 
 export const QUOTE_ENDPOINTS = {

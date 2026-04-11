@@ -30,6 +30,10 @@ export interface AddOrgMemberRequest {
   email: string;
 }
 
+export interface UpdateMemberRoleRequest {
+  role: 'Member' | 'Manager';
+}
+
 export interface ListOrgsResponse {
   organizations: OrgResponse[];
 }
