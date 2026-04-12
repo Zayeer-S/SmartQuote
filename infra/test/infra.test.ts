@@ -38,8 +38,8 @@ describe('DatabaseStack', () => {
   });
 
   describe('VPC endpoints', () => {
-    it('has exactly 5 VPC endpoints (S3 gateway, Secrets Manager interface, Bedrock interface, Lambda interface, Simple Email Service interface)', () => {
-      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 5);
+    it('has exactly 4 VPC endpoints (S3 gateway, Secrets Manager interface, Lambda interface, Simple Email Service interface)', () => {
+      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 4);
     });
 
     it('has an S3 gateway endpoint', () => {
@@ -55,13 +55,6 @@ describe('DatabaseStack', () => {
       dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
         VpcEndpointType: 'Interface',
         ServiceName: Match.stringLikeRegexp('secretsmanager'),
-      });
-    });
-
-    it('has a Bedrock runtime interface endpoint', () => {
-      dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
-        VpcEndpointType: 'Interface',
-        ServiceName: Match.stringLikeRegexp('bedrock-runtime'),
       });
     });
 
@@ -182,6 +175,34 @@ describe('AppStack', () => {
     });
   });
 
+  describe('Embedder Lambda', () => {
+    it('has the correct function name from config', () => {
+      appTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        FunctionName: infraConfig.embedderLambda.functionName,
+      });
+    });
+
+    it('has the correct memory size from config', () => {
+      appTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        FunctionName: infraConfig.embedderLambda.functionName,
+        MemorySize: infraConfig.embedderLambda.memoryMb,
+      });
+    });
+
+    it('has the correct timeout from config', () => {
+      appTemplate.hasResourceProperties('AWS::Lambda::Function', {
+        FunctionName: infraConfig.embedderLambda.functionName,
+        Timeout: infraConfig.embedderLambda.timeoutSeconds,
+      });
+    });
+
+    it('has a Function URL with auth type NONE', () => {
+      appTemplate.hasResourceProperties('AWS::Lambda::Url', {
+        AuthType: 'NONE',
+      });
+    });
+  });
+
   describe('API Lambda', () => {
     it('has the correct function name from config', () => {
       appTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -219,6 +240,7 @@ describe('AppStack', () => {
         'MAX_LOGIN_ATTEMPTS',
         'LOGIN_RATE_LIMIT_WINDOW_MINUTES',
         'ML_QUOTE_LAMBDA_FUNCTION_NAME',
+        'EMBEDDING_SERVICE_URL',
       ];
 
       const functions = appTemplate.findResources('AWS::Lambda::Function', {
@@ -250,19 +272,6 @@ describe('AppStack', () => {
       const envVars = fnResource.Properties.Environment.Variables;
       expect(envVars).toHaveProperty('ML_QUOTE_LAMBDA_FUNCTION_NAME');
       expect(envVars['ML_QUOTE_LAMBDA_FUNCTION_NAME']).toBeTruthy();
-    });
-
-    it('has Bedrock InvokeModel permission', () => {
-      appTemplate.hasResourceProperties('AWS::IAM::Policy', {
-        PolicyDocument: {
-          Statement: Match.arrayWith([
-            Match.objectLike({
-              Action: 'bedrock:InvokeModel',
-              Effect: 'Allow',
-            }),
-          ]),
-        },
-      });
     });
 
     it('has lambda:InvokeFunction permission on the ML Lambda', () => {
@@ -351,6 +360,10 @@ describe('AppStack', () => {
 
     it('outputs MlQuoteFunctionName', () => {
       appTemplate.hasOutput('MlQuoteFunctionName', {});
+    });
+
+    it('outputs EmbedderFunctionUrl', () => {
+      appTemplate.hasOutput('EmbedderFunctionUrl', {});
     });
   });
 });
