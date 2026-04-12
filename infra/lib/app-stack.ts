@@ -67,6 +67,16 @@ export class AppStack extends cdk.Stack {
         'ML quote Lambda -- invoke manually to smoke test: aws lambda invoke --function-name smartquote-ml-quote --region eu-west-2 --payload ... response.json',
     });
 
+    const mlFunctionUrl = mlFunction.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.NONE,
+      cors: { allowedOrigins: ['*'] },
+    });
+
+    new cdk.CfnOutput(this, 'MlQuoteFunctionUrl', {
+      value: mlFunctionUrl.url,
+      description: 'ML quote service Function URL -- set as ML_QUOTE_SERVICE_URL in API Lambda env',
+    });
+
     // Embedder Lambda (all-MiniLM-L6-v2)
     const embedderEcrRepo = ecr.Repository.fromRepositoryName(
       this,
@@ -145,7 +155,7 @@ export class AppStack extends cdk.Stack {
         APP_SECRET_ARN: appSecret.secretArn,
         AWS_S3_BUCKET: infraConfig.attachments.bucketName,
         ATTACHMENT_PRESIGN_EXPIRY_SECONDS: String(infraConfig.attachments.presignExpirySeconds),
-        ML_QUOTE_LAMBDA_FUNCTION_NAME: mlFunction.functionName,
+        ML_QUOTE_SERVICE_URL: mlFunctionUrl.url,
         EMBEDDING_SERVICE_URL: embedderFunctionUrl.url,
       },
     });
@@ -167,12 +177,6 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    // Allow apiFunction to invoke the ML Lambda.
-    // grantInvoke adds lambda:InvokeFunction on mlFunction's ARN to apiFunction's role.
-    mlFunction.grantInvoke(apiFunction);
-
-    // Invoked manually via AWS CLI when migrations need to run.
-    // Lives in the same VPC as RDS so it can reach the private DB endpoint.
     const migrateFunction = new lambdaNodejs.NodejsFunction(this, 'MigrateFunction', {
       functionName: 'smartquote-migrate',
       entry: path.join(__dirname, '../../', 'src/server/bootstrap/lambda.migrate.ts'),
@@ -289,7 +293,6 @@ export class AppStack extends cdk.Stack {
         'Invoke this Lambda to seed the database: aws lambda invoke --function-name smartquote-seed --region eu-west-2 response.json',
     });
 
-    // ── API Gateway ────────────────────────────────────────────────────────
     const api = new apigateway.LambdaRestApi(this, 'ApiGateway', {
       handler: apiFunction,
       proxy: true,

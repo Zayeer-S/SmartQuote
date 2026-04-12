@@ -41,13 +41,7 @@ export const infraConfig = {
 
   mlLambda: {
     functionName: 'smartquote-ml-quote',
-    /** ECR repository that holds the ML container image */
     ecrRepoName: 'smartquote-ml-quote',
-    /**
-     * Image tag used at runtime. On first deploy the repo will be empty so
-     * the ML Lambda will fail to create -- push an image tagged 'latest'
-     * then redeploy to complete the setup.
-     */
     imageTag: 'latest',
     memoryMb: 1024,
     timeoutSeconds: 29,
