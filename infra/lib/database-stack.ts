@@ -58,10 +58,6 @@ export class DatabaseStack extends cdk.Stack {
       securityGroups: [lambdaSecurityGroup],
     });
 
-    this.vpc.addInterfaceEndpoint('BedrockEndpoint', {
-      service: ec2.InterfaceVpcEndpointAwsService.BEDROCK_RUNTIME,
-    });
-
     this.vpc.addGatewayEndpoint('S3Endpoint', {
       service: ec2.GatewayVpcEndpointAwsService.S3,
       subnets: [{ subnetType: ec2.SubnetType.PRIVATE_ISOLATED }],
