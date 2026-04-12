@@ -277,9 +277,32 @@ export class QuoteEngineService {
         ticket.users_impacted >= rule.users_impacted_min &&
         ticket.users_impacted <= rule.users_impacted_max
     );
+    if (matched) return matched;
 
-    if (!matched) throw new QuoteError(QUOTE_ERROR_MSGS.NO_MATCHING_RULE, 422);
-    return matched;
+    // Fallback: same severity + impact ignoring users_impacted range.
+    // Handles edge cases where users_impacted falls outside all seeded ranges
+    // for a given severity/impact combination.
+    const fallback = allRules.find(
+      (rule) =>
+        (rule.ticket_severity_id as unknown as number) ===
+          (ticket.ticket_severity_id as unknown as number) &&
+        (rule.business_impact_id as unknown as number) ===
+          (ticket.business_impact_id as unknown as number)
+    );
+    if (fallback) return fallback;
+
+    // Last resort: pick the lowest-priority-order rule that covers the
+    // users_impacted range. Catches severity/impact combinations absent from
+    // the seed data entirely (e.g. Low/Critical, Critical/Minor).
+    const lastResort = allRules.find(
+      (rule) =>
+        ticket.users_impacted >= rule.users_impacted_min &&
+        ticket.users_impacted <= rule.users_impacted_max
+    );
+    if (lastResort) return lastResort;
+
+    // Nothing matched at all -- seed data is incomplete.
+    throw new QuoteError(QUOTE_ERROR_MSGS.NO_MATCHING_RULE, 422);
   }
 
   /**
