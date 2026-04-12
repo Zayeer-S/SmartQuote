@@ -1,15 +1,12 @@
-import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { PriorityEngineAnchor } from '../../database/types/tables.js';
 
-const MODEL_ID = 'amazon.titan-embed-text-v2:0' as const;
-
-interface TitanEmbedResponse {
+interface EmbedResponse {
   embedding: number[];
-  inputTextTokenCount: number;
+  dim: number;
 }
 
 export class BertEmbedder {
-  private client: BedrockRuntimeClient | null = null;
+  private serviceUrl: string;
 
   /**
    * In-memory cache of anchor embeddings, keyed by label.
@@ -17,14 +14,13 @@ export class BertEmbedder {
    */
   private anchorEmbeddings = new Map<string, { embedding: number[]; urgency_score: number }>();
 
-  private getClient(): BedrockRuntimeClient {
-    // Instantiated lazily so importing this module in non-AWS environments (CI, local dev) does not trigger credential resolution at startup.
-    this.client ??= new BedrockRuntimeClient({ region: process.env.AWS_REGION ?? 'us-east-1' });
-    return this.client;
+  constructor(serviceUrl: string) {
+    this.serviceUrl = serviceUrl;
   }
 
-  /** and caches the results in memory.
-   * Must be called after `init()` and before the first `calculatePriority` call.
+  /**
+   * Fetches and caches embeddings for all active priority engine anchors.
+   * Must be called after bootstrap and before the first calculatePriority call.
    *
    * Embeddings are generated from each anchor's description_text.
    * Runs in parallel across all anchors.
@@ -51,26 +47,24 @@ export class BertEmbedder {
   }
 
   /**
-   * Embeds a single text string into a 1024-dimensional float vector
-   * using Amazon Titan Text Embeddings V2.
+   * Embeds a single text string into a 384-dimensional float vector
+   * using all-MiniLM-L6-v2 via the embedding microservice.
    *
-   * Titan V2 returns normalized vectors by default, so cosine similarity
-   * over the cached anchor embeddings works identically to before.
+   * Vectors are L2-normalized by the service, so cosine similarity
+   * over cached anchor embeddings works identically to before.
    *
    * @param text The text to embed (ticket description or anchor sentence)
-   * @returns A flat number[] of length 1024
+   * @returns A flat number[] of length 384
    */
   async embed(text: string): Promise<number[]> {
-    const command = new InvokeModelCommand({
-      modelId: MODEL_ID,
-      contentType: 'application/json',
-      accept: 'application/json',
-      body: JSON.stringify({ inputText: text }),
+    const res = await fetch(`${this.serviceUrl}/embed`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
     });
+    if (!res.ok) throw new Error(`BertEmbedder: embedding service returned ${String(res.status)}`);
 
-    const response = await this.getClient().send(command);
-    const parsed = JSON.parse(Buffer.from(response.body).toString('utf-8')) as TitanEmbedResponse;
-
-    return parsed.embedding;
+    const data = (await res.json()) as EmbedResponse;
+    return data.embedding;
   }
 }
