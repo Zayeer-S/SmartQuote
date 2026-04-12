@@ -5,8 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:full": "concurrently \"npm run dev:client\" \"npm run dev:server\" \"npm run dev:ml\"",
     "dev:client": "vite",
     "dev:server": "tsx watch src/server/bootstrap/server.ts",
+    "dev:ml": "concurrently \"npm run dev:ml:embedder\" \"npm run dev:ml:quote\"",
+    "dev:ml:embedder": "cd models/embedder && uvicorn app:app --host 0.0.0.0 --port 8001 --reload",
+    "dev:ml:quote": "cd models/handler && uvicorn handler:app --host 0.0.0.0 --port 8002 --reload",
     "build": "tsc -b && vite build",
     "build:server": "tsc --project tsconfig.server.json --noEmit",
     "build:client": "vite build",
@@ -67,7 +71,6 @@
     "setup": "npm i && npm audit fix --force && cp .env.example .env.local && docker-compose up -d && db:reset"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.1015.0",
     "@aws-sdk/client-s3": "^3.1015.0",
     "@aws-sdk/client-secrets-manager": "^3.994.0",
     "@aws-sdk/s3-request-presigner": "^3.1017.0",
