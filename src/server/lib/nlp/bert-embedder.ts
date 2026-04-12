@@ -28,13 +28,17 @@ export class BertEmbedder {
    * @param anchors Active anchor rows from PriorityEngineAnchorsDAO
    */
   async warmAnchors(anchors: PriorityEngineAnchor[]): Promise<void> {
-    const entries = await Promise.all(
-      anchors.map(async (anchor) => {
-        const embedding = await this.embed(anchor.description_text);
-        return [anchor.label, { embedding, urgency_score: anchor.urgency_score }] as const;
-      })
-    );
-    this.anchorEmbeddings = new Map(entries);
+    try {
+      const entries = await Promise.all(
+        anchors.map(async (anchor) => {
+          const embedding = await this.embed(anchor.description_text);
+          return [anchor.label, { embedding, urgency_score: anchor.urgency_score }] as const;
+        })
+      );
+      this.anchorEmbeddings = new Map(entries);
+    } catch (err) {
+      console.warn('BertEmbedder: warmAnchors failed, NLP signal disabled:', err);
+    }
   }
 
   /**
@@ -62,7 +66,10 @@ export class BertEmbedder {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
     });
-    if (!res.ok) throw new Error(`BertEmbedder: embedding service returned ${String(res.status)}`);
+
+    if (!res.ok) {
+      throw new Error(`BertEmbedder: embedding service returned ${String(res.status)}`);
+    }
 
     const data = (await res.json()) as EmbedResponse;
     return data.embedding;
