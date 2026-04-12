@@ -75,7 +75,7 @@ describe('DatabaseStack', () => {
     it('has a Simple Email Service interface endpoint', () => {
       dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
         VpcEndpointType: 'Interface',
-        ServiceName: Match.stringLikeRegexp('ses'),
+        ServiceName: Match.stringLikeRegexp('email-smtp'),
       });
     });
   });
