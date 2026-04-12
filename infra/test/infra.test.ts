@@ -173,6 +173,10 @@ describe('AppStack', () => {
         },
       });
     });
+
+    it('has a Function URL with auth type NONE', () => {
+      appTemplate.resourceCountIs('AWS::Lambda::Url', 2);
+    });
   });
 
   describe('Embedder Lambda', () => {
@@ -239,7 +243,7 @@ describe('AppStack', () => {
         'BCRYPT_SALT_ROUNDS',
         'MAX_LOGIN_ATTEMPTS',
         'LOGIN_RATE_LIMIT_WINDOW_MINUTES',
-        'ML_QUOTE_LAMBDA_FUNCTION_NAME',
+        'ML_QUOTE_SERVICE_URL',
         'EMBEDDING_SERVICE_URL',
       ];
 
@@ -264,27 +268,14 @@ describe('AppStack', () => {
       });
     });
 
-    it('has ML_QUOTE_LAMBDA_FUNCTION_NAME set to the ML Lambda function name', () => {
+    it('has ML_QUOTE_SERVICE_URL set', () => {
       const functions = appTemplate.findResources('AWS::Lambda::Function', {
         Properties: { FunctionName: infraConfig.lambda.functionName },
       });
       const fnResource = Object.values(functions)[0];
       const envVars = fnResource.Properties.Environment.Variables;
-      expect(envVars).toHaveProperty('ML_QUOTE_LAMBDA_FUNCTION_NAME');
-      expect(envVars['ML_QUOTE_LAMBDA_FUNCTION_NAME']).toBeTruthy();
-    });
-
-    it('has lambda:InvokeFunction permission on the ML Lambda', () => {
-      appTemplate.hasResourceProperties('AWS::IAM::Policy', {
-        PolicyDocument: {
-          Statement: Match.arrayWith([
-            Match.objectLike({
-              Action: 'lambda:InvokeFunction',
-              Effect: 'Allow',
-            }),
-          ]),
-        },
-      });
+      expect(envVars).toHaveProperty('ML_QUOTE_SERVICE_URL');
+      expect(envVars['ML_QUOTE_SERVICE_URL']).toBeTruthy();
     });
   });
 
@@ -364,6 +355,10 @@ describe('AppStack', () => {
 
     it('outputs EmbedderFunctionUrl', () => {
       appTemplate.hasOutput('EmbedderFunctionUrl', {});
+    });
+
+    it('outputs MlQuoteFunctionUrl', () => {
+      appTemplate.hasOutput('MlQuoteFunctionUrl', {});
     });
   });
 });
