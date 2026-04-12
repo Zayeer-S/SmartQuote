@@ -93,6 +93,7 @@ export class QuoteContainer {
       this.quoteService,
       this.quoteEngineService,
       this.quoteApprovalService,
+      this.mlQuoteService,
       lookup
     );
   }
