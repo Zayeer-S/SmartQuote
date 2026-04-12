@@ -7,6 +7,7 @@ import numpy as np
 MODEL_DIR = os.environ.get("MODEL_DIR", "/opt/ml")
 _pca = _regressor = _classifier = None
 
+EMBEDDING_DIM = 384
 
 TABULAR_FEATURE_ORDER = [
     "ticket_type_id",
@@ -32,7 +33,7 @@ def _load_models():
 
 def _build_feature_vector(embedding: list, features: dict):
     """
-    1. Apply PCA to the 1536-dim embedding to turn it into 32 dim
+    1. Apply PCA to the 384-dim embedding to turn it into 32 dim
     2. Concat with 6 tabular features
     Returns a (1, 38) array ready for XGBoost inference
     """
@@ -81,11 +82,13 @@ def handler(event, _context):
     try:
         embedding = event["embedding"]
         features = event["features"]
-        if len(embedding) != 1536:
+        if len(embedding) != EMBEDDING_DIM:
             return response(
                 400,
                 json.dumps(
-                    {"error": f"embedding must be 1536-dim, got {len(embedding)}"}
+                    {
+                        "error": f"embedding must be {EMBEDDING_DIM}-dim, got {len(embedding)}"
+                    }
                 ),
             )
 
