@@ -54,8 +54,7 @@ const envSchema = z.object({
   SMTP_USER: optionalStr,
   SMTP_PASSWORD: optionalStr,
 
-  ML_QUOTE_LAMBDA_FUNCTION_NAME: z.string().optional().default(''),
-
+  ML_QUOTE_SERVICE_URL: optionalStr,
   EMBEDDING_SERVICE_URL: optionalStr,
 });
 

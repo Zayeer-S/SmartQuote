@@ -1,7 +1,6 @@
-import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda';
-import { BUSINESS_HOURS } from '../../../shared/constants';
-import { TicketEmbeddingsDAO } from '../../daos/children/ticket-nlp.dao';
-import { Ticket } from '../../database/types/tables';
+import { BUSINESS_HOURS } from '../../../shared/constants/index.js';
+import { TicketEmbeddingsDAO } from '../../daos/children/ticket-nlp.dao.js';
+import type { Ticket } from '../../database/types/tables.js';
 
 export interface MLQuoteFeatures {
   ticket_type_id: number;
@@ -21,8 +20,8 @@ export interface MLQuoteResult {
 }
 
 function deadlineOffsetDays(deadline: Date, now: Date): number {
-  const msPerDays = 1000 * 60 * 60 * 24;
-  return (deadline.getTime() - now.getTime()) / msPerDays;
+  const msPerDay = 1000 * 60 * 60 * 24;
+  return (deadline.getTime() - now.getTime()) / msPerDay;
 }
 
 function isAfterHours(date: Date): 0 | 1 {
@@ -32,37 +31,37 @@ function isAfterHours(date: Date): 0 | 1 {
 
 export class MLQuoteService {
   private ticketEmbeddingsDAO: TicketEmbeddingsDAO;
-  private lambdaFunctionName: string;
+  private serviceUrl: string | undefined;
   private clock: () => Date;
-  private _client: LambdaClient | null = null;
 
   constructor(
     ticketEmbeddingsDAO: TicketEmbeddingsDAO,
-    lambdaFunctionName: string,
+    serviceUrl: string | undefined,
     clock: () => Date = () => new Date()
   ) {
     this.ticketEmbeddingsDAO = ticketEmbeddingsDAO;
-    this.lambdaFunctionName = lambdaFunctionName;
+    this.serviceUrl = serviceUrl;
     this.clock = clock;
-  }
-
-  private get client(): LambdaClient {
-    this._client ??= new LambdaClient({});
-    return this._client;
   }
 
   /**
    * Generates an ML-derived quote estimate by:
-   *  1. Fetching the pre-computed Titan embedding via findByTicketIds.
+   *  1. Fetching the pre-computed embedding via findByTicketIds.
    *  2. Building the tabular feature vector from the ticket row.
-   *  3. Invoking the ML Lambda with both.
+   *  3. POSTing both to the ML quote microservice.
    *  4. Returning the structured result.
    *
-   * Returns null (never throws) if no embedding exists yet or if the Lambda
-   * invocation fails. Callers should treat null as "ML estimate unavailable"
-   * and surface the rule-based result only.
+   * Returns null (never throws) when:
+   *  - ML_QUOTE_SERVICE_URL is not configured
+   *  - No embedding exists for the ticket yet
+   *  - The service call fails for any reason
+   *
+   * Callers should treat null as "ML estimate unavailable" and fall back
+   * to the rule-based quote engine result only.
    */
   async generateMLQuote(ticket: Ticket): Promise<MLQuoteResult | null> {
+    if (!this.serviceUrl) return null;
+
     const rows = await this.ticketEmbeddingsDAO.findByTicketIds([ticket.id]);
     const embedding = rows[0];
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -80,26 +79,20 @@ export class MLQuoteService {
     };
 
     try {
-      const cmd = new InvokeCommand({
-        FunctionName: this.lambdaFunctionName,
-        Payload: Buffer.from(JSON.stringify({ embedding: embedding, features })),
+      const res = await fetch(`${this.serviceUrl}/predict`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ embedding: embedding.embedding, features }),
       });
 
-      const res = await this.client.send(cmd);
-      if (!res.Payload) return null;
-
-      const raw = JSON.parse(Buffer.from(res.Payload).toString('utf-8')) as {
-        statusCode: number;
-        body: string;
-      };
-      if (raw.statusCode !== 200) {
-        console.error('[MLQuoteService] Lambda returned non-200:', raw.body);
+      if (!res.ok) {
+        console.error(`[MLQuoteService] Service returned ${String(res.status)}`);
         return null;
       }
 
-      return JSON.parse(raw.body) as MLQuoteResult;
+      return (await res.json()) as MLQuoteResult;
     } catch (err) {
-      console.error('[MLQuoteService] Lambda invocation failed:', err);
+      console.error('[MLQuoteService] Request failed:', err);
       return null;
     }
   }
