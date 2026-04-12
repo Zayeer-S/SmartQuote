@@ -1,4 +1,9 @@
-import { BUSINESS_HOURS, PERMISSIONS, QUOTE_CREATORS } from '../../../shared/constants/index.js';
+import {
+  BUSINESS_HOURS,
+  PERMISSIONS,
+  QUOTE_CREATORS,
+  QUOTE_EFFORT_LEVELS,
+} from '../../../shared/constants/index.js';
 import type { InsertData, TransactionContext } from '../../daos/base/types.js';
 import type { QuoteCalculationRulesDAO, QuotesDAO } from '../../daos/children/quotes-domain.dao.js';
 import type { RateProfilesDAO } from '../../daos/children/rate-profiles.dao.js';
@@ -16,6 +21,7 @@ import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket.errors.js';
 import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
 import type { NotificationService } from '../notification/notification.service.js';
+import type { QuoteEffortLevel } from '../../../shared/constants/lookup-values.js';
 
 export interface ComputeQuoteInput {
   ticket: Ticket;
@@ -76,6 +82,21 @@ export function computeQuote(input: ComputeQuoteInput): ComputeQuoteResult {
 export function isBusinessHours(date: Date): boolean {
   const hour = date.getHours();
   return hour >= BUSINESS_HOURS.START_HOUR && hour < BUSINESS_HOURS.END_HOUR;
+}
+
+/**
+ * Derives a quote effort level from the combined severity + business impact score.
+ * Both inputs are 1-4 ordinal IDs so the combined range is 2-8.
+ *
+ *   2-3 -> Low    (low severity, low impact)
+ *   4-6 -> Medium (mixed)
+ *   7-8 -> High   (high/critical severity and impact)
+ */
+export function deriveEffortLevel(severityId: number, businessImpactId: number): QuoteEffortLevel {
+  const combined = severityId + businessImpactId;
+  if (combined <= 3) return QUOTE_EFFORT_LEVELS.LOW;
+  if (combined <= 6) return QUOTE_EFFORT_LEVELS.MEDIUM;
+  return QUOTE_EFFORT_LEVELS.HIGH;
 }
 
 export class QuoteEngineService {
@@ -163,8 +184,11 @@ export class QuoteEngineService {
 
     const nextVersion = await this.resolveNextVersion(ticketId, options);
 
-    // TODO: rule.quote_effort_level_id should be used here once QuoteCalculationRule
-    // carries that field - currently the rule only has suggested_ticket_priority_id.
+    const effortLevel = deriveEffortLevel(
+      ticket.ticket_severity_id as unknown as number,
+      ticket.business_impact_id as unknown as number
+    );
+
     const newQuote = await this.quotesDAO.create(
       {
         ticket_id: ticketId,
@@ -181,8 +205,7 @@ export class QuoteEngineService {
         quote_creator_id: this.lookup.quoteCreatorId(QUOTE_CREATORS.AUTOMATED),
         suggested_ticket_priority_id:
           computed.suggested_ticket_priority_id as unknown as Quote['suggested_ticket_priority_id'],
-        quote_effort_level_id:
-          rule.suggested_ticket_priority_id as unknown as Quote['quote_effort_level_id'],
+        quote_effort_level_id: this.lookup.quoteEffortLevelId(effortLevel),
         deleted_at: null,
       } satisfies InsertData<Quote>,
       options
@@ -214,7 +237,7 @@ export class QuoteEngineService {
           computed.suggested_ticket_priority_id as unknown as number
         ),
         effortLevel: this.lookup.quoteEffortLevelName(
-          newQuote.quote_effort_level_id as unknown as number
+          this.lookup.quoteEffortLevelId(effortLevel) as unknown as number
         ),
         userId: creator.id as string,
         userEmail: creator.email,
