@@ -35,9 +35,14 @@ smartquote/
 │   ├── .venv/
 │   ├── .gitignore
 │   ├── requirements.txt
+│   ├── embedding/
+│   │   ├── app.py                                  # Lambda entry point
+│   │   ├── Dockerfile
+│   │   └── requirements.txt
 │   ├── handler/
 │   │   ├── app.py                                  # Lambda entry point
 │   │   ├── Dockerfile
+│   │   ├── requirements.txt
 │   │   └── artifacts
 │   │       ├── pca.pkl
 │   │       ├── regressor.pkl

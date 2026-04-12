@@ -13,7 +13,7 @@ SEVERITIES = [1, 2, 3, 4]  # Low, Medium, High, Critical
 BUSINESS_IMPACTS = [1, 2, 3, 4]  # Minor, Moderate, Major, Critical
 AFTER_HOURS = [0, 1]
 
-EMBEDDING_DIM = 1536
+EMBEDDING_DIM = 384
 EMBEDDING_PCA_COMPONENTS = 32
 
 BASE_HOURLY_RATES = {

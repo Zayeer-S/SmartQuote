@@ -20,6 +20,28 @@ services:
     networks:
       - app-network
 
+  embedding:
+    build:
+      context: ./models/embedder
+      dockerfile: Dockerfile
+      target: local
+    container_name: smartquote-embedding
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:8000/health'')"',
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network
+
 volumes:
   postgres-data:
     driver: local

@@ -67,7 +67,40 @@ export class AppStack extends cdk.Stack {
         'ML quote Lambda -- invoke manually to smoke test: aws lambda invoke --function-name smartquote-ml-quote --region eu-west-2 --payload ... response.json',
     });
 
-    // ── API Lambda (Node.js zip) ───────────────────────────────────────────
+    // Embedder Lambda (all-MiniLM-L6-v2)
+    const embedderEcrRepo = ecr.Repository.fromRepositoryName(
+      this,
+      'EmbedderEcrRepo',
+      infraConfig.embedderLambda.ecrRepoName
+    );
+
+    const embedderFunction = new lambda.DockerImageFunction(this, 'EmbedderFunction', {
+      functionName: infraConfig.embedderLambda.functionName,
+      code: lambda.DockerImageCode.fromEcr(embedderEcrRepo, {
+        tagOrDigest: infraConfig.embedderLambda.imageTag,
+      }),
+      memorySize: infraConfig.embedderLambda.memoryMb,
+      timeout: cdk.Duration.seconds(infraConfig.embedderLambda.timeoutSeconds),
+      vpc: databaseStack.vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [lambdaSecurityGroup],
+    });
+
+    // Function URL so the API Lambda (and local dev) can call it over plain HTTPS
+    // with no AWS SDK / SigV4 required. Auth is NONE -- the function is only
+    // reachable from within the VPC via the Lambda interface endpoint.
+    const embedderFunctionUrl = embedderFunction.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.NONE,
+      cors: { allowedOrigins: ['*'] },
+    });
+
+    new cdk.CfnOutput(this, 'EmbedderFunctionUrl', {
+      value: embedderFunctionUrl.url,
+      description:
+        'Embedding service Function URL -- set as EMBEDDING_SERVICE_URL in API Lambda env',
+    });
+
+    // API Lambda (Node.js zip)
     const apiFunction = new lambdaNodejs.NodejsFunction(this, 'ApiFunction', {
       functionName: infraConfig.lambda.functionName,
       entry: path.join(__dirname, '../../', infraConfig.lambda.entryPoint),
@@ -113,6 +146,7 @@ export class AppStack extends cdk.Stack {
         AWS_S3_BUCKET: infraConfig.attachments.bucketName,
         ATTACHMENT_PRESIGN_EXPIRY_SECONDS: String(infraConfig.attachments.presignExpirySeconds),
         ML_QUOTE_LAMBDA_FUNCTION_NAME: mlFunction.functionName,
+        EMBEDDING_SERVICE_URL: embedderFunctionUrl.url,
       },
     });
 
@@ -133,20 +167,10 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    apiFunction.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ['bedrock:InvokeModel'],
-        resources: [
-          `arn:aws:bedrock:${this.region}::foundation-model/amazon.titan-embed-text-v2:0`,
-        ],
-      })
-    );
-
     // Allow apiFunction to invoke the ML Lambda.
     // grantInvoke adds lambda:InvokeFunction on mlFunction's ARN to apiFunction's role.
     mlFunction.grantInvoke(apiFunction);
 
-    // ── Migrate Lambda ─────────────────────────────────────────────────────
     // Invoked manually via AWS CLI when migrations need to run.
     // Lives in the same VPC as RDS so it can reach the private DB endpoint.
     const migrateFunction = new lambdaNodejs.NodejsFunction(this, 'MigrateFunction', {
@@ -206,7 +230,6 @@ export class AppStack extends cdk.Stack {
         'Invoke this Lambda to run DB migrations: aws lambda invoke --function-name smartquote-migrate --region eu-west-2 response.json',
     });
 
-    // ── Seed Lambda ────────────────────────────────────────────────────────
     // Invoked manually via AWS CLI to populate the database with seed data.
     const seedFunction = new lambdaNodejs.NodejsFunction(this, 'SeedFunction', {
       functionName: 'smartquote-seed',
@@ -289,7 +312,6 @@ export class AppStack extends cdk.Stack {
       },
     });
 
-    // ── Frontend (S3 + CloudFront) ─────────────────────────────────────────
     const frontendBucket = new s3.Bucket(this, 'FrontendBucket', {
       bucketName: infraConfig.s3.bucketName,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,

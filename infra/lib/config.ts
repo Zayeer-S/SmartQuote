@@ -55,6 +55,14 @@ export const infraConfig = {
     modelDir: '/opt/ml',
   },
 
+  embedderLambda: {
+    functionName: 'smartquote-embedder',
+    ecrRepoName: 'smartquote-embedder',
+    imageTag: 'latest',
+    memoryMb: 512,
+    timeoutSeconds: 29,
+  },
+
   s3: {
     bucketName: 'smartquote-frontend',
     /** Path to built frontend assets, relative to repo root */
