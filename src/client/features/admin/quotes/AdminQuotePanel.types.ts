@@ -9,11 +9,11 @@ import type {
   QuoteConfidenceLevel,
 } from '../../../../shared/constants/lookup-values.js';
 
-// ─── Panel navigation ─────────────────────────────────────────────────────────
+// Panel navigation
 
 export type ActiveQuotePanel = 'none' | 'create' | 'update' | 'revisions' | 'reject';
 
-// ─── Form state ───────────────────────────────────────────────────────────────
+// Form state
 
 export interface CreateQuoteFormState {
   estimatedHoursMinimum: string;
@@ -42,7 +42,7 @@ export interface UpdateQuoteFormState {
   quoteConfidenceLevel?: QuoteConfidenceLevel;
 }
 
-// ─── Select options ───────────────────────────────────────────────────────────
+// Select options
 
 export const EFFORT_OPTIONS: { value: QuoteEffortLevel; label: string }[] = [
   { value: QUOTE_EFFORT_LEVELS.LOW, label: QUOTE_EFFORT_LEVELS.LOW },
@@ -57,13 +57,16 @@ export const CONFIDENCE_OPTIONS: { value: QuoteConfidenceLevel; label: string }[
 ];
 
 export const APPROVAL_STATUS_BADGE: Record<QuoteApprovalStatus, string> = {
-  [QUOTE_APPROVAL_STATUSES.PENDING]: 'badge badge-in-progress',
-  [QUOTE_APPROVAL_STATUSES.APPROVED]: 'badge badge-resolved',
+  [QUOTE_APPROVAL_STATUSES.APPROVED_BY_AGENT]: 'badge badge-in-progress',
+  [QUOTE_APPROVAL_STATUSES.APPROVED_BY_MANAGER]: 'badge badge-in-progress',
+  [QUOTE_APPROVAL_STATUSES.APPROVED_BY_ADMIN]: 'badge badge-in-progress',
+  [QUOTE_APPROVAL_STATUSES.APPROVED_BY_CUSTOMER]: 'badge badge-resolved',
   [QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER]: 'badge badge-cancelled',
   [QUOTE_APPROVAL_STATUSES.REJECTED_BY_CUSTOMER]: 'badge badge-cancelled',
   [QUOTE_APPROVAL_STATUSES.REVISED]: 'badge badge-neutral',
 };
 
+/** Quote has no approval record yet, or was rejected -- agent can (re)submit. */
 export function isSubmittable(status: QuoteApprovalStatus | null): boolean {
   return (
     status === null ||
@@ -72,11 +75,21 @@ export function isSubmittable(status: QuoteApprovalStatus | null): boolean {
   );
 }
 
-export function isPending(status: QuoteApprovalStatus | null): boolean {
-  return status === QUOTE_APPROVAL_STATUSES.PENDING;
+/** Quote has been submitted by an agent and is awaiting manager or admin action. */
+export function isAwaitingManagerApproval(status: QuoteApprovalStatus | null): boolean {
+  return status === QUOTE_APPROVAL_STATUSES.APPROVED_BY_AGENT;
 }
 
-export function isCreatable(status: QuoteApprovalStatus | null): boolean {
+/** Quote has cleared employee approval and is awaiting the customer's decision. */
+export function isAwaitingCustomerAction(status: QuoteApprovalStatus | null): boolean {
+  return (
+    status === QUOTE_APPROVAL_STATUSES.APPROVED_BY_MANAGER ||
+    status === QUOTE_APPROVAL_STATUSES.APPROVED_BY_ADMIN
+  );
+}
+
+/** Quote fields can be edited. Locked once submitted (APPROVED_BY_AGENT) or fully resolved. */
+export function isEditable(status: QuoteApprovalStatus | null): boolean {
   return (
     status === null ||
     status === QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER ||
@@ -84,10 +97,16 @@ export function isCreatable(status: QuoteApprovalStatus | null): boolean {
   );
 }
 
-export function isEditable(status: QuoteApprovalStatus | null): boolean {
+/** Quote has reached a terminal accepted or rejected state -- no further actions possible. */
+export function isSettled(status: QuoteApprovalStatus | null): boolean {
   return (
-    status !== null &&
-    status !== QUOTE_APPROVAL_STATUSES.PENDING &&
-    status !== QUOTE_APPROVAL_STATUSES.APPROVED
+    status === QUOTE_APPROVAL_STATUSES.APPROVED_BY_CUSTOMER ||
+    status === QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER ||
+    status === QUOTE_APPROVAL_STATUSES.REJECTED_BY_CUSTOMER
   );
+}
+
+/** Quote can still be created or replaced (no quote exists, or the last one was rejected). */
+export function isCreatable(status: QuoteApprovalStatus | null): boolean {
+  return isSubmittable(status);
 }

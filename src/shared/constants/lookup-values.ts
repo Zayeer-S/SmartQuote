@@ -29,8 +29,18 @@ export const PERMISSIONS = {
   QUOTES_READ_OWN: 'quotes:read:own',
   QUOTES_READ_ALL: 'quotes:read:all',
   QUOTES_UPDATE: 'quotes:update',
-  QUOTES_APPROVE: 'quotes:approve',
-  QUOTES_REJECT: 'quotes:reject',
+  /** Submit a quote for manager review. Held by: Support Agent, Manager, Admin. */
+  QUOTES_AGENT_APPROVE: 'quotes:agent-approve',
+  /** Approve a quote that has been submitted by an agent (APPROVED_BY_AGENT -> APPROVED_BY_MANAGER). Held by: Manager. */
+  QUOTES_MANAGER_APPROVE: 'quotes:manager-approve',
+  /** Reject a quote that has been submitted by an agent (APPROVED_BY_AGENT -> REJECTED_BY_MANAGER). Held by: Manager. */
+  QUOTES_MANAGER_REJECT: 'quotes:manager-reject',
+  /** Bypass the agent + manager approval steps entirely (APPROVED_BY_AGENT -> APPROVED_BY_ADMIN). Held by: Admin. */
+  QUOTES_ADMIN_APPROVE: 'quotes:admin-approve',
+  /** Accept a quote that has cleared employee approval (APPROVED_BY_MANAGER | APPROVED_BY_ADMIN -> APPROVED_BY_CUSTOMER). Held by: Customer. */
+  QUOTES_CUSTOMER_APPROVE: 'quotes:customer-approve',
+  /** Reject a quote that has cleared employee approval (APPROVED_BY_MANAGER | APPROVED_BY_ADMIN -> REJECTED_BY_CUSTOMER). Held by: Customer. */
+  QUOTES_CUSTOMER_REJECT: 'quotes:customer-reject',
   QUOTES_DELETE: 'quotes:delete',
 
   USERS_CREATE: 'users:create',
@@ -168,9 +178,33 @@ export const QUOTE_CREATORS = {
 export type QuoteCreator = (typeof QUOTE_CREATORS)[keyof typeof QUOTE_CREATORS];
 
 export const QUOTE_APPROVAL_STATUSES = {
-  PENDING: 'Pending',
-  APPROVED: 'Approved',
+  /** Approval workflow state machine
+      quote_approval_id IS NULL  = not yet submitted
+
+      APPROVED_BY_AGENT    [submitForApproval, requires QUOTES_AGENT_APPROVE]
+        --[QUOTES_MANAGER_APPROVE]--> APPROVED_BY_MANAGER
+        --[QUOTES_MANAGER_REJECT]---> REJECTED_BY_MANAGER  (terminal)
+        --[QUOTES_ADMIN_APPROVE]----> APPROVED_BY_ADMIN
+
+      APPROVED_BY_MANAGER
+        --[QUOTES_CUSTOMER_APPROVE]-> APPROVED_BY_CUSTOMER (terminal)
+        --[QUOTES_CUSTOMER_REJECT]--> REJECTED_BY_CUSTOMER (terminal)
+
+      APPROVED_BY_ADMIN
+        --[QUOTES_CUSTOMER_APPROVE]-> APPROVED_BY_CUSTOMER (terminal)
+        --[QUOTES_CUSTOMER_REJECT]--> REJECTED_BY_CUSTOMER (terminal)
+   */
+  /** Agent has submitted the quote for manager review. Awaiting manager action. */
+  APPROVED_BY_AGENT: 'Approved By Agent',
+  /** Manager has approved. Quote is now visible to the customer. */
+  APPROVED_BY_MANAGER: 'Approved By Manager',
+  /** Admin bypassed the agent + manager steps. Quote is visible to the customer. */
+  APPROVED_BY_ADMIN: 'Approved By Admin',
+  /** Customer has accepted the quote. Terminal state. */
+  APPROVED_BY_CUSTOMER: 'Approved By Customer',
+  /** Manager rejected the agent submission. Terminal — agent must revise and resubmit. */
   REJECTED_BY_MANAGER: 'Rejected By Manager',
+  /** Customer rejected the quote after employee approval. Terminal. */
   REJECTED_BY_CUSTOMER: 'Rejected By Customer',
   REVISED: 'Revised',
 } as const;

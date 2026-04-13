@@ -56,9 +56,16 @@ export const QUOTE_ENDPOINTS = {
   GET: (ticketId = ':ticketId', quoteId = ':quoteId') => `/${ticketId}/quotes/${quoteId}`,
   UPDATE: (ticketId = ':ticketId', quoteId = ':quoteId') => `/${ticketId}/quotes/${quoteId}`,
   SUBMIT: (ticketId = ':ticketId', quoteId = ':quoteId') => `/${ticketId}/quotes/${quoteId}/submit`,
-  APPROVE: (ticketId = ':ticketId', quoteId = ':quoteId') =>
-    `/${ticketId}/quotes/${quoteId}/approve`,
-  REJECT: (ticketId = ':ticketId', quoteId = ':quoteId') => `/${ticketId}/quotes/${quoteId}/reject`,
+  MANAGER_APPROVE: (ticketId = ':ticketId', quoteId = ':quoteId') =>
+    `/${ticketId}/quotes/${quoteId}/manager-approve`,
+  MANAGER_REJECT: (ticketId = ':ticketId', quoteId = ':quoteId') =>
+    `/${ticketId}/quotes/${quoteId}/manager-reject`,
+  ADMIN_APPROVE: (ticketId = ':ticketId', quoteId = ':quoteId') =>
+    `/${ticketId}/quotes/${quoteId}/admin-approve`,
+  CUSTOMER_APPROVE: (ticketId = ':ticketId', quoteId = ':quoteId') =>
+    `/${ticketId}/quotes/${quoteId}/customer-approve`,
+  CUSTOMER_REJECT: (ticketId = ':ticketId', quoteId = ':quoteId') =>
+    `/${ticketId}/quotes/${quoteId}/customer-reject`,
   REVISIONS: (ticketId = ':ticketId', quoteId = ':quoteId') =>
     `/${ticketId}/quotes/${quoteId}/revisions`,
 } as const;

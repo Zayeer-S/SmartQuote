@@ -8,6 +8,7 @@ import { OrganizationMembersDAO } from '../../../../src/server/daos/children/org
 import { RateProfilesDAO } from '../../../../src/server/daos/children/rate-profiles.dao';
 import { TicketsDAO } from '../../../../src/server/daos/children/tickets-domain.dao';
 import {
+  QuoteApprovalsDAO,
   QuoteCalculationRulesDAO,
   QuotesDAO,
 } from '../../../../src/server/daos/children/quotes-domain.dao';
@@ -55,6 +56,8 @@ export function makeMockRateProfilesDAO(): RateProfilesDAO {
 
 export function makeMockQuotesDAO(): QuotesDAO {
   return {
+    getById: vi.fn(),
+    update: vi.fn(),
     create: vi.fn(),
     findLatestForTicket: vi.fn().mockResolvedValue(null),
   } as unknown as QuotesDAO;
@@ -90,4 +93,12 @@ export function makeMockNotificationTypesDAO(): NotificationTypesDAO {
     findByName: vi.fn(),
     getAll: vi.fn(),
   } as unknown as NotificationTypesDAO;
+}
+
+export function makeMockQuoteApprovalsDAO(): QuoteApprovalsDAO {
+  return {
+    create: vi.fn(),
+    getById: vi.fn(),
+    update: vi.fn(),
+  } as unknown as QuoteApprovalsDAO;
 }

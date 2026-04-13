@@ -182,7 +182,7 @@ export class QuotesDAO extends DeletableDAO<Quote, QuoteId> {
           .leftJoin(statuses, `${approvals}.approval_status_id`, `${statuses}.id`)
           .whereIn(`${q}.ticket_id`, ticketIds)
           .whereNull(`${q}.deleted_at`)
-          .where(`${statuses}.name`, QUOTE_APPROVAL_STATUSES.APPROVED);
+          .where(`${statuses}.name`, QUOTE_APPROVAL_STATUSES.APPROVED_BY_CUSTOMER);
       })
       .from('ranked')
       .where('rn', 1);

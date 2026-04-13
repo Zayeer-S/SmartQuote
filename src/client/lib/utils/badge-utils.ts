@@ -24,8 +24,10 @@ const PRIORITY_BADGE_CLASS: Record<TicketPriority, string> = {
 };
 
 const QUOTE_APPROVAL_BADGE_CLASS: Record<QuoteApprovalStatus, string> = {
-  [QUOTE_APPROVAL_STATUSES.PENDING]: 'badge badge-quote-pending',
-  [QUOTE_APPROVAL_STATUSES.APPROVED]: 'badge badge-quote-approved',
+  [QUOTE_APPROVAL_STATUSES.APPROVED_BY_AGENT]: 'badge badge-quote-pending',
+  [QUOTE_APPROVAL_STATUSES.APPROVED_BY_MANAGER]: 'badge badge-quote-pending',
+  [QUOTE_APPROVAL_STATUSES.APPROVED_BY_ADMIN]: 'badge badge-quote-pending',
+  [QUOTE_APPROVAL_STATUSES.APPROVED_BY_CUSTOMER]: 'badge badge-quote-approved',
   [QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER]: 'badge badge-quote-rejected-manager',
   [QUOTE_APPROVAL_STATUSES.REJECTED_BY_CUSTOMER]: 'badge badge-quote-rejected-customer',
   [QUOTE_APPROVAL_STATUSES.REVISED]: 'badge badge-quote-revised',

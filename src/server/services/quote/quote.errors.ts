@@ -13,7 +13,8 @@ export const QUOTE_ERROR_MSGS = {
   NO_ACTIVE_RATE_PROFILE: 'No active rate profile found matching this ticket',
   NO_MATCHING_RULE: 'No calculation rule found matching this ticket',
   ALREADY_APPROVED: 'Quote has already been approved',
-  NOT_PENDING: 'Quote is not in a pending approval state',
+  NOT_SUBMITTED: 'Quote has not been submitted for approval yet',
+  WRONG_STAGE: 'This action is not permitted at the current approval stage',
   MIN_MAX_HOURS: 'Estimated maximum hours must be greater than or equal to minimum hours',
   USER_NOT_FOUND: 'No user found for this quote',
 } as const;

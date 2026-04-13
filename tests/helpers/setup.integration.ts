@@ -31,7 +31,6 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await db.migrate.rollback(undefined, true);
   await db.destroy();
 });
 
