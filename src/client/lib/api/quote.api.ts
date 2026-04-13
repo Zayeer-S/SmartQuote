@@ -105,38 +105,95 @@ export const quoteAPI = {
   },
 
   /**
-   * Approve a quote
+   * Manager approves a submitted quote (APPROVED_BY_AGENT -> APPROVED_BY_MANAGER)
    * @param ticketId Parent ticket ID
    * @param quoteId Target quote ID
    * @param payload Optional approval comment
    * @returns Approval record
    */
-  async approveQuote(
+  async managerApproveQuote(
     ticketId: string,
     quoteId: string,
     payload: ApproveQuoteRequest
   ): Promise<QuoteApprovalResponse> {
     const response = await httpClient.post<ApiResponse<QuoteApprovalResponse>>(
-      ticketBase + QUOTE_ENDPOINTS.APPROVE(ticketId, quoteId),
+      ticketBase + QUOTE_ENDPOINTS.MANAGER_APPROVE(ticketId, quoteId),
       payload
     );
     return extractData(response);
   },
 
   /**
-   * Reject a quote
+   * Manager rejects a submitted quote (APPROVED_BY_AGENT -> REJECTED_BY_MANAGER)
    * @param ticketId Parent ticket ID
    * @param quoteId Target quote ID
    * @param payload Rejection comment -- mandatory
    * @returns Approval record
    */
-  async rejectQuote(
+  async managerRejectQuote(
     ticketId: string,
     quoteId: string,
     payload: RejectQuoteRequest
   ): Promise<QuoteApprovalResponse> {
     const response = await httpClient.post<ApiResponse<QuoteApprovalResponse>>(
-      ticketBase + QUOTE_ENDPOINTS.REJECT(ticketId, quoteId),
+      ticketBase + QUOTE_ENDPOINTS.MANAGER_REJECT(ticketId, quoteId),
+      payload
+    );
+    return extractData(response);
+  },
+
+  /**
+   * Admin bypasses agent + manager steps (APPROVED_BY_AGENT -> APPROVED_BY_ADMIN)
+   * @param ticketId Parent ticket ID
+   * @param quoteId Target quote ID
+   * @param payload Optional approval comment
+   * @returns Approval record
+   */
+  async adminApproveQuote(
+    ticketId: string,
+    quoteId: string,
+    payload: ApproveQuoteRequest
+  ): Promise<QuoteApprovalResponse> {
+    const response = await httpClient.post<ApiResponse<QuoteApprovalResponse>>(
+      ticketBase + QUOTE_ENDPOINTS.ADMIN_APPROVE(ticketId, quoteId),
+      payload
+    );
+    return extractData(response);
+  },
+
+  /**
+   * Customer accepts a quote (APPROVED_BY_MANAGER | APPROVED_BY_ADMIN -> APPROVED_BY_CUSTOMER)
+   * @param ticketId Parent ticket ID
+   * @param quoteId Target quote ID
+   * @param payload Optional acceptance comment
+   * @returns Approval record
+   */
+  async customerApproveQuote(
+    ticketId: string,
+    quoteId: string,
+    payload: ApproveQuoteRequest
+  ): Promise<QuoteApprovalResponse> {
+    const response = await httpClient.post<ApiResponse<QuoteApprovalResponse>>(
+      ticketBase + QUOTE_ENDPOINTS.CUSTOMER_APPROVE(ticketId, quoteId),
+      payload
+    );
+    return extractData(response);
+  },
+
+  /**
+   * Customer rejects a quote (APPROVED_BY_MANAGER | APPROVED_BY_ADMIN -> REJECTED_BY_CUSTOMER)
+   * @param ticketId Parent ticket ID
+   * @param quoteId Target quote ID
+   * @param payload Rejection comment -- mandatory
+   * @returns Approval record
+   */
+  async customerRejectQuote(
+    ticketId: string,
+    quoteId: string,
+    payload: RejectQuoteRequest
+  ): Promise<QuoteApprovalResponse> {
+    const response = await httpClient.post<ApiResponse<QuoteApprovalResponse>>(
+      ticketBase + QUOTE_ENDPOINTS.CUSTOMER_REJECT(ticketId, quoteId),
       payload
     );
     return extractData(response);
