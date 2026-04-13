@@ -64,8 +64,6 @@ beforeAll(async () => {
   ticket4QuoteId = q4Quotes.find((q) => q.version === 2)!.id;
 });
 
-// ─── LIST ─────────────────────────────────────────────────────────────────────
-
 describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.LIST()}`, () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).get(quotesBase(ticket1Id));
@@ -107,8 +105,6 @@ describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.LIST()}`, () => {
     expect(res.status).toBe(404);
   });
 });
-
-// ─── GET ──────────────────────────────────────────────────────────────────────
 
 describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.GET()}`, () => {
   it('returns 401 when unauthenticated', async () => {
@@ -159,8 +155,6 @@ describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.GET()}`, () => {
   });
 });
 
-// ─── GENERATE ─────────────────────────────────────────────────────────────────
-
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE()}`, () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE(ticket1Id)}`);
@@ -199,8 +193,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE()}`, () => {
     expect(res.status).toBe(404);
   });
 });
-
-// ─── CREATE MANUAL ────────────────────────────────────────────────────────────
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL()}`, () => {
   const validManualQuote = {
@@ -274,8 +266,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL()}`, () => {
     expect(res.status).toBe(404);
   });
 });
-
-// ─── UPDATE ───────────────────────────────────────────────────────────────────
 
 describe(`PATCH ${TICKETS_BASE}${QUOTE_ENDPOINTS.UPDATE()}`, () => {
   it('returns 401 when unauthenticated', async () => {

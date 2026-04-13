@@ -25,8 +25,6 @@ let adminToken: string;
 // All approval tests run against ticket1 (org1) so customer1 has visibility
 let ticket1Id: string;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 /** Create a fresh unsubmitted quote and return its id */
 async function createQuote(fields: {
   estimatedHoursMinimum: number;
@@ -59,8 +57,6 @@ async function createAndManagerApprove(fields: Parameters<typeof createQuote>[0]
   return quoteId;
 }
 
-// ─── Setup ────────────────────────────────────────────────────────────────────
-
 beforeAll(async () => {
   app = await bootstrapApplication({ runBackgroundJobs: false });
 
@@ -84,8 +80,6 @@ beforeAll(async () => {
   const tickets: { id: string; title: string }[] = listRes.body.data.tickets;
   ticket1Id = tickets.find((t) => t.title === 'Email notifications not working')!.id;
 });
-
-// ─── SUBMIT ───────────────────────────────────────────────────────────────────
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT()}`, () => {
   let freshQuoteId: string;
@@ -131,8 +125,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT()}`, () => {
     expect(res.status).toBe(422);
   });
 });
-
-// ─── MANAGER APPROVE ─────────────────────────────────────────────────────────
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE()}`, () => {
   let submittedQuoteId: string;
@@ -192,8 +184,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE()}`, () => {
     expect(res.status).toBe(422);
   });
 });
-
-// ─── MANAGER REJECT ───────────────────────────────────────────────────────────
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_REJECT()}`, () => {
   let submittedQuoteId: string;
@@ -255,8 +245,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_REJECT()}`, () => {
   });
 });
 
-// ─── ADMIN APPROVE ────────────────────────────────────────────────────────────
-
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.ADMIN_APPROVE()}`, () => {
   let submittedQuoteId: string;
 
@@ -306,8 +294,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.ADMIN_APPROVE()}`, () => {
     expect(res.status).toBe(422);
   });
 });
-
-// ─── CUSTOMER APPROVE ─────────────────────────────────────────────────────────
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_APPROVE()}`, () => {
   let managerApprovedQuoteId: string;
@@ -366,8 +352,6 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_APPROVE()}`, () => {
     expect(res.status).toBe(422);
   });
 });
-
-// ─── CUSTOMER REJECT ──────────────────────────────────────────────────────────
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_REJECT()}`, () => {
   let managerApprovedQuoteId: string;

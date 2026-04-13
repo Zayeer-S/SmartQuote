@@ -90,7 +90,7 @@ export class DatabaseStack extends cdk.Stack {
       },
     });
 
-    // ── RDS instance ───────────────────────────────────────────────────────
+    // RDS
     const dbInstance = new rds.DatabaseInstance(this, 'Database', {
       engine: rds.DatabaseInstanceEngine.postgres({
         version: rds.PostgresEngineVersion.VER_16,

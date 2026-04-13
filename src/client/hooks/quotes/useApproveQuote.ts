@@ -6,8 +6,6 @@ import type {
   QuoteApprovalResponse,
 } from '../../../shared/contracts/quote-contracts.js';
 
-// ─── Shared hook factory ──────────────────────────────────────────────────────
-
 interface QuoteActionState {
   data: QuoteApprovalResponse | null;
   loading: boolean;
@@ -85,8 +83,6 @@ function useQuoteRejectAction(
 
   return { ...state, execute };
 }
-
-// ─── Public hooks ─────────────────────────────────────────────────────────────
 
 export function useManagerApproveQuote() {
   return useQuoteApproveAction(quoteAPI.managerApproveQuote.bind(quoteAPI));

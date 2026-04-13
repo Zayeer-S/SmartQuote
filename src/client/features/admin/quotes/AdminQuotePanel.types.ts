@@ -9,11 +9,11 @@ import type {
   QuoteConfidenceLevel,
 } from '../../../../shared/constants/lookup-values.js';
 
-// ─── Panel navigation ─────────────────────────────────────────────────────────
+// Panel navigation
 
 export type ActiveQuotePanel = 'none' | 'create' | 'update' | 'revisions' | 'reject';
 
-// ─── Form state ───────────────────────────────────────────────────────────────
+// Form state
 
 export interface CreateQuoteFormState {
   estimatedHoursMinimum: string;
@@ -42,7 +42,7 @@ export interface UpdateQuoteFormState {
   quoteConfidenceLevel?: QuoteConfidenceLevel;
 }
 
-// ─── Select options ───────────────────────────────────────────────────────────
+// Select options
 
 export const EFFORT_OPTIONS: { value: QuoteEffortLevel; label: string }[] = [
   { value: QUOTE_EFFORT_LEVELS.LOW, label: QUOTE_EFFORT_LEVELS.LOW },
