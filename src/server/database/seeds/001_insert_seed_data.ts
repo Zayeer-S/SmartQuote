@@ -732,7 +732,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
-      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_MANAGER_REJECT],
+      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_MANAGER_APPROVE],
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
