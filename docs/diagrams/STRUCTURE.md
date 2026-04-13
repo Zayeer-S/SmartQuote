@@ -470,6 +470,8 @@ smartquote/
 │   │   ├── constants/
 │   │   │   ├── comment.smoke.data.ts
 │   │   │   └── e2e.paths.ts
+│   │   ├── flow/
+│   │   │   └── quote.approval.flow.test.ts
 │   │   ├── setup/
 │   │   │   ├── admin.setup.ts
 │   │   │   └── customer.setup.ts
@@ -496,6 +498,7 @@ smartquote/
 │   │   ├── auth.routes.test.ts
 │   │   ├── email.service.test.ts
 │   │   ├── org.routes.test.ts
+│   │   ├── quote.approval.routes.test.ts
 │   │   ├── quote.routes.test.ts
 │   │   ├── rate.profiles.routes.test.ts
 │   │   ├── sla.routes.test.ts
@@ -505,6 +508,7 @@ smartquote/
 │   │       ├── auth.service.test.ts
 │   │       ├── notification.service.test.ts
 │   │       ├── password.service.test.ts
+│   │       ├── quote.approval.service.test.ts
 │   │       ├── quote.engine.service.test.ts
 │   │       ├── quote.service.test.ts
 │   │       └── session.service.test.ts
