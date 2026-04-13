@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useSubmitForApproval } from '../../../hooks/quotes/useSubmitForApproval.js';
-import { useApproveQuote } from '../../../hooks/quotes/useApproveQuote.js';
-import { useRejectQuote } from '../../../hooks/quotes/useRejectQuote.js';
+import {
+  useManagerApproveQuote,
+  useManagerRejectQuote,
+  useAdminApproveQuote,
+} from '../../../hooks/quotes/useApproveQuote.js';
 import { useQuotePermissions } from '../../../hooks/auth/useQuotePermissions.js';
 import type { QuoteWithApprovalResponse } from '../../../../shared/contracts/quote-contracts.js';
-import { isSubmittable, isPending } from './AdminQuotePanel.types.js';
+import { isSubmittable, isAwaitingManagerApproval } from './AdminQuotePanel.types.js';
 import './AdminQuoteApproval.css';
 
 interface AdminQuoteApprovalProps {
@@ -18,10 +21,12 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
   latestQuote,
   onQuoteMutated,
 }) => {
-  const { canUpdate, canApprove, canReject } = useQuotePermissions();
+  const { canUpdate, canAgentApprove, canManagerApprove, canManagerReject, canAdminApprove } =
+    useQuotePermissions();
   const submitForApproval = useSubmitForApproval();
-  const approveQuote = useApproveQuote();
-  const rejectQuote = useRejectQuote();
+  const managerApprove = useManagerApproveQuote();
+  const managerReject = useManagerRejectQuote();
+  const adminApprove = useAdminApproveQuote();
 
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectionNotes, setRejectionNotes] = useState('');
@@ -32,25 +37,30 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
     void submitForApproval.execute(ticketId, latestQuote.id).then(onQuoteMutated);
   };
 
-  const handleApprove = (): void => {
-    void approveQuote.execute(ticketId, latestQuote.id, {}).then(onQuoteMutated);
+  const handleManagerApprove = (): void => {
+    void managerApprove.execute(ticketId, latestQuote.id, {}).then(onQuoteMutated);
+  };
+
+  const handleAdminApprove = (): void => {
+    void adminApprove.execute(ticketId, latestQuote.id, {}).then(onQuoteMutated);
   };
 
   const handleRejectSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!rejectionNotes.trim()) return;
-    void rejectQuote.execute(ticketId, latestQuote.id, { comment: rejectionNotes }).then(() => {
+    void managerReject.execute(ticketId, latestQuote.id, { comment: rejectionNotes }).then(() => {
       setRejectionNotes('');
       setShowRejectForm(false);
       onQuoteMutated();
     });
   };
 
-  const showSubmit = canUpdate && isSubmittable(status);
-  const showApprove = canApprove && isPending(status);
-  const showReject = canReject && isPending(status);
+  const showSubmit = canUpdate && canAgentApprove && isSubmittable(status);
+  const showManagerApprove = canManagerApprove && isAwaitingManagerApproval(status);
+  const showManagerReject = canManagerReject && isAwaitingManagerApproval(status);
+  const showAdminApprove = canAdminApprove && isAwaitingManagerApproval(status);
 
-  if (!showSubmit && !showApprove && !showReject) return null;
+  if (!showSubmit && !showManagerApprove && !showManagerReject && !showAdminApprove) return null;
 
   return (
     <section aria-label="Quote approval" data-testid="admin-quote-approval-section">
@@ -68,20 +78,33 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
           </button>
         )}
 
-        {showApprove && (
+        {showManagerApprove && (
           <button
             type="button"
             className="btn btn-primary"
-            onClick={handleApprove}
-            disabled={approveQuote.loading}
-            aria-busy={approveQuote.loading}
-            data-testid="approve-quote-btn"
+            onClick={handleManagerApprove}
+            disabled={managerApprove.loading}
+            aria-busy={managerApprove.loading}
+            data-testid="manager-approve-quote-btn"
           >
-            {approveQuote.loading ? 'Approving...' : 'Approve'}
+            {managerApprove.loading ? 'Approving...' : 'Approve'}
           </button>
         )}
 
-        {showReject && (
+        {showAdminApprove && (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleAdminApprove}
+            disabled={adminApprove.loading}
+            aria-busy={adminApprove.loading}
+            data-testid="admin-approve-quote-btn"
+          >
+            {adminApprove.loading ? 'Approving...' : 'Approve (Admin)'}
+          </button>
+        )}
+
+        {showManagerReject && (
           <button
             type="button"
             className={`btn ${showRejectForm ? 'btn-ghost' : 'btn-danger'}`}
@@ -100,14 +123,19 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
           {submitForApproval.error}
         </p>
       )}
-      {approveQuote.error && (
+      {managerApprove.error && (
         <p className="feedback-error" role="alert" data-testid="approve-quote-error">
-          {approveQuote.error}
+          {managerApprove.error}
         </p>
       )}
-      {rejectQuote.error && (
+      {adminApprove.error && (
+        <p className="feedback-error" role="alert" data-testid="admin-approve-quote-error">
+          {adminApprove.error}
+        </p>
+      )}
+      {managerReject.error && (
         <p className="feedback-error" role="alert" data-testid="reject-quote-error">
-          {rejectQuote.error}
+          {managerReject.error}
         </p>
       )}
 
@@ -131,7 +159,7 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
               }}
               placeholder="Explain why this quote is being rejected..."
               required
-              disabled={rejectQuote.loading}
+              disabled={managerReject.loading}
               rows={3}
               aria-required="true"
               data-testid="rq-notes"
@@ -141,11 +169,11 @@ const AdminQuoteApproval: React.FC<AdminQuoteApprovalProps> = ({
           <button
             type="submit"
             className="btn btn-danger"
-            disabled={rejectQuote.loading || !rejectionNotes.trim()}
-            aria-busy={rejectQuote.loading}
+            disabled={managerReject.loading || !rejectionNotes.trim()}
+            aria-busy={managerReject.loading}
             data-testid="reject-quote-submit-btn"
           >
-            {rejectQuote.loading ? 'Rejecting...' : 'Confirm Rejection'}
+            {managerReject.loading ? 'Rejecting...' : 'Confirm Rejection'}
           </button>
         </form>
       )}

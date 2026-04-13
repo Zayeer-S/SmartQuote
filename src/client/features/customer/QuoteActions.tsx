@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { useApproveQuote } from '../../hooks/quotes/useApproveQuote.js';
-import { useRejectQuote } from '../../hooks/quotes/useRejectQuote.js';
-import { QUOTE_APPROVAL_STATUSES } from '../../../shared/constants/lookup-values.js';
+import {
+  useCustomerApproveQuote,
+  useCustomerRejectQuote,
+} from '../../hooks/quotes/useApproveQuote.js';
+import { isAwaitingCustomerAction } from '../../features/admin/quotes/AdminQuotePanel.types.js';
 import type { QuoteApprovalStatus } from '../../../shared/constants/lookup-values.js';
 import './QuoteActions.css';
 
@@ -11,21 +13,19 @@ interface QuoteActionsProps {
   approvalStatus?: QuoteApprovalStatus | null;
 }
 
-const SETTLED_STATUSES: QuoteApprovalStatus[] = [
-  QUOTE_APPROVAL_STATUSES.APPROVED,
-  QUOTE_APPROVAL_STATUSES.REJECTED_BY_CUSTOMER,
-];
-
 const QuoteActions: React.FC<QuoteActionsProps> = ({ ticketId, quoteId, approvalStatus }) => {
   const [rejectComment, setRejectComment] = useState('');
   const [showRejectForm, setShowRejectForm] = useState(false);
 
-  const approve = useApproveQuote();
-  const reject = useRejectQuote();
+  const approve = useCustomerApproveQuote();
+  const reject = useCustomerRejectQuote();
 
-  const isSettled = approvalStatus != null && SETTLED_STATUSES.includes(approvalStatus);
+  // Only show actions when the quote is waiting for the customer's decision
+  if (!isAwaitingCustomerAction(approvalStatus ?? null)) {
+    return null;
+  }
+
   const isBusy = approve.loading || reject.loading;
-  const rejectSucceeded = reject.data !== null;
 
   const handleApprove = (): void => {
     void approve.execute(ticketId, quoteId, {});
@@ -46,14 +46,6 @@ const QuoteActions: React.FC<QuoteActionsProps> = ({ ticketId, quoteId, approval
     setRejectComment('');
   };
 
-  if (isSettled) {
-    return (
-      <p className="quote-actions-settled" data-testid="quote-actions-settled">
-        This quote has already been {approvalStatus.toLowerCase()}.
-      </p>
-    );
-  }
-
   if (approve.data) {
     return (
       <p className="feedback-success" data-testid="approve-success">
@@ -62,7 +54,7 @@ const QuoteActions: React.FC<QuoteActionsProps> = ({ ticketId, quoteId, approval
     );
   }
 
-  if (rejectSucceeded) {
+  if (reject.data) {
     return (
       <p className="feedback-success" data-testid="reject-success">
         Quote rejected successfully.
