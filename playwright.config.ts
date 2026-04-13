@@ -1,8 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
-import { SESSION_PATHS } from './tests/e2e/constants/e2e.paths.js';
+import { SESSION_PATHS } from './tests/e2e/constants/e2e.paths';
 
-// Smoke files that require a stored session must be excluded from unauthenticated
-// projects and listed explicitly in the appropriate authenticated project instead.
 const SESSION_SMOKE_FILES = [
   '**/smoke/ticket.smoke.test.ts',
   '**/smoke/admin.comment.smoke.test.ts',
@@ -11,6 +9,8 @@ const SESSION_SMOKE_FILES = [
   '**/smoke/sla.smoke.test.ts',
   '**/smoke/org.smoke.test.ts',
 ];
+
+const FLOW_FILES = ['**/flows/quote.approval.flow.test.ts'];
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -45,13 +45,21 @@ export default defineConfig({
       testMatch: '**/setup/admin.setup.ts',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'agent-setup',
+      testMatch: '**/setup/agent.setup.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'manager-setup',
+      testMatch: '**/setup/manager.setup.ts',
+      use: { ...devices['Desktop Chrome'] },
+    },
 
     // --- Unauthenticated browsers ---
-    // Runs all tests except session-dependent smoke files, which require
-    // stored auth state and are handled by the authenticated projects below.
     {
       name: 'chromium',
-      testIgnore: SESSION_SMOKE_FILES,
+      testIgnore: [...SESSION_SMOKE_FILES, ...FLOW_FILES],
       use: {
         ...devices['Desktop Chrome'],
         storageState: { cookies: [], origins: [] },
@@ -59,7 +67,7 @@ export default defineConfig({
     },
     {
       name: 'firefox',
-      testIgnore: SESSION_SMOKE_FILES,
+      testIgnore: [...SESSION_SMOKE_FILES, ...FLOW_FILES],
       use: {
         ...devices['Desktop Firefox'],
         storageState: { cookies: [], origins: [] },
@@ -67,8 +75,6 @@ export default defineConfig({
     },
 
     // --- Authenticated browsers (admin session) ---
-    // Only runs the admin comment smoke file. Must complete before
-    // chromium-customer so the internal comment exists for the visibility test.
     {
       name: 'chromium-admin',
       testMatch: [
@@ -101,6 +107,15 @@ export default defineConfig({
       use: {
         ...devices['Desktop Firefox'],
         storageState: SESSION_PATHS.CUSTOMER,
+      },
+    },
+
+    {
+      name: 'flow',
+      testMatch: '**/flows/quote.approval.flow.test.ts',
+      dependencies: ['agent-setup', 'manager-setup', 'customer-setup'],
+      use: {
+        ...devices['Desktop Chrome'],
       },
     },
   ],
