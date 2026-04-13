@@ -183,12 +183,12 @@ export class QuoteController {
     }
   };
 
-  approveQuote = async (req: Request, res: Response): Promise<void> => {
+  managerApproveQuote = async (req: Request, res: Response): Promise<void> => {
     try {
       const actor = (req as AuthenticatedRequest).user;
       const body = validateOrThrow(approveQuoteSchema, req.body);
 
-      const approval = await this.quoteApprovalService.approveQuote(
+      const approval = await this.quoteApprovalService.managerApprove(
         req.params.quoteId as QuoteId,
         actor.id as UserId,
         body.comment ?? null
@@ -200,15 +200,66 @@ export class QuoteController {
     }
   };
 
-  rejectQuote = async (req: Request, res: Response): Promise<void> => {
+  managerRejectQuote = async (req: Request, res: Response): Promise<void> => {
     try {
       const actor = (req as AuthenticatedRequest).user;
       const body = validateOrThrow(rejectQuoteSchema, req.body);
 
-      const approval = await this.quoteApprovalService.rejectQuote(
+      const approval = await this.quoteApprovalService.managerReject(
         req.params.quoteId as QuoteId,
-        body.comment,
-        actor.id as UserId
+        actor.id as UserId,
+        body.comment
+      );
+
+      success(res, this.mapApproval(approval), 200);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
+  adminApproveQuote = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const actor = (req as AuthenticatedRequest).user;
+      const body = validateOrThrow(approveQuoteSchema, req.body);
+
+      const approval = await this.quoteApprovalService.adminApprove(
+        req.params.quoteId as QuoteId,
+        actor.id as UserId,
+        body.comment ?? null
+      );
+
+      success(res, this.mapApproval(approval), 200);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
+  customerApproveQuote = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const actor = (req as AuthenticatedRequest).user;
+      const body = validateOrThrow(approveQuoteSchema, req.body);
+
+      const approval = await this.quoteApprovalService.customerApprove(
+        req.params.quoteId as QuoteId,
+        actor.id as UserId,
+        body.comment ?? null
+      );
+
+      success(res, this.mapApproval(approval), 200);
+    } catch (err: unknown) {
+      handleError(res, err);
+    }
+  };
+
+  customerRejectQuote = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const actor = (req as AuthenticatedRequest).user;
+      const body = validateOrThrow(rejectQuoteSchema, req.body);
+
+      const approval = await this.quoteApprovalService.customerReject(
+        req.params.quoteId as QuoteId,
+        actor.id as UserId,
+        body.comment
       );
 
       success(res, this.mapApproval(approval), 200);
