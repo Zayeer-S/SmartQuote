@@ -285,7 +285,7 @@ export async function generateQuoteApprovals(
       {
         approved_by_user_id: managerId,
         user_role: AUTH_ROLES.MANAGER,
-        approval_status_id: lookupIds.approvalStatuses[QUOTE_APPROVAL_STATUSES.APPROVED],
+        approval_status_id: lookupIds.approvalStatuses[QUOTE_APPROVAL_STATUSES.APPROVED_BY_MANAGER],
         comment: 'Approved - reasonable estimate for this incident.',
         approved_at: yesterday,
       },
@@ -293,7 +293,7 @@ export async function generateQuoteApprovals(
       {
         approved_by_user_id: managerId,
         user_role: AUTH_ROLES.MANAGER,
-        approval_status_id: lookupIds.approvalStatuses[QUOTE_APPROVAL_STATUSES.PENDING],
+        approval_status_id: lookupIds.approvalStatuses[QUOTE_APPROVAL_STATUSES.APPROVED_BY_AGENT],
         comment: null,
         approved_at: null,
       },
@@ -301,7 +301,7 @@ export async function generateQuoteApprovals(
       {
         approved_by_user_id: managerId,
         user_role: AUTH_ROLES.MANAGER,
-        approval_status_id: lookupIds.approvalStatuses[QUOTE_APPROVAL_STATUSES.APPROVED],
+        approval_status_id: lookupIds.approvalStatuses[QUOTE_APPROVAL_STATUSES.APPROVED_BY_MANAGER],
         comment: 'Approved - critical issue, justified cost.',
         approved_at: yesterday,
       },

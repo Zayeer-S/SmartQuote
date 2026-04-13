@@ -648,11 +648,11 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
-      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_APPROVE],
+      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_CUSTOMER_APPROVE],
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.CUSTOMER],
-      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_REJECT],
+      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_CUSTOMER_REJECT],
     },
 
     // SUPPORT AGENT permissions
@@ -700,6 +700,10 @@ export async function seed(knex: Knex): Promise<void> {
       role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
       permission_id: lookupIds.permissions[PERMISSIONS.ANALYTICS_READ],
     },
+    {
+      role_id: lookupIds.roles[AUTH_ROLES.SUPPORT_AGENT],
+      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_AGENT_APPROVE],
+    },
 
     // MANAGER permissions
     {
@@ -728,11 +732,11 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
-      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_APPROVE],
+      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_MANAGER_REJECT],
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
-      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_REJECT],
+      permission_id: lookupIds.permissions[PERMISSIONS.QUOTES_MANAGER_REJECT],
     },
     {
       role_id: lookupIds.roles[AUTH_ROLES.MANAGER],
