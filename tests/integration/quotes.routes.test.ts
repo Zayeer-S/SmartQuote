@@ -15,7 +15,6 @@ import { USERS } from '../constants/test.user.credentials';
 const LOGIN = `/api${AUTH_ENDPOINTS.BASE}${AUTH_ENDPOINTS.LOGIN}`;
 const TICKETS_BASE = `/api${TICKET_ENDPOINTS.BASE}`;
 
-// Build a quote URL base for a given ticketId
 function quotesBase(ticketId: string): string {
   return `${TICKETS_BASE}${QUOTE_ENDPOINTS.BASE(ticketId)}`;
 }
@@ -25,14 +24,12 @@ let customer1Token: string;
 let customer2Token: string;
 let agentToken: string;
 let managerToken: string;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 let adminToken: string;
 
-// Seeded ticket ids -- discovered at runtime
 let ticket1Id: string; // org1, INCIDENT, HIGH, MAJOR -- has seed rate profile
 let ticket4Id: string; // org2, ENHANCEMENT, MEDIUM, MODERATE -- has seed rate profile
 
-// Seeded quote ids -- discovered at runtime
 let ticket1QuoteId: string;
 let ticket4QuoteId: string; // version 2 (latest, not soft-deleted)
 
@@ -75,21 +72,12 @@ beforeAll(async () => {
   ticket4QuoteId = q4Quotes.find((q) => q.version === 2)!.id;
 });
 
+// ─── LIST ─────────────────────────────────────────────────────────────────────
+
 describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.LIST()}`, () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).get(quotesBase(ticket1Id));
     expect(res.status).toBe(401);
-  });
-
-  it('returns 403 when actor lacks QUOTES_READ permission', async () => {
-    // Customer has QUOTES_READ_OWN only -- but can still read their own org quotes
-    // Agent/Manager/Admin have QUOTES_READ_ALL
-    // We need a role with NO quote read permission -- none in the current seed,
-    // so we verify the positive case and trust the RBAC middleware test coverage
-    const res = await request(app)
-      .get(quotesBase(ticket1Id))
-      .set('Authorization', `Bearer ${agentToken}`);
-    expect(res.status).toBe(200);
   });
 
   it('returns quotes array for agent on any ticket', async () => {
@@ -127,6 +115,8 @@ describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.LIST()}`, () => {
     expect(res.status).toBe(404);
   });
 });
+
+// ─── GET ──────────────────────────────────────────────────────────────────────
 
 describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.GET()}`, () => {
   it('returns 401 when unauthenticated', async () => {
@@ -177,6 +167,8 @@ describe(`GET ${TICKETS_BASE}${QUOTE_ENDPOINTS.GET()}`, () => {
   });
 });
 
+// ─── GENERATE ─────────────────────────────────────────────────────────────────
+
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE()}`, () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE(ticket1Id)}`);
@@ -215,6 +207,8 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE()}`, () => {
     expect(res.status).toBe(404);
   });
 });
+
+// ─── CREATE MANUAL ────────────────────────────────────────────────────────────
 
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL()}`, () => {
   const validManualQuote = {
@@ -289,6 +283,8 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL()}`, () => {
   });
 });
 
+// ─── UPDATE ───────────────────────────────────────────────────────────────────
+
 describe(`PATCH ${TICKETS_BASE}${QUOTE_ENDPOINTS.UPDATE()}`, () => {
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app)
@@ -339,8 +335,9 @@ describe(`PATCH ${TICKETS_BASE}${QUOTE_ENDPOINTS.UPDATE()}`, () => {
   });
 });
 
+// ─── SUBMIT ───────────────────────────────────────────────────────────────────
+
 describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT()}`, () => {
-  // Create a fresh quote to submit so we don't collide with other tests
   let freshQuoteId: string;
 
   beforeAll(async () => {
@@ -373,23 +370,30 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT()}`, () => {
     expect(res.status).toBe(403);
   });
 
-  it('returns 201 with a PENDING approval record for agent', async () => {
+  it('returns 201 with APPROVED_BY_AGENT status for agent', async () => {
     const res = await request(app)
       .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, freshQuoteId)}`)
       .set('Authorization', `Bearer ${agentToken}`);
 
     expect(res.status).toBe(201);
     expect(res.body.data).toMatchObject({
-      approvalStatus: 'Pending',
+      approvalStatus: 'Approved By Agent',
     });
+  });
+
+  it('returns 422 when submitting an already-submitted quote', async () => {
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, freshQuoteId)}`)
+      .set('Authorization', `Bearer ${agentToken}`);
+
+    expect(res.status).toBe(422);
   });
 });
 
-describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE()}`, () => {
-  let pendingQuoteId: string;
+describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE()}`, () => {
+  let submittedQuoteId: string;
 
   beforeAll(async () => {
-    // Create and submit a fresh quote to get a PENDING approval
     const createRes = await request(app)
       .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL(ticket1Id)}`)
       .set('Authorization', `Bearer ${agentToken}`)
@@ -401,42 +405,51 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE()}`, () => {
         quoteEffortLevel: 'Low',
         quoteConfidenceLevel: null,
       });
-    pendingQuoteId = createRes.body.data.id as string;
+    submittedQuoteId = createRes.body.data.id as string;
 
     await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, pendingQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, submittedQuoteId)}`)
       .set('Authorization', `Bearer ${agentToken}`);
   });
 
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).post(
-      `${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE(ticket1Id, pendingQuoteId)}`
+      `${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE(ticket1Id, submittedQuoteId)}`
     );
     expect(res.status).toBe(401);
   });
 
-  it('returns 403 when agent tries to approve (lacks QUOTES_APPROVE)', async () => {
+  it('returns 403 when agent tries to manager-approve', async () => {
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE(ticket1Id, pendingQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE(ticket1Id, submittedQuoteId)}`)
       .set('Authorization', `Bearer ${agentToken}`);
 
     expect(res.status).toBe(403);
   });
 
-  it('returns 200 with APPROVED status for manager', async () => {
+  it('returns 403 when customer tries to manager-approve', async () => {
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE(ticket1Id, pendingQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE(ticket1Id, submittedQuoteId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 200 with APPROVED_BY_MANAGER status for manager', async () => {
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE(ticket1Id, submittedQuoteId)}`)
       .set('Authorization', `Bearer ${managerToken}`)
       .send({ comment: 'Looks good' });
 
     expect(res.status).toBe(200);
-    expect(res.body.data.approvalStatus).toBe('Approved');
+    expect(res.body.data.approvalStatus).toBe('Approved By Manager');
     expect(res.body.data.comment).toBe('Looks good');
   });
 
-  it('returns 422 when trying to approve an already-approved quote', async () => {
+  it('returns 422 when trying to manager-approve at wrong stage', async () => {
+    // Already at APPROVED_BY_MANAGER -- not APPROVED_BY_AGENT anymore
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE(ticket1Id, pendingQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE(ticket1Id, submittedQuoteId)}`)
       .set('Authorization', `Bearer ${managerToken}`)
       .send({ comment: 'Double approve' });
 
@@ -444,13 +457,13 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.APPROVE()}`, () => {
   });
 });
 
-describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT()}`, () => {
-  let pendingManagerQuoteId: string;
-  let pendingCustomerQuoteId: string;
+// ─── MANAGER REJECT ───────────────────────────────────────────────────────────
+
+describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_REJECT()}`, () => {
+  let submittedQuoteId: string;
 
   beforeAll(async () => {
-    // Quote for manager rejection test
-    const createRes1 = await request(app)
+    const createRes = await request(app)
       .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL(ticket1Id)}`)
       .set('Authorization', `Bearer ${agentToken}`)
       .send({
@@ -461,58 +474,40 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT()}`, () => {
         quoteEffortLevel: 'Medium',
         quoteConfidenceLevel: null,
       });
-    pendingManagerQuoteId = createRes1.body.data.id as string;
+    submittedQuoteId = createRes.body.data.id as string;
 
     await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, pendingManagerQuoteId)}`)
-      .set('Authorization', `Bearer ${agentToken}`);
-
-    // Quote for customer rejection test
-    const createRes2 = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL(ticket1Id)}`)
-      .set('Authorization', `Bearer ${agentToken}`)
-      .send({
-        estimatedHoursMinimum: 5,
-        estimatedHoursMaximum: 10,
-        hourlyRate: 110,
-        fixedCost: 0,
-        quoteEffortLevel: 'Medium',
-        quoteConfidenceLevel: null,
-      });
-    pendingCustomerQuoteId = createRes2.body.data.id as string;
-
-    await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, pendingCustomerQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, submittedQuoteId)}`)
       .set('Authorization', `Bearer ${agentToken}`);
   });
 
   it('returns 401 when unauthenticated', async () => {
     const res = await request(app).post(
-      `${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`
+      `${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_REJECT(ticket1Id, submittedQuoteId)}`
     );
     expect(res.status).toBe(401);
   });
 
-  it('returns 403 when agent tries to reject (lacks QUOTES_REJECT)', async () => {
+  it('returns 403 when agent tries to manager-reject', async () => {
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_REJECT(ticket1Id, submittedQuoteId)}`)
       .set('Authorization', `Bearer ${agentToken}`);
 
     expect(res.status).toBe(403);
   });
 
-  it('returns 400 when comment is missing (required for rejection)', async () => {
+  it('returns 400 when comment is missing', async () => {
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_REJECT(ticket1Id, submittedQuoteId)}`)
       .set('Authorization', `Bearer ${managerToken}`)
       .send({});
 
     expect(res.status).toBe(400);
   });
 
-  it('returns 200 with Rejected By Manager status when manager rejects', async () => {
+  it('returns 200 with REJECTED_BY_MANAGER status for manager', async () => {
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_REJECT(ticket1Id, submittedQuoteId)}`)
       .set('Authorization', `Bearer ${managerToken}`)
       .send({ comment: 'Needs more detail' });
 
@@ -521,9 +516,198 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT()}`, () => {
     expect(res.body.data.comment).toBe('Needs more detail');
   });
 
-  it('returns 200 with Rejected By Customer status when customer rejects', async () => {
+  it('returns 422 when trying to reject at wrong stage', async () => {
+    // Already REJECTED_BY_MANAGER -- not APPROVED_BY_AGENT anymore
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingCustomerQuoteId)}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_REJECT(ticket1Id, submittedQuoteId)}`)
+      .set('Authorization', `Bearer ${managerToken}`)
+      .send({ comment: 'Double reject' });
+
+    expect(res.status).toBe(422);
+  });
+});
+
+// ─── ADMIN APPROVE ────────────────────────────────────────────────────────────
+
+describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.ADMIN_APPROVE()}`, () => {
+  let submittedQuoteId: string;
+
+  beforeAll(async () => {
+    const createRes = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL(ticket1Id)}`)
+      .set('Authorization', `Bearer ${agentToken}`)
+      .send({
+        estimatedHoursMinimum: 4,
+        estimatedHoursMaximum: 8,
+        hourlyRate: 100,
+        fixedCost: 0,
+        quoteEffortLevel: 'Medium',
+        quoteConfidenceLevel: null,
+      });
+    submittedQuoteId = createRes.body.data.id as string;
+
+    await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, submittedQuoteId)}`)
+      .set('Authorization', `Bearer ${agentToken}`);
+  });
+
+  it('returns 401 when unauthenticated', async () => {
+    const res = await request(app).post(
+      `${TICKETS_BASE}${QUOTE_ENDPOINTS.ADMIN_APPROVE(ticket1Id, submittedQuoteId)}`
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 403 when manager tries to admin-approve', async () => {
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.ADMIN_APPROVE(ticket1Id, submittedQuoteId)}`)
+      .set('Authorization', `Bearer ${managerToken}`);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 200 with APPROVED_BY_ADMIN status for admin', async () => {
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.ADMIN_APPROVE(ticket1Id, submittedQuoteId)}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ comment: 'Admin bypass' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.approvalStatus).toBe('Approved By Admin');
+  });
+});
+
+// ─── CUSTOMER APPROVE ─────────────────────────────────────────────────────────
+
+describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_APPROVE()}`, () => {
+  // Needs a quote at APPROVED_BY_MANAGER -- create, submit, manager-approve in setup
+  let managerApprovedQuoteId: string;
+
+  beforeAll(async () => {
+    const createRes = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL(ticket1Id)}`)
+      .set('Authorization', `Bearer ${agentToken}`)
+      .send({
+        estimatedHoursMinimum: 2,
+        estimatedHoursMaximum: 5,
+        hourlyRate: 85,
+        fixedCost: 0,
+        quoteEffortLevel: 'Low',
+        quoteConfidenceLevel: null,
+      });
+    managerApprovedQuoteId = createRes.body.data.id as string;
+
+    await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${agentToken}`);
+
+    await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${managerToken}`)
+      .send({ comment: null });
+  });
+
+  it('returns 401 when unauthenticated', async () => {
+    const res = await request(app).post(
+      `${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_APPROVE(ticket1Id, managerApprovedQuoteId)}`
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 403 when agent tries to customer-approve', async () => {
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_APPROVE(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${agentToken}`);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 403 when customer from wrong org tries to customer-approve', async () => {
+    // customer2 is on org2, ticket1 is org1
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_APPROVE(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${customer2Token}`);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 200 with APPROVED_BY_CUSTOMER status for customer', async () => {
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_APPROVE(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .send({});
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.approvalStatus).toBe('Approved By Customer');
+  });
+
+  it('returns 422 when trying to customer-approve at wrong stage', async () => {
+    // Already APPROVED_BY_CUSTOMER
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_APPROVE(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .send({});
+
+    expect(res.status).toBe(422);
+  });
+});
+
+// ─── CUSTOMER REJECT ──────────────────────────────────────────────────────────
+
+describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_REJECT()}`, () => {
+  let managerApprovedQuoteId: string;
+
+  beforeAll(async () => {
+    const createRes = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CREATE_MANUAL(ticket1Id)}`)
+      .set('Authorization', `Bearer ${agentToken}`)
+      .send({
+        estimatedHoursMinimum: 6,
+        estimatedHoursMaximum: 12,
+        hourlyRate: 120,
+        fixedCost: 0,
+        quoteEffortLevel: 'High',
+        quoteConfidenceLevel: null,
+      });
+    managerApprovedQuoteId = createRes.body.data.id as string;
+
+    await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.SUBMIT(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${agentToken}`);
+
+    await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.MANAGER_APPROVE(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${managerToken}`)
+      .send({ comment: null });
+  });
+
+  it('returns 401 when unauthenticated', async () => {
+    const res = await request(app).post(
+      `${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_REJECT(ticket1Id, managerApprovedQuoteId)}`
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 403 when agent tries to customer-reject', async () => {
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_REJECT(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${agentToken}`);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 400 when comment is missing', async () => {
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_REJECT(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
+      .send({});
+
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 200 with REJECTED_BY_CUSTOMER status for customer', async () => {
+    const res = await request(app)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_REJECT(ticket1Id, managerApprovedQuoteId)}`)
       .set('Authorization', `Bearer ${customer1Token}`)
       .send({ comment: 'Too expensive' });
 
@@ -532,10 +716,11 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT()}`, () => {
     expect(res.body.data.comment).toBe('Too expensive');
   });
 
-  it('returns 422 when trying to reject an already-rejected quote', async () => {
+  it('returns 422 when trying to customer-reject at wrong stage', async () => {
+    // Already REJECTED_BY_CUSTOMER
     const res = await request(app)
-      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.REJECT(ticket1Id, pendingManagerQuoteId)}`)
-      .set('Authorization', `Bearer ${managerToken}`)
+      .post(`${TICKETS_BASE}${QUOTE_ENDPOINTS.CUSTOMER_REJECT(ticket1Id, managerApprovedQuoteId)}`)
+      .set('Authorization', `Bearer ${customer1Token}`)
       .send({ comment: 'Double reject' });
 
     expect(res.status).toBe(422);
