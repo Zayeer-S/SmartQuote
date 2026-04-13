@@ -117,7 +117,7 @@ const CustomerDashboardPage: React.FC = () => {
           <div className="feedback-success" role="status" data-testid="ticket-submit-success">
             <div>
               <strong>Ticket submitted successfully.</strong>
-              <p>Your ticket has been received. You can close this window or press Esc.</p>
+              <p>Your ticket has been received. You can close this window.</p>
             </div>
           </div>
         ) : (
