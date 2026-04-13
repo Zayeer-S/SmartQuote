@@ -1,8 +1,10 @@
-import json
 import os
 
 import joblib
 import numpy as np
+from fastapi import FastAPI
+from mangum import Mangum
+from pydantic import BaseModel
 
 MODEL_DIR = os.environ.get("MODEL_DIR", "/opt/ml")
 _pca = _regressor = _classifier = None
@@ -19,10 +21,6 @@ TABULAR_FEATURE_ORDER = [
 ]
 
 
-def response(statusCode: int, message: str):
-    return {"statusCode": statusCode, "body": message}
-
-
 def _load_models():
     global _pca, _regressor, _classifier
     if _pca is None or _regressor is None or _classifier is None:
@@ -37,7 +35,6 @@ def _build_feature_vector(embedding: list, features: dict):
     2. Concat with 6 tabular features
     Returns a (1, 38) array ready for XGBoost inference
     """
-    # Silence type check
     assert _pca is not None
 
     emb_array = np.array(embedding, dtype=np.float32).reshape(1, -1)
@@ -50,12 +47,11 @@ def _build_feature_vector(embedding: list, features: dict):
     return np.hstack([emb_reduced, tabular])
 
 
-def predict(embedding: list, features: dict) -> dict:
+def _predict(embedding: list, features: dict) -> dict:
     _load_models()
 
     X = _build_feature_vector(embedding, features)
 
-    # Silence type check
     assert _regressor is not None
     assert _classifier is not None
 
@@ -78,30 +74,38 @@ def predict(embedding: list, features: dict) -> dict:
     }
 
 
-def handler(event, _context):
-    try:
-        embedding = event["embedding"]
-        features = event["features"]
-        if len(embedding) != EMBEDDING_DIM:
-            return response(
-                400,
-                json.dumps(
-                    {
-                        "error": f"embedding must be {EMBEDDING_DIM}-dim, got {len(embedding)}"
-                    }
-                ),
-            )
+class PredictRequest(BaseModel):
+    embedding: list[float]
+    features: dict[str, float]
 
-        required = set(TABULAR_FEATURE_ORDER)
-        missing = required - set(features.keys())
-        if missing:
-            return response(
-                400, json.dumps({"error": f"missing feature fields: {missing}"})
-            )
 
-        result = predict(embedding, features)
-        return response(200, json.dumps(result))
+app = FastAPI()
 
-    # TODO: Refactor away from blind exception
-    except Exception as e:
-        return response(500, json.dumps({"error": str(e)}))
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.post("/predict")
+def predict(req: PredictRequest):
+    if len(req.embedding) != EMBEDDING_DIM:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"embedding must be {EMBEDDING_DIM}-dim, got {len(req.embedding)}",
+        )
+
+    missing = set(TABULAR_FEATURE_ORDER) - set(req.features.keys())
+    if missing:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=400, detail=f"missing feature fields: {missing}"
+        )
+
+    return _predict(req.embedding, req.features)
+
+
+handler = Mangum(app, lifespan="off")

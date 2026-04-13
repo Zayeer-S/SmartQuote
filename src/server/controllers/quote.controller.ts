@@ -12,6 +12,7 @@ import type {
 import type { QuoteService } from '../services/quote/quote.service.js';
 import type { QuoteEngineService } from '../services/quote/quote-engine.service.js';
 import type { QuoteApprovalService } from '../services/quote/quote-approval.service.js';
+import type { MLQuoteService } from '../services/quote/ml-quote.service.js';
 import {
   approveQuoteSchema,
   createManualQuoteSchema,
@@ -19,8 +20,10 @@ import {
   updateQuoteSchema,
 } from '../validators/quote.validator.js';
 import type {
+  GenerateQuoteResponse,
   ListQuotesResponse,
   ListRevisionsResponse,
+  MLQuoteEstimate,
   QuoteApprovalResponse,
   QuoteResponse,
   QuoteRevisionResponse,
@@ -33,30 +36,51 @@ export class QuoteController {
   private quoteService: QuoteService;
   private quoteEngineService: QuoteEngineService;
   private quoteApprovalService: QuoteApprovalService;
+  private mlQuoteService: MLQuoteService;
   private lookup: LookupResolver;
 
   constructor(
     quoteService: QuoteService,
     quoteEngineService: QuoteEngineService,
     quoteApprovalService: QuoteApprovalService,
+    mlQuoteService: MLQuoteService,
     lookup: LookupResolver
   ) {
     this.quoteService = quoteService;
     this.quoteEngineService = quoteEngineService;
     this.quoteApprovalService = quoteApprovalService;
+    this.mlQuoteService = mlQuoteService;
     this.lookup = lookup;
   }
 
   generateQuote = async (req: Request, res: Response): Promise<void> => {
     try {
       const actor = (req as AuthenticatedRequest).user;
+      const ticketId = req.params.ticketId as TicketId;
 
-      const quote = await this.quoteEngineService.generateQuote(
-        req.params.ticketId as TicketId,
-        actor.id as UserId
-      );
+      const quote = await this.quoteEngineService.generateQuote(ticketId, actor.id as UserId);
 
-      success(res, this.mapQuote(quote), 201);
+      const ticket = await this.quoteEngineService.getTicket(ticketId);
+      const mlResult = await this.mlQuoteService.generateMLQuote(ticket);
+
+      const mlEstimate: MLQuoteEstimate | null = mlResult
+        ? {
+            estimatedHoursMinimum: mlResult.estimated_hours_minimum,
+            estimatedHoursMaximum: mlResult.estimated_hours_maximum,
+            estimatedCost: mlResult.estimated_cost,
+            suggestedTicketPriority: this.lookup.ticketPriorityName(
+              mlResult.suggested_ticket_priority_id
+            ),
+            priorityConfidence: mlResult.priority_confidence,
+          }
+        : null;
+
+      const response: GenerateQuoteResponse = {
+        ruleBased: this.mapQuote(quote),
+        mlEstimate,
+      };
+
+      success(res, response, 201);
     } catch (err: unknown) {
       handleError(res, err);
     }

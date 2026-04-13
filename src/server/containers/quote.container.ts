@@ -78,7 +78,7 @@ export class QuoteContainer {
 
     this.mlQuoteService = new MLQuoteService(
       this.ticketEmbeddingsDAO,
-      backEnv.ML_QUOTE_LAMBDA_FUNCTION_NAME
+      backEnv.ML_QUOTE_SERVICE_URL
     );
 
     this.quoteApprovalService = new QuoteApprovalService(
@@ -93,6 +93,7 @@ export class QuoteContainer {
       this.quoteService,
       this.quoteEngineService,
       this.quoteApprovalService,
+      this.mlQuoteService,
       lookup
     );
   }

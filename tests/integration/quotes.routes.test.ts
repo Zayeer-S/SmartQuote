@@ -197,13 +197,14 @@ describe(`POST ${TICKETS_BASE}${QUOTE_ENDPOINTS.GENERATE()}`, () => {
       .set('Authorization', `Bearer ${agentToken}`);
 
     expect(res.status).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data.ruleBased).toMatchObject({
       ticketId: ticket1Id,
       version: expect.any(Number),
       hourlyRate: expect.any(Number),
       estimatedCost: expect.any(Number),
       quoteCreator: 'Automated',
     });
+    expect(res.body.data).toHaveProperty('mlEstimate');
   });
 
   it('returns 404 when the ticket does not exist', async () => {
