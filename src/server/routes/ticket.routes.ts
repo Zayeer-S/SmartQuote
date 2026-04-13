@@ -266,22 +266,43 @@ export function createTicketRoutes(
   router.post(
     QUOTE_ENDPOINTS.SUBMIT(),
     authenticate,
-    can(PERMISSIONS.QUOTES_CREATE),
+    can(PERMISSIONS.QUOTES_AGENT_APPROVE),
     quoteController.submitForApproval
   );
 
   router.post(
-    QUOTE_ENDPOINTS.APPROVE(),
+    QUOTE_ENDPOINTS.MANAGER_APPROVE(),
     authenticate,
-    can(PERMISSIONS.QUOTES_APPROVE),
-    quoteController.approveQuote
+    can(PERMISSIONS.QUOTES_MANAGER_APPROVE),
+    quoteController.managerApproveQuote
   );
 
   router.post(
-    QUOTE_ENDPOINTS.REJECT(),
+    QUOTE_ENDPOINTS.MANAGER_REJECT(),
     authenticate,
-    can(PERMISSIONS.QUOTES_REJECT),
-    quoteController.rejectQuote
+    can(PERMISSIONS.QUOTES_MANAGER_REJECT),
+    quoteController.managerRejectQuote
+  );
+
+  router.post(
+    QUOTE_ENDPOINTS.ADMIN_APPROVE(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_ADMIN_APPROVE),
+    quoteController.adminApproveQuote
+  );
+
+  router.post(
+    QUOTE_ENDPOINTS.CUSTOMER_APPROVE(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_CUSTOMER_APPROVE),
+    quoteController.customerApproveQuote
+  );
+
+  router.post(
+    QUOTE_ENDPOINTS.CUSTOMER_REJECT(),
+    authenticate,
+    can(PERMISSIONS.QUOTES_CUSTOMER_REJECT),
+    quoteController.customerRejectQuote
   );
 
   router.get(
