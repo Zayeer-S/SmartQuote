@@ -239,6 +239,8 @@ export class QuoteController {
       const actor = (req as AuthenticatedRequest).user;
       const body = validateOrThrow(approveQuoteSchema, req.body);
 
+      await this.quoteService.getQuote(req.params.quoteId as QuoteId, actor.id as UserId);
+
       const approval = await this.quoteApprovalService.customerApprove(
         req.params.quoteId as QuoteId,
         actor.id as UserId,
@@ -255,6 +257,8 @@ export class QuoteController {
     try {
       const actor = (req as AuthenticatedRequest).user;
       const body = validateOrThrow(rejectQuoteSchema, req.body);
+
+      await this.quoteService.getQuote(req.params.quoteId as QuoteId, actor.id as UserId);
 
       const approval = await this.quoteApprovalService.customerReject(
         req.params.quoteId as QuoteId,
