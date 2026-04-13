@@ -291,17 +291,7 @@ export class QuoteEngineService {
     );
     if (fallback) return fallback;
 
-    // Last resort: pick the lowest-priority-order rule that covers the
-    // users_impacted range. Catches severity/impact combinations absent from
-    // the seed data entirely (e.g. Low/Critical, Critical/Minor).
-    const lastResort = allRules.find(
-      (rule) =>
-        ticket.users_impacted >= rule.users_impacted_min &&
-        ticket.users_impacted <= rule.users_impacted_max
-    );
-    if (lastResort) return lastResort;
-
-    // Nothing matched at all -- seed data is incomplete.
+    // Nothing matched at all -- seed data is incomplete for this severity/impact combination.
     throw new QuoteError(QUOTE_ERROR_MSGS.NO_MATCHING_RULE, 422);
   }
 

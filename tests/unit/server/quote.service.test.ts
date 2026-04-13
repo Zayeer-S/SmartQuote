@@ -92,9 +92,9 @@ describe('QuoteEngineService.generateQuote', () => {
   let rbac: ReturnType<typeof makeMockRBACService>;
   let notificationService: NotificationService;
 
-  // No lookup needed -- LookupResolver is only used for quoteCreatorId which we stub via the DAO
   const stubLookup = {
     quoteCreatorId: vi.fn().mockReturnValue(2),
+    quoteEffortLevelId: vi.fn().mockReturnValue(1),
   };
 
   function makeService(clock?: () => Date): QuoteEngineService {
@@ -119,6 +119,11 @@ describe('QuoteEngineService.generateQuote', () => {
     rulesDAO = makeMockRulesDAO();
     rbac = makeMockRBACService();
     notificationService = makeMockNotificationService();
+
+    // Default to empty arrays so tests that don't set these don't crash before
+    // reaching the assertion under test
+    vi.mocked(rulesDAO.getAll).mockResolvedValue([]);
+    vi.mocked(rateProfilesDAO.findActive).mockResolvedValue([]);
   });
 
   it('throws ForbiddenError when actor lacks QUOTES_CREATE', async () => {
