@@ -51,7 +51,7 @@ const CustomerQuotePanel: React.FC<QuotePanelProps> = ({ ticketId, quote }) => {
         </div>
       </dl>
 
-      <QuoteActions ticketId={ticketId} quoteId={quote.id} />
+      <QuoteActions ticketId={ticketId} quoteId={quote.id} approvalStatus={quote.approvalStatus} />
     </section>
   );
 };
