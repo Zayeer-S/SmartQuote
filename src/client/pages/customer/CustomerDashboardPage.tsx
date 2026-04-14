@@ -9,7 +9,10 @@ import TicketPagination from '../../features/collate/TicketPagination.js';
 import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
 import CustomerTicketCard from '../../features/customer/CustomerTicketCard.js';
+import { usePollingRefetch } from '../../hooks/usePollingRefetch.js';
 import '../../styles/DashboardPage.css';
+
+const POLL_INTERVAL_MS = 30_000;
 
 const CustomerDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -25,6 +28,8 @@ const CustomerDashboardPage: React.FC = () => {
     fetchTickets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  usePollingRefetch(fetchTickets, POLL_INTERVAL_MS);
 
   const handleOpenModal = (): void => {
     setSubmitSuccess(false);

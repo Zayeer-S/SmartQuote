@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import TicketDetailCard from '../../features/shared/TicketDetailCard.js';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
@@ -10,6 +10,7 @@ import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import CustomerQuotePanel from '../../features/customer/CustomerQuotePanel.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
 import { useQuoteWsSubscription } from '../../hooks/quotes/useQuoteWsSubscription.js';
+import { usePollingRefetch } from '../../hooks/usePollingRefetch.js';
 
 type CustomerTab = 'details' | 'quote' | 'revision';
 
@@ -17,6 +18,8 @@ const CUSTOMER_TABS: TabNavItem<CustomerTab>[] = [
   { key: 'details', label: 'Details' },
   { key: 'quote', label: 'Quote' },
 ];
+
+const POLL_INTERVAL_MS = 30_000;
 
 const CustomerTicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
@@ -41,14 +44,22 @@ const CustomerTicketDetailPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId]);
 
-  const handleQuoteMutated = (): void => {
+  const handleQuoteMutated = useCallback((): void => {
     if (ticketId) {
       void fetchQuotes(ticketId);
       void fetchTickets(ticketId);
     }
-  };
+  }, [fetchQuotes, fetchTickets, ticketId]);
+
+  const pollRefetch = useCallback((): void => {
+    if (ticketId) {
+      void fetchQuotes(ticketId);
+      void fetchTickets(ticketId);
+    }
+  }, [fetchQuotes, fetchTickets, ticketId]);
 
   useQuoteWsSubscription(ticketId ?? '', handleQuoteMutated);
+  usePollingRefetch(pollRefetch, POLL_INTERVAL_MS);
 
   if (!ticketId) {
     return (
