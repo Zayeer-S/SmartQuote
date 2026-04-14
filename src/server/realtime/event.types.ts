@@ -9,11 +9,21 @@ export interface TicketCreatedPayload {
   createdAt: string;
 }
 
-// TODO: STUBBED
+export interface CommentCreatedPayload {
+  ticketId: string;
+  commentId: string;
+  orgId: string;
+  authorUserId: string;
+  authorDisplayName: string;
+  commentText: string;
+  commentType: string;
+  createdAt: string;
+}
+
 export interface AppEventMap {
   'ticket:created': TicketCreatedPayload;
   'ticket:assigned': TicketCreatedPayload; // TODO: STUBBED
-  'comment:created': TicketCreatedPayload; // TODO: STUBBED
+  'comment:created': CommentCreatedPayload;
   'quote:created': TicketCreatedPayload; // TODO: STUBBED
   'quote:updated': TicketCreatedPayload; // TODO: STUBBED
   'quote:approved-by-agent': TicketCreatedPayload; // TODO: STUBBED

@@ -132,6 +132,10 @@ export class ConnectionManager {
     }
   }
 
+  getUserId(connectionId: string): UserId | undefined {
+    return this.connections.get(connectionId)?.userId;
+  }
+
   getConnectionCount(): number {
     return this.connections.size;
   }
