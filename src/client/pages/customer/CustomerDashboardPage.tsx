@@ -9,7 +9,7 @@ import TicketPagination from '../../features/collate/TicketPagination.js';
 import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
 import CustomerTicketCard from '../../features/customer/CustomerTicketCard.js';
-import { usePollingRefetch } from '../../hooks/usePollingRefetch.js';
+import { usePollingRefetch } from '../../hooks/updates/usePollingRefetch.js';
 import '../../styles/DashboardPage.css';
 
 const POLL_INTERVAL_MS = 30_000;

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { WsRoomId, WsServerMessage } from '../../shared/contracts/realtime-contracts';
-import { useWs } from './contexts/useWs';
+import { WsRoomId, WsServerMessage } from '../../../shared/contracts/realtime-contracts';
+import { useWs } from '../contexts/useWs';
 
 /**
  * Subscribes to a WS room for the lifetime of the calling component.

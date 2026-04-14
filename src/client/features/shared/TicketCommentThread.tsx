@@ -7,7 +7,7 @@ import type { CommentType } from '../../../shared/constants/lookup-values.js';
 import TabNav from '../../components/TabNav.js';
 import type { TabNavItem } from '../../components/TabNav.js';
 import './TicketCommentThread.css';
-import { useWsSubscription } from '../../hooks/useWsSubscription.js';
+import { useWsSubscription } from '../../hooks/updates/useWsSubscription.js';
 import {
   WsCommentCreatedMessage,
   WsServerMessage,

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import type { WsRoomId, WsServerMessage } from '../../../shared/contracts/realtime-contracts.js';
-import { useWsSubscription } from '../useWsSubscription.js';
+import { useWsSubscription } from './useWsSubscription.js';
 
 const TICKET_EVENTS = new Set(['ticket:created', 'ticket:assigned']);
 

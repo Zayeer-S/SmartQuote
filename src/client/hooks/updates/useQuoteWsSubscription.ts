@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import type { WsServerMessage } from '../../../shared/contracts/realtime-contracts.js';
-import { useWsSubscription } from '../useWsSubscription.js';
+import { useWsSubscription } from './useWsSubscription.js';
 
 const QUOTE_EVENTS = new Set([
   'quote:created',

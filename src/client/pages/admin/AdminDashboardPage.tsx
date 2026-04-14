@@ -7,8 +7,8 @@ import TicketPagination from '../../features/collate/TicketPagination.js';
 import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
 import AdminTicketCard from '../../features/admin/tickets/AdminTicketCard.js';
-import { useTicketWsSubscription } from '../../hooks/tickets/useTicketWsSubscription.js';
-import { usePollingRefetch } from '../../hooks/usePollingRefetch.js';
+import { useTicketWsSubscription } from '../../hooks/updates/useTicketWsSubscription.js';
+import { usePollingRefetch } from '../../hooks/updates/usePollingRefetch.js';
 import '../../styles/DashboardPage.css';
 
 const PRIORITY_ORDER: Record<string, number> = { P1: 1, P2: 2, P3: 3, P4: 4 };

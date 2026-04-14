@@ -21,8 +21,8 @@ import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import { useListEmployeeUsers } from '../../hooks/useListEmployeeUsers.js';
 import AdminQuotePanel from '../../features/admin/quotes/AdminQuotePanel.js';
 import SlaStatus from '../../features/admin/tickets/SlaStatus.js';
-import { useQuoteWsSubscription } from '../../hooks/quotes/useQuoteWsSubscription.js';
-import { usePollingRefetch } from '../../hooks/usePollingRefetch.js';
+import { useQuoteWsSubscription } from '../../hooks/updates/useQuoteWsSubscription.js';
+import { usePollingRefetch } from '../../hooks/updates/usePollingRefetch.js';
 
 type AdminTab = 'details' | 'quote' | 'revision';
 

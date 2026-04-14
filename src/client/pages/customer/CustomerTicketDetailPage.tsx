@@ -9,8 +9,8 @@ import TicketDetailSidePanel from '../../features/shared/side-panels/TicketDetai
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import CustomerQuotePanel from '../../features/customer/CustomerQuotePanel.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
-import { useQuoteWsSubscription } from '../../hooks/quotes/useQuoteWsSubscription.js';
-import { usePollingRefetch } from '../../hooks/usePollingRefetch.js';
+import { useQuoteWsSubscription } from '../../hooks/updates/useQuoteWsSubscription.js';
+import { usePollingRefetch } from '../../hooks/updates/usePollingRefetch.js';
 
 type CustomerTab = 'details' | 'quote' | 'revision';
 

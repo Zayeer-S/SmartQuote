@@ -184,6 +184,7 @@ smartquote/
 │   │   │   │   ├── useGetQuote.ts
 │   │   │   │   ├── useGetRevisionHistory.ts
 │   │   │   │   ├── useListQuote.ts
+│   │   │   │   ├── useQuoteWsSubscription.ts
 │   │   │   │   ├── useRejectQuote.ts
 │   │   │   │   ├── useSubmitForApproval.ts
 │   │   │   │   └── useUpdateForQuote.ts
@@ -198,18 +199,23 @@ smartquote/
 │   │   │   │   ├── useListSlaPolicy.ts
 │   │   │   │   ├── useSlaScopeOptions.ts
 │   │   │   │   └── useUpdateSlaPolicy.ts
-│   │   │   └── tickets/
-│   │   │       ├── useAddComment.ts
-│   │   │       ├── useAssignTicket.ts
-│   │   │       ├── useCreateTicket.ts
-│   │   │       ├── useDeleteTicket.ts
-│   │   │       ├── useGetAttachmentUrl.ts
-│   │   │       ├── useGetSimilarTicket.ts
-│   │   │       ├── useGetTicket.ts
-│   │   │       ├── useListComments.ts
-│   │   │       ├── useListTicket.ts
-│   │   │       ├── useResolveTicket.ts
-│   │   │       └── useUpdateTicket.ts
+│   │   │   ├── tickets/
+│   │   │   │   ├── useAddComment.ts
+│   │   │   │   ├── useAssignTicket.ts
+│   │   │   │   ├── useCreateTicket.ts
+│   │   │   │   ├── useDeleteTicket.ts
+│   │   │   │   ├── useGetAttachmentUrl.ts
+│   │   │   │   ├── useGetSimilarTicket.ts
+│   │   │   │   ├── useGetTicket.ts
+│   │   │   │   ├── useListComments.ts
+│   │   │   │   ├── useListTicket.ts
+│   │   │   │   ├── useResolveTicket.ts
+│   │   │   │   └── useUpdateTicket.ts
+│   │   │   └── updates/                            # WebSockets + Polling hooks
+│   │   │       ├── usePollingRefetch.ts
+│   │   │       ├── useQuoteWsSubscription.ts
+│   │   │       ├── useTicketWsSubscription.ts
+│   │   │       └── useWsSubscription.ts
 │   │   ├── lib/
 │   │   │   ├── api/                                # Only place that knows endpoints in client
 │   │   │   │   ├── admin.api.ts
