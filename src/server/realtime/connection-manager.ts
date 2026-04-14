@@ -1,6 +1,6 @@
-import { WebSocket } from 'ws';
-import { UserId } from '../database/types/ids';
-import { WsRoomId } from '../../shared/contracts/realtime-contracts';
+import type { WebSocket } from 'ws';
+import type { UserId } from '../database/types/ids.js';
+import type { WsRoomId } from '../../shared/contracts/realtime-contracts.js';
 
 interface ManagedConnection {
   ws: WebSocket;
@@ -26,7 +26,12 @@ export class ConnectionManager {
   private userIdx = new Map<string, Set<string>>();
 
   register(connectionId: string, ws: WebSocket, userId: UserId): void {
-    this.connections.set(connectionId, { ws, userId, rooms: new Set(), connectedAt: new Date() });
+    this.connections.set(connectionId, {
+      ws,
+      userId,
+      rooms: new Set(),
+      connectedAt: new Date(),
+    });
 
     const existing = this.userIdx.get(userId as string) ?? new Set<string>();
     existing.add(connectionId);
@@ -102,7 +107,7 @@ export class ConnectionManager {
       }
 
       conn.ws.send(message, (err) => {
-        if (err) console.error(`[WS] send error on ${id}`);
+        if (err) console.error(`[WS] send error on ${id}:`, err);
       });
     }
 
@@ -122,7 +127,7 @@ export class ConnectionManager {
       if (conn?.ws.readyState !== 1 /** OPEN */) continue;
 
       conn.ws.send(message, (err) => {
-        if (err) console.error(`[WS] send error on ${id}`, err);
+        if (err) console.error(`[WS] send error on ${id}:`, err);
       });
     }
   }
