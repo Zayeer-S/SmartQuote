@@ -62,7 +62,7 @@ export function createWsServer(
         if (authenticated) return;
 
         try {
-          const session = await sessionService.getSession(msg.token as never);
+          const session = await sessionService.validate(msg.token);
           if (!session) {
             send(ws, { type: 'auth:error', message: 'Invalid or expired token' });
             ws.close();

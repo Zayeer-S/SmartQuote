@@ -99,14 +99,4 @@ export class SessionService {
   async cleanupExpired(options?: TransactionContext): Promise<number> {
     return await this.sessionsDAO.deleteExpired(options);
   }
-
-  /**
-   * Get current session for the UserId
-   *
-   * @param userId User ID
-   * @returns First session found for the User ID
-   */
-  async getSession(userId: UserId): Promise<Session | null> {
-    return await this.sessionsDAO.findByUserId(userId, { includeInactive: false });
-  }
 }
