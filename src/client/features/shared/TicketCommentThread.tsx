@@ -98,7 +98,6 @@ const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
     if (!commentText.trim()) return;
     void add.execute(ticketId, { commentText, commentType }).then(() => {
       setCommentText('');
-      void list.execute(ticketId);
     });
   };
 
