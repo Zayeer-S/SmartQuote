@@ -14,6 +14,7 @@ import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket
 import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { OrganizationMembersDAO } from '../../daos/children/organizations-domain.dao.js';
+import { eventBus } from '../../lib/event-bus.js';
 
 export interface CreateManualQuoteData {
   estimated_hours_minimum: number;
@@ -146,7 +147,7 @@ export class QuoteService {
     const estimatedHoursMid = (data.estimated_hours_minimum + data.estimated_hours_maximum) / 2;
     const estimatedCost = estimatedHoursMid * data.hourly_rate + data.fixed_cost;
 
-    return this.quotesDAO.create(
+    const quote = await this.quotesDAO.create(
       {
         ticket_id: ticketId,
         version: nextVersion,
@@ -168,6 +169,15 @@ export class QuoteService {
       } satisfies InsertData<Quote>,
       options
     );
+
+    eventBus.emit('quote:created', {
+      quoteId: quote.id as string,
+      ticketId: ticketId as string,
+      version: quote.version,
+      event: 'quote:created',
+    });
+
+    return quote;
   }
 
   /**
@@ -254,6 +264,13 @@ export class QuoteService {
       actorId,
       options
     );
+
+    eventBus.emit('quote:updated', {
+      quoteId: newQuote.id as string,
+      ticketId: newQuote.ticket_id as string,
+      version: newQuote.version,
+      event: 'quote:updated',
+    });
 
     return newQuote;
   }

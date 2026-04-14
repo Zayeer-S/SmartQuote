@@ -5,10 +5,10 @@ import type { ConnectionManager } from './connection-manager.js';
 import type { RoomResolver } from './room-resolver.js';
 import type { SessionService } from '../services/auth/session.service.js';
 import type { WsClientMessage } from '../../shared/contracts/realtime-contracts.js';
-import { registerCommentHandlers } from './handlers.js';
+import { registerCommentHandlers, registerQuoteHandlers } from './handlers.js';
 
 function send(ws: WebSocket, payload: unknown): void {
-  if (ws.readyState === 1 /* OPEN */) {
+  if (ws.readyState === 1 /** OPEN */) {
     ws.send(JSON.stringify(payload));
   }
 }
@@ -21,8 +21,8 @@ export function createWsServer(
 ): WebSocketServer {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
-  // TODO: REGISTER REMAINING HANDLERS
   registerCommentHandlers(connectionManager);
+  registerQuoteHandlers(connectionManager);
 
   wss.on('connection', (ws) => {
     const connectionId = randomUUID();

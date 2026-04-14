@@ -78,5 +78,12 @@ export interface CommentCreatedPayload {
   commentType: string;
   createdAt: string;
 }
+export interface QuoteEventPayload {
+  quoteId: string;
+  ticketId: string;
+  version: number;
+  event: AppEvent;
+  comment?: string | null;
+}
 
 export type WsCommentCreatedMessage = WsEventMessage<'comment:created'>;
