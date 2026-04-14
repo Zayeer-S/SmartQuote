@@ -1,3 +1,5 @@
+import { AppEvent, AppEventMap } from '../../server/realtime/event.types';
+
 export type WsRoomId =
   | `ticket:${string}`
   | `org:${string}`
@@ -52,17 +54,7 @@ export interface WsPingMessage {
   type: 'ping';
 }
 
-export interface CommentCreatedPayload {
-  ticketId: string;
-  commentId: string;
-  authorUserId: string;
-  authorDisplayName: string;
-  commentText: string;
-  commentType: string;
-  createdAt: string;
-}
-
-export interface WsEventMessage<T extends string = string, D = unknown> {
+export interface WsEventMessage<T extends AppEvent = AppEvent, D = AppEventMap[T]> {
   type: T;
   data: D;
   sentAt: string;
@@ -74,4 +66,17 @@ export type WsServerMessage =
   | WsSubscribeAck
   | WsErrorMessage
   | WsPingMessage
-  | WsEventMessage;
+  | WsEventMessage
+  | WsCommentCreatedMessage;
+
+export interface CommentCreatedPayload {
+  ticketId: string;
+  commentId: string;
+  authorUserId: string;
+  authorDisplayName: string;
+  commentText: string;
+  commentType: string;
+  createdAt: string;
+}
+
+export type WsCommentCreatedMessage = WsEventMessage<'comment:created'>;

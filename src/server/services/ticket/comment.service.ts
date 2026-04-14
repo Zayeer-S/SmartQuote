@@ -9,6 +9,8 @@ import { ForbiddenError } from './ticket.errors.js';
 import type { UsersDAO } from '../../daos/children/users-domain.dao.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { TicketCommentsDAO } from '../../daos/children/tickets-domain.dao.js';
+import { CommentCreatedPayload } from '../../../shared/contracts/realtime-contracts.js';
+import { eventBus } from '../../lib/event-bus.js';
 
 export interface EnrichedComment extends TicketComment {
   author_display_name: string;
@@ -81,7 +83,21 @@ export class CommentService {
       options
     );
 
-    return this.enrichOne(comment, options);
+    const enriched = await this.enrichOne(comment, options);
+
+    const payload: CommentCreatedPayload = {
+      ticketId: String(ticketId),
+      commentId: String(enriched.id),
+      authorUserId: String(actorId),
+      authorDisplayName: enriched.author_display_name,
+      commentText: enriched.comment_text,
+      commentType: this.lookup.commentTypeName(enriched.comment_type_id),
+      createdAt: enriched.created_at.toISOString(),
+    };
+
+    eventBus.emit('comment:created', payload);
+
+    return enriched;
   }
 
   /**
