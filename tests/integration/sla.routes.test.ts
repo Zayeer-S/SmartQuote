@@ -48,7 +48,8 @@ let customer1Token: string;
 let customer2Token: string;
 
 beforeAll(async () => {
-  app = await bootstrapApplication({ runBackgroundJobs: false });
+  const bootstrap = await bootstrapApplication({ runBackgroundJobs: false });
+  app = bootstrap.app;
 
   [adminToken, managerToken, agentToken, customer1Token, customer2Token] = await Promise.all([
     getToken(app, USERS.ADMIN.EMAIL, USERS.ADMIN.PASSWORD),

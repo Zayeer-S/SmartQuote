@@ -58,7 +58,8 @@ async function createAndManagerApprove(fields: Parameters<typeof createQuote>[0]
 }
 
 beforeAll(async () => {
-  app = await bootstrapApplication({ runBackgroundJobs: false });
+  const bootstrap = await bootstrapApplication({ runBackgroundJobs: false });
+  app = bootstrap.app;
 
   const login = async (email: string, password: string): Promise<string> => {
     const res = await request(app).post(LOGIN).send({ email, password });
