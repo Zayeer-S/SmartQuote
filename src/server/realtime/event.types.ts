@@ -26,3 +26,18 @@ export interface AppEventMap {
 }
 
 export type AppEvent = keyof AppEventMap;
+
+/**
+ * Every message pushed to a client follows this envelope.
+ * The frontend discriminates on `type` to handle the payload.
+ */
+export interface WsMessage<K extends AppEvent = AppEvent> {
+  type: K;
+  data: AppEventMap[K];
+  /** ISO 8601 */
+  sentAt: string;
+}
+
+export function buildWsMessage<K extends AppEvent>(type: K, data: AppEventMap[K]): WsMessage<K> {
+  return { type, data, sentAt: new Date().toISOString() };
+}
