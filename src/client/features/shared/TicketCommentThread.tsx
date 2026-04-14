@@ -7,6 +7,11 @@ import type { CommentType } from '../../../shared/constants/lookup-values.js';
 import TabNav from '../../components/TabNav.js';
 import type { TabNavItem } from '../../components/TabNav.js';
 import './TicketCommentThread.css';
+import { useWsSubscription } from '../../hooks/useWsSubscription.js';
+import {
+  WsCommentCreatedMessage,
+  WsServerMessage,
+} from '../../../shared/contracts/realtime-contracts.js';
 
 interface CommentThreadProps {
   ticketId: string;
@@ -58,6 +63,26 @@ const TicketCommentThread: React.FC<CommentThreadProps> = ({ ticketId }) => {
     void list.execute(ticketId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId]);
+
+  useWsSubscription(`ticket:${ticketId}`, (msg: WsServerMessage) => {
+    if (msg.type !== 'comment:created') return;
+
+    const event = msg as WsCommentCreatedMessage;
+    const alreadyPresent = (list.data?.comments ?? []).some(
+      (c) => c.id === Number(event.data.commentId)
+    );
+    if (alreadyPresent) return;
+
+    list.appendComment({
+      id: Number(event.data.commentId),
+      ticketId: event.data.ticketId,
+      authorDisplayName: event.data.authorDisplayName,
+      commentText: event.data.commentText,
+      commentType: event.data.commentType as CommentType,
+      createdAt: event.data.createdAt,
+      updatedAt: event.sentAt,
+    });
+  });
 
   // Derived from active channel -- no separate state needed.
   const commentType: CommentType =
