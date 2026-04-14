@@ -68,4 +68,14 @@ export class SessionsDAO extends BaseDAO<Session, SessionId> {
     const query = this.getQuery(options);
     return await query.where({ user_id: userId }).delete();
   }
+
+  async findByUserId(userId: UserId, options?: QueryOptions): Promise<Session | null> {
+    let query = this.getQuery(options);
+    query = query.where({ user_id: userId });
+    query = this.applyFilters(query, options);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const result = await query.first();
+    return result ? (result as Session) : null;
+  }
 }
