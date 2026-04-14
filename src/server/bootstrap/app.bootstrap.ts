@@ -32,15 +32,24 @@ import { SlaContainer } from '../containers/sla.container.js';
 import { createSlaRoutes } from '../routes/sla.routes.js';
 import { NotificationContainer } from '../containers/notification.container.js';
 import { createUserRoutes } from '../routes/user.routes.js';
+import { ConnectionManager } from '../realtime/connection-manager.js';
+import { RoomResolver } from '../realtime/room-resolver.js';
 
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
   runBackgroundJobs?: boolean;
 }
 
+export interface BootstrapResult {
+  app: Express;
+  sessionService: SessionService;
+  connectionManager: ConnectionManager;
+  roomResolver: RoomResolver;
+}
+
 export async function bootstrapApplication(
   options: BootstrapOptions = { runBackgroundJobs: true }
-): Promise<Express> {
+): Promise<BootstrapResult> {
   console.log('Bootstrapping application...');
 
   const db = await initializeDatabase();
@@ -205,9 +214,21 @@ export async function bootstrapApplication(
   app.use(notFoundHandler);
   app.use(errorHandler);
 
+  const connectionManager = new ConnectionManager();
+  const roomResolver = new RoomResolver(
+    adminContainer.rbacService,
+    authContainer.orgMembersDAO,
+    ticketContainer.ticketsDAO
+  );
+
   console.log('Application bootstrapped successfully');
 
-  return app;
+  return {
+    app,
+    sessionService: authContainer.sessionService,
+    connectionManager,
+    roomResolver,
+  };
 }
 
 /** Start background job to clean up expired sessions */

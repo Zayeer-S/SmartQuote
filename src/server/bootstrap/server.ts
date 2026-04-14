@@ -1,19 +1,22 @@
 import { backEnv } from '../config/env.backend.js';
 import { bootstrapApplication } from './app.bootstrap.js';
 import { closeDatabase } from './database.bootstrap.js';
+import { createWsServer } from '../realtime/ws-server.js';
 
 async function startServer() {
   try {
-    const app = await bootstrapApplication();
+    const { app, sessionService, connectionManager, roomResolver } = await bootstrapApplication();
 
     const server = app.listen(backEnv.PORT, () => {
-      console.log(`Server running 
+      console.log(`Server running
             Environment: ${backEnv.NODE_ENV}
             Port: ${backEnv.PORT.toString()}
             Host: ${backEnv.HOST}
             API: http://${backEnv.HOST}:${String(backEnv.PORT)}/api
             Health: http://${backEnv.HOST}:${String(backEnv.PORT)}/health)\n`);
     });
+
+    createWsServer(server, connectionManager, roomResolver, sessionService);
 
     const shutdown = async (signal: string) => {
       console.log(`${signal} received. Starting graceful shutdown...`);

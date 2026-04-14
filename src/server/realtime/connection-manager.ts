@@ -2,7 +2,7 @@ import type { WebSocket } from 'ws';
 import type { UserId } from '../database/types/ids.js';
 import type { WsRoomId } from '../../shared/contracts/realtime-contracts.js';
 
-interface ManagedConnection {
+export interface ManagedConnection {
   ws: WebSocket;
   userId: UserId;
   rooms: Set<WsRoomId>;
@@ -54,6 +54,10 @@ export class ConnectionManager {
 
     this.connections.delete(connectionId);
     console.log(`[WS] deregistered connection ${connectionId}`);
+  }
+
+  getConnection(connectionId: string): ManagedConnection | undefined {
+    return this.connections.get(connectionId);
   }
 
   subscribeToRooms(connectionId: string, rooms: WsRoomId[]): WsRoomId[] {
