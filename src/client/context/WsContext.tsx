@@ -87,9 +87,8 @@ export const WsProvider: React.FC<WsProviderProps> = ({ children }) => {
         return;
       }
 
-      // Dispatch to registered room handlers
-      // msg.type for domain events matches the room prefix (e.g. 'comment:created' -> 'ticket:<id>')
-      // We fan out to all handlers across all rooms and let each handler filter by type
+      // Dispatch to registered room handlers.
+      // Fan out to all handlers across all rooms; each handler filters by type.
       for (const handlers of handlersRef.current.values()) {
         for (const handler of handlers) handler(msg);
       }
@@ -114,14 +113,33 @@ export const WsProvider: React.FC<WsProviderProps> = ({ children }) => {
     };
   }, [flushPendingRooms]);
 
-  // Connect on mount if a token exists; tear down on unmount
+  // Connect on mount if a token exists; tear down on unmount.
   useEffect(() => {
     if (tokenStorage.exists()) connect();
 
     return () => {
       intentionalCloseRef.current = true;
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
-      wsRef.current?.close();
+
+      const ws = wsRef.current;
+      if (ws) {
+        // Detach handlers before closing so the onclose callback from this
+        // socket instance cannot trigger a reconnect on the second StrictMode
+        // mount. Without this, stale handlers on the CONNECTING socket fire
+        // after the second connect() has already set intentionalCloseRef back
+        // to false.
+        ws.onopen = null;
+        ws.onmessage = null;
+        ws.onerror = null;
+        ws.onclose = null;
+        // Only close if the handshake has progressed -- closing a CONNECTING
+        // socket is what causes the "closed before connection established"
+        // error in StrictMode dev double-invoke.
+        if (ws.readyState !== WebSocket.CONNECTING) {
+          ws.close();
+        }
+        wsRef.current = null;
+      }
     };
     // connect is stable (useCallback with no deps that change)
     // eslint-disable-next-line react-hooks/exhaustive-deps
