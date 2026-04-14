@@ -1,3 +1,6 @@
+import { CommentCreatedPayload } from '../../shared/contracts/realtime-contracts';
+
+// STUB: PAYLOADS SHOULD BE IN CONTRACTS
 export interface TicketCreatedPayload {
   ticketId: string;
   orgId: string;
@@ -6,17 +9,6 @@ export interface TicketCreatedPayload {
   ticketType: string;
   ticketSeverity: string;
   ticketPriority: string;
-  createdAt: string;
-}
-
-export interface CommentCreatedPayload {
-  ticketId: string;
-  commentId: string;
-  orgId: string;
-  authorUserId: string;
-  authorDisplayName: string;
-  commentText: string;
-  commentType: string;
   createdAt: string;
 }
 

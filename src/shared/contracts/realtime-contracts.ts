@@ -52,6 +52,16 @@ export interface WsPingMessage {
   type: 'ping';
 }
 
+export interface CommentCreatedPayload {
+  ticketId: string;
+  commentId: string;
+  authorUserId: string;
+  authorDisplayName: string;
+  commentText: string;
+  commentType: string;
+  createdAt: string;
+}
+
 export interface WsEventMessage<T extends string = string, D = unknown> {
   type: T;
   data: D;
