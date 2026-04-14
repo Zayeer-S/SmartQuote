@@ -79,7 +79,9 @@ smartquote/
 │   │   │   ├── sidebar.context.types.ts
 │   │   │   ├── SidebarContext.ts
 │   │   │   ├── theme.context.types.ts
-│   │   │   └── ThemeContext.ts
+│   │   │   ├── ThemeContext.ts
+│   │   │   ├── ws.context.types.ts
+│   │   │   └── WsContext.ts
 │   │   ├── features/                               # Feature scoped UI behaviour composed from components and hooks
 │   │   │   ├── admin/
 │   │   │   │   ├── analytics/
@@ -142,20 +144,25 @@ smartquote/
 │   │   │           ├── DashboardSidePanel.tsx
 │   │   │           └── TicketDetailSidePanel.tsx
 │   │   ├── hooks/                                  # Thin adapters between UI and API layers. No business rules. All context hooks
+│   │   │   ├── useAdminTicketFilters.ts
+│   │   │   ├── useListEmployeeUsers.ts
 │   │   │   ├── useLogin.ts
 │   │   │   ├── useTicketFilters.ts
+│   │   │   ├── useWsSubscription.ts
 │   │   │   ├── analytics/
 │   │   │   │   ├── useQuoteAccuracy.ts
 │   │   │   │   ├── useResolutionTime.ts
 │   │   │   │   └── useTicketVolume.ts
 │   │   │   ├── auth/
+│   │   │   │   ├── useOrgPermissions.ts
 │   │   │   │   ├── useQuotePermissions.ts
 │   │   │   │   ├── useTicketPermissions.ts
 │   │   │   │   └── useUserPermissions.ts
 │   │   │   ├── contexts/                            # All context hooks
 │   │   │   │   ├── useAuth.ts
 │   │   │   │   ├── useSidebar.ts
-│   │   │   │   └── useTheme.ts
+│   │   │   │   ├── useTheme.ts
+│   │   │   │   └── useWs.ts
 │   │   │   ├── notifications/
 │   │   │   │   ├── useGetNotificationPreferences.ts
 │   │   │   │   └── useUpdateNotificationPreferences.ts
@@ -168,6 +175,7 @@ smartquote/
 │   │   │   │   ├── useListOrgMembers.ts
 │   │   │   │   ├── useListOrgs.ts
 │   │   │   │   ├── useRemoveOrgMember.ts
+│   │   │   │   ├── useUpdateMemberRole.ts
 │   │   │   │   └── useUpdateOrg.ts
 │   │   │   ├── quotes/ 
 │   │   │   │   ├── useApproveQuote.ts
@@ -188,6 +196,7 @@ smartquote/
 │   │   │   │   ├── useCreateSlaPolicy.ts
 │   │   │   │   ├── useDeleteSlaPolicy.ts
 │   │   │   │   ├── useListSlaPolicy.ts
+│   │   │   │   ├── useSlaScopeOptions.ts
 │   │   │   │   └── useUpdateSlaPolicy.ts
 │   │   │   └── tickets/
 │   │   │       ├── useAddComment.ts
@@ -359,6 +368,7 @@ smartquote/
 │   │   │   ├── nlp/
 │   │   │   │   ├── bert-embedder.ts
 │   │   │   │   └── cosine-similarity.ts
+│   │   │   ├── event-bus.ts
 │   │   │   ├── lookup-maps.ts
 │   │   │   ├── lookup-resolver.ts
 │   │   │   └── respond.ts
@@ -367,6 +377,12 @@ smartquote/
 │   │   │   ├── error.middleware.ts
 │   │   │   ├── rate-limit.middleware.ts
 │   │   │   └── rbac.middleware.ts
+│   │   ├── realtime/                               # Websockets
+│   │   │   ├── connection-manager.ts
+│   │   │   ├── event.types.ts
+│   │   │   ├── handlers.ts
+│   │   │   ├── room-resolver.ts
+│   │   │   └── ws-server.ts
 │   │   ├── routes/                                 # Map URLs to controllers only - no logic allowed.
 │   │   │   ├── admin.routes.ts
 │   │   │   ├── analytics.routes.ts
@@ -504,6 +520,8 @@ smartquote/
 │   │   ├── sla.routes.test.ts
 │   │   └── ticket.routes.test.ts
 │   ├── unit/
+│   │   ├── client/
+│   │   │   └── useWsSubscription.test.ts
 │   │   └── server/
 │   │       ├── auth.service.test.ts
 │   │       ├── notification.service.test.ts
