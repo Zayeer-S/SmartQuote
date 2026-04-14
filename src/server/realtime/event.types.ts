@@ -1,23 +1,14 @@
 import {
   CommentCreatedPayload,
   QuoteEventPayload,
+  SlaEventPayload,
+  TicketAssignedPayload,
+  TicketCreatedPayload,
 } from '../../shared/contracts/realtime-contracts';
-
-// STUB: PAYLOADS SHOULD BE IN CONTRACTS
-export interface TicketCreatedPayload {
-  ticketId: string;
-  orgId: string;
-  title: string;
-  creatorUserId: string;
-  ticketType: string;
-  ticketSeverity: string;
-  ticketPriority: string;
-  createdAt: string;
-}
 
 export interface AppEventMap {
   'ticket:created': TicketCreatedPayload;
-  'ticket:assigned': TicketCreatedPayload; // TODO: STUBBED
+  'ticket:assigned': TicketAssignedPayload;
   'comment:created': CommentCreatedPayload;
   'quote:created': QuoteEventPayload;
   'quote:updated': QuoteEventPayload;
@@ -27,8 +18,8 @@ export interface AppEventMap {
   /** Also means ticket is resolved */
   'quote:approved-by-customer': QuoteEventPayload;
   'quote:rejected-by-manager': QuoteEventPayload;
-  'sla:breach-imminent': TicketCreatedPayload; // TODO: STUBBED
-  'sla:breached': TicketCreatedPayload; // TODO: STUBBED
+  'sla:breach-imminent': SlaEventPayload;
+  'sla:breached': SlaEventPayload;
 }
 
 export type AppEvent = keyof AppEventMap;

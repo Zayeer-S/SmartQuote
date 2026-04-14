@@ -5,7 +5,12 @@ import type { ConnectionManager } from './connection-manager.js';
 import type { RoomResolver } from './room-resolver.js';
 import type { SessionService } from '../services/auth/session.service.js';
 import type { WsClientMessage } from '../../shared/contracts/realtime-contracts.js';
-import { registerCommentHandlers, registerQuoteHandlers } from './handlers.js';
+import {
+  registerCommentHandlers,
+  registerQuoteHandlers,
+  registerSlaHandlers,
+  registerTicketHandlers,
+} from './handlers.js';
 
 function send(ws: WebSocket, payload: unknown): void {
   if (ws.readyState === 1 /** OPEN */) {
@@ -23,6 +28,8 @@ export function createWsServer(
 
   registerCommentHandlers(connectionManager);
   registerQuoteHandlers(connectionManager);
+  registerTicketHandlers(connectionManager);
+  registerSlaHandlers(connectionManager);
 
   wss.on('connection', (ws) => {
     const connectionId = randomUUID();

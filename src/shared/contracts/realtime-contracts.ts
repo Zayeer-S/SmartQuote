@@ -78,12 +78,42 @@ export interface CommentCreatedPayload {
   commentType: string;
   createdAt: string;
 }
+
 export interface QuoteEventPayload {
   quoteId: string;
   ticketId: string;
   version: number;
   event: AppEvent;
   comment?: string | null;
+}
+
+export interface TicketCreatedPayload {
+  ticketId: string;
+  ticketTitle: string;
+  organizationId: string | null;
+  creatorUserId: string;
+  ticketType: string;
+  ticketSeverity: string;
+  ticketPriority: string;
+  createdAt: string;
+}
+
+export interface TicketAssignedPayload {
+  ticketId: string;
+  ticketTitle: string;
+  organizationId: string | null;
+  assigneeUserId: string;
+  assignedAt: string;
+}
+
+export interface SlaEventPayload {
+  ticketId: string;
+  ticketTitle: string;
+  organizationId: string | null;
+  policyName: string;
+  /** ISO 8601 */
+  breachDeadline: string;
+  severity: string;
 }
 
 export type WsCommentCreatedMessage = WsEventMessage<'comment:created'>;
