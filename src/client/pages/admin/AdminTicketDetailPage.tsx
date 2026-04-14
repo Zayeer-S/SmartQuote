@@ -21,6 +21,7 @@ import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import { useListEmployeeUsers } from '../../hooks/useListEmployeeUsers.js';
 import AdminQuotePanel from '../../features/admin/quotes/AdminQuotePanel.js';
 import SlaStatus from '../../features/admin/tickets/SlaStatus.js';
+import { useQuoteWsSubscription } from '../../hooks/quotes/useQuoteWsSubscription.js';
 
 type AdminTab = 'details' | 'quote' | 'revision';
 
@@ -72,13 +73,18 @@ const AdminTicketDetailPage: React.FC = () => {
   }, [ticketId]);
 
   const handleQuoteMutated = (): void => {
-    if (ticketId) void fetchQuotes(ticketId);
+    if (ticketId) {
+      void fetchQuotes(ticketId);
+      void fetchTickets(ticketId);
+    }
     setMlEstimate(null);
   };
 
   const handleGenerated = (estimate: MLQuoteEstimate | null): void => {
     setMlEstimate(estimate);
   };
+
+  useQuoteWsSubscription(ticketId ?? '', handleQuoteMutated);
 
   if (!ticketId) {
     return (
