@@ -60,8 +60,8 @@ describe('DatabaseStack', () => {
   });
 
   describe('VPC endpoints', () => {
-    it('has exactly 4 VPC endpoints (S3 gateway, Secrets Manager interface, Lambda interface, Simple Email Service interface)', () => {
-      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 4);
+    it('has exactly 7 VPC endpoints (S3 gateway, Secrets Manager, Lambda, SES, ECR API, ECR DKR, CloudWatch Logs)', () => {
+      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 7);
     });
 
     it('has an S3 gateway endpoint', () => {
@@ -91,6 +91,27 @@ describe('DatabaseStack', () => {
       dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
         VpcEndpointType: 'Interface',
         ServiceName: Match.stringLikeRegexp('email-smtp'),
+      });
+    });
+
+    it('has an ECR API interface endpoint', () => {
+      dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+        VpcEndpointType: 'Interface',
+        ServiceName: Match.stringLikeRegexp('ecr\.api'),
+      });
+    });
+
+    it('has an ECR DKR interface endpoint', () => {
+      dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+        VpcEndpointType: 'Interface',
+        ServiceName: Match.stringLikeRegexp('ecr\.dkr'),
+      });
+    });
+
+    it('has a CloudWatch Logs interface endpoint', () => {
+      dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+        VpcEndpointType: 'Interface',
+        ServiceName: Match.stringLikeRegexp('logs'),
       });
     });
   });
@@ -390,27 +411,6 @@ describe('AppStack', () => {
     it('task security group only accepts inbound from the ALB on the container port', () => {
       appTemplate.hasResourceProperties('AWS::EC2::SecurityGroup', {
         GroupDescription: 'WS Fargate task - accepts traffic from ALB only',
-      });
-    });
-
-    it('has ECR API VPC endpoint', () => {
-      appTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
-        VpcEndpointType: 'Interface',
-        ServiceName: Match.stringLikeRegexp('ecr\\.api'),
-      });
-    });
-
-    it('has ECR DKR VPC endpoint', () => {
-      appTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
-        VpcEndpointType: 'Interface',
-        ServiceName: Match.stringLikeRegexp('ecr\\.dkr'),
-      });
-    });
-
-    it('has CloudWatch Logs VPC endpoint', () => {
-      appTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
-        VpcEndpointType: 'Interface',
-        ServiceName: Match.stringLikeRegexp('logs'),
       });
     });
 

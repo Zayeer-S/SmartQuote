@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib/core';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
+import * as ecsPatterns from 'aws-cdk-lib/aws-ecs-patterns';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import { OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -304,8 +305,6 @@ export class AppStack extends cdk.Stack {
       handler: apiFunction,
       proxy: true,
       deployOptions: { stageName: 'prod' },
-      // multipart/form-data must be listed here so API Gateway treats upload
-      // bodies as binary and passes them through to Lambda intact.
       binaryMediaTypes: ['multipart/form-data'],
       defaultCorsPreflightOptions: {
         allowOrigins: [infraConfig.cors.origin],
@@ -320,24 +319,6 @@ export class AppStack extends cdk.Stack {
         'Access-Control-Allow-Origin': `'${infraConfig.cors.origin}'`,
         'Access-Control-Allow-Headers': "'*'",
       },
-    });
-
-    databaseStack.vpc.addInterfaceEndpoint('EcrApiEndpoint', {
-      service: ec2.InterfaceVpcEndpointAwsService.ECR,
-      subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
-      securityGroups: [lambdaSecurityGroup],
-    });
-
-    databaseStack.vpc.addInterfaceEndpoint('EcrDkrEndpoint', {
-      service: ec2.InterfaceVpcEndpointAwsService.ECR_DOCKER,
-      subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
-      securityGroups: [lambdaSecurityGroup],
-    });
-
-    databaseStack.vpc.addInterfaceEndpoint('LogsEndpoint', {
-      service: ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
-      subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
-      securityGroups: [lambdaSecurityGroup],
     });
 
     // Security group for the ALB - accepts HTTPS from anywhere
@@ -390,14 +371,32 @@ export class AppStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    const wsExecutionRole = new iam.Role(this, 'WsTaskExecutionRole', {
+      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
+      ],
+    });
+
+    wsExecutionRole.addToPrincipalPolicy(
+      new iam.PolicyStatement({
+        actions: [
+          'ecr:GetDownloadUrlForLayer',
+          'ecr:BatchGetImage',
+          'ecr:BatchCheckLayerAvailability',
+          // ecr:GetAuthorizationToken is account-level, cannot scope to repo ARN
+          'ecr:GetAuthorizationToken',
+        ],
+        resources: ['*'],
+      })
+    );
+
     const wsTaskDef = new ecs.FargateTaskDefinition(this, 'WsTaskDef', {
       cpu: infraConfig.wsServer.cpu,
       memoryLimitMiB: infraConfig.wsServer.memoryMb,
+      executionRole: wsExecutionRole,
     });
 
-    // Grant the task execution role read access to ECR and Secrets Manager.
-    // taskRole (runtime) gets Secrets Manager read for app secrets.
-    wsEcrRepo.grantPull(wsTaskDef.executionRole!);
     appSecret.grantRead(wsTaskDef.taskRole);
     databaseStack.dbSecret.grantRead(wsTaskDef.taskRole);
 
