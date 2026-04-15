@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
-import { useWsSubscription } from '../../../src/client/hooks/useWsSubscription.ts';
+import { useWsSubscription } from '../../../src/client/hooks/updates/useWsSubscription.ts';
 import { WsContext, WsContextValue } from '../../../src/client/context/ws.context.types.ts';
 import type {
   WsRoomId,
