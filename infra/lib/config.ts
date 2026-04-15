@@ -4,6 +4,7 @@ export const infraConfig = {
 
   domain: {
     hostname: 'smartquote.zayeer.dev',
+    wsHostname: 'ws.smartquote.zayeer.dev',
   },
 
   cors: {
@@ -55,6 +56,16 @@ export const infraConfig = {
     imageTag: 'latest',
     memoryMb: 512,
     timeoutSeconds: 29,
+  },
+
+  wsServer: {
+    ecrRepoName: 'smartquote-ws',
+    imageTag: 'latest',
+    cpu: 256,
+    memoryMb: 512,
+    containerPort: 3001,
+    desiredCount: 1,
+    albIdleTimeoutSeconds: 120,
   },
 
   s3: {
