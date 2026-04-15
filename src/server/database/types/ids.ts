@@ -31,7 +31,8 @@ export type OrganizationId = StringId<'Organization'>;
 export type UserId = StringId<'User'>;
 export type TicketId = StringId<'Ticket'>;
 export type QuoteId = StringId<'Quote'>;
-export type SmartQuoteConfigId = StringId<'SmartQuoteConfig'>;
+export type SmartQuoteConfigKey = StringId<'SmartQuoteConfig'>;
+export type SpecialWorkingDayId = StringId<'SpecialWorkingDay'>;
 
 export type QuoteApprovalId = IntegerId<'QuoteApproval'>;
 export type RateProfileId = IntegerId<'RateProfile'>;

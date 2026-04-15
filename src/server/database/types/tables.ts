@@ -23,6 +23,8 @@ import type {
   RoleId,
   SessionId,
   SlaPolicyId,
+  SmartQuoteConfigKey,
+  SpecialWorkingDayId,
   TicketAttachmentId,
   TicketCommentId,
   TicketEmbeddingId,
@@ -310,4 +312,21 @@ export interface TicketEmbedding extends BaseAuditRows {
   /** Stored as a JSONB float array. Length matches the embedding model's output dimension. */
   embedding: number[];
   computed_at: Date;
+}
+
+export interface SmartQuoteConfig extends BaseAuditRows {
+  key: SmartQuoteConfigKey;
+  value: string;
+  description: string;
+}
+
+export interface SpecialWorkingDay extends BaseAuditRows {
+  id: SpecialWorkingDayId;
+  /** YYYY-MM-DD */
+  date: string;
+  /** HH:mm:ss */
+  start_time: string;
+  /** HH:mm:ss */
+  end_time: string;
+  is_holiday: boolean;
 }
