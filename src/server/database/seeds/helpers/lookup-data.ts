@@ -150,9 +150,14 @@ export const ANALYTICS_SCHEMAS_SEED_DATA: AnalyticsSchemaRow[] = [
 
 export const SMARTQUOTE_CONFIGS_SEED_DATA: ConfigRow[] = [
   {
-    key: SMARTQUOTE_CONFIG_KEYS.HOURS_PER_DAY,
-    value: '6',
-    description: 'Standard working hours per day for resource calculations',
+    key: SMARTQUOTE_CONFIG_KEYS.DEFAULT_DAY_START_TIME,
+    value: '09:00',
+    description: 'Start of working day',
+  },
+  {
+    key: SMARTQUOTE_CONFIG_KEYS.DEFAULT_DAY_END_TIME,
+    value: '17:00',
+    description: 'End of working day',
   },
   {
     key: SMARTQUOTE_CONFIG_KEYS.VELOCITY_MULTIPLIER,

@@ -19,13 +19,13 @@ const AdminSystemConfigPage: React.FC = () => {
         data-testid="system-config-form"
       >
         <div className="field-group">
-          <label className="field-label" htmlFor={SMARTQUOTE_CONFIG_KEYS.HOURS_PER_DAY}>
-            Hours Per Day
+          <label className="field-label" htmlFor={SMARTQUOTE_CONFIG_KEYS.DEFAULT_DAY_START_TIME}>
+            Default Working Day Start Time
           </label>
           <input
             className="field-input system-config-input"
-            id={SMARTQUOTE_CONFIG_KEYS.HOURS_PER_DAY}
-            name={SMARTQUOTE_CONFIG_KEYS.HOURS_PER_DAY}
+            id={SMARTQUOTE_CONFIG_KEYS.DEFAULT_DAY_START_TIME}
+            name={SMARTQUOTE_CONFIG_KEYS.DEFAULT_DAY_START_TIME}
             type="number"
             min={1}
             max={24}
