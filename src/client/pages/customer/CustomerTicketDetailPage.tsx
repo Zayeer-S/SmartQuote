@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import TicketDetailCard from '../../features/shared/TicketDetailCard.js';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
@@ -9,6 +9,7 @@ import TicketDetailSidePanel from '../../features/shared/side-panels/TicketDetai
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import CustomerQuotePanel from '../../features/customer/CustomerQuotePanel.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
+import type { QuoteWithApprovalResponse } from '../../../shared/contracts/quote-contracts.js';
 import { useQuoteWsSubscription } from '../../hooks/updates/useQuoteWsSubscription.js';
 import { usePollingRefetch } from '../../hooks/updates/usePollingRefetch.js';
 
@@ -31,10 +32,11 @@ const CustomerTicketDetailPage: React.FC = () => {
   const { execute: fetchTickets } = ticket;
   const { execute: fetchQuotes } = quotes;
 
-  const latestQuote =
-    quotes.data && quotes.data.quotes.length > 0
-      ? quotes.data.quotes.reduce((a, b) => (a.version > b.version ? a : b))
-      : null;
+  const stableQuoteRef = useRef<QuoteWithApprovalResponse | null>(null);
+  if (quotes.data && quotes.data.quotes.length > 0) {
+    stableQuoteRef.current = quotes.data.quotes.reduce((a, b) => (a.version > b.version ? a : b));
+  }
+  const latestQuote = stableQuoteRef.current;
 
   useEffect(() => {
     if (ticketId) {
