@@ -562,4 +562,8 @@ smartquote/
 ├── tsconfig.migrations.json
 ├── tsconfig.node.json
 ├── tsconfig.server.json
-└── vite.config.ts
+├── tsconfig.ws.json
+├── vite.config.ts
+├── vitest.config.integration.ts
+├── vitest.config.unit.client.ts
+└── vitest.config.unit.server.ts
