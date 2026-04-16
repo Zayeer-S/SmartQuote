@@ -1,18 +1,21 @@
 import { Knex } from 'knex';
-import type { SmartQuoteConfigKey, SpecialWorkingDayId } from '../../database/types/ids.js';
+import type { SmartQuoteConfigKey } from '../../../shared/constants/index.js';
+import type { SpecialWorkingDayId } from '../../database/types/ids.js';
 import type { SmartQuoteConfig, SpecialWorkingDay } from '../../database/types/tables.js';
 import { BaseDAO } from '../base/base.dao.js';
 import { CONFIG_TABLES } from '../../database/config/table-names.js';
 
-export class SmartQuoteConfigsDAO extends BaseDAO<SmartQuoteConfig, SmartQuoteConfigKey> {
+/**
+ * DAO for the smartquote_configs table.
+ * Does not extend BaseDAO because the table uses `key` as its primary key column
+ * rather than the `id` column that BaseEntity and BaseDAO require.
+ * All queries are written directly against the Knex instance.
+ */
+export class SmartQuoteConfigsDAO {
+  protected db: Knex;
+
   constructor(db: Knex) {
-    super(
-      {
-        tableName: CONFIG_TABLES.SMARTQUOTE_CONFIGS,
-        primaryKey: 'id',
-      },
-      db
-    );
+    this.db = db;
   }
 
   /**
@@ -24,7 +27,9 @@ export class SmartQuoteConfigsDAO extends BaseDAO<SmartQuoteConfig, SmartQuoteCo
    * @returns Raw string value or null
    */
   async getValue(key: SmartQuoteConfigKey): Promise<string | null> {
-    const row = await this.getById(key);
+    const row = await this.db(CONFIG_TABLES.SMARTQUOTE_CONFIGS)
+      .where('key', key)
+      .first<SmartQuoteConfig | undefined>();
     return row?.value ?? null;
   }
 
@@ -37,8 +42,8 @@ export class SmartQuoteConfigsDAO extends BaseDAO<SmartQuoteConfig, SmartQuoteCo
    */
   async setValue(key: SmartQuoteConfigKey, value: string): Promise<void> {
     await this.db(CONFIG_TABLES.SMARTQUOTE_CONFIGS)
-      .insert({ id: key, value })
-      .onConflict('id')
+      .insert({ key, value })
+      .onConflict('key')
       .merge({ value });
   }
 }

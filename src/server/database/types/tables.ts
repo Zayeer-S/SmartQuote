@@ -315,7 +315,7 @@ export interface TicketEmbedding extends BaseAuditRows {
 }
 
 export interface SmartQuoteConfig extends BaseAuditRows {
-  id: SmartQuoteConfigKey;
+  key: SmartQuoteConfigKey;
   value: string;
   description: string;
 }
