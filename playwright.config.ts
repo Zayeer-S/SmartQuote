@@ -120,10 +120,11 @@ export default defineConfig({
     },
   ],
 
+  globalSetup: './tests/e2e/global.setup.ts',
+
   webServer: [
     {
-      command:
-        'cross-env NODE_ENV=test npm run db:reset && cross-env NODE_ENV=test npm run dev:server',
+      command: 'cross-env NODE_ENV=test npm run dev:server',
       url: 'http://localhost:3000/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
@@ -132,7 +133,7 @@ export default defineConfig({
       command: 'npm run dev:client',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
-      timeout: 60_000,
+      timeout: 120_000, // bump from 60_000
     },
   ],
 });
