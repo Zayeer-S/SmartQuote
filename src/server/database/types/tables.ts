@@ -151,6 +151,11 @@ export interface Quote extends BaseAuditRows, DeletableRow {
   estimated_cost: Decimal;
   fixed_cost: Decimal;
   final_cost: Decimal | null;
+  ml_estimated_hours_minimum: Decimal | null;
+  ml_estimated_hours_maximum: Decimal | null;
+  ml_estimated_cost: Decimal | null;
+  ml_suggested_ticket_priority_id: TicketPriorityId | null;
+  ml_priority_confidence: Decimal | null;
   quote_confidence_level_id: QuoteConfidenceId | null;
   quote_approval_id: QuoteApprovalId | null;
   suggested_ticket_priority_id: TicketPriorityId;
