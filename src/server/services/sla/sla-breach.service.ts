@@ -1,7 +1,6 @@
 import { SMARTQUOTE_CONFIG_KEYS } from '../../../shared/constants/lookup-values.js';
 import type { SmartQuoteConfigsDAO } from '../../daos/children/smartquote-configs-domain.dao.js';
 import type { SpecialWorkingDaysDAO } from '../../daos/children/smartquote-configs-domain.dao.js';
-import { SmartQuoteConfigKey } from '../../database/types/ids.js';
 
 /** Parsed working-hours window for a single calendar day. */
 interface DayWindow {
@@ -63,11 +62,9 @@ export class SlaBreachService {
    */
   async computeDeadline(from: Date, responseTimeHours: number): Promise<Date> {
     const defaultStart = await this.configsDAO.getValue(
-      SMARTQUOTE_CONFIG_KEYS.DEFAULT_DAY_START_TIME as SmartQuoteConfigKey
+      SMARTQUOTE_CONFIG_KEYS.DEFAULT_DAY_START_TIME
     );
-    const defaultEnd = await this.configsDAO.getValue(
-      SMARTQUOTE_CONFIG_KEYS.DEFAULT_DAY_END_TIME as SmartQuoteConfigKey
-    );
+    const defaultEnd = await this.configsDAO.getValue(SMARTQUOTE_CONFIG_KEYS.DEFAULT_DAY_END_TIME);
 
     // Fall back to constants if config rows are absent
     const defaultStartMinutes = parseTime(defaultStart ?? '09:00');
