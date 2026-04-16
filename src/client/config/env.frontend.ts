@@ -2,9 +2,9 @@
 import z from 'zod';
 
 const envSchema = z.object({
-  VITE_APP_URL: z.url(),
-  VITE_FRONTEND_URL: z.url(),
-  VITE_WS_URL: z.string().min(1),
+  VITE_APP_URL: z.url().default('http://localhost:3000'),
+  VITE_FRONTEND_URL: z.url().default('http://localhost:5173'),
+  VITE_WS_URL: z.string().min(1).default('ws://localhost:3000/ws'),
 });
 
 const rawSchema = {
