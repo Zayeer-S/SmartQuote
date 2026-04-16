@@ -67,4 +67,4 @@ jobs:
 
       - name: Run Smoke tests
 
-        run: npm run test:e2e:smoke
+        run: npm run test:e2e

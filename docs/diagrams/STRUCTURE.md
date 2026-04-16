@@ -73,7 +73,7 @@ smartquote/
 │   │   │       └── LoginIcons.tsx
 │   │   ├── config/env.frontend.ts                  # Environment and config values only; no runtime logic
 │   │   ├── constants/client.routes.ts
-│   │   ├── contexts/                               # Define types, hooks of context seperately for fast refresh
+│   │   ├── context/                               # Define types, hooks of context seperately for fast refresh
 │   │   │   ├── auth.context.types.ts
 │   │   │   ├── AuthContext.ts
 │   │   │   ├── sidebar.context.types.ts
