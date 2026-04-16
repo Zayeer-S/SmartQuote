@@ -12,7 +12,6 @@ import type {
 import type { QuoteService } from '../services/quote/quote.service.js';
 import type { QuoteEngineService } from '../services/quote/quote-engine.service.js';
 import type { QuoteApprovalService } from '../services/quote/quote-approval.service.js';
-import type { MLQuoteService } from '../services/quote/ml-quote.service.js';
 import {
   approveQuoteSchema,
   createManualQuoteSchema,
@@ -36,20 +35,17 @@ export class QuoteController {
   private quoteService: QuoteService;
   private quoteEngineService: QuoteEngineService;
   private quoteApprovalService: QuoteApprovalService;
-  private mlQuoteService: MLQuoteService;
   private lookup: LookupResolver;
 
   constructor(
     quoteService: QuoteService,
     quoteEngineService: QuoteEngineService,
     quoteApprovalService: QuoteApprovalService,
-    mlQuoteService: MLQuoteService,
     lookup: LookupResolver
   ) {
     this.quoteService = quoteService;
     this.quoteEngineService = quoteEngineService;
     this.quoteApprovalService = quoteApprovalService;
-    this.mlQuoteService = mlQuoteService;
     this.lookup = lookup;
   }
 
@@ -60,24 +56,9 @@ export class QuoteController {
 
       const quote = await this.quoteEngineService.generateQuote(ticketId, actor.id as UserId);
 
-      const ticket = await this.quoteEngineService.getTicket(ticketId);
-      const mlResult = await this.mlQuoteService.generateMLQuote(ticket);
-
-      const mlEstimate: MLQuoteEstimate | null = mlResult
-        ? {
-            estimatedHoursMinimum: mlResult.estimated_hours_minimum,
-            estimatedHoursMaximum: mlResult.estimated_hours_maximum,
-            estimatedCost: mlResult.estimated_cost,
-            suggestedTicketPriority: this.lookup.ticketPriorityName(
-              mlResult.suggested_ticket_priority_id
-            ),
-            priorityConfidence: mlResult.priority_confidence,
-          }
-        : null;
-
       const response: GenerateQuoteResponse = {
         ruleBased: this.mapQuote(quote),
-        mlEstimate,
+        mlEstimate: this.extractMLEstimate(quote),
       };
 
       success(res, response, 201);
@@ -308,6 +289,25 @@ export class QuoteController {
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
       fixedCost: Number(quote.fixed_cost),
       finalCost: Number(quote.final_cost),
+
+      mlEstimatedHoursMinimum:
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+        quote.ml_estimated_hours_minimum != null ? Number(quote.ml_estimated_hours_minimum) : null,
+
+      mlEstimatedHoursMaximum:
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+        quote.ml_estimated_hours_maximum != null ? Number(quote.ml_estimated_hours_maximum) : null,
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      mlEstimatedCost: quote.ml_estimated_cost != null ? Number(quote.ml_estimated_cost) : null,
+      mlSuggestedTicketPriority:
+        quote.ml_suggested_ticket_priority_id != null
+          ? this.lookup.ticketPriorityName(
+              quote.ml_suggested_ticket_priority_id as unknown as number
+            )
+          : null,
+      mlPriorityConfidence:
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+        quote.ml_priority_confidence != null ? Number(quote.ml_priority_confidence) : null,
       quoteConfidenceLevel: this.lookup.quoteConfidenceLevelName(
         quote.quote_confidence_level_id as unknown as number | null
       ),
@@ -321,6 +321,35 @@ export class QuoteController {
       quoteCreator: this.lookup.quoteCreatorName(quote.quote_creator_id as unknown as number),
       createdAt: quote.created_at.toISOString(),
       updatedAt: quote.updated_at.toISOString(),
+    };
+  }
+
+  /**
+   * Derives an MLQuoteEstimate from the persisted ml_* columns on a quote row.
+   * Returns null if ML data was not available at generation time.
+   */
+  private extractMLEstimate(quote: Quote): MLQuoteEstimate | null {
+    if (
+      quote.ml_estimated_hours_minimum == null ||
+      quote.ml_estimated_hours_maximum == null ||
+      quote.ml_estimated_cost == null ||
+      quote.ml_suggested_ticket_priority_id == null ||
+      quote.ml_priority_confidence == null
+    ) {
+      return null;
+    }
+    return {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      estimatedHoursMinimum: Number(quote.ml_estimated_hours_minimum),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      estimatedHoursMaximum: Number(quote.ml_estimated_hours_maximum),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      estimatedCost: Number(quote.ml_estimated_cost),
+      suggestedTicketPriority: this.lookup.ticketPriorityName(
+        quote.ml_suggested_ticket_priority_id as unknown as number
+      ),
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-conversion
+      priorityConfidence: Number(quote.ml_priority_confidence),
     };
   }
 
