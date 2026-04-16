@@ -3,12 +3,14 @@ import { CLIENT_ROUTES } from '../../../constants/client.routes.js';
 import { getSlaBadgeClass } from '../../../lib/utils/badge-utils.js';
 import type { TicketSummaryResponse } from '../../../../shared/contracts/ticket-contracts.js';
 import BaseTicketCard from '../../shared/BaseTicketCard.js';
+import { useSlaCountdown } from '../../../hooks/sla/useSlaCountdown.js';
 
 interface AdminTicketCardProps {
   ticket: TicketSummaryResponse;
+  onSlaBreachConfirm?: () => void;
 }
 
-const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
+const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket, onSlaBreachConfirm }) => {
   const formattedDeadline = new Date(ticket.deadline).toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
@@ -17,6 +19,15 @@ const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
 
   const isAssigned = ticket.assignedToUserId !== null;
   const sla = ticket.slaStatus;
+
+  const { display: countdownDisplay, breached } = useSlaCountdown(
+    sla?.slaDeadline ?? null,
+    onSlaBreachConfirm
+  );
+
+  const slaBadgeLabel = breached || (sla?.deadlineBreached ?? false) ? 'SLA Breached' : 'SLA OK';
+  const slaBadgeTitle =
+    sla !== null ? `${sla.policyName} - ${countdownDisplay || slaBadgeLabel}` : undefined;
 
   return (
     <BaseTicketCard
@@ -35,11 +46,11 @@ const AdminTicketCard: React.FC<AdminTicketCardProps> = ({ ticket }) => {
           </span>
           {sla !== null && (
             <span
-              className={getSlaBadgeClass(sla.deadlineBreached)}
+              className={getSlaBadgeClass(breached || sla.deadlineBreached)}
               data-testid="ticket-sla-badge"
-              title={sla.policyName}
+              title={slaBadgeTitle}
             >
-              {sla.deadlineBreached ? 'SLA Breached' : 'SLA OK'}
+              {slaBadgeLabel}
             </span>
           )}
         </>
