@@ -358,7 +358,10 @@ smartquote/
 │   │   │   │   ├── 007_alter_ticket_attachments.ts
 │   │   │   │   ├── 008_add_resolved_at_to_tickets.ts
 │   │   │   │   ├── 009_alter_rate_profiles_table.ts
-│   │   │   │   └── 010_alter_sla_policies_table.ts
+│   │   │   │   ├── 010_alter_sla_policies_table.ts
+│   │   │   │   ├── 011_create_ticket_embeddings.ts
+│   │   │   │   ├── 012_create_special_working_days_table.ts
+│   │   │   │   └── 013_add_mlestimate_to_quotes_table.ts
 │   │   │   ├── seeds/
 │   │   │   │   ├── 001_insert_seed_data.ts
 │   │   │   │   └── helpers
