@@ -68,3 +68,13 @@ jobs:
       - name: Run Smoke tests
 
         run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            coverage/e2e/report/
+            coverage/e2e/results/
+          retention-days: 7
