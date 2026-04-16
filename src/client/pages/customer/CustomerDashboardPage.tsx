@@ -98,7 +98,9 @@ const CustomerDashboardPage: React.FC = () => {
 
           <BaseTicketList
             tickets={filteredTickets}
-            renderItem={(ticket) => <CustomerTicketCard ticket={ticket} />}
+            renderItem={(ticket) => (
+              <CustomerTicketCard ticket={ticket} onSlaBreachConfirm={fetchTickets} />
+            )}
             loading={loading}
             error={error}
             emptyMessage="You have no tickets yet."

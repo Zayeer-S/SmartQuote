@@ -143,7 +143,10 @@ const AdminTicketDetailPage: React.FC = () => {
               {!ticketLoading && !ticketError && ticketData && (
                 <>
                   <TicketDetailCard ticketId={ticketId} ticket={ticket} />
-                  <SlaStatus slaStatus={ticketData.slaStatus} />
+                  <SlaStatus
+                    slaStatus={ticketData.slaStatus}
+                    onSlaBreachConfirm={pollRefetch}
+                  />{' '}
                   <AssignTicketForm
                     ticketData={ticketData}
                     adminUsers={adminData}
