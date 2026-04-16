@@ -1,8 +1,5 @@
 import React from 'react';
-import type {
-  MLQuoteEstimate,
-  QuoteWithApprovalResponse,
-} from '../../../../shared/contracts/quote-contracts.js';
+import type { QuoteWithApprovalResponse } from '../../../../shared/contracts/quote-contracts.js';
 import { getCurrency, getTimestamp } from '../../../lib/utils/formatters.js';
 import AdminQuoteApproval from './AdminQuoteApproval.js';
 import '../../../styles/QuotePanel.css';
@@ -10,16 +7,16 @@ import '../../../styles/QuotePanel.css';
 interface QuotePanelProps {
   ticketId: string;
   quote: QuoteWithApprovalResponse;
-  mlEstimate: MLQuoteEstimate | null;
   handleQuoteMutated: () => void;
 }
 
-const AdminQuotePanel: React.FC<QuotePanelProps> = ({
-  ticketId,
-  quote,
-  mlEstimate,
-  handleQuoteMutated,
-}) => {
+const AdminQuotePanel: React.FC<QuotePanelProps> = ({ ticketId, quote, handleQuoteMutated }) => {
+  const hasMlEstimate =
+    quote.mlEstimatedHoursMinimum != null &&
+    quote.mlEstimatedHoursMaximum != null &&
+    quote.mlEstimatedCost != null &&
+    quote.mlSuggestedTicketPriority != null &&
+    quote.mlPriorityConfidence != null;
   return (
     <section className="card quote-panel" aria-labelledby="quote-heading" data-testid="quote-panel">
       <h2 className="quote-panel-title" id="quote-heading">
@@ -103,38 +100,45 @@ const AdminQuotePanel: React.FC<QuotePanelProps> = ({
         </div>
       </dl>
 
-      {mlEstimate !== null && (
+      {hasMlEstimate && (
         <div className="quote-panel-ml" data-testid="quote-ml-estimate">
           <p className="quote-panel-source-label quote-panel-source-label--ml">
             ML estimate
             <span className="quote-panel-ml-confidence" data-testid="quote-ml-confidence">
-              {Math.round(mlEstimate.priorityConfidence * 100)}% priority confidence
+              {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                Math.round(quote.mlPriorityConfidence! * 100)
+              }
+              % priority confidence
             </span>
           </p>
           <dl className="quote-panel-dl quote-panel-dl--ml">
             <div>
               <dt>Estimated Cost</dt>
-              <dd data-testid="quote-ml-estimated-cost">{getCurrency(mlEstimate.estimatedCost)}</dd>
+              <dd data-testid="quote-ml-estimated-cost">
+                {
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  getCurrency(quote.mlEstimatedCost!)
+                }
+              </dd>
             </div>
 
             <div>
               <dt>Hours Range</dt>
               <dd data-testid="quote-ml-hours">
-                {mlEstimate.estimatedHoursMinimum}–{mlEstimate.estimatedHoursMaximum} hrs
+                {quote.mlEstimatedHoursMinimum}--{quote.mlEstimatedHoursMaximum} hrs
               </dd>
             </div>
 
             <div>
               <dt>Suggested Priority</dt>
-              <dd data-testid="quote-ml-suggested-priority">
-                {mlEstimate.suggestedTicketPriority}
-              </dd>
+              <dd data-testid="quote-ml-suggested-priority">{quote.mlSuggestedTicketPriority}</dd>
             </div>
           </dl>
         </div>
       )}
 
-      {mlEstimate === null && (
+      {!hasMlEstimate && (
         <p className="quote-panel-ml-unavailable" data-testid="quote-ml-unavailable">
           ML estimate unavailable -- ticket embedding may still be processing.
         </p>
