@@ -16,7 +16,9 @@ export interface SlaContract {
 
 /**
  * SLA status computed for a specific ticket.
- * Breach is deadline-driven -- deadlineBreached = ticket.deadline < now.
+ * Breach is response-deadline-driven -- deadlineBreached = slaDeadline < now.
+ * slaDeadline is computed from ticket.created_at + severityTarget.responseTimeHours
+ * using business-hours-aware arithmetic (skips outside working hours and holidays).
  * severityTarget is the contract row matching the ticket's severity, or null
  * if the active policy has no entry for that severity.
  */
@@ -28,10 +30,16 @@ export interface SlaStatusResponse {
   } | null;
   /** All severity targets from the policy, shown in full on the detail view */
   allSeverityTargets: SlaSeverityTarget[];
-  /** True when ticket.deadline is in the past */
+  /** True when slaDeadline is in the past */
   deadlineBreached: boolean;
-  /** Hours between now and the deadline. Negative when already breached. */
+  /** Hours between now and slaDeadline. Negative when already breached. */
   hoursUntilDeadline: number;
+  /**
+   * ISO 8601 timestamp of the computed SLA response deadline.
+   * Derived from ticket.created_at + responseTimeHours using business-hours
+   * arithmetic. Null when severityTarget is null (no matching contract row).
+   */
+  slaDeadline: string | null;
 }
 
 export interface CreateSlaPolicyRequest {

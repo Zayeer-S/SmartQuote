@@ -109,7 +109,9 @@ const AdminDashboardPage: React.FC = () => {
 
           <BaseTicketList
             tickets={filteredTickets}
-            renderItem={(ticket) => <AdminTicketCard ticket={ticket} />}
+            renderItem={(ticket) => (
+              <AdminTicketCard ticket={ticket} onSlaBreachConfirm={fetchTickets} />
+            )}
             loading={loading}
             error={error}
             emptyMessage="No tickets have been submitted yet."

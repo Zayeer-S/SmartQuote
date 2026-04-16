@@ -2,14 +2,23 @@ import React from 'react';
 import { SlaStatusResponse } from '../../../../shared/contracts/sla-contracts';
 import { getSlaBadgeClass } from '../../../lib/utils/badge-utils';
 import { getHours } from '../../../lib/utils/formatters';
+import { useSlaCountdown } from '../../../hooks/sla/useSlaCountdown';
 import './SlaStatus.css';
 
 interface SlaSectionProps {
   slaStatus: SlaStatusResponse | null;
+  onSlaBreachConfirm?: () => void;
 }
 
-const SlaStatus: React.FC<SlaSectionProps> = ({ slaStatus }) => {
+const SlaStatus: React.FC<SlaSectionProps> = ({ slaStatus, onSlaBreachConfirm }) => {
+  const { display: countdownDisplay, breached } = useSlaCountdown(
+    slaStatus?.slaDeadline ?? null,
+    onSlaBreachConfirm
+  );
+
   if (slaStatus == null) return;
+
+  const isBreached = breached || slaStatus.deadlineBreached;
 
   return (
     <section className="card" aria-labelledby="sla-section-heading" data-testid="sla-section">
@@ -21,16 +30,19 @@ const SlaStatus: React.FC<SlaSectionProps> = ({ slaStatus }) => {
         <span className="sla-detail-policy-name" data-testid="sla-policy-name">
           {slaStatus.policyName}
         </span>
-        <span
-          className={getSlaBadgeClass(slaStatus.deadlineBreached)}
-          data-testid="sla-breach-badge"
-        >
-          {slaStatus.deadlineBreached ? 'Deadline Breached' : 'Within Deadline'}
+        <span className={getSlaBadgeClass(isBreached)} data-testid="sla-breach-badge">
+          {isBreached ? 'Deadline Breached' : 'Within Deadline'}
         </span>
       </div>
 
       {slaStatus.severityTarget !== null && (
         <dl className="sla-detail-current-target">
+          {!isBreached && slaStatus.slaDeadline !== null && (
+            <div className="sla-detail-dl-row">
+              <dt>Response Deadline</dt>
+              <dd data-testid="sla-countdown">{countdownDisplay}</dd>
+            </div>
+          )}
           <div className="sla-detail-dl-row">
             <dt>Response Target</dt>
             <dd data-testid="sla-response-target">

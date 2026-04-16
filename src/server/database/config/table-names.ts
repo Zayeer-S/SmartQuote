@@ -54,6 +54,7 @@ export const ENGINE_TABLES = {
 
 export const CONFIG_TABLES = {
   SMARTQUOTE_CONFIGS: 'smartquote_configs',
+  SPECIAL_WORKING_DAYS: 'special_working_days',
 };
 
 export const TABLE_NAMES = {

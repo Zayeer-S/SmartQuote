@@ -36,3 +36,18 @@ export function getCurrency(amount: number): string {
     amount
   );
 }
+
+export function formatCountdown(seconds: number): string {
+  if (seconds <= 0) return 'Breached';
+
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+
+  const mm = m < 10 ? `0${String(m)}` : String(m);
+  const ss = s < 10 ? `0${String(s)}` : String(s);
+
+  if (h > 0) return `${String(h)}h ${mm}m ${ss}s`;
+  if (m > 0) return `${mm}m ${ss}s`;
+  return `${ss}s`;
+}

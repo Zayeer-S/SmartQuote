@@ -38,6 +38,8 @@ import { RoomResolver } from '../realtime/room-resolver.js';
 interface BootstrapOptions {
   /** Set to false in Lambda - background jobs are meaningless in stateless invocations */
   runBackgroundJobs?: boolean;
+  /** Override the clock used for ticket creation timestamps. Useful in tests. */
+  clock?: () => Date;
 }
 
 export interface BootstrapResult {
@@ -137,7 +139,8 @@ export async function bootstrapApplication(
     lookupResolver,
     embedder,
     slaContainer.slaService,
-    notificationContainer.notificationService
+    notificationContainer.notificationService,
+    options.clock
   );
   const quoteContainer = new QuoteContainer(
     db,

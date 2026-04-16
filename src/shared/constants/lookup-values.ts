@@ -231,10 +231,13 @@ export type AnalyticsSchemaName =
   (typeof ANALYTICS_SCHEMA_NAMES)[keyof typeof ANALYTICS_SCHEMA_NAMES];
 
 export const SMARTQUOTE_CONFIG_KEYS = {
-  HOURS_PER_DAY: 'hours_per_day',
-  VELOCITY_MULTIPLIER: 'velocity_multiplier',
-  TICKET_PRIORITY_NLP_WEIGHT: 'ticket_priority_nlp_weight',
-  TICKET_PRIORITY_USERS_IMPACTED_TIERS: 'ticket_priority_users_impacted_tiers',
+  /** hh:mm */
+  DEFAULT_DAY_START_TIME: 'config:default_day_start_time',
+  /** hh:mm */
+  DEFAULT_DAY_END_TIME: 'config:default_day_end_time',
+  VELOCITY_MULTIPLIER: 'config:velocity_multiplier',
+  TICKET_PRIORITY_NLP_WEIGHT: 'config:ticket_priority_nlp_weight',
+  TICKET_PRIORITY_USERS_IMPACTED_TIERS: 'config:ticket_priority_users_impacted_tiers',
 } as const;
 
 export type SmartQuoteConfigKey =
