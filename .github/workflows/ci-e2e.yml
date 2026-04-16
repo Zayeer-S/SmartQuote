@@ -65,7 +65,10 @@ jobs:
             npx playwright install --with-deps
           fi
 
-      - name: Run Smoke tests
+      - name: Reset database
+        run: npm run db:reset
+
+      - name: Run E2E tests
 
         run: npm run test:e2e
 
