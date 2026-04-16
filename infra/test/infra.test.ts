@@ -38,15 +38,13 @@ describe('CertificateStack', () => {
     ({ certTemplate } = buildStacks());
   });
 
-  it('includes the ws subdomain as a SAN', () => {
-    certTemplate.hasResourceProperties('AWS::CertificateManager::Certificate', {
-      DomainName: infraConfig.domain.hostname,
-      SubjectAlternativeNames: Match.arrayWith([infraConfig.domain.wsHostname]),
-    });
+  it('has exactly 1 certificate (CloudFront, us-east-1)', () => {
+    certTemplate.resourceCountIs('AWS::CertificateManager::Certificate', 1);
   });
 
-  it('uses DNS validation', () => {
+  it('CloudFront cert covers the main domain with DNS validation', () => {
     certTemplate.hasResourceProperties('AWS::CertificateManager::Certificate', {
+      DomainName: infraConfig.domain.hostname,
       ValidationMethod: 'DNS',
     });
   });
@@ -472,6 +470,19 @@ describe('AppStack', () => {
           RestrictPublicBuckets: true,
         },
       });
+    });
+  });
+
+  describe('WS certificate', () => {
+    it('WS ALB cert covers the ws subdomain with DNS validation', () => {
+      appTemplate.hasResourceProperties('AWS::CertificateManager::Certificate', {
+        DomainName: infraConfig.domain.wsHostname,
+        ValidationMethod: 'DNS',
+      });
+    });
+
+    it('outputs WsCertificateArn', () => {
+      appTemplate.hasOutput('WsCertificateArn', {});
     });
   });
 

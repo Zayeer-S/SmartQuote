@@ -14,6 +14,7 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as path from 'path';
 import { Construct } from 'constructs';
@@ -459,11 +460,21 @@ export class AppStack extends cdk.Stack {
 
     wsTargetGroup.addTarget(wsService);
 
+    const wsCertificate = new acm.Certificate(this, 'WsCertificate', {
+      domainName: infraConfig.domain.wsHostname,
+      validation: acm.CertificateValidation.fromDns(),
+    });
+
+    new cdk.CfnOutput(this, 'WsCertificateArn', {
+      value: wsCertificate.certificateArn,
+      description: 'Add the DNS validation CNAME for ws.smartquote.zayeer.dev in Cloudflare',
+    });
+
     // HTTPS listener - terminates TLS, forwards to task over plain HTTP inside VPC
     wsAlb.addListener('WsHttpsListener', {
       port: 443,
       protocol: elbv2.ApplicationProtocol.HTTPS,
-      certificates: [certificateStack.certificate],
+      certificates: [wsCertificate],
       defaultTargetGroups: [wsTargetGroup],
     });
 
