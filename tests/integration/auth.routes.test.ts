@@ -22,7 +22,8 @@ const INVALID_CREDENTIALS = {
 let app: Express;
 
 beforeAll(async () => {
-  app = await bootstrapApplication({ runBackgroundJobs: false });
+  const bootstrap = await bootstrapApplication({ runBackgroundJobs: false });
+  app = bootstrap.app;
 });
 
 describe(`POST ${BASE}${AUTH_ENDPOINTS.LOGIN}`, () => {

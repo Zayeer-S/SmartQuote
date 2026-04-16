@@ -37,12 +37,12 @@ async function createThrowawayCustomer(token: string): Promise<string> {
     },
   });
 
+  const ok = res.ok();
+  const body = ok ? null : await res.text();
   await ctx.dispose();
 
-  if (!res.ok()) {
-    const body = await res.text();
-    throw new Error(`createThrowawayCustomer failed (${String(res.status())}): ${body}`);
-  }
+  if (!ok)
+    throw new Error(`createThrowawayCustomer failed (${String(res.status())}): ${body ?? ''}`);
 
   return email;
 }
@@ -82,13 +82,12 @@ test.describe('Admin orgs page', () => {
   });
 
   test('create org modal closes on cancel without creating', async ({ page }) => {
-    await expect(page.locator('[data-testid^="org-row-"]').first()).toBeVisible();
-    const countBefore = await page.locator('[data-testid^="org-row-"]').count();
     await page.getByTestId('create-org-btn').click();
     await expect(page.getByTestId('create-org-modal')).toBeVisible();
+    const countDuringOpen = await page.locator('[data-testid^="org-row-"]').count();
     await page.getByTestId('create-org-modal').getByTestId('cancel-btn').click();
     await expect(page.getByTestId('create-org-modal')).toBeHidden();
-    expect(await page.locator('[data-testid^="org-row-"]').count()).toBe(countBefore);
+    expect(await page.locator('[data-testid^="org-row-"]').count()).toBe(countDuringOpen);
   });
 
   test('edit org flow: updated name appears in list', async ({ page }) => {

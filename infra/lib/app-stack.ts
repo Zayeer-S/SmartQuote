@@ -1,6 +1,8 @@
 import * as cdk from 'aws-cdk-lib/core';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
+import * as ecs from 'aws-cdk-lib/aws-ecs';
+import * as ecsPatterns from 'aws-cdk-lib/aws-ecs-patterns';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import { OutputFormat } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -10,7 +12,10 @@ import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import * as path from 'path';
 import { Construct } from 'constructs';
 import { infraConfig } from './config';
@@ -39,6 +44,10 @@ export class AppStack extends cdk.Stack {
       'LambdaSg',
       cdk.Fn.importValue('LambdaSecurityGroupId')
     );
+
+    // -------------------------------------------------------------------------
+    // ML Lambda
+    // -------------------------------------------------------------------------
 
     const mlEcrRepo = ecr.Repository.fromRepositoryName(
       this,
@@ -297,8 +306,6 @@ export class AppStack extends cdk.Stack {
       handler: apiFunction,
       proxy: true,
       deployOptions: { stageName: 'prod' },
-      // multipart/form-data must be listed here so API Gateway treats upload
-      // bodies as binary and passes them through to Lambda intact.
       binaryMediaTypes: ['multipart/form-data'],
       defaultCorsPreflightOptions: {
         allowOrigins: [infraConfig.cors.origin],
@@ -314,6 +321,181 @@ export class AppStack extends cdk.Stack {
         'Access-Control-Allow-Headers': "'*'",
       },
     });
+
+    // Security group for the ALB - accepts HTTPS from anywhere
+    const albSecurityGroup = new ec2.SecurityGroup(this, 'WsAlbSg', {
+      vpc: databaseStack.vpc,
+      description: 'WS ALB - accepts HTTPS/WSS from internet',
+      allowAllOutbound: false,
+    });
+
+    albSecurityGroup.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(443),
+      'HTTPS/WSS from internet'
+    );
+
+    // Security group for the Fargate task - only accepts traffic from the ALB
+    const wsTaskSecurityGroup = new ec2.SecurityGroup(this, 'WsTaskSg', {
+      vpc: databaseStack.vpc,
+      description: 'WS Fargate task - accepts traffic from ALB only',
+      allowAllOutbound: true,
+    });
+
+    wsTaskSecurityGroup.addIngressRule(
+      albSecurityGroup,
+      ec2.Port.tcp(infraConfig.wsServer.containerPort),
+      'WS traffic from ALB'
+    );
+
+    // Allow ALB to reach the task
+    albSecurityGroup.addEgressRule(
+      wsTaskSecurityGroup,
+      ec2.Port.tcp(infraConfig.wsServer.containerPort),
+      'Forward to WS task'
+    );
+
+    const wsEcrRepo = ecr.Repository.fromRepositoryName(
+      this,
+      'WsEcrRepo',
+      infraConfig.wsServer.ecrRepoName
+    );
+
+    const cluster = new ecs.Cluster(this, 'WsCluster', {
+      vpc: databaseStack.vpc,
+      clusterName: 'smartquote-ws',
+    });
+
+    const wsLogGroup = new logs.LogGroup(this, 'WsLogGroup', {
+      logGroupName: '/ecs/smartquote-ws',
+      retention: logs.RetentionDays.ONE_WEEK,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    const wsExecutionRole = new iam.Role(this, 'WsTaskExecutionRole', {
+      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
+      ],
+    });
+
+    wsExecutionRole.addToPrincipalPolicy(
+      new iam.PolicyStatement({
+        actions: [
+          'ecr:GetDownloadUrlForLayer',
+          'ecr:BatchGetImage',
+          'ecr:BatchCheckLayerAvailability',
+          // ecr:GetAuthorizationToken is account-level, cannot scope to repo ARN
+          'ecr:GetAuthorizationToken',
+        ],
+        resources: ['*'],
+      })
+    );
+
+    const wsTaskDef = new ecs.FargateTaskDefinition(this, 'WsTaskDef', {
+      cpu: infraConfig.wsServer.cpu,
+      memoryLimitMiB: infraConfig.wsServer.memoryMb,
+      executionRole: wsExecutionRole,
+    });
+
+    appSecret.grantRead(wsTaskDef.taskRole);
+    databaseStack.dbSecret.grantRead(wsTaskDef.taskRole);
+
+    wsTaskDef.addContainer('WsContainer', {
+      image: ecs.ContainerImage.fromEcrRepository(wsEcrRepo, infraConfig.wsServer.imageTag),
+      portMappings: [{ containerPort: infraConfig.wsServer.containerPort }],
+      logging: ecs.LogDrivers.awsLogs({
+        streamPrefix: 'ws',
+        logGroup: wsLogGroup,
+      }),
+      environment: {
+        NODE_ENV: 'production',
+        PORT: String(infraConfig.wsServer.containerPort),
+        HOST: '0.0.0.0',
+        DB_HOST: databaseStack.dbEndpoint,
+        DB_PORT: String(infraConfig.db.port),
+        DB_NAME: infraConfig.db.databaseName,
+        CORS_ORIGIN: infraConfig.cors.origin,
+      },
+      secrets: {
+        // Pulls individual keys from Secrets Manager at task start
+        DB_SECRET_ARN: ecs.Secret.fromSecretsManager(databaseStack.dbSecret),
+        APP_SECRET_ARN: ecs.Secret.fromSecretsManager(appSecret),
+      },
+    });
+
+    const wsService = new ecs.FargateService(this, 'WsService', {
+      cluster,
+      taskDefinition: wsTaskDef,
+      desiredCount: infraConfig.wsServer.desiredCount,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [wsTaskSecurityGroup, lambdaSecurityGroup],
+      assignPublicIp: false,
+    });
+
+    // ALB - internet-facing, lives in public subnets
+    const wsAlb = new elbv2.ApplicationLoadBalancer(this, 'WsAlb', {
+      vpc: databaseStack.vpc,
+      internetFacing: true,
+      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+      securityGroup: albSecurityGroup,
+      idleTimeout: cdk.Duration.seconds(infraConfig.wsServer.albIdleTimeoutSeconds),
+      loadBalancerName: 'smartquote-ws',
+    });
+
+    const wsTargetGroup = new elbv2.ApplicationTargetGroup(this, 'WsTargetGroup', {
+      vpc: databaseStack.vpc,
+      port: infraConfig.wsServer.containerPort,
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      targetType: elbv2.TargetType.IP,
+      // WebSocket connections are long-lived - set a generous deregistration delay
+      deregistrationDelay: cdk.Duration.seconds(30),
+      healthCheck: {
+        path: '/health',
+        interval: cdk.Duration.seconds(30),
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 3,
+      },
+    });
+
+    wsTargetGroup.addTarget(wsService);
+
+    const wsCertificate = new acm.Certificate(this, 'WsCertificate', {
+      domainName: infraConfig.domain.wsHostname,
+      validation: acm.CertificateValidation.fromDns(),
+    });
+
+    new cdk.CfnOutput(this, 'WsCertificateArn', {
+      value: wsCertificate.certificateArn,
+      description: 'Add the DNS validation CNAME for ws.smartquote.zayeer.dev in Cloudflare',
+    });
+
+    // HTTPS listener - terminates TLS, forwards to task over plain HTTP inside VPC
+    wsAlb.addListener('WsHttpsListener', {
+      port: 443,
+      protocol: elbv2.ApplicationProtocol.HTTPS,
+      certificates: [wsCertificate],
+      defaultTargetGroups: [wsTargetGroup],
+    });
+
+    new cdk.CfnOutput(this, 'WsAlbDnsName', {
+      value: wsAlb.loadBalancerDnsName,
+      description: 'Add this as a CNAME in Cloudflare pointing to ws.smartquote.zayeer.dev',
+    });
+
+    new cdk.CfnOutput(this, 'WsClusterName', {
+      value: cluster.clusterName,
+      description: 'ECS cluster name for the WS Fargate service',
+    });
+
+    new cdk.CfnOutput(this, 'WsServiceName', {
+      value: wsService.serviceName,
+      description: 'ECS service name - use to force new deployments via CLI',
+    });
+
+    // -------------------------------------------------------------------------
+    // CloudFront + frontend S3 bucket (unchanged)
+    // -------------------------------------------------------------------------
 
     const frontendBucket = new s3.Bucket(this, 'FrontendBucket', {
       bucketName: infraConfig.s3.bucketName,

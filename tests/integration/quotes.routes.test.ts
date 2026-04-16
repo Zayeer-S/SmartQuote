@@ -31,7 +31,8 @@ let ticket1QuoteId: string;
 let ticket4QuoteId: string; // version 2 (latest, not soft-deleted)
 
 beforeAll(async () => {
-  app = await bootstrapApplication({ runBackgroundJobs: false });
+  const bootstrap = await bootstrapApplication({ runBackgroundJobs: false });
+  app = bootstrap.app;
 
   const login = async (email: string, password: string): Promise<string> => {
     const res = await request(app).post(LOGIN).send({ email, password });

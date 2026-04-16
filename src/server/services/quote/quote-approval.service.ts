@@ -9,6 +9,7 @@ import type { QuoteApprovalStatus } from '../../../shared/constants/lookup-value
 import { ForbiddenError } from '../ticket/ticket.errors.js';
 import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
 import type { LookupResolver } from '../../lib/lookup-resolver.js';
+import { eventBus } from '../../lib/event-bus.js';
 
 export class QuoteApprovalService {
   private quotesDAO: QuotesDAO;
@@ -86,6 +87,13 @@ export class QuoteApprovalService {
       options
     );
 
+    eventBus.emit('quote:approved-by-agent', {
+      quoteId: quoteId as string,
+      ticketId: quote.ticket_id as string,
+      version: quote.version,
+      event: 'quote:approved-by-agent',
+    });
+
     return approval;
   }
 
@@ -115,15 +123,25 @@ export class QuoteApprovalService {
     );
     if (!canApprove) throw new ForbiddenError(QUOTE_ERROR_MSGS.FORBIDDEN);
 
-    const approval = await this.resolveApproval(quoteId, options);
+    const { approval, quote } = await this.resolveApproval(quoteId, options);
     this.assertStatus(approval, [QUOTE_APPROVAL_STATUSES.APPROVED_BY_AGENT]);
 
-    return this.updateApproval(
+    const updated = await this.updateApproval(
       approval.id as unknown as QuoteApprovalId,
       QUOTE_APPROVAL_STATUSES.APPROVED_BY_MANAGER,
       comment,
       options
     );
+
+    eventBus.emit('quote:approved-by-manager', {
+      quoteId: quoteId as string,
+      ticketId: quote.ticket_id as string,
+      version: quote.version,
+      event: 'quote:approved-by-manager',
+      comment,
+    });
+
+    return updated;
   }
 
   /**
@@ -152,15 +170,25 @@ export class QuoteApprovalService {
     );
     if (!canReject) throw new ForbiddenError(QUOTE_ERROR_MSGS.FORBIDDEN);
 
-    const approval = await this.resolveApproval(quoteId, options);
+    const { approval, quote } = await this.resolveApproval(quoteId, options);
     this.assertStatus(approval, [QUOTE_APPROVAL_STATUSES.APPROVED_BY_AGENT]);
 
-    return this.updateApproval(
+    const updated = await this.updateApproval(
       approval.id as unknown as QuoteApprovalId,
       QUOTE_APPROVAL_STATUSES.REJECTED_BY_MANAGER,
       comment,
       options
     );
+
+    eventBus.emit('quote:rejected-by-manager', {
+      quoteId: quoteId as string,
+      ticketId: quote.ticket_id as string,
+      version: quote.version,
+      event: 'quote:rejected-by-manager',
+      comment,
+    });
+
+    return updated;
   }
 
   /**
@@ -190,15 +218,25 @@ export class QuoteApprovalService {
     );
     if (!canApprove) throw new ForbiddenError(QUOTE_ERROR_MSGS.FORBIDDEN);
 
-    const approval = await this.resolveApproval(quoteId, options);
+    const { approval, quote } = await this.resolveApproval(quoteId, options);
     this.assertStatus(approval, [QUOTE_APPROVAL_STATUSES.APPROVED_BY_AGENT]);
 
-    return this.updateApproval(
+    const updated = await this.updateApproval(
       approval.id as unknown as QuoteApprovalId,
       QUOTE_APPROVAL_STATUSES.APPROVED_BY_ADMIN,
       comment,
       options
     );
+
+    eventBus.emit('quote:approved-by-admin', {
+      quoteId: quoteId as string,
+      ticketId: quote.ticket_id as string,
+      version: quote.version,
+      event: 'quote:approved-by-admin',
+      comment,
+    });
+
+    return updated;
   }
 
   /**
@@ -228,18 +266,28 @@ export class QuoteApprovalService {
     );
     if (!canApprove) throw new ForbiddenError(QUOTE_ERROR_MSGS.FORBIDDEN);
 
-    const approval = await this.resolveApproval(quoteId, options);
+    const { approval, quote } = await this.resolveApproval(quoteId, options);
     this.assertStatus(approval, [
       QUOTE_APPROVAL_STATUSES.APPROVED_BY_MANAGER,
       QUOTE_APPROVAL_STATUSES.APPROVED_BY_ADMIN,
     ]);
 
-    return this.updateApproval(
+    const updated = await this.updateApproval(
       approval.id as unknown as QuoteApprovalId,
       QUOTE_APPROVAL_STATUSES.APPROVED_BY_CUSTOMER,
       comment,
       options
     );
+
+    eventBus.emit('quote:approved-by-customer', {
+      quoteId: quoteId as string,
+      ticketId: quote.ticket_id as string,
+      version: quote.version,
+      event: 'quote:approved-by-customer',
+      comment,
+    });
+
+    return updated;
   }
 
   /**
@@ -269,7 +317,7 @@ export class QuoteApprovalService {
     );
     if (!canReject) throw new ForbiddenError(QUOTE_ERROR_MSGS.FORBIDDEN);
 
-    const approval = await this.resolveApproval(quoteId, options);
+    const { approval } = await this.resolveApproval(quoteId, options);
     this.assertStatus(approval, [
       QUOTE_APPROVAL_STATUSES.APPROVED_BY_MANAGER,
       QUOTE_APPROVAL_STATUSES.APPROVED_BY_ADMIN,
@@ -286,11 +334,13 @@ export class QuoteApprovalService {
   /**
    * Fetch and null-check the approval record for a quote.
    * Throws if the quote does not exist or has not been submitted yet.
+   * Returns both the approval and the quote so callers have ticket_id without
+   * an extra DB round-trip.
    */
   private async resolveApproval(
     quoteId: QuoteId,
     options?: TransactionContext
-  ): Promise<QuoteApproval> {
+  ): Promise<{ approval: QuoteApproval; quote: Awaited<ReturnType<QuotesDAO['getById']>> & {} }> {
     const quote = await this.quotesDAO.getById(quoteId, options);
     if (!quote) throw new QuoteError(QUOTE_ERROR_MSGS.NOT_FOUND, 404);
     if (quote.quote_approval_id === null) {
@@ -300,7 +350,7 @@ export class QuoteApprovalService {
     const approval = await this.quoteApprovalsDAO.getById(quote.quote_approval_id, options);
     if (!approval) throw new QuoteError(QUOTE_ERROR_MSGS.NOT_FOUND, 404);
 
-    return approval;
+    return { approval, quote };
   }
 
   /**

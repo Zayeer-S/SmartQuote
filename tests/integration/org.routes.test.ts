@@ -22,7 +22,8 @@ async function loginAs(email: string, password: string): Promise<string> {
 }
 
 beforeAll(async () => {
-  app = await bootstrapApplication({ runBackgroundJobs: false });
+  const bootstrap = await bootstrapApplication({ runBackgroundJobs: false });
+  app = bootstrap.app;
 
   adminToken = await loginAs(USERS.ADMIN.EMAIL, USERS.ADMIN.PASSWORD);
 

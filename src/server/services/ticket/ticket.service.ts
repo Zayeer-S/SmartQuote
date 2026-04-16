@@ -19,6 +19,7 @@ import type { IncomingFile } from '../storage/storage.service.types.js';
 import { OrganizationMembersDAO } from '../../daos/children/organizations-domain.dao.js';
 import type { TicketSimilarityService } from './ticket-similarity.service.js';
 import type { NotificationService } from '../notification/notification.service.js';
+import { eventBus } from '../../lib/event-bus.js';
 
 export class TicketService {
   private db: Knex;
@@ -131,6 +132,22 @@ export class TicketService {
       userId: actor.id as string,
       userEmail: actor.email,
       userFirstName: actor.first_name,
+    });
+
+    // Step 5: broadcast to admin dashboard and org room.
+    eventBus.emit('ticket:created', {
+      ticketId: ticket.id as string,
+      ticketTitle: ticket.title,
+      organizationId: ticket.organization_id as string | null,
+      creatorUserId: actorId as string,
+      ticketType: this.lookup.ticketTypeName(ticket.ticket_type_id as unknown as number),
+      ticketSeverity: this.lookup.ticketSeverityName(
+        ticket.ticket_severity_id as unknown as number
+      ),
+      ticketPriority: this.lookup.ticketPriorityName(
+        ticket.ticket_priority_id as unknown as number
+      ),
+      createdAt: ticket.created_at.toISOString(),
     });
 
     return ticket;
@@ -288,6 +305,15 @@ export class TicketService {
 
     const updated = await this.ticketsDAO.getById(ticketId, options);
     if (!updated) throw new TicketError(TICKET_ERROR_MSGS.NOT_FOUND, 404);
+
+    eventBus.emit('ticket:assigned', {
+      ticketId: updated.id as string,
+      ticketTitle: updated.title,
+      organizationId: updated.organization_id as string | null,
+      assigneeUserId: assigneeId as string,
+      assignedAt: updated.updated_at.toISOString(),
+    });
+
     return updated;
   }
 

@@ -4,15 +4,17 @@ import { Construct } from 'constructs';
 import { infraConfig } from './config';
 
 export class CertificateStack extends cdk.Stack {
+  /** CloudFront cert - must be in us-east-1, covers the main domain */
   public readonly certificate: acm.Certificate;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Cloudfront requires ACM cert to be in us-east-1 regardless of where the rest of the infra is
+    // CloudFront requires its cert in us-east-1.
+    // The WS ALB cert lives in AppStack (eu-west-2) since ALBs require a
+    // regional cert and it has no dependency on this stack.
     this.certificate = new acm.Certificate(this, 'Certificate', {
       domainName: infraConfig.domain.hostname,
-      // Here AWS will give a CNAME to add to Cloudflare
       validation: acm.CertificateValidation.fromDns(),
     });
 

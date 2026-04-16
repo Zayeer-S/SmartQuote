@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { CLIENT_ROUTES } from '../../constants/client.routes.js';
 import Breadcrumb from '../../components/Breadcrumb.js';
@@ -21,6 +21,8 @@ import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import { useListEmployeeUsers } from '../../hooks/useListEmployeeUsers.js';
 import AdminQuotePanel from '../../features/admin/quotes/AdminQuotePanel.js';
 import SlaStatus from '../../features/admin/tickets/SlaStatus.js';
+import { useQuoteWsSubscription } from '../../hooks/updates/useQuoteWsSubscription.js';
+import { usePollingRefetch } from '../../hooks/updates/usePollingRefetch.js';
 
 type AdminTab = 'details' | 'quote' | 'revision';
 
@@ -29,6 +31,8 @@ const ADMIN_TABS: TabNavItem<AdminTab>[] = [
   { key: 'quote', label: 'Quote' },
   { key: 'revision', label: 'Revise Quote' },
 ];
+
+const POLL_INTERVAL_MS = 30_000;
 
 function resolveLatestQuote(quotes: QuoteWithApprovalResponse[]): QuoteWithApprovalResponse | null {
   if (quotes.length === 0) return null;
@@ -71,14 +75,27 @@ const AdminTicketDetailPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId]);
 
-  const handleQuoteMutated = (): void => {
-    if (ticketId) void fetchQuotes(ticketId);
+  const handleQuoteMutated = useCallback((): void => {
+    if (ticketId) {
+      void fetchQuotes(ticketId);
+      void fetchTickets(ticketId);
+    }
     setMlEstimate(null);
-  };
+  }, [fetchQuotes, fetchTickets, ticketId]);
+
+  const pollRefetch = useCallback((): void => {
+    if (ticketId) {
+      void fetchQuotes(ticketId);
+      void fetchTickets(ticketId);
+    }
+  }, [fetchQuotes, fetchTickets, ticketId]);
 
   const handleGenerated = (estimate: MLQuoteEstimate | null): void => {
     setMlEstimate(estimate);
   };
+
+  useQuoteWsSubscription(ticketId ?? '', handleQuoteMutated);
+  usePollingRefetch(pollRefetch, POLL_INTERVAL_MS);
 
   if (!ticketId) {
     return (

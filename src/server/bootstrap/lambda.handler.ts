@@ -15,7 +15,7 @@ async function getHandler(): Promise<(event: unknown, context: unknown) => Promi
     import('serverless-http'),
   ]);
 
-  const app = await bootstrapApplication({ runBackgroundJobs: false });
+  const { app } = await bootstrapApplication({ runBackgroundJobs: false });
 
   cachedHandler = serverless(app, {
     binary: ['multipart/form-data'],

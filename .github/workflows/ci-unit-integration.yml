@@ -54,7 +54,7 @@ jobs:
               run: npm run type-check:server
 
             - name: Run unit tests
-              run: npm run test:unit:server
+              run: npm run test:unit
 
             - name: Run integration tests
               run: npm run test:integration

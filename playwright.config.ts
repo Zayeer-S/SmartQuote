@@ -10,7 +10,7 @@ const SESSION_SMOKE_FILES = [
   '**/smoke/org.smoke.test.ts',
 ];
 
-const FLOW_FILES = ['**/flows/quote.approval.flow.test.ts'];
+const FLOW_FILES = ['**/flow/quote.approval.flow.test.ts'];
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -112,7 +112,7 @@ export default defineConfig({
 
     {
       name: 'flow',
-      testMatch: '**/flows/quote.approval.flow.test.ts',
+      testMatch: '**/flow/quote.approval.flow.test.ts',
       dependencies: ['agent-setup', 'manager-setup', 'customer-setup'],
       use: {
         ...devices['Desktop Chrome'],

@@ -27,8 +27,28 @@ function buildStacks() {
   return {
     dbTemplate: Template.fromStack(databaseStack),
     appTemplate: Template.fromStack(appStack),
+    certTemplate: Template.fromStack(certificateStack),
   };
 }
+
+describe('CertificateStack', () => {
+  let certTemplate: Template;
+
+  beforeAll(() => {
+    ({ certTemplate } = buildStacks());
+  });
+
+  it('has exactly 1 certificate (CloudFront, us-east-1)', () => {
+    certTemplate.resourceCountIs('AWS::CertificateManager::Certificate', 1);
+  });
+
+  it('CloudFront cert covers the main domain with DNS validation', () => {
+    certTemplate.hasResourceProperties('AWS::CertificateManager::Certificate', {
+      DomainName: infraConfig.domain.hostname,
+      ValidationMethod: 'DNS',
+    });
+  });
+});
 
 describe('DatabaseStack', () => {
   let dbTemplate: Template;
@@ -38,8 +58,8 @@ describe('DatabaseStack', () => {
   });
 
   describe('VPC endpoints', () => {
-    it('has exactly 4 VPC endpoints (S3 gateway, Secrets Manager interface, Lambda interface, Simple Email Service interface)', () => {
-      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 4);
+    it('has exactly 7 VPC endpoints (S3 gateway, Secrets Manager, Lambda, SES, ECR API, ECR DKR, CloudWatch Logs)', () => {
+      dbTemplate.resourceCountIs('AWS::EC2::VPCEndpoint', 7);
     });
 
     it('has an S3 gateway endpoint', () => {
@@ -69,6 +89,27 @@ describe('DatabaseStack', () => {
       dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
         VpcEndpointType: 'Interface',
         ServiceName: Match.stringLikeRegexp('email-smtp'),
+      });
+    });
+
+    it('has an ECR API interface endpoint', () => {
+      dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+        VpcEndpointType: 'Interface',
+        ServiceName: Match.stringLikeRegexp('ecr\.api'),
+      });
+    });
+
+    it('has an ECR DKR interface endpoint', () => {
+      dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+        VpcEndpointType: 'Interface',
+        ServiceName: Match.stringLikeRegexp('ecr\.dkr'),
+      });
+    });
+
+    it('has a CloudWatch Logs interface endpoint', () => {
+      dbTemplate.hasResourceProperties('AWS::EC2::VPCEndpoint', {
+        VpcEndpointType: 'Interface',
+        ServiceName: Match.stringLikeRegexp('logs'),
       });
     });
   });
@@ -287,6 +328,98 @@ describe('AppStack', () => {
     });
   });
 
+  describe('WS Fargate service', () => {
+    it('creates an ECS cluster named smartquote-ws', () => {
+      appTemplate.hasResourceProperties('AWS::ECS::Cluster', {
+        ClusterName: 'smartquote-ws',
+      });
+    });
+
+    it('task definition has the correct cpu and memory from config', () => {
+      appTemplate.hasResourceProperties('AWS::ECS::TaskDefinition', {
+        Cpu: String(infraConfig.wsServer.cpu),
+        Memory: String(infraConfig.wsServer.memoryMb),
+      });
+    });
+
+    it('task definition container exposes the correct port from config', () => {
+      appTemplate.hasResourceProperties('AWS::ECS::TaskDefinition', {
+        ContainerDefinitions: Match.arrayWith([
+          Match.objectLike({
+            PortMappings: Match.arrayWith([
+              Match.objectLike({ ContainerPort: infraConfig.wsServer.containerPort }),
+            ]),
+          }),
+        ]),
+      });
+    });
+
+    it('Fargate service has the correct desired count from config', () => {
+      appTemplate.hasResourceProperties('AWS::ECS::Service', {
+        DesiredCount: infraConfig.wsServer.desiredCount,
+        LaunchType: 'FARGATE',
+      });
+    });
+
+    it('Fargate service does not assign a public IP (private isolated)', () => {
+      appTemplate.hasResourceProperties('AWS::ECS::Service', {
+        NetworkConfiguration: Match.objectLike({
+          AwsvpcConfiguration: Match.objectLike({
+            AssignPublicIp: 'DISABLED',
+          }),
+        }),
+      });
+    });
+
+    it('ALB is internet-facing', () => {
+      appTemplate.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
+        Scheme: 'internet-facing',
+        Name: 'smartquote-ws',
+      });
+    });
+
+    it('HTTPS listener is on port 443', () => {
+      appTemplate.hasResourceProperties('AWS::ElasticLoadBalancingV2::Listener', {
+        Port: 443,
+        Protocol: 'HTTPS',
+      });
+    });
+
+    it('target group health check hits /health', () => {
+      appTemplate.hasResourceProperties('AWS::ElasticLoadBalancingV2::TargetGroup', {
+        HealthCheckPath: '/health',
+        TargetType: 'ip',
+      });
+    });
+
+    it('ALB security group accepts inbound HTTPS from anywhere', () => {
+      appTemplate.hasResourceProperties('AWS::EC2::SecurityGroup', {
+        GroupDescription: 'WS ALB - accepts HTTPS/WSS from internet',
+        SecurityGroupIngress: Match.arrayWith([
+          Match.objectLike({
+            FromPort: 443,
+            ToPort: 443,
+            IpProtocol: 'tcp',
+            CidrIp: '0.0.0.0/0',
+          }),
+        ]),
+      });
+    });
+
+    it('task security group only accepts inbound from the ALB on the container port', () => {
+      appTemplate.hasResourceProperties('AWS::EC2::SecurityGroup', {
+        GroupDescription: 'WS Fargate task - accepts traffic from ALB only',
+      });
+    });
+
+    it('log group has one week retention', () => {
+      appTemplate.hasResourceProperties('AWS::Logs::LogGroup', {
+        LogGroupName: '/ecs/smartquote-ws',
+        RetentionInDays: 7,
+      });
+    });
+  });
+
   describe('CloudFront distribution', () => {
     it('has the /api/* behavior configured', () => {
       appTemplate.hasResourceProperties('AWS::CloudFront::Distribution', {
@@ -340,6 +473,19 @@ describe('AppStack', () => {
     });
   });
 
+  describe('WS certificate', () => {
+    it('WS ALB cert covers the ws subdomain with DNS validation', () => {
+      appTemplate.hasResourceProperties('AWS::CertificateManager::Certificate', {
+        DomainName: infraConfig.domain.wsHostname,
+        ValidationMethod: 'DNS',
+      });
+    });
+
+    it('outputs WsCertificateArn', () => {
+      appTemplate.hasOutput('WsCertificateArn', {});
+    });
+  });
+
   describe('Outputs', () => {
     it('outputs CloudFrontUrl', () => {
       appTemplate.hasOutput('CloudFrontUrl', {});
@@ -359,6 +505,18 @@ describe('AppStack', () => {
 
     it('outputs MlQuoteFunctionUrl', () => {
       appTemplate.hasOutput('MlQuoteFunctionUrl', {});
+    });
+
+    it('outputs WsAlbDnsName', () => {
+      appTemplate.hasOutput('WsAlbDnsName', {});
+    });
+
+    it('outputs WsClusterName', () => {
+      appTemplate.hasOutput('WsClusterName', {});
+    });
+
+    it('outputs WsServiceName', () => {
+      appTemplate.hasOutput('WsServiceName', {});
     });
   });
 });

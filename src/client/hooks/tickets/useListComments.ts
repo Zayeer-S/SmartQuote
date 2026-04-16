@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { ticketAPI } from '../../lib/api/ticket.api.js';
-import type { ListCommentsResponse } from '../../../shared/contracts/ticket-contracts.js';
+import type {
+  CommentResponse,
+  ListCommentsResponse,
+} from '../../../shared/contracts/ticket-contracts.js';
 
 interface UseListCommentsState {
   data: ListCommentsResponse | null;
@@ -10,6 +13,7 @@ interface UseListCommentsState {
 
 interface UseListCommentsReturn extends UseListCommentsState {
   execute: (ticketId: string) => Promise<void>;
+  appendComment: (comment: CommentResponse) => void;
 }
 
 export function useListComments(): UseListCommentsReturn {
@@ -29,5 +33,14 @@ export function useListComments(): UseListCommentsReturn {
     }
   }
 
-  return { ...state, execute };
+  function appendComment(comment: CommentResponse): void {
+    setState((prev) => ({
+      ...prev,
+      data: {
+        comments: [...(prev.data?.comments ?? []), comment],
+      },
+    }));
+  }
+
+  return { ...state, execute, appendComment };
 }

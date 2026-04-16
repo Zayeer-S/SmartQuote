@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/contexts/useAuth.js';
 import { useListTickets } from '../../hooks/tickets/useListTicket.js';
 import { useAdminTicketFilters, slaUrgencyKey } from '../../hooks/useAdminTicketFilters.js';
@@ -7,18 +7,28 @@ import TicketPagination from '../../features/collate/TicketPagination.js';
 import DashboardSidePanel from '../../features/shared/side-panels/DashboardSidePanel.js';
 import BaseTicketList from '../../features/shared/BaseTicketList.js';
 import AdminTicketCard from '../../features/admin/tickets/AdminTicketCard.js';
+import { useTicketWsSubscription } from '../../hooks/updates/useTicketWsSubscription.js';
+import { usePollingRefetch } from '../../hooks/updates/usePollingRefetch.js';
 import '../../styles/DashboardPage.css';
 
 const PRIORITY_ORDER: Record<string, number> = { P1: 1, P2: 2, P3: 3, P4: 4 };
+const POLL_INTERVAL_MS = 30_000;
 
 const AdminDashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { execute, data, loading, error } = useListTickets();
 
-  useEffect(() => {
+  const fetchTickets = useCallback(() => {
     void execute();
+  }, [execute]);
+
+  useEffect(() => {
+    fetchTickets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useTicketWsSubscription('admin:dashboard', fetchTickets);
+  usePollingRefetch(fetchTickets, POLL_INTERVAL_MS);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const allTickets = data?.tickets ?? [];

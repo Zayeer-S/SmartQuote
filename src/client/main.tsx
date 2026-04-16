@@ -29,6 +29,7 @@ import './styles/buttons.css';
 import './styles/forms.css';
 import './styles/cards.css';
 import './styles/badges.css';
+import { WsProvider } from './context/WsContext.js';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 createRoot(document.getElementById('root')!).render(
@@ -36,74 +37,79 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <SidebarProvider>
-            <Routes>
-              <Route path="/">
-                <Route index element={<LoginPage />} />
-                <Route path={CLIENT_ROUTES.LOGIN} element={<LoginPage />} />
-                <Route path={CLIENT_ROUTES.CANT_ACCESS_ACCOUNT} element={<CantAccessPage />} />
+          <WsProvider>
+            <SidebarProvider>
+              <Routes>
+                <Route path="/">
+                  <Route index element={<LoginPage />} />
+                  <Route path={CLIENT_ROUTES.LOGIN} element={<LoginPage />} />
+                  <Route path={CLIENT_ROUTES.CANT_ACCESS_ACCOUNT} element={<CantAccessPage />} />
 
-                <Route
-                  element={
-                    <ProtectedRoute
-                      allowedRoles={[
-                        AUTH_ROLES.ADMIN,
-                        AUTH_ROLES.MANAGER,
-                        AUTH_ROLES.SUPPORT_AGENT,
-                      ]}
-                    />
-                  }
-                >
-                  <Route path={CLIENT_ROUTES.ADMIN.ROOT} element={<AdminLayout />}>
-                    <Route index element={<AdminDashboardPage />} />
-                    <Route
-                      path={CLIENT_ROUTES.ADMIN.TICKET()}
-                      element={<AdminTicketDetailPage />}
-                    />
-                    <Route path={CLIENT_ROUTES.ADMIN.ANALYTICS} element={<AdminAnalyticsPage />} />
-                    <Route
-                      path={CLIENT_ROUTES.ADMIN.ORGANIZATIONS_LIST}
-                      element={<AdminOrgsPage />}
-                    />
-                    <Route
-                      path={CLIENT_ROUTES.ADMIN.ORGANIZATION_MEMBERS()}
-                      element={<AdminOrgsMembersPage />}
-                    />
-                    <Route
-                      path={CLIENT_ROUTES.ADMIN.SLA_POLICIES}
-                      element={<AdminSLAPoliciesPage />}
-                    />
-                    <Route
-                      path={CLIENT_ROUTES.ADMIN.RATE_PROFILES}
-                      element={<AdminRateProfilesPage />}
-                    />
-                    <Route
-                      path={CLIENT_ROUTES.ADMIN.USER_MANAGEMENT}
-                      element={<AdminUserManagementPage />}
-                    />
-                    <Route
-                      path={CLIENT_ROUTES.ADMIN.SYSTEM_CONFIG}
-                      element={<AdminSystemConfigPage />}
-                    />
-                    <Route path={CLIENT_ROUTES.ADMIN.SETTINGS} element={<SettingsPage />} />
+                  <Route
+                    element={
+                      <ProtectedRoute
+                        allowedRoles={[
+                          AUTH_ROLES.ADMIN,
+                          AUTH_ROLES.MANAGER,
+                          AUTH_ROLES.SUPPORT_AGENT,
+                        ]}
+                      />
+                    }
+                  >
+                    <Route path={CLIENT_ROUTES.ADMIN.ROOT} element={<AdminLayout />}>
+                      <Route index element={<AdminDashboardPage />} />
+                      <Route
+                        path={CLIENT_ROUTES.ADMIN.TICKET()}
+                        element={<AdminTicketDetailPage />}
+                      />
+                      <Route
+                        path={CLIENT_ROUTES.ADMIN.ANALYTICS}
+                        element={<AdminAnalyticsPage />}
+                      />
+                      <Route
+                        path={CLIENT_ROUTES.ADMIN.ORGANIZATIONS_LIST}
+                        element={<AdminOrgsPage />}
+                      />
+                      <Route
+                        path={CLIENT_ROUTES.ADMIN.ORGANIZATION_MEMBERS()}
+                        element={<AdminOrgsMembersPage />}
+                      />
+                      <Route
+                        path={CLIENT_ROUTES.ADMIN.SLA_POLICIES}
+                        element={<AdminSLAPoliciesPage />}
+                      />
+                      <Route
+                        path={CLIENT_ROUTES.ADMIN.RATE_PROFILES}
+                        element={<AdminRateProfilesPage />}
+                      />
+                      <Route
+                        path={CLIENT_ROUTES.ADMIN.USER_MANAGEMENT}
+                        element={<AdminUserManagementPage />}
+                      />
+                      <Route
+                        path={CLIENT_ROUTES.ADMIN.SYSTEM_CONFIG}
+                        element={<AdminSystemConfigPage />}
+                      />
+                      <Route path={CLIENT_ROUTES.ADMIN.SETTINGS} element={<SettingsPage />} />
+                    </Route>
                   </Route>
-                </Route>
 
-                <Route element={<ProtectedRoute allowedRoles={[AUTH_ROLES.CUSTOMER]} />}>
-                  <Route path={CLIENT_ROUTES.CUSTOMER.ROOT} element={<CustomerLayout />}>
-                    <Route index element={<CustomerDashboardPage />} />
-                    <Route
-                      path={CLIENT_ROUTES.CUSTOMER.TICKET()}
-                      element={<CustomerTicketDetailPage />}
-                    />
-                    <Route path={CLIENT_ROUTES.CUSTOMER.SETTINGS} element={<SettingsPage />} />
+                  <Route element={<ProtectedRoute allowedRoles={[AUTH_ROLES.CUSTOMER]} />}>
+                    <Route path={CLIENT_ROUTES.CUSTOMER.ROOT} element={<CustomerLayout />}>
+                      <Route index element={<CustomerDashboardPage />} />
+                      <Route
+                        path={CLIENT_ROUTES.CUSTOMER.TICKET()}
+                        element={<CustomerTicketDetailPage />}
+                      />
+                      <Route path={CLIENT_ROUTES.CUSTOMER.SETTINGS} element={<SettingsPage />} />
+                    </Route>
                   </Route>
-                </Route>
 
-                <Route path="*" element={<NotFoundPage />} />
-              </Route>
-            </Routes>
-          </SidebarProvider>
+                  <Route path="*" element={<NotFoundPage />} />
+                </Route>
+              </Routes>
+            </SidebarProvider>
+          </WsProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

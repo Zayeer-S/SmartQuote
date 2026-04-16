@@ -16,9 +16,29 @@ interface QuoteActionsProps {
 const QuoteActions: React.FC<QuoteActionsProps> = ({ ticketId, quoteId, approvalStatus }) => {
   const [rejectComment, setRejectComment] = useState('');
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [approveSuccess, setApproveSuccess] = useState(false);
+  const [rejectSuccess, setRejectSuccess] = useState(false);
 
   const approve = useCustomerApproveQuote();
   const reject = useCustomerRejectQuote();
+
+  // Success states are checked before the approval-status gate so they survive
+  // parent re-renders that change approvalStatus after a successful action.
+  if (approveSuccess) {
+    return (
+      <p className="feedback-success" data-testid="approve-success">
+        Quote accepted successfully.
+      </p>
+    );
+  }
+
+  if (rejectSuccess) {
+    return (
+      <p className="feedback-success" data-testid="reject-success">
+        Quote rejected successfully.
+      </p>
+    );
+  }
 
   // Only show actions when the quote is waiting for the customer's decision
   if (!isAwaitingCustomerAction(approvalStatus ?? null)) {
@@ -28,13 +48,17 @@ const QuoteActions: React.FC<QuoteActionsProps> = ({ ticketId, quoteId, approval
   const isBusy = approve.loading || reject.loading;
 
   const handleApprove = (): void => {
-    void approve.execute(ticketId, quoteId, {});
+    void approve.execute(ticketId, quoteId, {}).then(() => {
+      setApproveSuccess(true);
+    });
   };
 
   const handleRejectSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!rejectComment.trim()) return;
-    void reject.execute(ticketId, quoteId, { comment: rejectComment });
+    void reject.execute(ticketId, quoteId, { comment: rejectComment }).then(() => {
+      setRejectSuccess(true);
+    });
   };
 
   const handleOpenRejectForm = (): void => {
@@ -45,22 +69,6 @@ const QuoteActions: React.FC<QuoteActionsProps> = ({ ticketId, quoteId, approval
     setShowRejectForm(false);
     setRejectComment('');
   };
-
-  if (approve.data) {
-    return (
-      <p className="feedback-success" data-testid="approve-success">
-        Quote accepted successfully.
-      </p>
-    );
-  }
-
-  if (reject.data) {
-    return (
-      <p className="feedback-success" data-testid="reject-success">
-        Quote rejected successfully.
-      </p>
-    );
-  }
 
   return (
     <div className="quote-actions" data-testid="quote-actions">

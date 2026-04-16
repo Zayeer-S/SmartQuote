@@ -75,6 +75,24 @@ export class DatabaseStack extends cdk.Stack {
       securityGroups: [lambdaSecurityGroup],
     });
 
+    this.vpc.addInterfaceEndpoint('EcrApiEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.ECR,
+      subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [lambdaSecurityGroup],
+    });
+
+    this.vpc.addInterfaceEndpoint('EcrDkrEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.ECR_DOCKER,
+      subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [lambdaSecurityGroup],
+    });
+
+    this.vpc.addInterfaceEndpoint('LogsEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
+      subnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
+      securityGroups: [lambdaSecurityGroup],
+    });
+
     new cdk.CfnOutput(this, 'LambdaSecurityGroupId', {
       value: lambdaSecurityGroup.securityGroupId,
       exportName: 'LambdaSecurityGroupId',

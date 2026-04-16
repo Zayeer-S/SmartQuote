@@ -1,0 +1,119 @@
+import { AppEvent, AppEventMap } from '../../server/realtime/event.types';
+
+export type WsRoomId =
+  | `ticket:${string}`
+  | `org:${string}`
+  | 'admin:dashboard'
+  | `user:${string}`
+  | 'sla:monitor';
+
+/** Sent immediately after the WS connection opens */
+export interface WsAuthMessage {
+  type: 'auth';
+  token: string;
+}
+
+/** Subscribe to one or more rooms after auth is confirmed */
+export interface WsSubscribeMessage {
+  type: 'subscribe';
+  rooms: WsRoomId[];
+}
+
+/** Unsubscribe from rooms (e.g. when navigating away) */
+export interface WsUnsubscribeMessage {
+  type: 'unsubscribe';
+  rooms: WsRoomId[];
+}
+
+export type WsClientMessage = WsAuthMessage | WsSubscribeMessage | WsUnsubscribeMessage;
+
+// Server => Client messages
+
+export interface WsAuthAck {
+  type: 'auth:ack';
+  userId: string;
+}
+
+export interface WsAuthError {
+  type: 'auth:error';
+  message: string;
+}
+
+export interface WsSubscribeAck {
+  type: 'subscribe:ack';
+  rooms: WsRoomId[];
+}
+
+export interface WsErrorMessage {
+  type: 'error';
+  message: string;
+}
+
+/** Heartbeat */
+export interface WsPingMessage {
+  type: 'ping';
+}
+
+export interface WsEventMessage<T extends AppEvent = AppEvent, D = AppEventMap[T]> {
+  type: T;
+  data: D;
+  sentAt: string;
+}
+
+export type WsServerMessage =
+  | WsAuthAck
+  | WsAuthError
+  | WsSubscribeAck
+  | WsErrorMessage
+  | WsPingMessage
+  | WsEventMessage
+  | WsCommentCreatedMessage;
+
+export interface CommentCreatedPayload {
+  ticketId: string;
+  commentId: string;
+  authorUserId: string;
+  authorDisplayName: string;
+  commentText: string;
+  commentType: string;
+  createdAt: string;
+}
+
+export interface QuoteEventPayload {
+  quoteId: string;
+  ticketId: string;
+  version: number;
+  event: AppEvent;
+  comment?: string | null;
+}
+
+export interface TicketCreatedPayload {
+  ticketId: string;
+  ticketTitle: string;
+  organizationId: string | null;
+  creatorUserId: string;
+  ticketType: string;
+  ticketSeverity: string;
+  ticketPriority: string;
+  createdAt: string;
+}
+
+export interface TicketAssignedPayload {
+  ticketId: string;
+  ticketTitle: string;
+  organizationId: string | null;
+  assigneeUserId: string;
+  assignedAt: string;
+}
+
+export interface SlaEventPayload {
+  ticketId: string;
+  ticketTitle: string;
+  organizationId: string | null;
+  policyName: string;
+  /** ISO 8601 */
+  breachDeadline: string;
+  severity: string;
+}
+
+export type WsCommentCreatedMessage = WsEventMessage<'comment:created'>;

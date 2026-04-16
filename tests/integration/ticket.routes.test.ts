@@ -31,7 +31,8 @@ let ticket4Id: string; // org2, OPEN, unassigned
 let agentUserId: string;
 
 beforeAll(async () => {
-  app = await bootstrapApplication({ runBackgroundJobs: false });
+  const bootstrap = await bootstrapApplication({ runBackgroundJobs: false });
+  app = bootstrap.app;
 
   const login = async (
     email: string,
