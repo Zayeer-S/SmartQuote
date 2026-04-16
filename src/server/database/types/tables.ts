@@ -315,7 +315,7 @@ export interface TicketEmbedding extends BaseAuditRows {
 }
 
 export interface SmartQuoteConfig extends BaseAuditRows {
-  key: SmartQuoteConfigKey;
+  id: SmartQuoteConfigKey;
   value: string;
   description: string;
 }
@@ -325,8 +325,8 @@ export interface SpecialWorkingDay extends BaseAuditRows {
   /** YYYY-MM-DD */
   date: string;
   /** HH:mm:ss */
-  start_time: string;
+  start_time: string | null;
   /** HH:mm:ss */
-  end_time: string;
+  end_time: string | null;
   is_holiday: boolean;
 }
