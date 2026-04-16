@@ -13,6 +13,7 @@ import type { RBACService } from '../rbac/rbac.service.js';
 import { SlaError, SlaForbiddenError, SLA_ERROR_MSGS } from './sla.errors.js';
 import type { CreateSlaPolicyData, UpdateSlaPolicyData } from './sla.service.types.js';
 import type { SlaContract, SlaStatusResponse } from '../../../shared/contracts/sla-contracts.js';
+import type { SlaBreachService } from './sla-breach.service.js';
 
 export interface SlaPolicyWithDisplayName extends SlaPolicy {
   scopeDisplayName: string;
@@ -25,6 +26,7 @@ export class SlaService {
   private usersDAO: UsersDAO;
   private rolesDAO: RolesDAO;
   private rbacService: RBACService;
+  private breachService: SlaBreachService;
 
   constructor(
     slaPoliciesDAO: SlaPoliciesDAO,
@@ -32,7 +34,8 @@ export class SlaService {
     orgMembersDAO: OrganizationMembersDAO,
     usersDAO: UsersDAO,
     rolesDAO: RolesDAO,
-    rbacService: RBACService
+    rbacService: RBACService,
+    breachService: SlaBreachService
   ) {
     this.slaPoliciesDAO = slaPoliciesDAO;
     this.orgsDAO = orgsDAO;
@@ -40,6 +43,7 @@ export class SlaService {
     this.usersDAO = usersDAO;
     this.rolesDAO = rolesDAO;
     this.rbacService = rbacService;
+    this.breachService = breachService;
   }
 
   /**
@@ -49,14 +53,14 @@ export class SlaService {
    *   1. If the ticket has an organization_id, find an active policy for that org.
    *   2. Otherwise, find an active user-scoped policy for the ticket creator.
    *
-   * Breach is deadline-driven per client guidance -- the estimated_resolution_time
-   * represents dev effort spread over time, not a countdown. The deadline field is
-   * the correct signal for breach alerting.
+   * slaDeadline is computed from ticket.created_at + severityTarget.responseTimeHours
+   * using business-hours-aware arithmetic. deadlineBreached and hoursUntilDeadline
+   * are both derived from that computed deadline, not from tickets.deadline.
    *
    * Returns null when no active policy covers this ticket.
    *
    * @param ticket Ticket row (must include organization_id, creator_user_id,
-   *               ticket_severity_id resolved to a name, and deadline)
+   *               ticket_severity_id resolved to a name, created_at, and deadline)
    * @param ticketSeverityName Resolved severity name for contract lookup
    * @param options Optional transaction context
    */
@@ -70,12 +74,21 @@ export class SlaService {
 
     const contract = policy.contract as SlaContract;
     const allSeverityTargets = contract.severityTargets;
-
     const matchedTarget = allSeverityTargets.find((t) => t.severity === ticketSeverityName) ?? null;
 
     const now = new Date();
-    const deadlineMs = ticket.deadline.getTime();
-    const hoursUntilDeadline = (deadlineMs - now.getTime()) / (1000 * 60 * 60);
+
+    let slaDeadline: Date | null = null;
+    if (matchedTarget) {
+      slaDeadline = await this.breachService.computeDeadline(
+        ticket.created_at,
+        matchedTarget.responseTimeHours
+      );
+    }
+
+    const hoursUntilDeadline = slaDeadline
+      ? (slaDeadline.getTime() - now.getTime()) / (1000 * 60 * 60)
+      : 0;
 
     return {
       policyName: policy.name,
@@ -86,14 +99,19 @@ export class SlaService {
           }
         : null,
       allSeverityTargets,
-      deadlineBreached: hoursUntilDeadline < 0,
+      deadlineBreached: slaDeadline !== null && hoursUntilDeadline < 0,
       hoursUntilDeadline,
+      slaDeadline: slaDeadline?.toISOString() ?? null,
     };
   }
 
   /**
    * Resolve SLA status for a batch of tickets in O(unique orgs + unique users)
    * queries rather than one query per ticket.
+   *
+   * slaDeadline is computed per-ticket via SlaBreachService. The breach service
+   * pre-fetches config + special days once per computeDeadline call; calls are
+   * made in parallel per ticket to avoid sequential latency.
    *
    * Returns a Map keyed by ticket ID (as string). Tickets with no matching
    * policy are absent from the map (callers should treat missing keys as null).
@@ -107,7 +125,6 @@ export class SlaService {
   ): Promise<Map<string, SlaStatusResponse>> {
     if (tickets.length === 0) return new Map();
 
-    // Collect distinct org IDs and creator user IDs
     const orgIds = [
       ...new Set(
         tickets
@@ -124,7 +141,6 @@ export class SlaService {
       ),
     ];
 
-    // Fetch all relevant policies in two queries
     const [orgPolicies, userPolicies] = await Promise.all([
       orgIds.length > 0
         ? Promise.all(
@@ -138,7 +154,6 @@ export class SlaService {
         : Promise.resolve([]),
     ]);
 
-    // Build lookup maps: orgId -> first active policy, userId -> first active policy
     const now = new Date();
     const orgPolicyMap = new Map<string, SlaPolicy>();
     for (const p of orgPolicies) {
@@ -166,39 +181,55 @@ export class SlaService {
       }
     }
 
-    // Compute SLA status per ticket
+    // Compute SLA status per ticket in parallel
+    const entries = await Promise.all(
+      tickets.map(async ({ ticket, ticketSeverityName }) => {
+        const policy =
+          ticket.organization_id !== null
+            ? (orgPolicyMap.get(ticket.organization_id as string) ?? null)
+            : (userPolicyMap.get(ticket.creator_user_id as string) ?? null);
+
+        if (!policy) return null;
+
+        const contract = policy.contract as SlaContract;
+        const allSeverityTargets = contract.severityTargets;
+        const matchedTarget =
+          allSeverityTargets.find((t) => t.severity === ticketSeverityName) ?? null;
+
+        let slaDeadline: Date | null = null;
+        if (matchedTarget) {
+          slaDeadline = await this.breachService.computeDeadline(
+            ticket.created_at,
+            matchedTarget.responseTimeHours
+          );
+        }
+
+        const hoursUntilDeadline = slaDeadline
+          ? (slaDeadline.getTime() - now.getTime()) / (1000 * 60 * 60)
+          : 0;
+
+        const status: SlaStatusResponse = {
+          policyName: policy.name,
+          severityTarget: matchedTarget
+            ? {
+                responseTimeHours: matchedTarget.responseTimeHours,
+                resolutionTimeHours: matchedTarget.resolutionTimeHours,
+              }
+            : null,
+          allSeverityTargets,
+          deadlineBreached: slaDeadline !== null && hoursUntilDeadline < 0,
+          hoursUntilDeadline,
+          slaDeadline: slaDeadline?.toISOString() ?? null,
+        };
+
+        return [ticket.id as string, status] as const;
+      })
+    );
+
     const result = new Map<string, SlaStatusResponse>();
-
-    for (const { ticket, ticketSeverityName } of tickets) {
-      const policy =
-        ticket.organization_id !== null
-          ? (orgPolicyMap.get(ticket.organization_id as string) ?? null)
-          : (userPolicyMap.get(ticket.creator_user_id as string) ?? null);
-
-      if (!policy) continue;
-
-      const contract = policy.contract as SlaContract;
-      const allSeverityTargets = contract.severityTargets;
-      const matchedTarget =
-        allSeverityTargets.find((t) => t.severity === ticketSeverityName) ?? null;
-
-      const deadlineMs = ticket.deadline.getTime();
-      const hoursUntilDeadline = (deadlineMs - now.getTime()) / (1000 * 60 * 60);
-
-      result.set(ticket.id as string, {
-        policyName: policy.name,
-        severityTarget: matchedTarget
-          ? {
-              responseTimeHours: matchedTarget.responseTimeHours,
-              resolutionTimeHours: matchedTarget.resolutionTimeHours,
-            }
-          : null,
-        allSeverityTargets,
-        deadlineBreached: hoursUntilDeadline < 0,
-        hoursUntilDeadline,
-      });
+    for (const entry of entries) {
+      if (entry !== null) result.set(entry[0], entry[1]);
     }
-
     return result;
   }
 
@@ -418,16 +449,12 @@ export class SlaService {
     );
   }
 
-  /**
-   * Attach a scopeDisplayName to a single policy.
-   */
+  /** Attach a scopeDisplayName to a single policy. */
   private async attachDisplayName(
     policy: SlaPolicy,
     options?: TransactionContext
   ): Promise<SlaPolicyWithDisplayName> {
     const [result] = await this.attachDisplayNames([policy], options);
-    // attachDisplayNames always returns one entry per input
-
     return result;
   }
 
@@ -480,9 +507,7 @@ export class SlaService {
     });
   }
 
-  /**
-   * Assert that a user-scoped target is a Customer with no org membership.
-   */
+  /** Assert that a user-scoped target is a Customer with no org membership. */
   private async assertValidUserScope(userId: UserId, options?: TransactionContext): Promise<void> {
     const user = await this.usersDAO.getById(userId, options);
     if (!user) throw new SlaError(SLA_ERROR_MSGS.TARGET_USER_NOT_FOUND, 404);
@@ -494,9 +519,7 @@ export class SlaService {
     if (hasOrg) throw new SlaError(SLA_ERROR_MSGS.TARGET_USER_HAS_ORG, 422);
   }
 
-  /**
-   * Assert that a User row carries the Customer system role.
-   */
+  /** Assert that a User row carries the Customer system role. */
   private async assertIsCustomer(user: User): Promise<void> {
     const role = await this.rolesDAO.getById(user.role_id);
     if (role?.name !== AUTH_ROLES.CUSTOMER) {
@@ -504,9 +527,7 @@ export class SlaService {
     }
   }
 
-  /**
-   * Assert that the actor can read the given policy.
-   */
+  /** Assert that the actor can read the given policy. */
   private async assertReadAccess(
     policy: SlaPolicy,
     actorId: UserId,
@@ -533,9 +554,7 @@ export class SlaService {
     throw new SlaForbiddenError(SLA_ERROR_MSGS.FORBIDDEN);
   }
 
-  /**
-   * Return the SLA policies visible to a customer.
-   */
+  /** Return the SLA policies visible to a customer. */
   private async getCustomerPolicies(
     actorId: UserId,
     options?: TransactionContext
