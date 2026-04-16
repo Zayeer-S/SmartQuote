@@ -32,6 +32,7 @@ export class TicketService {
   private attachmentService: AttachmentService;
   private similarityService: TicketSimilarityService;
   private notificationService: NotificationService;
+  private clock: () => Date;
 
   constructor(
     db: Knex,
@@ -43,7 +44,8 @@ export class TicketService {
     priorityEngine: TicketPriorityEngineService,
     attachmentService: AttachmentService,
     similarityService: TicketSimilarityService,
-    notificationService: NotificationService
+    notificationService: NotificationService,
+    clock: () => Date = () => new Date()
   ) {
     this.db = db;
     this.ticketsDAO = ticketsDAO;
@@ -55,6 +57,7 @@ export class TicketService {
     this.attachmentService = attachmentService;
     this.similarityService = similarityService;
     this.notificationService = notificationService;
+    this.clock = clock;
   }
 
   /**
@@ -104,7 +107,8 @@ export class TicketService {
           resolved_by_user_id: null,
           resolved_at: null,
           deleted_at: null,
-        } satisfies InsertData<Ticket>,
+          created_at: this.clock(),
+        } as InsertData<Ticket> & { created_at: Date },
         ctx
       );
 

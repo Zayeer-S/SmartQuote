@@ -529,6 +529,7 @@ describe('slaStatus on ticket responses', () => {
       allSeverityTargets: expect.any(Array),
       deadlineBreached: expect.any(Boolean),
       hoursUntilDeadline: expect.any(Number),
+      slaDeadline: expect.any(String),
     });
   });
 
@@ -544,22 +545,52 @@ describe('slaStatus on ticket responses', () => {
     expect(res.body.data).toHaveProperty('attachments');
   });
 
-  it('slaStatus.deadlineBreached is true for a ticket with a past deadline', async () => {
-    // Ticket 3 in seed data has deadline = now (already passed at test runtime)
-    const listRes = await request(app).get('/api/tickets/').set(authHeader(adminToken));
-    const tickets = listRes.body.data.tickets;
+  it('slaStatus.deadlineBreached is true for a ticket created far in the past', async () => {
+    // Bootstrap a second app instance with a clock backdated by 48 hours so that
+    // ticket.created_at + any seeded responseTimeHours is guaranteed to be in the past.
+    const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
+    const backdatedClock = (): Date => new Date(Date.now() - FORTY_EIGHT_HOURS_MS);
 
-    // Find a resolved ticket -- seed data has ticket3 as Resolved with deadline=now
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const resolvedTicket = tickets.find(
-      (t: { ticketStatus: string }) => t.ticketStatus === 'Resolved'
-    );
+    const { app: backdatedApp } = await bootstrapApplication({
+      runBackgroundJobs: false,
+      clock: backdatedClock,
+    });
 
-    if (resolvedTicket?.slaStatus) {
-      // The resolved ticket has deadline = seed time (in the past), so it should be breached
-      expect(resolvedTicket.slaStatus.deadlineBreached).toBe(true);
-      expect(resolvedTicket.slaStatus.hoursUntilDeadline).toBeLessThan(0);
-    }
-    // If slaStatus is null the ticket just doesn't have a policy -- not a failure
+    // Log in as customer1 (org1 has a seeded SLA policy)
+    const loginRes = await request(backdatedApp)
+      .post(`${AUTH_BASE}${AUTH_ENDPOINTS.LOGIN}`)
+      .send({ email: USERS.CUSTOMER1_DIFF_ORG.EMAIL, password: USERS.CUSTOMER1_DIFF_ORG.PASSWORD });
+    const token = loginRes.body.data.token as string;
+
+    // Create a ticket -- its created_at will be set to backdatedClock() by TicketService
+    const createRes = await request(backdatedApp)
+      .post('/api/tickets/')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Backdated breach test ticket',
+        description: 'Created with a backdated clock to trigger SLA breach.',
+        ticketType: 'Support',
+        ticketSeverity: 'Critical',
+        businessImpact: 'Critical',
+        deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        usersImpacted: 5,
+      });
+
+    expect(createRes.status).toBe(201);
+    const ticketId = createRes.body.data.id as string;
+
+    // Fetch via admin using the normal app -- SLA status is computed at read time
+    const res = await request(app)
+      .get(`/api/tickets/${ticketId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    const slaStatus = res.body.data.slaStatus;
+
+    // org1 policy has Critical responseTimeHours: 1 -- 48h backdated created_at
+    // means slaDeadline = ~47 hours ago, so breach must be true
+    expect(slaStatus).not.toBeNull();
+    expect(slaStatus.deadlineBreached).toBe(true);
+    expect(slaStatus.hoursUntilDeadline).toBeLessThan(0);
   });
 });

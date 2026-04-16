@@ -56,7 +56,8 @@ export class TicketContainer {
     lookupResolver: LookupResolver,
     embedder: BertEmbedder | null,
     slaService: SlaService,
-    notificationService: NotificationService
+    notificationService: NotificationService,
+    clock: () => Date = () => new Date()
   ) {
     this.ticketsDAO = new TicketsDAO(db);
     this.ticketCommentsDAO = new TicketCommentsDAO(db);
@@ -126,7 +127,8 @@ export class TicketContainer {
       this.priorityEngine,
       this.attachmentService,
       this.similarityService,
-      notificationService
+      notificationService,
+      clock
     );
 
     this.commentService = new CommentService(
