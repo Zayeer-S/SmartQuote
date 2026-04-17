@@ -7,7 +7,7 @@ export async function login(
   redirectPattern: RegExp,
   rememberMe = false
 ) {
-  await page.goto('/login');
+  await page.goto('/login', {waitUntil: 'networkidle'});
   await page.getByTestId('email-input').fill(email);
   await page.getByTestId('password-input').fill(password);
   if (rememberMe) await page.getByTestId('remember-me-checkbox').check();

@@ -24,6 +24,7 @@ import {
 } from './utils/mock.daos';
 import { makeMockNotificationService, makeMockRBACService } from './utils/mock.services';
 import { NotificationService } from '../../../src/server/services/notification/notification.service';
+import { MLQuoteService } from '../../../src/server/services/quote/ml-quote.service';
 
 const ACTOR_ID = 'user-1' as unknown as UserId;
 const TICKET_ID = 'ticket-1' as unknown as TicketId;
@@ -91,11 +92,18 @@ describe('QuoteEngineService.generateQuote', () => {
   let rulesDAO: QuoteCalculationRulesDAO;
   let rbac: ReturnType<typeof makeMockRBACService>;
   let notificationService: NotificationService;
+  let mlQuoteService: MLQuoteService;
 
   const stubLookup = {
     quoteCreatorId: vi.fn().mockReturnValue(2),
     quoteEffortLevelId: vi.fn().mockReturnValue(1),
   };
+
+  function makeMockMLQuoteService(): MLQuoteService {
+    return {
+      generateMLQuote: vi.fn().mockResolvedValue(null),
+    } as unknown as MLQuoteService;
+  }
 
   function makeService(clock?: () => Date): QuoteEngineService {
     return new QuoteEngineService(
@@ -107,6 +115,7 @@ describe('QuoteEngineService.generateQuote', () => {
       rbac,
       stubLookup as never,
       notificationService,
+      mlQuoteService,
       clock
     );
   }
@@ -119,6 +128,7 @@ describe('QuoteEngineService.generateQuote', () => {
     rulesDAO = makeMockRulesDAO();
     rbac = makeMockRBACService();
     notificationService = makeMockNotificationService();
+    mlQuoteService = makeMockMLQuoteService();
 
     // Default to empty arrays so tests that don't set these don't crash before
     // reaching the assertion under test

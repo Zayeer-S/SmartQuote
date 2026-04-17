@@ -45,6 +45,11 @@ export interface QuoteResponse {
   estimatedCost: number;
   fixedCost: number;
   finalCost: number | null;
+  mlEstimatedHoursMinimum: number | null;
+  mlEstimatedHoursMaximum: number | null;
+  mlEstimatedCost: number | null;
+  mlSuggestedTicketPriority: TicketPriority | null;
+  mlPriorityConfidence: number | null;
   quoteConfidenceLevel: QuoteConfidenceLevel | null;
   quoteApprovalId: number | null;
   suggestedTicketPriority: TicketPriority;
@@ -111,15 +116,16 @@ export interface MLQuoteEstimate {
 
 /**
  * Response shape for the auto-generate quote endpoint.
- * Both outputs are returned so the admin can compare and choose which to apply.
- * Only the rule-based quote is persisted to the DB at generation time.
+ * The ML estimate is persisted on the same quote row (ml_* columns) so it
+ * survives refresh. mlEstimate is null if the ticket had no embedding yet or
+ * the Lambda failed at generation time.
  */
 export interface GenerateQuoteResponse {
-  /** Persisted quote from the rule-based engine. */
+  /** Persisted quote from the rule-based engine, with ML columns populated if available. */
   ruleBased: QuoteResponse;
   /**
-   * ML estimate. Null if the ticket has no embedding yet or the Lambda failed.
-   * Display-only -- nothing is persisted from this until an admin applies it.
+   * ML estimate derived from the persisted ml_* columns on the quote row.
+   * Null if unavailable at generation time.
    */
   mlEstimate: MLQuoteEstimate | null;
 }

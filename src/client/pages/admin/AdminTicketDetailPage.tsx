@@ -12,10 +12,7 @@ import {
 } from '../../features/admin/quotes/AdminQuoteEditor.js';
 import AdminQuoteRevisions from '../../features/admin/quotes/AdminQuoteRevisions.js';
 import { useListQuotes } from '../../hooks/quotes/useListQuote.js';
-import type {
-  MLQuoteEstimate,
-  QuoteWithApprovalResponse,
-} from '../../../shared/contracts/quote-contracts.js';
+import type { QuoteWithApprovalResponse } from '../../../shared/contracts/quote-contracts.js';
 import AssignTicketForm from '../../features/admin/tickets/AssignTicketForm.js';
 import { useGetTicket } from '../../hooks/tickets/useGetTicket.js';
 import { useListEmployeeUsers } from '../../hooks/useListEmployeeUsers.js';
@@ -42,9 +39,6 @@ function resolveLatestQuote(quotes: QuoteWithApprovalResponse[]): QuoteWithAppro
 const AdminTicketDetailPage: React.FC = () => {
   const { ticketId } = useParams<{ ticketId: string }>();
   const [activeTab, setActiveTab] = useState<AdminTab>('details');
-  // Holds the ML estimate from the last auto-generate call.
-  // Cleared on any quote mutation so stale estimates never linger.
-  const [mlEstimate, setMlEstimate] = useState<MLQuoteEstimate | null>(null);
 
   const ticket = useGetTicket();
   const quotes = useListQuotes();
@@ -80,7 +74,6 @@ const AdminTicketDetailPage: React.FC = () => {
       void fetchQuotes(ticketId);
       void fetchTickets(ticketId);
     }
-    setMlEstimate(null);
   }, [fetchQuotes, fetchTickets, ticketId]);
 
   const pollRefetch = useCallback((): void => {
@@ -89,10 +82,6 @@ const AdminTicketDetailPage: React.FC = () => {
       void fetchTickets(ticketId);
     }
   }, [fetchQuotes, fetchTickets, ticketId]);
-
-  const handleGenerated = (estimate: MLQuoteEstimate | null): void => {
-    setMlEstimate(estimate);
-  };
 
   useQuoteWsSubscription(ticketId ?? '', handleQuoteMutated);
   usePollingRefetch(pollRefetch, POLL_INTERVAL_MS);
@@ -175,13 +164,11 @@ const AdminTicketDetailPage: React.FC = () => {
                     ticketId={ticketId}
                     latestQuote={latestQuote}
                     onSuccess={handleQuoteMutated}
-                    onGenerated={handleGenerated}
                   />
                   {latestQuote && (
                     <AdminQuotePanel
                       ticketId={ticketId}
                       quote={latestQuote}
-                      mlEstimate={mlEstimate}
                       handleQuoteMutated={handleQuoteMutated}
                     />
                   )}

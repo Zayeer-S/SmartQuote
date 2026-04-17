@@ -21,6 +21,7 @@ import type { LookupResolver } from '../../lib/lookup-resolver.js';
 import { ForbiddenError, TICKET_ERROR_MSGS, TicketError } from '../ticket/ticket.errors.js';
 import { QUOTE_ERROR_MSGS, QuoteError } from './quote.errors.js';
 import type { NotificationService } from '../notification/notification.service.js';
+import type { MLQuoteService } from './ml-quote.service.js';
 import type { QuoteEffortLevel } from '../../../shared/constants/lookup-values.js';
 
 export interface ComputeQuoteInput {
@@ -108,6 +109,7 @@ export class QuoteEngineService {
   private rbacService: RBACService;
   private lookup: LookupResolver;
   private notificationService: NotificationService;
+  private mlQuoteService: MLQuoteService;
   private clock: () => Date;
 
   constructor(
@@ -119,6 +121,7 @@ export class QuoteEngineService {
     rbacService: RBACService,
     lookup: LookupResolver,
     notificationService: NotificationService,
+    mlQuoteService: MLQuoteService,
     clock: () => Date = () => new Date()
   ) {
     this.quotesDAO = quotesDAO;
@@ -129,6 +132,7 @@ export class QuoteEngineService {
     this.rbacService = rbacService;
     this.lookup = lookup;
     this.notificationService = notificationService;
+    this.mlQuoteService = mlQuoteService;
     this.clock = clock;
   }
 
@@ -189,6 +193,10 @@ export class QuoteEngineService {
       ticket.business_impact_id as unknown as number
     );
 
+    // Fire ML call before persisting so results land on the same row.
+    // Returns null on any failure -- never throws.
+    const mlResult = await this.mlQuoteService.generateMLQuote(ticket);
+
     const newQuote = await this.quotesDAO.create(
       {
         ticket_id: ticketId,
@@ -206,6 +214,13 @@ export class QuoteEngineService {
         suggested_ticket_priority_id:
           computed.suggested_ticket_priority_id as unknown as Quote['suggested_ticket_priority_id'],
         quote_effort_level_id: this.lookup.quoteEffortLevelId(effortLevel),
+        ml_estimated_hours_minimum: mlResult ? mlResult.estimated_hours_minimum : null,
+        ml_estimated_hours_maximum: mlResult ? mlResult.estimated_hours_maximum : null,
+        ml_estimated_cost: mlResult ? mlResult.estimated_cost : null,
+        ml_suggested_ticket_priority_id: mlResult
+          ? (mlResult.suggested_ticket_priority_id as unknown as Quote['ml_suggested_ticket_priority_id'])
+          : null,
+        ml_priority_confidence: mlResult ? mlResult.priority_confidence : null,
         deleted_at: null,
       } satisfies InsertData<Quote>,
       options

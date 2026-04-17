@@ -7,6 +7,7 @@
     "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
     "dev:full": "concurrently \"npm run dev:client\" \"npm run dev:server\" \"npm run dev:ml\"",
     "dev:client": "vite",
+    "dev:client:test": "vite --mode test",
     "dev:server": "tsx watch src/server/bootstrap/server.ts",
     "dev:ml": "concurrently \"npm run dev:ml:embedder\" \"npm run dev:ml:quote\"",
     "dev:ml:embedder": "cd models/embedder && uvicorn app:app --host 0.0.0.0 --port 8001 --reload",

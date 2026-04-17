@@ -122,14 +122,13 @@ export default defineConfig({
 
   webServer: [
     {
-      command:
-        'cross-env NODE_ENV=test npm run db:reset && cross-env NODE_ENV=test npm run dev:server',
+      command: 'cross-env NODE_ENV=test npm run dev:server',
       url: 'http://localhost:3000/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: 'npm run dev:client',
+      command: 'npm run dev:client:test',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
