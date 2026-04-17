@@ -165,6 +165,11 @@ export class QuoteService {
         quote_creator_id: this.lookup.quoteCreatorId(QUOTE_CREATORS.MANUAL),
         suggested_ticket_priority_id: ticket.ticket_priority_id,
         quote_effort_level_id: this.lookup.quoteEffortLevelId(data.quote_effort_level),
+        ml_estimated_hours_minimum: null,
+        ml_estimated_hours_maximum: null,
+        ml_estimated_cost: null,
+        ml_suggested_ticket_priority_id: null,
+        ml_priority_confidence: null,
         deleted_at: null,
       } satisfies InsertData<Quote>,
       options
@@ -245,6 +250,11 @@ export class QuoteService {
       quote_effort_level_id: data.quote_effort_level
         ? this.lookup.quoteEffortLevelId(data.quote_effort_level)
         : existing.quote_effort_level_id,
+      ml_estimated_hours_minimum: existing.ml_estimated_hours_minimum,
+      ml_estimated_hours_maximum: existing.ml_estimated_hours_maximum,
+      ml_estimated_cost: existing.ml_estimated_cost,
+      ml_suggested_ticket_priority_id: existing.ml_suggested_ticket_priority_id,
+      ml_priority_confidence: existing.ml_priority_confidence,
       deleted_at: null,
     };
 
