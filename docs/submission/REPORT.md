@@ -19,7 +19,7 @@ The system is deployed entirely on AWS in the `eu-west-2` (London) region. The f
 
 A second Lambda (Python container) handles ML inference. It is invoked by the main Lambda via the AWS SDK and has no public endpoint.
 
-*[Insert system architecture diagram here]*
+[System design diagram](docs/diagrams/SYSTEM_DESIGN.png)
 
 ### Key architectural decisions
 
