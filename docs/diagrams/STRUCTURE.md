@@ -18,6 +18,7 @@ smartquote/
 │   └── guides/
 │       ├── CICD.md
 │       ├── DB.md
+│       ├── FIRST_DEPLOYMENT.md
 │       ├── INFRA.md
 │       ├── ML.md
 │       └── TESTS.md

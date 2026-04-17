@@ -125,24 +125,22 @@ aws secretsmanager create-secret \
 > For Gmail, use an App Password rather than your account password:
 > https://support.google.com/accounts/answer/185833
 
-### 5c -- ECR repository + initial ML image
+### 5c -- ECR repositories + initial images
 
-The App Stack references the ECR repo by name and will fail if the repository is
-empty or does not exist.
+The App Stack references three ECR repos by name and will fail if any repository is
+empty or does not exist. Log in to ECR once, then create and push all three.
 
-Create the repository:
+```bash
+aws ecr get-login-password --region eu-west-2 | \
+  docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.eu-west-2.amazonaws.com
+```
+
+**ML quote service** (`./models/handler/`):
 
 ```bash
 aws ecr create-repository \
   --repository-name smartquote-ml-quote \
   --region eu-west-2
-```
-
-Build and push the initial image:
-
-```bash
-aws ecr get-login-password --region eu-west-2 | \
-  docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.eu-west-2.amazonaws.com
 
 docker buildx build \
   --platform linux/amd64 \
@@ -158,9 +156,51 @@ docker push \
   <AWS_ACCOUNT_ID>.dkr.ecr.eu-west-2.amazonaws.com/smartquote-ml-quote:latest
 ```
 
+**Embedder service** (`./models/embedding/`):
+
+```bash
+aws ecr create-repository \
+  --repository-name smartquote-embedder \
+  --region eu-west-2
+
+docker buildx build \
+  --platform linux/amd64 \
+  --provenance=false \
+  --output type=docker \
+  -t smartquote-embedder \
+  ./models/embedding/
+
+docker tag smartquote-embedder:latest \
+  <AWS_ACCOUNT_ID>.dkr.ecr.eu-west-2.amazonaws.com/smartquote-embedder:latest
+
+docker push \
+  <AWS_ACCOUNT_ID>.dkr.ecr.eu-west-2.amazonaws.com/smartquote-embedder:latest
+```
+
+**WebSocket server** (`./src/server/` or wherever the WS Dockerfile lives):
+
+```bash
+aws ecr create-repository \
+  --repository-name smartquote-ws \
+  --region eu-west-2
+
+docker buildx build \
+  --platform linux/amd64 \
+  --provenance=false \
+  --output type=docker \
+  -t smartquote-ws \
+  <PATH_TO_WS_DOCKERFILE_DIR>
+
+docker tag smartquote-ws:latest \
+  <AWS_ACCOUNT_ID>.dkr.ecr.eu-west-2.amazonaws.com/smartquote-ws:latest
+
+docker push \
+  <AWS_ACCOUNT_ID>.dkr.ecr.eu-west-2.amazonaws.com/smartquote-ws:latest
+```
+
 > **Important:** Always build with `--platform linux/amd64 --provenance=false
 > --output type=docker`. Omitting these flags on Windows/WSL2 produces an OCI
-> manifest that Lambda rejects.
+> manifest that Lambda/Fargate rejects.
 
 Refer to [ML.md](docs/guides/ML.md) for details on retraining and updating the model.
 
@@ -176,7 +216,7 @@ npm run infra:setup && npm run infra:deploy-all
 client, and DB migrations).
 
 `infra:deploy-all` deploys `SmartQuoteAppStack` and then immediately invokes the
-migrate Lambda to run all pending migrations, returning `migrate.json`.
+migrate Lambda to run all pending migrations.
 
 After this completes, note two outputs from the CDK deploy:
 
@@ -185,14 +225,33 @@ After this completes, note two outputs from the CDK deploy:
 
 ---
 
-## Step 7 -- Point the domain at CloudFront
+## Step 7 -- Point domains at CloudFront and the WS ALB
 
-In your DNS provider, add a CNAME record pointing your configured hostname at the
-CloudFront distribution. For example, if using Cloudflare:
+Two DNS records are required.
+
+**Main hostname** -- point your configured hostname at CloudFront:
 
 | Type | Name | Target | Proxy status |
 |---|---|---|---|
-| CNAME | `smartquote` | `<CloudFrontDomain output>` | Proxied (orange cloud) |
+| CNAME | `<your hostname>` | `<CloudFrontDomain output>` | Proxied (orange cloud) |
+
+**WebSocket subdomain** -- the App Stack creates an ACM cert for the WS subdomain
+and outputs a `WsCertificateArn`. Like Step 3, this cert requires DNS validation
+before traffic can flow.
+
+1. Open AWS Console -> Certificate Manager -> find the cert for the WS subdomain
+2. Copy the CNAME name and value from the "Domains" panel
+3. Add it to your DNS provider as a CNAME set to "DNS only" (not proxied)
+4. Wait for the cert status to change to "Issued"
+
+Then add the WS subdomain CNAME pointing at the ALB:
+
+| Type | Name | Target | Proxy status |
+|---|---|---|---|
+| CNAME | `<your ws hostname>` | `<WsAlbDnsName output>` | DNS only (grey cloud) |
+
+> The WS ALB CNAME must be "DNS only" -- WebSocket upgrades do not work through
+> Cloudflare's proxy layer.
 
 ---
 
@@ -251,7 +310,8 @@ The `smartquote/app-secrets` secret does not exist. Complete step 5b before retr
 A VPC endpoint is missing. The Lambda runs in `PRIVATE_ISOLATED` subnets with no
 NAT gateway -- all AWS SDK calls (Secrets Manager, S3, Bedrock, Lambda) must route
 through VPC endpoints. Verify `SmartQuoteDatabaseStack` deployed cleanly and all
-four endpoints are present in the VPC.
+seven endpoints are present in the VPC (Secrets Manager, S3, Lambda, SES, ECR API,
+ECR Docker, CloudWatch Logs).
 
 **Source fix not reflected after redeploy**
 The esbuild bundle cache may be stale. See the Gotchas section in [INFRA.md](docs/guides/INFRA.md).
