@@ -15,7 +15,7 @@
     "build": "tsc -b && vite build",
     "build:server": "tsc --project tsconfig.server.json --noEmit",
     "build:client": "vite build",
-    "build:ws": "node_modules/.bin/esbuild src/server/bootstrap/server.ts --bundle --platform=node --target=node22 --format=esm --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\" --external:pg-native --external:better-sqlite3 --external:mysql --external:mysql2 --external:sqlite3 --external:pg-query-stream --external:oracledb --external:tedious --outfile=dist-ws/server.mjs",
+    "build:ws": "npx esbuild src/server/bootstrap/server.ts --bundle --platform=node --target=node22 --format=esm --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\" --external:pg-native --external:better-sqlite3 --external:mysql --external:mysql2 --external:sqlite3 --external:pg-query-stream --external:oracledb --external:tedious --outfile=dist-ws/server.mjs",
     "build:all": "npm run build:server && npm run build:client && npm run build:db && npm run build:ws",
     "build:db": "tsc --project tsconfig.migrations.json",
     "preview": "vite preview",
