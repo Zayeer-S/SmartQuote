@@ -1,27 +1,47 @@
-import { backEnv } from '../config/env.backend.js';
-import { bootstrapApplication } from './app.bootstrap.js';
-import { closeDatabase } from './database.bootstrap.js';
-import { createWsServer } from '../realtime/ws-server.js';
+import { loadSecrets } from './secrets.js';
 
-async function startServer() {
+async function startServer(): Promise<void> {
+  await loadSecrets();
+
+  const [{ backEnv }, { bootstrapWsServer }, { createWsServer }, { closeDatabase }] =
+    await Promise.all([
+      import('../config/env.backend.js'),
+      import('./ws.bootstrap.js'),
+      import('../realtime/ws-server.js'),
+      import('./database.bootstrap.js'),
+    ]);
+
   try {
-    const { app, sessionService, connectionManager, roomResolver } = await bootstrapApplication();
+    const { sessionService, connectionManager, roomResolver } = await bootstrapWsServer();
 
-    const server = app.listen(backEnv.PORT, () => {
-      console.log(`Server running
-            Environment: ${backEnv.NODE_ENV}
-            Port: ${backEnv.PORT.toString()}
-            Host: ${backEnv.HOST}
-            API: http://${backEnv.HOST}:${String(backEnv.PORT)}/api
-            Health: http://${backEnv.HOST}:${String(backEnv.PORT)}/health)\n`);
+    const { createServer } = await import('http');
+    const httpServer = createServer((req, res) => {
+      if (req.url === '/health') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
+        return;
+      }
+      res.writeHead(404);
+      res.end();
     });
 
-    createWsServer(server, connectionManager, roomResolver, sessionService);
+    createWsServer(httpServer, connectionManager, roomResolver, sessionService);
 
-    const shutdown = async (signal: string) => {
+    httpServer.listen(backEnv.PORT, () => {
+      console.log(
+        `WS server running\n` +
+          `\tEnvironment: ${backEnv.NODE_ENV}\n` +
+          `\tPort:        ${String(backEnv.PORT)}\n` +
+          `\tHost:        ${backEnv.HOST}\n` +
+          `\tWS:          ws://${backEnv.HOST}:${String(backEnv.PORT)}/ws\n` +
+          `\tHealth:      http://${backEnv.HOST}:${String(backEnv.PORT)}/health`
+      );
+    });
+
+    const shutdown = async (signal: string): Promise<void> => {
       console.log(`${signal} received. Starting graceful shutdown...`);
 
-      server.close(() => {
+      httpServer.close(() => {
         console.log('HTTP server closed');
       });
 

@@ -29,10 +29,23 @@ const envSchema = z.object({
   DB_PASSWORD: z.string(),
 
   SESSION_SECRET: z.string().min(32, 'Session secret must be at least 32 characters'),
-  SESSION_EXPIRY_HOURS: z.string().transform(Number),
-  BCRYPT_SALT_ROUNDS: z.string().transform(Number),
-  MAX_LOGIN_ATTEMPTS: z.string().transform(Number),
-  LOGIN_RATE_LIMIT_WINDOW_MINUTES: z.string().transform(Number),
+
+  SESSION_EXPIRY_HOURS: z
+    .string()
+    .optional()
+    .transform((val) => Number(val ?? '168')),
+  BCRYPT_SALT_ROUNDS: z
+    .string()
+    .optional()
+    .transform((val) => Number(val ?? '12')),
+  MAX_LOGIN_ATTEMPTS: z
+    .string()
+    .optional()
+    .transform((val) => Number(val ?? '10')),
+  LOGIN_RATE_LIMIT_WINDOW_MINUTES: z
+    .string()
+    .optional()
+    .transform((val) => Number(val ?? '1')),
 
   JWT_SECRET: z.string(),
 

@@ -415,12 +415,9 @@ export class AppStack extends cdk.Stack {
         DB_HOST: databaseStack.dbEndpoint,
         DB_PORT: String(infraConfig.db.port),
         DB_NAME: infraConfig.db.databaseName,
+        DB_SECRET_ARN: databaseStack.dbSecret.secretArn,
+        APP_SECRET_ARN: appSecret.secretArn,
         CORS_ORIGIN: infraConfig.cors.origin,
-      },
-      secrets: {
-        // Pulls individual keys from Secrets Manager at task start
-        DB_SECRET_ARN: ecs.Secret.fromSecretsManager(databaseStack.dbSecret),
-        APP_SECRET_ARN: ecs.Secret.fromSecretsManager(appSecret),
       },
     });
 
